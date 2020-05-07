@@ -31,13 +31,11 @@
 #define SIF_IS_PUBLIC   1
 #define SIF_IS_HIRES    2
 #define SIF_IS_LACE     4
-#define SIF_BITMAP      8
-#define SIF_DBL_BUFFER  16
 
 struct SCREEN_INFO
 {
-  LONG    Left, Top, Width, Height;
-  STRPTR  Title;
-  UWORD   Depth;
-  UWORD   Flags;  /* See SIF_* */
+  LONG    si_Left, si_Top, si_Width, si_Height;
+  STRPTR  si_Title;
+  UWORD   si_Depth;
+  UWORD   si_Flags;  /* See SIF_* */
 };

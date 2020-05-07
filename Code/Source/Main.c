@@ -33,6 +33,8 @@
 #include <dos/dos.h>
 #include <workbench/startup.h>
 
+#include "Screen.h"
+
 
 BYTE VersionString[] = "$VER: Parrot 0.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
@@ -44,11 +46,16 @@ struct IntuitionBase* IntuitionBase;
 LONG Requester(CONST_STRPTR options, CONST_STRPTR text);
 LONG RequesterF(CONST_STRPTR options, CONST_STRPTR text, ...);
 
+ULONG ScreenNew(struct SCREEN_INFO*);
+VOID ScreenDelete(ULONG);
+
 INT main()
 {
   struct Process* process;
   struct Message* wbMsg;
   INT             rc;
+  struct SCREEN_INFO screenInfo;
+  ULONG  screen;
 
   rc = RETURN_OK;
   SysBase = NULL;
@@ -86,11 +93,19 @@ INT main()
     goto CLEAN_EXIT;
   }
 
+  screenInfo.si_Left = 0;
+  screenInfo.si_Top  = 0;
+  screenInfo.si_Width = 320;
+  screenInfo.si_Height = 240;
+  screenInfo.si_Depth = 3;
+  screenInfo.si_Title = "Parrot";
+  screenInfo.si_Flags = SIF_IS_PUBLIC;
 
+  screen = ScreenNew(&screenInfo);
 
-  RequesterF("Squawk!", "Hello Parrot. DOSBASE = 0x%lx", DOSBase);
+  Delay(50 * 2);
 
-
+  ScreenDelete(screen);
 
   CLEAN_EXIT:
 

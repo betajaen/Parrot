@@ -34,5 +34,72 @@
 
 ULONG ScreenNew(struct SCREEN_INFO* info)
 {
-  return 0UL;
+  struct NewScreen newScreen;
+  struct Screen* screen;
+
+  if (info->si_Width < 320)
+  {
+    info->si_Width = 320;
+  }
+  
+  if (info->si_Height < 240)
+  {
+    info->si_Height = 240;
+  }
+
+  if (info->si_Depth < 2)
+  {
+    info->si_Depth = 2;
+  }
+
+  if (info->si_Title == NULL || *info->si_Title == 0)
+  {
+    info->si_Title = "Parrot";
+  }
+
+  newScreen.LeftEdge = info->si_Left;
+  newScreen.TopEdge = info->si_Top;
+  newScreen.Width = info->si_Width;
+  newScreen.Height = info->si_Height;
+  newScreen.Depth = info->si_Depth;
+  newScreen.ViewModes = 0;
+
+  if ((info->si_Flags & SIF_IS_HIRES) != 0)
+  {
+    newScreen.ViewModes |= HIRES;
+  }
+
+  if ((info->si_Flags & SIF_IS_LACE) != 0)
+  {
+    newScreen.ViewModes |= LACE;
+  }
+
+  newScreen.Type = 0;
+
+  if ((info->si_Flags & SIF_IS_PUBLIC) != 0)
+  {
+    newScreen.Type |= PUBLICSCREEN;
+  }
+
+  newScreen.BlockPen = BLOCKPEN;
+  newScreen.DetailPen = DETAILPEN;
+
+  newScreen.Font = NULL;
+  newScreen.DefaultTitle = (UBYTE*)info->si_Title;
+  newScreen.Gadgets = NULL;
+  newScreen.CustomBitMap = NULL;
+
+  screen = OpenScreen(&newScreen);
+
+  return (ULONG) screen;
 }
+
+
+VOID ScreenDelete(ULONG screen)
+{
+  if (screen != 0)
+  {
+    CloseScreen((struct Screen*) screen);
+  }
+}
+
