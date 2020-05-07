@@ -27,6 +27,12 @@
 
 #include <exec/types.h>
 
+#if defined(__M68K__)
+#define IS_M68K
+#else
+#error "Unsupported Arch"
+#endif
+
 /**
     Typename consistency
 */
@@ -46,8 +52,9 @@
 /**
     SDL Banned Functions
 */
-#define memcpy      __unsafe_memcpy
-#define strcat      __unsafe_strcat
-#define strcpy      __unsafe_strcpy
-#define sprintf     __unsafe_sprintf
-
+#define memcpy      __unsafe_memcpy   /* DO NOT USE     */
+#define strcat      __unsafe_strcat   /* DO NOT USE     */
+#define strcpy      __unsafe_strcpy   /* DO NOT USE     */
+#define sprintf     __unsafe_sprintf  /* Use StrFormat  */
+#define strlen      __unsafe_strlen   /* Use StrLength  */
+#define strtok      __unsafe_strtok   /* DO NOT USE     */
