@@ -33,13 +33,16 @@ CFLAGS  = -lamiga -nostdlib -O2 -IInclude
 
 # RULES
 
-PARROT_OBJ = main.o mem.o
+PARROT_OBJ = main.o mem.o string.o
 
 parrot: $(PARROT_OBJ)
 	$(CC) $(CFLAGS) $(PARROT_OBJ) -o ../Parrot/Parrot
 
-main.o: Source/main.c
-	$(CC) $(CFLAGS) -c Source/main.c -o main.o
+main.o: Source/Main.c
+	$(CC) $(CFLAGS) -c Source/Main.c -o main.o
 
-mem.o: Source/mem.c
-	$(CC) $(CFLAGS) -c Source/mem.c -o mem.o
+mem.o: Source/Mem.c
+	$(CC) $(CFLAGS) -c Source/Mem.c -o mem.o
+	
+mem.o: Source/String.c
+	$(CC) $(CFLAGS) -c Source/String.c -o string.o
