@@ -42,6 +42,7 @@ struct DosLibrary*    DOSBase;
 struct IntuitionBase* IntuitionBase;
 
 LONG Requester(CONST_STRPTR options, CONST_STRPTR text);
+LONG RequesterF(CONST_STRPTR options, CONST_STRPTR text, ...);
 
 INT main()
 {
@@ -87,8 +88,7 @@ INT main()
 
 
 
-
-  Requester("Squawk!", "Hello Parrot");
+  RequesterF("Squawk!", "Hello Parrot. DOSBASE = 0x%lx", DOSBase);
 
 
 

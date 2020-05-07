@@ -39,25 +39,55 @@ struct EasyStruct EasyRequesterStruct =
   NULL,
 };
 
-LONG Requester(CONST_STRPTR options, CONST_STRPTR text)
+STATIC CHAR RequesterText[1024] = { 0 };
+
+LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText)
 {
-  if (NULL == options || *options == 0)
+  if (NULL == pOptions || *pOptions == 0)
   {
     EasyRequesterStruct.es_GadgetFormat = (UBYTE*)"Okay";
   }
   else
   {
-    EasyRequesterStruct.es_GadgetFormat = (UBYTE*)options;
+    EasyRequesterStruct.es_GadgetFormat = (UBYTE*)pOptions;
   }
 
-  if (NULL == text || *text == 0)
+  if (NULL == pText || *pText == 0)
   {
     EasyRequesterStruct.es_TextFormat = (UBYTE*)"No Message.";
   }
   else
   {
-    EasyRequesterStruct.es_TextFormat = (UBYTE*)text;
+    EasyRequesterStruct.es_TextFormat = (UBYTE*)pText;
   }
 
   return EasyRequest(NULL, &EasyRequesterStruct, NULL);
+}
+
+#if defined(IS_M68K)
+STATIC CONST ULONG PutChar = 0x16c04e75;
+STATIC CONST ULONG CountChar = 0x52934E75;
+#endif
+
+LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...)
+{
+#if defined(IS_M68K)
+  LONG size;;
+  STRPTR* arg;
+
+  size = 0;
+  arg = (STRPTR*)(&pFmt + 1);
+  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & CountChar, (STRPTR )&size);
+
+  if (size >= sizeof(RequesterText) || (0 == size))
+  {
+    return 0;
+  }
+
+  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & PutChar, (STRPTR) &RequesterText[0]);
+
+  return Requester(pOptions, RequesterText);
+#else
+  return 0; /* Unimplemented */
+#endif
 }
