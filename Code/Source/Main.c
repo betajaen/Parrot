@@ -27,14 +27,42 @@
 
 #include "Common.h"
 
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <dos/dos.h>
+#include <workbench/startup.h>
+
+
 BYTE VersionString[] = "$VER: Parrot 0.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
 
-struct ExecBase* SysBase;
+struct ExecBase*    SysBase;
+struct DosLibrary*  DOSBase;
 
 INT main()
 {
+  struct Process* process = NULL;
+  struct Message* wbMsg   = NULL;
+
   SysBase = *(struct ExecBase**) 4L;
 
-  return 0;
+  process = (struct Process*) FindTask(NULL);
+
+  if (process->pr_CLI != NULL)
+  {
+    DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 0);
+    Write(Output(), "Parrot can only be launched from Workbench\n", 44);
+    return RETURN_FAIL;
+  }
+
+  WaitPort(&process->pr_MsgPort);
+  wbMsg = GetMsg(&process->pr_MsgPort);
+
+  if (wbMsg)
+  {
+    Forbid();
+    ReplyMsg(wbMsg);
+  }
+
+  return RETURN_OK;
 }
