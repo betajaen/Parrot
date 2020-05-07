@@ -29,6 +29,7 @@
 
 #include <proto/exec.h>
 #include <proto/dos.h>
+#include <proto/intuition.h>
 #include <dos/dos.h>
 #include <workbench/startup.h>
 
@@ -36,13 +37,22 @@
 BYTE VersionString[] = "$VER: Parrot 0.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
 
-struct ExecBase*    SysBase;
-struct DosLibrary*  DOSBase;
+struct ExecBase*      SysBase;
+struct DosLibrary*    DOSBase;
+struct IntuitionBase* IntuitionBase;
+
+LONG Requester(CONST_STRPTR options, CONST_STRPTR text);
 
 INT main()
 {
-  struct Process* process = NULL;
-  struct Message* wbMsg   = NULL;
+  struct Process* process;
+  struct Message* wbMsg;
+  INT             rc;
+
+  rc = RETURN_OK;
+  SysBase = NULL;
+  DOSBase = NULL;
+  IntuitionBase = NULL;
 
   SysBase = *(struct ExecBase**) 4L;
 
@@ -52,17 +62,56 @@ INT main()
   {
     DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 0);
     Write(Output(), "Parrot can only be launched from Workbench\n", 44);
-    return RETURN_FAIL;
+    rc = RETURN_FAIL;
+    goto CLEAN_EXIT;
   }
 
   WaitPort(&process->pr_MsgPort);
   wbMsg = GetMsg(&process->pr_MsgPort);
 
-  if (wbMsg)
+  DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 0);
+
+  if (NULL == DOSBase)
+  {
+    rc = RETURN_FAIL;
+    goto CLEAN_EXIT;
+  }
+
+  IntuitionBase = (struct IntuitionBase*) OpenLibrary("intuition.library", 0);
+
+  if (NULL == IntuitionBase)
+  {
+    rc = RETURN_FAIL;
+    goto CLEAN_EXIT;
+  }
+
+
+
+
+  Requester("Squawk!", "Hello Parrot");
+
+
+
+  CLEAN_EXIT:
+
+  if (NULL != wbMsg)
   {
     Forbid();
     ReplyMsg(wbMsg);
   }
 
-  return RETURN_OK;
+  if (NULL != IntuitionBase)
+  {
+    CloseLibrary((struct Library*) IntuitionBase);
+    IntuitionBase = NULL;
+  }
+
+  if (NULL != DOSBase)
+  {
+    CloseLibrary((struct Library*) DOSBase);
+    DOSBase = NULL;
+  }
+
+
+  return rc;
 }
