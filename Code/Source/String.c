@@ -73,7 +73,7 @@ ULONG StrLengthFormat(CHAR* pFmt, ...)
 ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...)
 {
 #if defined(IS_M68K)
-  LONG size;;
+  LONG size;
   STRPTR* arg;
   
   if (0 == pBufferCapacity)
@@ -90,7 +90,7 @@ ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...)
     return 0;
   }
 
-  RawDoFmt((STRPTR)pFmt, (&pFmt + 1), (void (*)(void)) &PutChar, pBuffer);
+  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) &PutChar, pBuffer);
 
   return size;
 #else
