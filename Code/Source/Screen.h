@@ -1,5 +1,5 @@
 /**
-    $Id: Screen.c, 0.1, 2020/05/07 15:55:00, betajaen Exp $
+    $Id: Common.h 0.1, 2020/05/07 06:44:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,14 +25,19 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Common.h"
+#include "Parrot.h"
 
-#include <proto/exec.h>
-#include <proto/intuition.h>
 
-#include "Screen.h"
+#define SIF_IS_PUBLIC   1
+#define SIF_IS_HIRES    2
+#define SIF_IS_LACE     4
+#define SIF_BITMAP      8
+#define SIF_DBL_BUFFER  16
 
-ULONG ScreenNew(struct SCREEN_INFO* info)
+struct SCREEN_INFO
 {
-  return 0UL;
-}
+  LONG    Left, Top, Width, Height;
+  STRPTR  Title;
+  UWORD   Depth;
+  UWORD   Flags;  /* See SIF_* */
+};

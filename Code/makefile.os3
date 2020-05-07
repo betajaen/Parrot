@@ -33,7 +33,7 @@ CFLAGS  = -lamiga -nostdlib -O2 -IInclude
 
 # RULES
 
-PARROT_OBJ = main.o mem.o string.o requester.o
+PARROT_OBJ = main.o mem.o string.o requester.o screen.o
 
 parrot: $(PARROT_OBJ)
 	$(CC) $(CFLAGS) $(PARROT_OBJ) -o ../Parrot/Parrot
@@ -49,6 +49,9 @@ string.o: Source/String.c
 
 requester.o: Source/Requester.c
 	$(CC) $(CFLAGS) -c Source/Requester.c -o requester.o
+
+screen.o: Source/Screen.c Source/Screen.h
+	$(CC) $(CFLAGS) -c Source/Screen.c -o screen.o
 
 .PHONY: clean
 
