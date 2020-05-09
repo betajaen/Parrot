@@ -52,7 +52,7 @@ ULONG ScreenNew(struct SCREEN_INFO* info)
     info->si_Depth = 2;
   }
 
-  if (info->si_Title == NULL || *info->si_Title == 0)
+  if (NULL == info->si_Title == NULL || '\0' == info->si_Title[0])
   {
     info->si_Title = "Parrot";
   }
@@ -97,7 +97,7 @@ ULONG ScreenNew(struct SCREEN_INFO* info)
 
 VOID ScreenDelete(ULONG screen)
 {
-  if (screen != 0)
+  if (0 != screen)
   {
     CloseScreen((struct Screen*) screen);
   }
