@@ -58,3 +58,16 @@
 #define sprintf     __unsafe_sprintf  /* Use StrFormat  */
 #define strlen      __unsafe_strlen   /* Use StrLength  */
 #define strtok      __unsafe_strtok   /* DO NOT USE     */
+
+
+#define SIF_IS_PUBLIC   1
+#define SIF_IS_HIRES    2
+#define SIF_IS_LACE     4
+
+struct SCREEN_INFO
+{
+  LONG    si_Left, si_Top, si_Width, si_Height;
+  STRPTR  si_Title;
+  UWORD   si_Depth;
+  UWORD   si_Flags;  /* See SIF_* */
+};
