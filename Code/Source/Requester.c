@@ -43,7 +43,7 @@ STATIC CHAR RequesterText[1024] = { 0 };
 
 LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText)
 {
-  if (NULL == pOptions || *pOptions == 0)
+  if (NULL == pOptions || '\0' == pOptions[0])
   {
     EasyRequesterStruct.es_GadgetFormat = (UBYTE*)"Okay";
   }
@@ -52,7 +52,7 @@ LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText)
     EasyRequesterStruct.es_GadgetFormat = (UBYTE*)pOptions;
   }
 
-  if (NULL == pText || *pText == 0)
+  if (NULL == pText || '\0' == pText[0])
   {
     EasyRequesterStruct.es_TextFormat = (UBYTE*)"No Message.";
   }
