@@ -33,8 +33,6 @@
 #include <dos/dos.h>
 #include <workbench/startup.h>
 
-#include "Screen.h"
-
 
 BYTE VersionString[] = "$VER: Parrot 0.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";

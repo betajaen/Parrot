@@ -71,3 +71,15 @@ struct SCREEN_INFO
   UWORD   si_Depth;
   UWORD   si_Flags;  /* See SIF_* */
 };
+
+struct PARROT_CONTEXT
+{
+  APTR State;
+
+  APTR(*pi_MemNew)(ULONG size, ULONG requirements);
+  APTR(*pi_MemDelete)(APTR mem);
+
+  ULONG(*pi_ScreenOpen)(struct SCREEN_INFO*);
+  ULONG(*pi_ScreenClose)(ULONG);
+};
+

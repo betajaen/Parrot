@@ -30,8 +30,6 @@
 #include <proto/exec.h>
 #include <proto/intuition.h>
 
-#include "Screen.h"
-
 ULONG ScreenNew(struct SCREEN_INFO* info)
 {
   struct NewScreen newScreen;
