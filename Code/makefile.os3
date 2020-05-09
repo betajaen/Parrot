@@ -34,11 +34,11 @@ CFLAGS  = -lamiga -nostdlib -O2 -IInclude
 # PARROT
 
 PARROT_OBJ = main.o mem.o string.o requester.o screen.o
-TEST_ENGINE_OBJ = test_main.o
+TEST_ENGINE_OBJ = test_main.o test_lib.o
 
 parrot: $(PARROT_OBJ) $(TEST_ENGINE_OBJ)
 	$(CC) $(CFLAGS) $(PARROT_OBJ) -o ../Parrot/Parrot
-	$(CC) $(CFLAGS) $(TEST_ENGINE_OBJ) -o ../Parrot/test.library
+	$(CC) $(CFLAGS) $(TEST_ENGINE_OBJ) -o ../Parrot/parrot-test.library
 
 main.o: Source/Main.c
 	$(CC) $(CFLAGS) -c Source/Main.c -o main.o
@@ -58,7 +58,10 @@ screen.o: Source/Screen.c Include/Parrot.h
 
 # Test Engine
 test_main.o: Engines/Test/Main.c Include/Parrot.h
-	$(CC) $(CFLAGS) -c Engines/Test/Main.c -o test_main.o
+	$(CC) $(CFLAGS) -c Engines/Test/Main.c -o test_main.o -IEngines/Test
+
+test_lib.o: Engines/Engine.c
+	$(CC) $(CFLAGS) -c Engines/Engine.c -o test_lib.o -IEngines/Test
 
 .PHONY: clean
 

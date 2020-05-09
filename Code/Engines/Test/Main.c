@@ -26,22 +26,39 @@
 */
 
 #include "Parrot.h"
+#include "SDI_lib.h"
 
 struct TEST_STATE
 {
   ULONG ts_Dummy;
 };
 
-VOID Parrot_Initialise(struct PARROT_CONTEXT* parrot)
+VOID Lib_Parrot_Initialise(
+  REG(a6, UNUSED __BASE_OR_IFACE),
+  REG(a0, struct PARROT_CONTEXT* parrot)
+)
 {
   parrot->State = parrot->pi_MemNew(sizeof(struct TEST_STATE), 0);
 }
 
-VOID Parrot_Shutdown(struct PARROT_CONTEXT* parrot)
+VOID Lib_Parrot_Shutdown(
+  REG(a6, UNUSED __BASE_OR_IFACE),
+  REG(a0, struct PARROT_CONTEXT* parrot)
+)
 {
   if (0UL != parrot->State)
   {
     parrot->pi_MemDelete(parrot->State);
     parrot->State = 0UL;
   }
+}
+
+BOOL Lib_Parrot_Event(
+  REG(a6, UNUSED __BASE_OR_IFACE),
+  REG(a0, struct PARROT_CONTEXT* parrot),
+  REG(d0, ULONG event),
+  REG(d1, ULONG data)
+)
+{
+  return TRUE;
 }

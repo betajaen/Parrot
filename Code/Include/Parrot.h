@@ -27,6 +27,8 @@
 
 #include <exec/types.h>
 
+#include "SDI_compiler.h"
+
 #if defined(__M68K__)
 #define IS_M68K
 #else
@@ -77,9 +79,8 @@ struct PARROT_CONTEXT
   APTR State;
 
   APTR(*pi_MemNew)(ULONG size, ULONG requirements);
-  APTR(*pi_MemDelete)(APTR mem);
+  VOID(*pi_MemDelete)(APTR mem);
 
   ULONG(*pi_ScreenOpen)(struct SCREEN_INFO*);
-  ULONG(*pi_ScreenClose)(ULONG);
+  VOID(*pi_ScreenClose)(ULONG);
 };
-

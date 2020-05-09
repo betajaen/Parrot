@@ -1,0 +1,7 @@
+##base _ParrotBase
+##bias 30
+##public
+Lib_Parrot_Initialise(ctx)(a0)
+Lib_Parrot_Shutdown(ctx)(a0)
+Lib_Parrot_Event(ctx, event, user)(a0, d0, d1)
+##end
