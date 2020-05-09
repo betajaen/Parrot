@@ -91,3 +91,8 @@ LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...)
   return 0; /* Unimplemented */
 #endif
 }
+
+EXPORT LONG TestRequester(LONG x)
+{
+  return RequesterF("Okay", "This is a test. Value given is = %ld", x);
+}

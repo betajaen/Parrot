@@ -28,34 +28,41 @@
 #include "Parrot.h"
 #include "SDI_lib.h"
 
+#include <proto/parrot.h>
+
 struct TEST_STATE
 {
   ULONG ts_Dummy;
 };
 
-VOID Lib_Parrot_Initialise(
+struct ParrotBase* ParrotBase;
+
+VOID GameInitialise(
   REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct PARROT_CONTEXT* parrot)
+  REG(a0, struct ParrotBase* parrot)
 )
 {
-  parrot->State = parrot->pi_MemNew(sizeof(struct TEST_STATE), 0);
+  // ParrotBase = parrot;
+  // ParrotBase->State = (APTR) 1234;
+  // TestRequester(1701);
+
+  // parrot->State = parrot->pi_MemNew(sizeof(struct TEST_STATE), 0);
 }
 
-VOID Lib_Parrot_Shutdown(
-  REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct PARROT_CONTEXT* parrot)
+VOID GameShutdown(
+  REG(a6, UNUSED __BASE_OR_IFACE)
 )
 {
-  if (0UL != parrot->State)
-  {
-    parrot->pi_MemDelete(parrot->State);
-    parrot->State = 0UL;
-  }
+  // ParrotBase->State = 0;
+  //if (0UL != parrot->State)
+  //{
+  //  parrot->pi_MemDelete(parrot->State);
+  //  parrot->State = 0UL;
+  //}
 }
 
-BOOL Lib_Parrot_Event(
+BOOL OnGameEvent(
   REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct PARROT_CONTEXT* parrot),
   REG(d0, ULONG event),
   REG(d1, ULONG data)
 )

@@ -1,5 +1,5 @@
 /**
-    $Id: Parrot.h 0.1, 2020/05/07 06:49:00, betajaen Exp $
+    $Id: Protos.inc, 0.1, 2020/05/10 13:30:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,50 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <exec/types.h>
+/***START***/
 
-#include "SDI_compiler.h"
+LONG TestRequester(LONG x);
 
-#if defined(__M68K__)
-#define IS_M68K
-#else
-#error "Unsupported Arch"
-#endif
-
-/**
-    Typename consistency
-*/
-#ifndef INT
-#define INT int
-#endif
-
-#ifndef CHAR
-#define CHAR char
-#endif
-
-#ifndef STATIC
-#define STATIC static
-#endif
-
-/**
-    SDL Banned Functions
-*/
-#define memcpy      __unsafe_memcpy   /* DO NOT USE     */
-#define strcat      __unsafe_strcat   /* DO NOT USE     */
-#define strcpy      __unsafe_strcpy   /* DO NOT USE     */
-#define sprintf     __unsafe_sprintf  /* Use StrFormat  */
-#define strlen      __unsafe_strlen   /* Use StrLength  */
-#define strtok      __unsafe_strtok   /* DO NOT USE     */
-
-
-#define SIF_IS_PUBLIC   1
-#define SIF_IS_HIRES    2
-#define SIF_IS_LACE     4
-
-struct SCREEN_INFO
+LONG EXPORT_TestRequester(__reg("a6") struct ParrotBase*, __reg("d0") LONG x)
 {
-  LONG    si_Left, si_Top, si_Width, si_Height;
-  STRPTR  si_Title;
-  UWORD   si_Depth;
-  UWORD   si_Flags;  /* See SIF_* */
-};
+  return TestRequester(x);
+}
+
+#define EXPORT_Vectors \
+  , (APTR) EXPORT_TestRequester
+
+/***END***/

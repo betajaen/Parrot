@@ -29,31 +29,17 @@
 
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <proto/intuition.h>
 #include <dos/dos.h>
 #include <workbench/startup.h>
 
-#include <inline/parrot_protos.h>
+#include <proto/parrot.h>
 
-
-BYTE VersionString[] = "$VER: Parrot 0.1 (6.5.2020)\r\n";
+BYTE VersionString[]   = "$VER: Parrot 0.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
 
 struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
-struct IntuitionBase* IntuitionBase;
 struct Library*       ParrotBase;
-
-LONG Requester(CONST_STRPTR options, CONST_STRPTR text);
-LONG RequesterF(CONST_STRPTR options, CONST_STRPTR text, ...);
-
-ULONG ScreenNew(struct SCREEN_INFO*);
-VOID ScreenDelete(ULONG);
-
-
-APTR MemNew(ULONG size, ULONG requirements);
-VOID MemDelete(APTR mem);
-VOID MakeParrotContext(struct PARROT_CONTEXT* ctx);
 
 INT main()
 {
@@ -62,12 +48,10 @@ INT main()
   INT             rc;
   struct SCREEN_INFO screenInfo;
   ULONG  screen;
-  struct PARROT_CONTEXT ctx;
 
   rc = RETURN_OK;
   SysBase = NULL;
   DOSBase = NULL;
-  IntuitionBase = NULL;
 
   SysBase = *(struct ExecBase**) 4L;
 
@@ -92,56 +76,16 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  IntuitionBase = (struct IntuitionBase*) OpenLibrary("intuition.library", 0);
-
-  if (NULL == IntuitionBase)
-  {
-    rc = RETURN_FAIL;
-    goto CLEAN_EXIT;
-  }
-
-  ParrotBase = OpenLibrary("PROGDIR:parrot-test.library", 0);
-  
+  ParrotBase = OpenLibrary("PROGDIR:Parrot.library", 0);
   if (NULL == ParrotBase)
   {
-    Requester("Ok", "Did not open");
     rc = RETURN_FAIL;
     goto CLEAN_EXIT;
   }
-  MakeParrotContext(&ctx);
 
-  RequesterF("Cool", "Opened %lx", ParrotBase);
-
-  RequesterF("Cool", "State Before=%lx", ctx.State);
-
-
-  Lib_Parrot_Initialise(&ctx);
-  
-  
-  RequesterF("Cool", "State After = %lx", ctx.State);
-  
-  Lib_Parrot_Shutdown(&ctx);
-
-  RequesterF("Cool", "State After.2 = %lx", ctx.State);
+  TestRequester(1234);
 
   CloseLibrary(ParrotBase);
-  
-  
-  RequesterF("Cool", "Closed %lx", ParrotBase);
-
-  screenInfo.si_Left = 0;
-  screenInfo.si_Top  = 0;
-  screenInfo.si_Width = 320;
-  screenInfo.si_Height = 240;
-  screenInfo.si_Depth = 3;
-  screenInfo.si_Title = "Parrot";
-  screenInfo.si_Flags = SIF_IS_PUBLIC;
-  
-  screen = ScreenNew(&screenInfo);
-  
-  Delay(50 * 2);
-  
-  ScreenDelete(screen);
 
   CLEAN_EXIT:
 
@@ -149,12 +93,6 @@ INT main()
   {
     Forbid();
     ReplyMsg(wbMsg);
-  }
-
-  if (NULL != IntuitionBase)
-  {
-    CloseLibrary((struct Library*) IntuitionBase);
-    IntuitionBase = NULL;
   }
 
   if (NULL != DOSBase)
@@ -165,13 +103,4 @@ INT main()
 
 
   return rc;
-}
-
-VOID MakeParrotContext(struct PARROT_CONTEXT* ctx)
-{
-  ctx->State = 0;
-  ctx->pi_ScreenOpen = ScreenNew;
-  ctx->pi_ScreenClose = ScreenDelete;
-  ctx->pi_MemNew = MemNew;
-  ctx->pi_MemDelete = MemDelete;
 }

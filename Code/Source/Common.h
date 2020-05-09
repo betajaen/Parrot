@@ -26,3 +26,5 @@
 */
 
 #include "Parrot.h"
+
+#define EXPORT

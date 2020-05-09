@@ -52,19 +52,17 @@ struct LibraryHeader
 #define __BASE_OR_IFACE_VAR		EngineBase
 #define __BASE_OR_IFACE			__BASE_OR_IFACE_TYPE __BASE_OR_IFACE_VAR
 
-VOID Lib_Parrot_Initialise(
+VOID GameInitialise(
   REG(a6, UNUSED __BASE_OR_IFACE),
   REG(a0, struct PARROT_CONTEXT* parrot)
 );
 
-VOID Lib_Parrot_Shutdown(
-  REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct PARROT_CONTEXT* parrot)
+VOID GameShutdown(
+  REG(a6, UNUSED __BASE_OR_IFACE)
 );
 
-BOOL Lib_Parrot_Event(
+BOOL OnGameEvent(
   REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct PARROT_CONTEXT* parrot),
   REG(d0, ULONG event),
   REG(d1, ULONG data)
 );
@@ -86,9 +84,9 @@ STATIC CONST APTR LibVectors[] =
   (APTR)LibClose,
   (APTR)LibExpunge,
   (APTR)LibNull,
-  (APTR)Lib_Parrot_Initialise,
-  (APTR)Lib_Parrot_Shutdown,
-  (APTR)Lib_Parrot_Event,
+  (APTR)GameInitialise,
+  (APTR)GameShutdown,
+  (APTR)OnGameEvent,
   (APTR)-1
 };
 

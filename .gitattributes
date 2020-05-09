@@ -1,0 +1,7 @@
+*.c       text diff=c eol=lf
+*.h       text diff=c eol=lf
+*.guide   text eol=lf
+*.o       binary
+*.library binary
+Parrot    binary
+*.iff     binary
