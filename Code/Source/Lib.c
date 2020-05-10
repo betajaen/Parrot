@@ -55,10 +55,9 @@ STATIC CONST CHAR CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rig
 STATIC CONST CHAR UserLibName[] = "Parrot.library";
 STATIC CONST CHAR UserLibID[] = "\0$VER: Parrot.library 1.0 (9.5.2020)\r\n";
 
-
-LIBFUNC STATIC struct ParrotBase* LibInit(REG(a0, BPTR Segment), REG(d0, struct ParrotBase* lh), REG(a6, struct ExecBase* sb));
+LIBFUNC STATIC struct ParrotBase*    LibInit(REG(a0, BPTR Segment), REG(d0, struct ParrotBase* lh), REG(a6, struct ExecBase* sb));
 LIBFUNC STATIC BPTR                  LibExpunge(REG(a6, struct ParrotBase* base));
-LIBFUNC STATIC struct ParrotBase* LibOpen(REG(a6, struct ParrotBase* base));
+LIBFUNC STATIC struct ParrotBase*    LibOpen(REG(a6, struct ParrotBase* base));
 LIBFUNC STATIC BPTR                  LibClose(REG(a6, struct ParrotBase* base));
 
 struct ExecBase*      SysBase;
