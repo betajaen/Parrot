@@ -34,7 +34,7 @@ CFLAGS  = -lamiga -nostdlib -O2 -IInclude
 # PARROT
 
 PARROT_OBJ = main.o
-PARROT_LIB_OBJ = lib.o mem.o string.o requester.o screen.o
+PARROT_LIB_OBJ = lib.o mem.o string.o requester.o screen.o game.o
 GAME_MANIAC_OBJ = maniac_lib.o maniac_main.o
 
 
@@ -61,6 +61,9 @@ requester.o: Source/Requester.c
 
 screen.o: Source/Screen.c Include/Parrot.h
 	$(CC) $(CFLAGS) -c Source/Screen.c -o screen.o
+
+game.o: Source/Game.c Include/Parrot.h
+	$(CC) $(CFLAGS) -c Source/Game.c -o game.o
 
 # MANIAC
 

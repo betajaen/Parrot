@@ -34,8 +34,6 @@
 
 #include <proto/exec.h>
 
-struct ExecBase* SysBase;
-
 #include <SDI_lib.h>
 #include <SDI_stdarg.h>
 
@@ -52,16 +50,16 @@ struct LibraryHeader
 #define __BASE_OR_IFACE_VAR		EngineBase
 #define __BASE_OR_IFACE			__BASE_OR_IFACE_TYPE __BASE_OR_IFACE_VAR
 
-VOID GameInitialise(
+VOID EXPORT_GameInitialise(
   REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct PARROT_CONTEXT* parrot)
+  REG(a0, struct Library* parrot)
 );
 
-VOID GameShutdown(
+VOID EXPORT_GameShutdown(
   REG(a6, UNUSED __BASE_OR_IFACE)
 );
 
-BOOL OnGameEvent(
+BOOL EXPORT_OnGameEvent(
   REG(a6, UNUSED __BASE_OR_IFACE),
   REG(d0, ULONG event),
   REG(d1, ULONG data)
@@ -84,9 +82,9 @@ STATIC CONST APTR LibVectors[] =
   (APTR)LibClose,
   (APTR)LibExpunge,
   (APTR)LibNull,
-  (APTR)GameInitialise,
-  (APTR)GameShutdown,
-  (APTR)OnGameEvent,
+  (APTR)EXPORT_GameInitialise,
+  (APTR)EXPORT_GameShutdown,
+  (APTR)EXPORT_OnGameEvent,
   (APTR)-1
 };
 
@@ -112,6 +110,10 @@ static const USED_VAR struct Resident ROMTag =
   (APTR)LibInitTab
 };
 
+struct ExecBase* SysBase;
+struct DOSBase* DOSBase;
+struct Library*  ParrotBase;
+
 #define DeleteLibrary(LIB) \
   FreeMem((STRPTR)(LIB)-(LIB)->lib_NegSize, (ULONG)((LIB)->lib_NegSize+(LIB)->lib_PosSize))
 
@@ -130,6 +132,8 @@ LIBFUNC static struct LibraryHeader* LibInit(REG(a0, BPTR librarySegment), REG(d
   base->segList = librarySegment;
   base->sysBase = (APTR)SysBase;
 
+  DOSBase = (struct DOSBase*) OpenLibrary("dos.library", 0);
+
   return(base);
 }
 
@@ -147,6 +151,9 @@ LIBFUNC static BPTR LibExpunge(REG(a6, struct LibraryHeader* base))
   rc = base->segList;
 
   Remove((struct Node*)base);
+
+  CloseLibrary((struct Library*) DOSBase);
+
   DeleteLibrary(&base->libBase);
 
   return(rc);
@@ -172,4 +179,35 @@ LIBFUNC static BPTR LibClose(REG(a6, struct LibraryHeader* base))
   }
 
   return 0;
+}
+
+VOID GameInitialise();
+
+VOID EXPORT_GameInitialise(
+  REG(a6, UNUSED __BASE_OR_IFACE),
+  REG(a0, struct Library* parrot)
+)
+{
+  ParrotBase = parrot;
+  GameInitialise();
+}
+
+VOID GameShutdown();
+
+VOID EXPORT_GameShutdown(
+  REG(a6, UNUSED __BASE_OR_IFACE)
+)
+{
+  GameShutdown();
+}
+
+BOOL OnGameEvent(ULONG event, ULONG data);
+
+BOOL EXPORT_OnGameEvent(
+  REG(a6, UNUSED __BASE_OR_IFACE),
+  REG(d0, ULONG event),
+  REG(d1, ULONG data)
+)
+{
+  return OnGameEvent(event, data);
 }

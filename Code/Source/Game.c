@@ -1,8 +1,8 @@
 /**
-    $Id: Main.c, 1.0, 2020/05/10 07:17:00, betajaen Exp $
+    $Id: Game.c, 0.1, 2020/05/07 08:54:00, betajaen Exp $
 
-    Maniac Game Module for Parrot
-    =============================
+    Parrot - Point and Click Adventure Game Player
+    ==============================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -25,33 +25,46 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Parrot.h"
-#include <proto/parrot.h>
+#include "Common.h"
 
-VOID GameInitialise()
+#include <proto/exec.h>
+#include <proto/parrot_game.h>
+
+extern struct Library* ParrotBase;
+
+LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
+ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
+
+EXPORT VOID GameStart(CONST_STRPTR name)
 {
-  struct SCREEN_INFO info;
-  ULONG screen;
+  CHAR buffer[1024];
+  struct Library* GameBase;
 
-  info.si_Depth = 3;
-  info.si_Flags = SIF_IS_PUBLIC;
-  info.si_Left = 0;
-  info.si_Top = 0;
-  info.si_Width = 320;
-  info.si_Height = 200;
-  info.si_Title = "Maniac Mansion";
-  
-  screen = ScreenNew(&info);
-  Delay(50 * 3);
-  ScreenDelete(screen);
-  screen = 0;
-}
+  GameBase = NULL;
 
-VOID GameShutdown()
-{
-}
+  if (0 == StrFormat(buffer, sizeof(buffer), "PROGDIR:Games/%s.library", name))
+  {
+    Alert(0x11110002);
+    goto CLEAN_EXIT;
+  }
 
-BOOL OnGameEvent(ULONG event, ULONG data)
-{
-  return TRUE;
+  GameBase = OpenLibrary(buffer, 0);
+
+  if (NULL == GameBase)
+  {
+    RequesterF("Okay", "Could not open %s", buffer);
+    goto CLEAN_EXIT;
+  }
+
+  GameInitialise(ParrotBase);
+
+
+CLEAN_EXIT:
+
+  if (NULL != GameBase)
+  {
+    CloseLibrary(GameBase);
+    GameBase = NULL;
+  }
+
 }

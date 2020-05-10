@@ -1,5 +1,5 @@
 /**
-    $Id: Protos.inc, 0.1, 2020/05/10 13:30:00, betajaen Exp $
+    $Id: Protos.inc, 1.0, 2020/05/10 13:30:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -27,14 +27,63 @@
 
 /***START***/
 
-LONG TestRequester(LONG x);
+/* GameStart */
+VOID GameStart(CONST_STRPTR name);
+VOID EXPORT_GameStart(__reg("a6") struct ParrotBase*, __reg("a0") CONST_STRPTR name)
+{
+  GameStart(name);
+}
 
+/* TestRequester */
+LONG TestRequester(LONG x);
 LONG EXPORT_TestRequester(__reg("a6") struct ParrotBase*, __reg("d0") LONG x)
 {
   return TestRequester(x);
 }
 
+/* MemNew */
+APTR MemNew(ULONG size, ULONG requirements);
+APTR EXPORT_MemNew(__reg("a6") struct ParrotBase*, __reg("d0") ULONG size, __reg("d1") ULONG requirements)
+{
+  return MemNew(size, requirements);
+}
+
+/* MemDelete */
+BOOL MemDelete(APTR pMem);
+BOOL EXPORT_MemDelete(__reg("a6") struct ParrotBase*, __reg("a0") APTR pMem)
+{
+  return MemDelete(pMem);
+}
+
+/* MemSize */
+ULONG MemSize(APTR pMem);
+ULONG EXPORT_MemSize(__reg("a6") struct ParrotBase*, __reg("a0") APTR pMem)
+{
+  return MemSize(pMem);
+}
+
+/* ScreenNew */
+ULONG ScreenNew(struct SCREEN_INFO* info);
+ULONG EXPORT_ScreenNew(__reg("a6") struct ParrotBase*, __reg("a0") struct SCREEN_INFO* info)
+{
+  return ScreenNew(info);
+}
+
+/* ScreenDelete */
+VOID ScreenDelete(ULONG screen);
+VOID EXPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)
+{
+  ScreenDelete(screen);
+}
+
+
 #define EXPORT_Vectors \
-  , (APTR) EXPORT_TestRequester
+  , (APTR) EXPORT_GameStart\
+  , (APTR) EXPORT_TestRequester\
+  , (APTR) EXPORT_MemNew\
+  , (APTR) EXPORT_MemDelete\
+  , (APTR) EXPORT_MemSize\
+  , (APTR) EXPORT_ScreenNew\
+  , (APTR) EXPORT_ScreenDelete
 
 /***END***/

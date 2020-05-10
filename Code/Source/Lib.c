@@ -63,6 +63,7 @@ LIBFUNC STATIC BPTR                  LibClose(REG(a6, struct ParrotBase* base));
 struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
 struct IntuitionBase* IntuitionBase;
+struct Library*       ParrotBase;
 
 struct ParrotBase
 {
@@ -139,6 +140,8 @@ LIBFUNC STATIC struct ParrotBase* LibInit(REG(a0, BPTR librarySegment), REG(d0, 
   {
     return(base);
   }
+
+  ParrotBase = (struct Library*) &base->pb_LibBase;
 
   return(base);
 }

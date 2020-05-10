@@ -30,7 +30,7 @@
 #include <proto/exec.h>
 #include <proto/intuition.h>
 
-ULONG ScreenNew(struct SCREEN_INFO* info)
+EXPORT ULONG ScreenNew(struct SCREEN_INFO* info)
 {
   struct NewScreen newScreen;
   struct Screen* screen;
@@ -50,7 +50,7 @@ ULONG ScreenNew(struct SCREEN_INFO* info)
     info->si_Depth = 2;
   }
 
-  if (NULL == info->si_Title == NULL || '\0' == info->si_Title[0])
+  if (NULL == info->si_Title || '\0' == info->si_Title[0])
   {
     info->si_Title = "Parrot";
   }
@@ -93,7 +93,7 @@ ULONG ScreenNew(struct SCREEN_INFO* info)
 }
 
 
-VOID ScreenDelete(ULONG screen)
+EXPORT VOID ScreenDelete(ULONG screen)
 {
   if (0 != screen)
   {

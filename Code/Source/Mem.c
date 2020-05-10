@@ -37,7 +37,7 @@ struct MEM_HEADER
   ULONG   mh_Magic;
 };
 
-APTR MemNew(ULONG size, ULONG requirements)
+EXPORT APTR MemNew(ULONG size, ULONG requirements)
 {
   struct MEM_HEADER* hdr;
 
@@ -56,7 +56,7 @@ APTR MemNew(ULONG size, ULONG requirements)
   return (APTR)(hdr + 1);
 }
 
-BOOL MemDelete(APTR pMem)
+EXPORT BOOL MemDelete(APTR pMem)
 {
   struct MEM_HEADER* hdr;
 
@@ -76,7 +76,7 @@ BOOL MemDelete(APTR pMem)
   return TRUE;
 }
 
-ULONG MemSize(APTR pMem)
+EXPORT ULONG MemSize(APTR pMem)
 {
   struct MEM_HEADER* hdr;
 

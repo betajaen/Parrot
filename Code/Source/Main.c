@@ -83,10 +83,10 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  TestRequester(1234);
+  GameStart("Maniac");
 
   CloseLibrary(ParrotBase);
-
+  
   CLEAN_EXIT:
 
   if (NULL != wbMsg)
