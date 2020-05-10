@@ -39,7 +39,7 @@ struct ExecBase* SysBase;
 #include <SDI_lib.h>
 #include <SDI_stdarg.h>
 
-#include "Info.inc"
+#include "Version.h"
 
 struct LibraryHeader
 {

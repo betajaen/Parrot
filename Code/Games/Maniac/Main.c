@@ -1,8 +1,8 @@
 /**
-    $Id: Test.c, 0.1, 2020/05/09 08:53:00, betajaen Exp $
+    $Id: Main.c, 1.0, 2020/05/10 07:17:00, betajaen Exp $
 
-    Test Engine for Parrot
-    ======================
+    Maniac Game Module for Parrot
+    =============================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -26,14 +26,6 @@
 */
 
 #include "Parrot.h"
-#include "SDI_lib.h"
-
-#include <proto/parrot.h>
-
-struct TEST_STATE
-{
-  ULONG ts_Dummy;
-};
 
 struct ParrotBase* ParrotBase;
 
@@ -42,23 +34,12 @@ VOID GameInitialise(
   REG(a0, struct ParrotBase* parrot)
 )
 {
-  // ParrotBase = parrot;
-  // ParrotBase->State = (APTR) 1234;
-  // TestRequester(1701);
-
-  // parrot->State = parrot->pi_MemNew(sizeof(struct TEST_STATE), 0);
 }
 
 VOID GameShutdown(
   REG(a6, UNUSED __BASE_OR_IFACE)
 )
 {
-  // ParrotBase->State = 0;
-  //if (0UL != parrot->State)
-  //{
-  //  parrot->pi_MemDelete(parrot->State);
-  //  parrot->State = 0UL;
-  //}
 }
 
 BOOL OnGameEvent(
