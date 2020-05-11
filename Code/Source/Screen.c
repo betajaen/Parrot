@@ -30,10 +30,24 @@
 #include <proto/exec.h>
 #include <proto/intuition.h>
 
+struct PARROT_SCREEN
+{
+  struct Screen* Screen;
+  struct Window* Window;
+};
+
+LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
+APTR MemNew(ULONG size, ULONG requirements);
+BOOL MemDelete(APTR pMem);
+
 EXPORT ULONG ScreenNew(struct SCREEN_INFO* info)
 {
-  struct NewScreen newScreen;
-  struct Screen* screen;
+  struct NewScreen      newScreen;
+  struct PARROT_SCREEN* screen;
+  struct Screen*        wbScreen;
+
+  screen = NULL;
+  wbScreen = NULL;
 
   if (info->si_Width < 320)
   {
@@ -87,7 +101,25 @@ EXPORT ULONG ScreenNew(struct SCREEN_INFO* info)
   newScreen.Gadgets = NULL;
   newScreen.CustomBitMap = NULL;
 
-  screen = OpenScreen(&newScreen);
+  wbScreen = OpenScreenTags(&newScreen,
+    SA_Quiet, TRUE,
+    SA_ShowTitle, FALSE,
+    SA_Draggable, FALSE,
+    SA_Exclusive, TRUE,
+    TAG_END
+  );
+
+  if (NULL == wbScreen)
+  {
+    RequesterF("Close", "Could not open screen %ldx%ldx%ld for Parrot", info->si_Width, info->si_Height, info->si_Depth);
+    goto CLEAN_EXIT;
+  }
+
+  screen = MemNew(sizeof(struct PARROT_SCREEN), 0);
+  screen->Screen = wbScreen;
+  screen->Window = NULL;
+
+  CLEAN_EXIT:
 
   return (ULONG) screen;
 }
@@ -95,9 +127,15 @@ EXPORT ULONG ScreenNew(struct SCREEN_INFO* info)
 
 EXPORT VOID ScreenDelete(ULONG screen)
 {
+  struct PARROT_SCREEN* parrotScreen;
+
   if (0 != screen)
   {
-    CloseScreen((struct Screen*) screen);
+    parrotScreen = (struct PARROT_SCREEN*) (screen);
+
+    CloseScreen((struct Screen*) parrotScreen->Screen);
+
+    MemDelete(parrotScreen);
   }
 }
 
