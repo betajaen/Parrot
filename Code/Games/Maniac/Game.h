@@ -48,7 +48,7 @@ struct GameBase
   /* Arena used for current cell objects. */
   APTR               gb_ArenaCell;
   /* Current Screen */
-  ULONG              gb_Screen;
+  APTR               gb_Screen;
 };
 
 extern struct GameBase* GameBase;

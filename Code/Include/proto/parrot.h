@@ -18,19 +18,19 @@ BOOL IMPORT_MemDelete(__reg("a6") struct ParrotBase*, __reg("a0") APTR pMem)="\t
 ULONG IMPORT_MemSize(__reg("a6") struct ParrotBase*, __reg("a0") APTR pMem)="\tjsr\t-54(a6)";
 #define MemSize(pMem) IMPORT_MemSize(ParrotBase, pMem)
 
-ULONG IMPORT_ScreenNew(__reg("a6") struct ParrotBase*, __reg("a0") struct SCREEN_INFO* info)="\tjsr\t-60(a6)";
-#define ScreenNew(info) IMPORT_ScreenNew(ParrotBase, info)
+APTR IMPORT_ScreenNew(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena, __reg("a1") struct SCREEN_INFO* info)="\tjsr\t-60(a6)";
+#define ScreenNew(arena, info) IMPORT_ScreenNew(ParrotBase, arena, info)
 
-VOID IMPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)="\tjsr\t-66(a6)";
-#define ScreenDelete(screen) IMPORT_ScreenDelete(ParrotBase, screen)
+VOID IMPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)="\tjsr\t-66(a6)";
+#define ScreenDelete(obj) IMPORT_ScreenDelete(ParrotBase, obj)
 
-VOID IMPORT_ScreenSetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UBYTE cursor)="\tjsr\t-72(a6)";
+VOID IMPORT_ScreenSetCursor(__reg("a6") struct ParrotBase*, __reg("a0") APTR screen, __reg("d0") UBYTE cursor)="\tjsr\t-72(a6)";
 #define ScreenSetCursor(screen, cursor) IMPORT_ScreenSetCursor(ParrotBase, screen, cursor)
 
-UBYTE IMPORT_ScreenGetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)="\tjsr\t-78(a6)";
+UBYTE IMPORT_ScreenGetCursor(__reg("a6") struct ParrotBase*, __reg("a0") APTR screen)="\tjsr\t-78(a6)";
 #define ScreenGetCursor(screen) IMPORT_ScreenGetCursor(ParrotBase, screen)
 
-VOID IMPORT_ScreenSetColour(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UWORD index, __reg("d2") UBYTE r, __reg("d3") UBYTE g, __reg("d4") UBYTE b)="\tjsr\t-84(a6)";
+VOID IMPORT_ScreenSetColour(__reg("a6") struct ParrotBase*, __reg("a0") APTR screen, __reg("d0") UWORD index, __reg("d1") UBYTE r, __reg("d2") UBYTE g, __reg("d3") UBYTE b)="\tjsr\t-84(a6)";
 #define ScreenSetColour(screen, index, r, g, b) IMPORT_ScreenSetColour(ParrotBase, screen, index, r, g, b)
 
 VOID IMPORT_GameDelaySeconds(__reg("a6") struct ParrotBase*, __reg("d0") UWORD seconds)="\tjsr\t-90(a6)";
@@ -62,5 +62,11 @@ BOOL IMPORT_ArenaRollback(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena
 
 ULONG IMPORT_ArenaSpace(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)="\tjsr\t-144(a6)";
 #define ArenaSpace(arena) IMPORT_ArenaSpace(ParrotBase, arena)
+
+VOID IMPORT_ScreenClear(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)="\tjsr\t-150(a6)";
+#define ScreenClear(obj) IMPORT_ScreenClear(ParrotBase, obj)
+
+VOID IMPORT_ScreenSwapBuffers(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)="\tjsr\t-156(a6)";
+#define ScreenSwapBuffers(obj) IMPORT_ScreenSwapBuffers(ParrotBase, obj)
 
 #endif /* PROTO_PARROT_H */

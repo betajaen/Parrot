@@ -63,36 +63,36 @@ ULONG EXPORT_MemSize(__reg("a6") struct ParrotBase*, __reg("a0") APTR pMem)
 }
 
 /* ScreenNew */
-ULONG ScreenNew(struct SCREEN_INFO* info);
-ULONG EXPORT_ScreenNew(__reg("a6") struct ParrotBase*, __reg("a0") struct SCREEN_INFO* info)
+APTR ScreenNew(APTR arena, struct SCREEN_INFO* info);
+APTR EXPORT_ScreenNew(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena, __reg("a1") struct SCREEN_INFO* info)
 {
-  return ScreenNew(info);
+  return ScreenNew(arena, info);
 }
 
 /* ScreenDelete */
-VOID ScreenDelete(ULONG screen);
-VOID EXPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)
+VOID ScreenDelete(APTR obj);
+VOID EXPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)
 {
-  ScreenDelete(screen);
+  ScreenDelete(obj);
 }
 
 /* ScreenSetCursor */
-VOID ScreenSetCursor(ULONG screen, UBYTE cursor);
-VOID EXPORT_ScreenSetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UBYTE cursor)
+VOID ScreenSetCursor(APTR screen, UBYTE cursor);
+VOID EXPORT_ScreenSetCursor(__reg("a6") struct ParrotBase*, __reg("a0") APTR screen, __reg("d0") UBYTE cursor)
 {
   ScreenSetCursor(screen, cursor);
 }
 
 /* ScreenGetCursor */
-UBYTE ScreenGetCursor(ULONG screen);
-UBYTE EXPORT_ScreenGetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)
+UBYTE ScreenGetCursor(APTR screen);
+UBYTE EXPORT_ScreenGetCursor(__reg("a6") struct ParrotBase*, __reg("a0") APTR screen)
 {
   return ScreenGetCursor(screen);
 }
 
 /* ScreenSetColour */
-VOID ScreenSetColour(ULONG screen, UWORD index, UBYTE r, UBYTE g, UBYTE b);
-VOID EXPORT_ScreenSetColour(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UWORD index, __reg("d2") UBYTE r, __reg("d3") UBYTE g, __reg("d4") UBYTE b)
+VOID ScreenSetColour(APTR screen, UWORD index, UBYTE r, UBYTE g, UBYTE b);
+VOID EXPORT_ScreenSetColour(__reg("a6") struct ParrotBase*, __reg("a0") APTR screen, __reg("d0") UWORD index, __reg("d1") UBYTE r, __reg("d2") UBYTE g, __reg("d3") UBYTE b)
 {
   ScreenSetColour(screen, index, r, g, b);
 }
@@ -167,6 +167,20 @@ ULONG EXPORT_ArenaSpace(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)
   return ArenaSpace(arena);
 }
 
+/* ScreenClear */
+VOID ScreenClear(APTR obj);
+VOID EXPORT_ScreenClear(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)
+{
+  ScreenClear(obj);
+}
+
+/* ScreenSwapBuffers */
+VOID ScreenSwapBuffers(APTR obj);
+VOID EXPORT_ScreenSwapBuffers(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)
+{
+  ScreenSwapBuffers(obj);
+}
+
 
 #define EXPORT_Vectors \
   , (APTR) EXPORT_GameStart\
@@ -188,6 +202,8 @@ ULONG EXPORT_ArenaSpace(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)
   , (APTR) EXPORT_ObjGetClass\
   , (APTR) EXPORT_ObjGetSize\
   , (APTR) EXPORT_ArenaRollback\
-  , (APTR) EXPORT_ArenaSpace
+  , (APTR) EXPORT_ArenaSpace\
+  , (APTR) EXPORT_ScreenClear\
+  , (APTR) EXPORT_ScreenSwapBuffers
 
 /***END***/

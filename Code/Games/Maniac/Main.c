@@ -41,7 +41,7 @@ VOID GameInitialise()
   info.si_Height = 200;
   info.si_Title = "Maniac Mansion";
   
-  THIS_GAME->gb_Screen = ScreenNew(&info);
+  THIS_GAME->gb_Screen = ScreenNew(THIS_GAME->gb_ArenaGame, &info);
   GameDelaySeconds(3);
 }
 

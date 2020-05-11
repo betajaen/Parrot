@@ -31,6 +31,7 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <proto/intuition.h>
+#include <proto/graphics.h>
 #include <dos/dos.h>
 
 #include <exec/types.h>
@@ -53,6 +54,7 @@ STATIC CONST CHAR UserLibID[] = "\0$VER: Parrot.library 1.0 (9.5.2020)\r\n";
 struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
 struct IntuitionBase* IntuitionBase;
+struct GfxBase*       GfxBase;
 struct Library*       ParrotBase;
 
 struct ParrotBase
@@ -138,6 +140,13 @@ LIBFUNC STATIC struct ParrotBase* LibInit(REG(a0, BPTR librarySegment), REG(d0, 
   IntuitionBase = (struct IntuitionBase*) OpenLibrary("intuition.library", 0);
 
   if (NULL == IntuitionBase)
+  {
+    return(base);
+  }
+
+  GfxBase = (struct GfxBase*) OpenLibrary("graphics.library", 0);
+
+  if (NULL == GfxBase)
   {
     return(base);
   }
