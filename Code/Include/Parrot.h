@@ -105,4 +105,9 @@ struct SCREEN_INFO
 #define CURSOR_LOCK   27
 #define CURSOR_UNLOCK 28
 
+struct ROOM
+{
+  ULONG   rm_Id;
+};
+
 #endif
