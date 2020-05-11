@@ -39,20 +39,22 @@
 
 #include "Version.h"
 
-struct LibraryHeader
+struct ParrotBase;
+
+struct GameBase
 {
   struct Library	libBase;
   struct Library* sysBase;
   ULONG           segList;
 };
 
-#define __BASE_OR_IFACE_TYPE	struct LibraryHeader *
+#define __BASE_OR_IFACE_TYPE	struct GameBase *
 #define __BASE_OR_IFACE_VAR		EngineBase
 #define __BASE_OR_IFACE			__BASE_OR_IFACE_TYPE __BASE_OR_IFACE_VAR
 
 VOID EXPORT_GameInitialise(
   REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct Library* parrot)
+  REG(a0, struct ParrotBase* parrot)
 );
 
 VOID EXPORT_GameShutdown(
@@ -65,13 +67,13 @@ BOOL EXPORT_OnGameEvent(
   REG(d1, ULONG data)
 );
 
-LIBFUNC static struct LibraryHeader*  LibInit(REG(a0, BPTR Segment), REG(d0, struct LibraryHeader* lh), REG(a6, struct ExecBase* sb));
-LIBFUNC static BPTR                   LibExpunge(REG(a6, struct LibraryHeader* base));
-LIBFUNC static struct LibraryHeader*  LibOpen(REG(a6, struct LibraryHeader* base));
-LIBFUNC static BPTR                   LibClose(REG(a6, struct LibraryHeader* base));
-LIBFUNC static LONG                   LibNull(void);
+LIBFUNC STATIC struct GameBase*       LibInit(REG(a0, BPTR Segment), REG(d0, struct GameBase* lh), REG(a6, struct ExecBase* sb));
+LIBFUNC STATIC BPTR                   LibExpunge(REG(a6, struct GameBase* base));
+LIBFUNC STATIC struct GameBase*       LibOpen(REG(a6, struct GameBase* base));
+LIBFUNC STATIC BPTR                   LibClose(REG(a6, struct GameBase* base));
+LIBFUNC STATIC LONG                   LibNull(void);
 
-LIBFUNC static LONG LibNull(VOID)
+LIBFUNC STATIC LONG LibNull(VOID)
 {
   return(0);
 }
@@ -90,13 +92,13 @@ STATIC CONST APTR LibVectors[] =
 
 STATIC CONST ULONG LibInitTab[] =
 {
-  sizeof(struct LibraryHeader),
+  sizeof(struct GameBase),
   (ULONG)LibVectors,
   (ULONG)NULL,
   (ULONG)LibInit
 };
 
-static const USED_VAR struct Resident ROMTag =
+STATIC CONST USED_VAR struct Resident ROMTag =
 {
   RTC_MATCHWORD,
   (struct Resident*) & ROMTag,
@@ -110,14 +112,14 @@ static const USED_VAR struct Resident ROMTag =
   (APTR)LibInitTab
 };
 
-struct ExecBase* SysBase;
-struct DOSBase* DOSBase;
-struct Library*  ParrotBase;
+struct ExecBase*    SysBase;
+struct DOSBase*     DOSBase;
+struct ParrotBase*  ParrotBase;
 
 #define DeleteLibrary(LIB) \
   FreeMem((STRPTR)(LIB)-(LIB)->lib_NegSize, (ULONG)((LIB)->lib_NegSize+(LIB)->lib_PosSize))
 
-LIBFUNC static struct LibraryHeader* LibInit(REG(a0, BPTR librarySegment), REG(d0, struct LibraryHeader* base), REG(a6, struct ExecBase* sb))
+LIBFUNC STATIC struct GameBase* LibInit(REG(a0, BPTR librarySegment), REG(d0, struct GameBase* base), REG(a6, struct ExecBase* sb))
 {
   SysBase = (APTR)sb;
 
@@ -137,7 +139,7 @@ LIBFUNC static struct LibraryHeader* LibInit(REG(a0, BPTR librarySegment), REG(d
   return(base);
 }
 
-LIBFUNC static BPTR LibExpunge(REG(a6, struct LibraryHeader* base))
+LIBFUNC STATIC BPTR LibExpunge(REG(a6, struct GameBase* base))
 {
   BPTR rc;
 
@@ -159,7 +161,7 @@ LIBFUNC static BPTR LibExpunge(REG(a6, struct LibraryHeader* base))
   return(rc);
 }
 
-LIBFUNC static struct LibraryHeader* LibOpen(REG(a6, struct LibraryHeader* base))
+LIBFUNC STATIC struct GameBase* LibOpen(REG(a6, struct GameBase* base))
 {
   base->libBase.lib_Flags &= ~LIBF_DELEXP;
   base->libBase.lib_OpenCnt++;
@@ -167,7 +169,7 @@ LIBFUNC static struct LibraryHeader* LibOpen(REG(a6, struct LibraryHeader* base)
   return base;
 }
 
-LIBFUNC static BPTR LibClose(REG(a6, struct LibraryHeader* base))
+LIBFUNC STATIC BPTR LibClose(REG(a6, struct GameBase* base))
 {
   if (base->libBase.lib_OpenCnt > 0 &&
     --base->libBase.lib_OpenCnt == 0)
@@ -185,7 +187,7 @@ VOID GameInitialise();
 
 VOID EXPORT_GameInitialise(
   REG(a6, UNUSED __BASE_OR_IFACE),
-  REG(a0, struct Library* parrot)
+  REG(a0, struct ParrotBase* parrot)
 )
 {
   ParrotBase = parrot;

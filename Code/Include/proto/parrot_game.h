@@ -5,7 +5,10 @@
 #include <exec/types.h>
 #endif
 
-VOID __GameInitialise(__reg("a6") struct Library *, __reg("a0") struct Library* parrotBase)="\tjsr\t-30(a6)";
+struct ParrotBase;
+extern struct ParrotBase* ParrotBase;
+
+VOID __GameInitialise(__reg("a6") struct Library*, __reg("a0") struct ParrotBase*)="\tjsr\t-30(a6)";
 #define GameInitialise(parrotBase) __GameInitialise(GameBase, parrotBase)
 
 VOID __GameShutdown(__reg("a6") struct Library *)="\tjsr\t-36(a6)";

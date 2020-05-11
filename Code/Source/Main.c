@@ -39,7 +39,7 @@ BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.
 
 struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
-struct Library*       ParrotBase;
+struct ParrotBase*    ParrotBase;
 
 INT main()
 {
@@ -76,7 +76,7 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  ParrotBase = OpenLibrary("PROGDIR:Parrot.library", 0);
+  ParrotBase = (struct ParrotBase*) OpenLibrary("PROGDIR:Parrot.library", 0);
   if (NULL == ParrotBase)
   {
     rc = RETURN_FAIL;
@@ -85,7 +85,7 @@ INT main()
 
   GameStart("Maniac");
 
-  CloseLibrary(ParrotBase);
+  CloseLibrary((struct Library*) ParrotBase);
   
   CLEAN_EXIT:
 

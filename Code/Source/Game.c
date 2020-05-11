@@ -28,9 +28,11 @@
 #include "Common.h"
 
 #include <proto/exec.h>
+#include <proto/dos.h>
+
 #include <proto/parrot_game.h>
 
-extern struct Library* ParrotBase;
+extern struct ParrotBase* ParrotBase;
 
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
 ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
@@ -55,8 +57,8 @@ EXPORT VOID GameStart(CONST_STRPTR name)
     RequesterF("Okay", "Could not open %s", buffer);
     goto CLEAN_EXIT;
   }
-
-  GameInitialise(ParrotBase);
+  
+  __GameInitialise(GameBase, ParrotBase);
 
 
 CLEAN_EXIT:
@@ -67,4 +69,9 @@ CLEAN_EXIT:
     GameBase = NULL;
   }
 
+}
+
+EXPORT VOID GameDelaySeconds(UWORD seconds)
+{
+  Delay(seconds * 50);
 }

@@ -42,7 +42,7 @@ VOID GameInitialise()
   info.si_Title = "Maniac Mansion";
   
   screen = ScreenNew(&info);
-  Delay(50 * 3);
+  GameDelaySeconds(3);
   ScreenDelete(screen);
   screen = 0;
 }

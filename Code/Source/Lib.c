@@ -25,11 +25,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/* Stub Entry Function */
-static int LibNull()
-{
-  return 0;
-}
 
 #include "Common.h"
 
@@ -55,11 +50,6 @@ STATIC CONST CHAR CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rig
 STATIC CONST CHAR UserLibName[] = "Parrot.library";
 STATIC CONST CHAR UserLibID[] = "\0$VER: Parrot.library 1.0 (9.5.2020)\r\n";
 
-LIBFUNC STATIC struct ParrotBase*    LibInit(REG(a0, BPTR Segment), REG(d0, struct ParrotBase* lh), REG(a6, struct ExecBase* sb));
-LIBFUNC STATIC BPTR                  LibExpunge(REG(a6, struct ParrotBase* base));
-LIBFUNC STATIC struct ParrotBase*    LibOpen(REG(a6, struct ParrotBase* base));
-LIBFUNC STATIC BPTR                  LibClose(REG(a6, struct ParrotBase* base));
-
 struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
 struct IntuitionBase* IntuitionBase;
@@ -72,6 +62,17 @@ struct ParrotBase
   struct Library* pb_SysBase;
   struct Library* pb_GameBase;
 };
+
+/* Stub Entry Function */
+STATIC INT LibNull()
+{
+  return 0;
+}
+
+LIBFUNC STATIC struct ParrotBase* LibInit(REG(a0, BPTR Segment), REG(d0, struct ParrotBase* lh), REG(a6, struct ExecBase* sb));
+LIBFUNC STATIC BPTR               LibExpunge(REG(a6, struct ParrotBase* base));
+LIBFUNC STATIC struct ParrotBase* LibOpen(REG(a6, struct ParrotBase* base));
+LIBFUNC STATIC BPTR               LibClose(REG(a6, struct ParrotBase* base));
 
 #include "Protos.inc"
 
@@ -95,7 +96,7 @@ STATIC CONST ULONG LibInitTab[] =
   (ULONG)LibInit
 };
 
-static const USED_VAR struct Resident ROMTag =
+STATIC CONST USED_VAR struct Resident ROMTag =
 {
   RTC_MATCHWORD,
   (struct Resident*) & ROMTag,
@@ -146,7 +147,7 @@ LIBFUNC STATIC struct ParrotBase* LibInit(REG(a0, BPTR librarySegment), REG(d0, 
   return(base);
 }
 
-LIBFUNC static BPTR LibExpunge(REG(a6, struct ParrotBase* base))
+LIBFUNC STATIC BPTR LibExpunge(REG(a6, struct ParrotBase* base))
 {
   BPTR rc;
 
@@ -175,7 +176,7 @@ LIBFUNC static BPTR LibExpunge(REG(a6, struct ParrotBase* base))
   return(rc);
 }
 
-LIBFUNC static struct ParrotBase* LibOpen(REG(a6, struct ParrotBase* base))
+LIBFUNC STATIC struct ParrotBase* LibOpen(REG(a6, struct ParrotBase* base))
 {
   base->pb_LibBase.lib_Flags &= ~LIBF_DELEXP;
   base->pb_LibBase.lib_OpenCnt++;
@@ -183,7 +184,7 @@ LIBFUNC static struct ParrotBase* LibOpen(REG(a6, struct ParrotBase* base))
   return base;
 }
 
-LIBFUNC static BPTR LibClose(REG(a6, struct ParrotBase* base))
+LIBFUNC STATIC BPTR LibClose(REG(a6, struct ParrotBase* base))
 {
   if (base->pb_LibBase.lib_OpenCnt > 0 &&
     --base->pb_LibBase.lib_OpenCnt == 0)

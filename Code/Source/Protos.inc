@@ -76,6 +76,34 @@ VOID EXPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("d0") ULONG scree
   ScreenDelete(screen);
 }
 
+/* ScreenSetCursor */
+VOID ScreenSetCursor(ULONG screen, UBYTE cursor);
+VOID EXPORT_ScreenSetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UBYTE cursor)
+{
+  ScreenSetCursor(screen, cursor);
+}
+
+/* ScreenGetCursor */
+UBYTE ScreenGetCursor(ULONG screen);
+UBYTE EXPORT_ScreenGetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)
+{
+  return ScreenGetCursor(screen);
+}
+
+/* ScreenSetColour */
+VOID ScreenSetColour(ULONG screen, UWORD index, UBYTE r, UBYTE g, UBYTE b);
+VOID EXPORT_ScreenSetColour(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UWORD index, __reg("d2") UBYTE r, __reg("d3") UBYTE g, __reg("d4") UBYTE b)
+{
+  ScreenSetColour(screen, index, r, g, b);
+}
+
+/* GameDelaySeconds */
+VOID GameDelaySeconds(UWORD seconds);
+VOID EXPORT_GameDelaySeconds(__reg("a6") struct ParrotBase*, __reg("d0") UWORD seconds)
+{
+  GameDelaySeconds(seconds);
+}
+
 
 #define EXPORT_Vectors \
   , (APTR) EXPORT_GameStart\
@@ -84,6 +112,10 @@ VOID EXPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("d0") ULONG scree
   , (APTR) EXPORT_MemDelete\
   , (APTR) EXPORT_MemSize\
   , (APTR) EXPORT_ScreenNew\
-  , (APTR) EXPORT_ScreenDelete
+  , (APTR) EXPORT_ScreenDelete\
+  , (APTR) EXPORT_ScreenSetCursor\
+  , (APTR) EXPORT_ScreenGetCursor\
+  , (APTR) EXPORT_ScreenSetColour\
+  , (APTR) EXPORT_GameDelaySeconds
 
 /***END***/

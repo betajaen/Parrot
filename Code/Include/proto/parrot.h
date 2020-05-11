@@ -1,7 +1,7 @@
 #ifndef PROTO_PARROT_H
 #define PROTO_PARROT_H
 
-extern struct Library* ParrotBase;
+extern struct ParrotBase* ParrotBase;
 
 VOID IMPORT_GameStart(__reg("a6") struct ParrotBase*, __reg("a0") CONST_STRPTR name)="\tjsr\t-30(a6)";
 #define GameStart(name) IMPORT_GameStart(ParrotBase, name)
@@ -23,5 +23,17 @@ ULONG IMPORT_ScreenNew(__reg("a6") struct ParrotBase*, __reg("a0") struct SCREEN
 
 VOID IMPORT_ScreenDelete(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)="\tjsr\t-66(a6)";
 #define ScreenDelete(screen) IMPORT_ScreenDelete(ParrotBase, screen)
+
+VOID IMPORT_ScreenSetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UBYTE cursor)="\tjsr\t-72(a6)";
+#define ScreenSetCursor(screen, cursor) IMPORT_ScreenSetCursor(ParrotBase, screen, cursor)
+
+UBYTE IMPORT_ScreenGetCursor(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen)="\tjsr\t-78(a6)";
+#define ScreenGetCursor(screen) IMPORT_ScreenGetCursor(ParrotBase, screen)
+
+VOID IMPORT_ScreenSetColour(__reg("a6") struct ParrotBase*, __reg("d0") ULONG screen, __reg("d1") UWORD index, __reg("d2") UBYTE r, __reg("d3") UBYTE g, __reg("d4") UBYTE b)="\tjsr\t-84(a6)";
+#define ScreenSetColour(screen, index, r, g, b) IMPORT_ScreenSetColour(ParrotBase, screen, index, r, g, b)
+
+VOID IMPORT_GameDelaySeconds(__reg("a6") struct ParrotBase*, __reg("d0") UWORD seconds)="\tjsr\t-90(a6)";
+#define GameDelaySeconds(seconds) IMPORT_GameDelaySeconds(ParrotBase, seconds)
 
 #endif /* PROTO_PARROT_H */

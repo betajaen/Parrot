@@ -101,3 +101,15 @@ EXPORT VOID ScreenDelete(ULONG screen)
   }
 }
 
+EXPORT VOID ScreenSetCursor(ULONG screen, UBYTE cursor)
+{
+}
+
+EXPORT UBYTE ScreenGetCursor(ULONG screen)
+{
+  return CURSOR_POINT;
+}
+
+EXPORT VOID ScreenSetColour(ULONG screen, UWORD index, UBYTE r, UBYTE g, UBYTE b)
+{
+}
