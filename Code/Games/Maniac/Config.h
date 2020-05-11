@@ -1,5 +1,5 @@
 /**
-    $Id: Main.c, 1.0, 2020/05/10 07:17:00, betajaen Exp $
+    $Id: Config.h, 1.0, 2020/05/11 12:23:00, betajaen Exp $
 
     Maniac Game Module for Parrot
     =============================
@@ -24,37 +24,9 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
+#ifndef PARROT_MANIAC_CONFIG_H
+#define PARROT_MANIAC_CONFIG_H
 
-#include "Game.h"
+#define ARENA_GENERIC_SIZE 2048
 
-VOID GameInitialise()
-{
-  struct SCREEN_INFO info;
-
-  THIS_GAME->gb_ArenaGame = ArenaNew(ARENA_GENERIC_SIZE, 0);
-
-  info.si_Depth = 3;
-  info.si_Flags = SIF_IS_PUBLIC;
-  info.si_Left = 0;
-  info.si_Top = 0;
-  info.si_Width = 320;
-  info.si_Height = 200;
-  info.si_Title = "Maniac Mansion";
-  
-  THIS_GAME->gb_Screen = ScreenNew(&info);
-  GameDelaySeconds(3);
-}
-
-VOID GameShutdown()
-{
-  ScreenDelete(THIS_GAME->gb_Screen);
-  THIS_GAME->gb_Screen = 0;
-
-  ArenaDelete(THIS_GAME->gb_ArenaGame);
-  THIS_GAME->gb_ArenaGame = 0;
-}
-
-BOOL OnGameEvent(ULONG event, ULONG data)
-{
-  return TRUE;
-}
+#endif

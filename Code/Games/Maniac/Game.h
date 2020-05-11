@@ -1,5 +1,5 @@
 /**
-    $Id: Main.c, 1.0, 2020/05/10 07:17:00, betajaen Exp $
+    $Id: Game.h, 1.0, 2020/05/11 12:11:00, betajaen Exp $
 
     Maniac Game Module for Parrot
     =============================
@@ -24,37 +24,35 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
+#ifndef PARROT_MANIAC_GAME_H
+#define PARROT_MANIAC_GAME_H
 
-#include "Game.h"
+#include "Parrot.h"
+#include "Config.h"
 
-VOID GameInitialise()
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/parrot.h>
+
+struct GameBase
 {
-  struct SCREEN_INFO info;
+  struct Library     gb_LibBase;
+  struct Library*    gb_SysBase;
+  ULONG              gb_SegList;
+  struct DosLibrary* gb_DOSBase;
+  struct ParrotBase* gb_ParrotBase;
+  /* Generic Arena used for full life-time objects. Such as the Screen */
+  APTR               gb_ArenaGame;
+  /* Arena used for chapter objects. */
+  APTR               gb_ArenaChapter;
+  /* Arena used for current cell objects. */
+  APTR               gb_ArenaCell;
+  /* Current Screen */
+  ULONG              gb_Screen;
+};
 
-  THIS_GAME->gb_ArenaGame = ArenaNew(ARENA_GENERIC_SIZE, 0);
+extern struct GameBase* GameBase;
 
-  info.si_Depth = 3;
-  info.si_Flags = SIF_IS_PUBLIC;
-  info.si_Left = 0;
-  info.si_Top = 0;
-  info.si_Width = 320;
-  info.si_Height = 200;
-  info.si_Title = "Maniac Mansion";
-  
-  THIS_GAME->gb_Screen = ScreenNew(&info);
-  GameDelaySeconds(3);
-}
+#define THIS_GAME GameBase
 
-VOID GameShutdown()
-{
-  ScreenDelete(THIS_GAME->gb_Screen);
-  THIS_GAME->gb_Screen = 0;
-
-  ArenaDelete(THIS_GAME->gb_ArenaGame);
-  THIS_GAME->gb_ArenaGame = 0;
-}
-
-BOOL OnGameEvent(ULONG event, ULONG data)
-{
-  return TRUE;
-}
+#endif

@@ -65,6 +65,11 @@ CLEAN_EXIT:
 
   if (NULL != GameBase)
   {
+    __GameShutdown(GameBase);
+  }
+
+  if (NULL != GameBase)
+  {
     CloseLibrary(GameBase);
     GameBase = NULL;
   }

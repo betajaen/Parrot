@@ -24,6 +24,8 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
+#ifndef PARROT_H
+#define PARROT_H
 
 #include <exec/types.h>
 
@@ -102,3 +104,5 @@ struct SCREEN_INFO
 #define CURSOR_CLOSE  26
 #define CURSOR_LOCK   27
 #define CURSOR_UNLOCK 28
+
+#endif

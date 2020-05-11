@@ -38,18 +38,12 @@
 #include <SDI_stdarg.h>
 
 #include "Version.h"
+#include "Game.h"
 
 struct ParrotBase;
 
-struct GameBase
-{
-  struct Library	libBase;
-  struct Library* sysBase;
-  ULONG           segList;
-};
-
 #define __BASE_OR_IFACE_TYPE	struct GameBase *
-#define __BASE_OR_IFACE_VAR		EngineBase
+#define __BASE_OR_IFACE_VAR		GameBase
 #define __BASE_OR_IFACE			__BASE_OR_IFACE_TYPE __BASE_OR_IFACE_VAR
 
 VOID EXPORT_GameInitialise(
@@ -112,8 +106,9 @@ STATIC CONST USED_VAR struct Resident ROMTag =
   (APTR)LibInitTab
 };
 
+struct GameBase*    GameBase;
 struct ExecBase*    SysBase;
-struct DOSBase*     DOSBase;
+struct DosLibrary*  DOSBase;
 struct ParrotBase*  ParrotBase;
 
 #define DeleteLibrary(LIB) \
@@ -123,18 +118,22 @@ LIBFUNC STATIC struct GameBase* LibInit(REG(a0, BPTR librarySegment), REG(d0, st
 {
   SysBase = (APTR)sb;
 
-  base->libBase.lib_Node.ln_Type = NT_LIBRARY;
-  base->libBase.lib_Node.ln_Pri = 0;
-  base->libBase.lib_Node.ln_Name = (char*)UserLibName;
-  base->libBase.lib_Flags = LIBF_CHANGED | LIBF_SUMUSED;
-  base->libBase.lib_Version = VERSION;
-  base->libBase.lib_Revision = REVISION;
-  base->libBase.lib_IdString = (char*)UserLibID;
+  base->gb_LibBase.lib_Node.ln_Type = NT_LIBRARY;
+  base->gb_LibBase.lib_Node.ln_Pri = 0;
+  base->gb_LibBase.lib_Node.ln_Name = (char*)UserLibName;
+  base->gb_LibBase.lib_Flags = LIBF_CHANGED | LIBF_SUMUSED;
+  base->gb_LibBase.lib_Version = VERSION;
+  base->gb_LibBase.lib_Revision = REVISION;
+  base->gb_LibBase.lib_IdString = (char*)UserLibID;
 
-  base->segList = librarySegment;
-  base->sysBase = (APTR)SysBase;
+  base->gb_SegList = librarySegment;
+  base->gb_SysBase = (APTR)SysBase;
 
-  DOSBase = (struct DOSBase*) OpenLibrary("dos.library", 0);
+  DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 0);
+
+  base->gb_DOSBase = DOSBase;
+
+  GameBase = base;
 
   return(base);
 }
@@ -143,38 +142,38 @@ LIBFUNC STATIC BPTR LibExpunge(REG(a6, struct GameBase* base))
 {
   BPTR rc;
 
-  if (base->libBase.lib_OpenCnt > 0)
+  if (base->gb_LibBase.lib_OpenCnt > 0)
   {
-    base->libBase.lib_Flags |= LIBF_DELEXP;
+    base->gb_LibBase.lib_Flags |= LIBF_DELEXP;
     return(0);
   }
 
-  SysBase = (APTR)base->sysBase;
-  rc = base->segList;
+  SysBase = (APTR)base->gb_SysBase;
+  rc = base->gb_SegList;
 
   Remove((struct Node*)base);
 
   CloseLibrary((struct Library*) DOSBase);
 
-  DeleteLibrary(&base->libBase);
+  DeleteLibrary(&base->gb_LibBase);
 
   return(rc);
 }
 
 LIBFUNC STATIC struct GameBase* LibOpen(REG(a6, struct GameBase* base))
 {
-  base->libBase.lib_Flags &= ~LIBF_DELEXP;
-  base->libBase.lib_OpenCnt++;
+  base->gb_LibBase.lib_Flags &= ~LIBF_DELEXP;
+  base->gb_LibBase.lib_OpenCnt++;
 
   return base;
 }
 
 LIBFUNC STATIC BPTR LibClose(REG(a6, struct GameBase* base))
 {
-  if (base->libBase.lib_OpenCnt > 0 &&
-    --base->libBase.lib_OpenCnt == 0)
+  if (base->gb_LibBase.lib_OpenCnt > 0 &&
+    --base->gb_LibBase.lib_OpenCnt == 0)
   {
-    if (base->libBase.lib_Flags & LIBF_DELEXP)
+    if (base->gb_LibBase.lib_Flags & LIBF_DELEXP)
     {
       return LibExpunge(base);
     }
@@ -186,11 +185,13 @@ LIBFUNC STATIC BPTR LibClose(REG(a6, struct GameBase* base))
 VOID GameInitialise();
 
 VOID EXPORT_GameInitialise(
-  REG(a6, UNUSED __BASE_OR_IFACE),
+  REG(a6, __BASE_OR_IFACE),
   REG(a0, struct ParrotBase* parrot)
 )
 {
   ParrotBase = parrot;
+  GameBase->gb_ParrotBase = parrot;
+
   GameInitialise();
 }
 

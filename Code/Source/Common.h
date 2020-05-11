@@ -24,7 +24,11 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
+#ifndef PARROT_COMMON_H
+#define PARROT_COMMON_H
 
 #include "Parrot.h"
 
 #define EXPORT
+
+#endif
