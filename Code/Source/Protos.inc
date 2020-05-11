@@ -104,6 +104,13 @@ VOID EXPORT_GameDelaySeconds(__reg("a6") struct ParrotBase*, __reg("d0") UWORD s
   GameDelaySeconds(seconds);
 }
 
+/* GameDelayTicks */
+VOID GameDelayTicks(UWORD ticks);
+VOID EXPORT_GameDelayTicks(__reg("a6") struct ParrotBase*, __reg("d0") UWORD ticks)
+{
+  GameDelayTicks(ticks);
+}
+
 
 #define EXPORT_Vectors \
   , (APTR) EXPORT_GameStart\
@@ -116,6 +123,7 @@ VOID EXPORT_GameDelaySeconds(__reg("a6") struct ParrotBase*, __reg("d0") UWORD s
   , (APTR) EXPORT_ScreenSetCursor\
   , (APTR) EXPORT_ScreenGetCursor\
   , (APTR) EXPORT_ScreenSetColour\
-  , (APTR) EXPORT_GameDelaySeconds
+  , (APTR) EXPORT_GameDelaySeconds\
+  , (APTR) EXPORT_GameDelayTicks
 
 /***END***/

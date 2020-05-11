@@ -71,6 +71,11 @@ CLEAN_EXIT:
 
 }
 
+EXPORT VOID GameDelayTicks(UWORD ticks)
+{
+  Delay(ticks);
+}
+
 EXPORT VOID GameDelaySeconds(UWORD seconds)
 {
   Delay(seconds * 50);

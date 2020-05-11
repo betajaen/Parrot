@@ -36,4 +36,7 @@ VOID IMPORT_ScreenSetColour(__reg("a6") struct ParrotBase*, __reg("d0") ULONG sc
 VOID IMPORT_GameDelaySeconds(__reg("a6") struct ParrotBase*, __reg("d0") UWORD seconds)="\tjsr\t-90(a6)";
 #define GameDelaySeconds(seconds) IMPORT_GameDelaySeconds(ParrotBase, seconds)
 
+VOID IMPORT_GameDelayTicks(__reg("a6") struct ParrotBase*, __reg("d0") UWORD ticks)="\tjsr\t-96(a6)";
+#define GameDelayTicks(ticks) IMPORT_GameDelayTicks(ParrotBase, ticks)
+
 #endif /* PROTO_PARROT_H */
