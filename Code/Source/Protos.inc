@@ -111,6 +111,62 @@ VOID EXPORT_GameDelayTicks(__reg("a6") struct ParrotBase*, __reg("d0") UWORD tic
   GameDelayTicks(ticks);
 }
 
+/* ArenaNew */
+APTR ArenaNew(ULONG size, ULONG requirements);
+APTR EXPORT_ArenaNew(__reg("a6") struct ParrotBase*, __reg("d0") ULONG size, __reg("d1") ULONG requirements)
+{
+  return ArenaNew(size, requirements);
+}
+
+/* ArenaDelete */
+BOOL ArenaDelete(APTR arena);
+BOOL EXPORT_ArenaDelete(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)
+{
+  return ArenaDelete(arena);
+}
+
+/* ArenaSize */
+ULONG ArenaSize(APTR arena);
+ULONG EXPORT_ArenaSize(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)
+{
+  return ArenaSize(arena);
+}
+
+/* ObjAlloc */
+APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
+APTR EXPORT_ObjAlloc(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena, __reg("d0") ULONG size, __reg("d1") ULONG class)
+{
+  return ObjAlloc(arena, size, class);
+}
+
+/* ObjGetClass */
+ULONG ObjGetClass(APTR alloc);
+ULONG EXPORT_ObjGetClass(__reg("a6") struct ParrotBase*, __reg("a0") APTR alloc)
+{
+  return ObjGetClass(alloc);
+}
+
+/* ObjGetSize */
+ULONG ObjGetSize(APTR alloc);
+ULONG EXPORT_ObjGetSize(__reg("a6") struct ParrotBase*, __reg("a0") APTR alloc)
+{
+  return ObjGetSize(alloc);
+}
+
+/* ArenaRollback */
+BOOL ArenaRollback(APTR arena);
+BOOL EXPORT_ArenaRollback(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)
+{
+  return ArenaRollback(arena);
+}
+
+/* ArenaSpace */
+ULONG ArenaSpace(APTR arena);
+ULONG EXPORT_ArenaSpace(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)
+{
+  return ArenaSpace(arena);
+}
+
 
 #define EXPORT_Vectors \
   , (APTR) EXPORT_GameStart\
@@ -124,6 +180,14 @@ VOID EXPORT_GameDelayTicks(__reg("a6") struct ParrotBase*, __reg("d0") UWORD tic
   , (APTR) EXPORT_ScreenGetCursor\
   , (APTR) EXPORT_ScreenSetColour\
   , (APTR) EXPORT_GameDelaySeconds\
-  , (APTR) EXPORT_GameDelayTicks
+  , (APTR) EXPORT_GameDelayTicks\
+  , (APTR) EXPORT_ArenaNew\
+  , (APTR) EXPORT_ArenaDelete\
+  , (APTR) EXPORT_ArenaSize\
+  , (APTR) EXPORT_ObjAlloc\
+  , (APTR) EXPORT_ObjGetClass\
+  , (APTR) EXPORT_ObjGetSize\
+  , (APTR) EXPORT_ArenaRollback\
+  , (APTR) EXPORT_ArenaSpace
 
 /***END***/

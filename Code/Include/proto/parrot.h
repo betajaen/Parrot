@@ -39,4 +39,28 @@ VOID IMPORT_GameDelaySeconds(__reg("a6") struct ParrotBase*, __reg("d0") UWORD s
 VOID IMPORT_GameDelayTicks(__reg("a6") struct ParrotBase*, __reg("d0") UWORD ticks)="\tjsr\t-96(a6)";
 #define GameDelayTicks(ticks) IMPORT_GameDelayTicks(ParrotBase, ticks)
 
+APTR IMPORT_ArenaNew(__reg("a6") struct ParrotBase*, __reg("d0") ULONG size, __reg("d1") ULONG requirements)="\tjsr\t-102(a6)";
+#define ArenaNew(size, requirements) IMPORT_ArenaNew(ParrotBase, size, requirements)
+
+BOOL IMPORT_ArenaDelete(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)="\tjsr\t-108(a6)";
+#define ArenaDelete(arena) IMPORT_ArenaDelete(ParrotBase, arena)
+
+ULONG IMPORT_ArenaSize(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)="\tjsr\t-114(a6)";
+#define ArenaSize(arena) IMPORT_ArenaSize(ParrotBase, arena)
+
+APTR IMPORT_ObjAlloc(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena, __reg("d0") ULONG size, __reg("d1") ULONG class)="\tjsr\t-120(a6)";
+#define ObjAlloc(arena, size, class) IMPORT_ObjAlloc(ParrotBase, arena, size, class)
+
+ULONG IMPORT_ObjGetClass(__reg("a6") struct ParrotBase*, __reg("a0") APTR alloc)="\tjsr\t-126(a6)";
+#define ObjGetClass(alloc) IMPORT_ObjGetClass(ParrotBase, alloc)
+
+ULONG IMPORT_ObjGetSize(__reg("a6") struct ParrotBase*, __reg("a0") APTR alloc)="\tjsr\t-132(a6)";
+#define ObjGetSize(alloc) IMPORT_ObjGetSize(ParrotBase, alloc)
+
+BOOL IMPORT_ArenaRollback(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)="\tjsr\t-138(a6)";
+#define ArenaRollback(arena) IMPORT_ArenaRollback(ParrotBase, arena)
+
+ULONG IMPORT_ArenaSpace(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)="\tjsr\t-144(a6)";
+#define ArenaSpace(arena) IMPORT_ArenaSpace(ParrotBase, arena)
+
 #endif /* PROTO_PARROT_H */
