@@ -31,3 +31,28 @@
 
 #define ROOM_MAGIC 0x524F4F4Dul
 
+APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
+LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
+
+EXPORT struct ROOM* RoomNew(APTR arena)
+{
+  struct ROOM* room;
+
+  room = ObjAlloc(arena, sizeof(struct ROOM), ROOM_MAGIC);
+
+  if (NULL != room)
+  {
+    room->rm_Id = 0;
+    room->rm_Node.ln_Pred = NULL;
+    room->rm_Node.ln_Succ = NULL;
+    room->rm_Node.ln_Pri = 0;
+    room->rm_Node.ln_Name = NULL;
+    room->rm_Node.ln_Type = NT_USER;
+  }
+  else
+  {
+    RequesterF("Close", "Could not allocate Room!");
+  }
+
+  return room;
+}

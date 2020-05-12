@@ -167,11 +167,6 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
     goto CLEAN_EXIT;
   }
 
-  ScreenClear(screen);
-  ScreenSwapBuffers(screen);
-  ScreenClear(screen);
-  ScreenSwapBuffers(screen);
-
   CLEAN_EXIT:
 
   return (APTR) screen;

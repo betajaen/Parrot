@@ -69,4 +69,7 @@ VOID IMPORT_ScreenClear(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)="\
 VOID IMPORT_ScreenSwapBuffers(__reg("a6") struct ParrotBase*, __reg("a0") APTR obj)="\tjsr\t-156(a6)";
 #define ScreenSwapBuffers(obj) IMPORT_ScreenSwapBuffers(ParrotBase, obj)
 
+struct ROOM* IMPORT_RoomNew(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)="\tjsr\t-162(a6)";
+#define RoomNew(arena) IMPORT_RoomNew(ParrotBase, arena)
+
 #endif /* PROTO_PARROT_H */

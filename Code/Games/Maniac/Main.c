@@ -30,8 +30,12 @@
 VOID GameInitialise()
 {
   struct SCREEN_INFO info;
+  struct ROOM* testRoom;
+  struct ROOM* testRoom2;
+
 
   THIS_GAME->gb_ArenaGame = ArenaNew(ARENA_GENERIC_SIZE, 0);
+  THIS_GAME->gb_ArenaChapter = ArenaNew(ARENA_CHAPTER_SIZE, 0);
 
   info.si_Depth = 3;
   info.si_Flags = SIF_IS_PUBLIC;
@@ -40,13 +44,25 @@ VOID GameInitialise()
   info.si_Width = 320;
   info.si_Height = 200;
   info.si_Title = "Maniac Mansion";
-  
+
   THIS_GAME->gb_Screen = ScreenNew(THIS_GAME->gb_ArenaGame, &info);
-  GameDelaySeconds(3);
+  NewList(THIS_ROOMS);
+
+  testRoom = RoomNew(THIS_GAME->gb_ArenaChapter);
+  AddTail(THIS_ROOMS, (struct Node*) testRoom);
+
+  testRoom2 = RoomNew(THIS_GAME->gb_ArenaChapter);
+  AddTail(THIS_ROOMS, (struct Node*) testRoom2);
+
+  ScreenClear(THIS_SCREEN);
+  ScreenSwapBuffers(THIS_SCREEN);
 }
 
 VOID GameShutdown()
 {
+  ArenaDelete(THIS_GAME->gb_ArenaChapter);
+  THIS_GAME->gb_ArenaChapter = 0;
+
   ScreenDelete(THIS_GAME->gb_Screen);
   THIS_GAME->gb_Screen = 0;
 

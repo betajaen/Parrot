@@ -49,10 +49,13 @@ struct GameBase
   APTR               gb_ArenaCell;
   /* Current Screen */
   APTR               gb_Screen;
+  /* Rooms */
+  struct List        gb_Rooms;
 };
 
 extern struct GameBase* GameBase;
 
-#define THIS_GAME GameBase
-
+#define THIS_GAME   (GameBase)
+#define THIS_ROOMS  (&(GameBase->gb_Rooms))
+#define THIS_SCREEN (GameBase->gb_Screen)
 #endif

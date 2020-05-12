@@ -28,6 +28,7 @@
 #define PARROT_H
 
 #include <exec/types.h>
+#include <exec/nodes.h>
 
 #include "SDI_compiler.h"
 
@@ -50,6 +51,17 @@
 
 #ifndef STATIC
 #define STATIC static
+#endif
+
+/**
+    Helper Macros
+*/
+
+#ifndef NewList
+#define NewList(X)\
+  (X)->lh_Head = (struct Node*) &(X)->lh_Tail;\
+  (X)->lh_Tail = 0;\
+  (X)->lh_TailPred = (struct Node*) &(X)->lh_Head;
 #endif
 
 /**
@@ -107,7 +119,8 @@ struct SCREEN_INFO
 
 struct ROOM
 {
-  ULONG   rm_Id;
+  struct Node     rm_Node;
+  ULONG           rm_Id;
 };
 
 #endif

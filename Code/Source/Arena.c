@@ -45,6 +45,8 @@ struct ARENA_ALLOC
   ULONG   aa_Class;
 };
 
+LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
+
 EXPORT APTR ArenaNew(ULONG size, ULONG requirements)
 {
   struct ARENA_HEADER* hdr;
@@ -56,13 +58,16 @@ EXPORT APTR ArenaNew(ULONG size, ULONG requirements)
     requirements);
 
   if (NULL == hdr)
+  {
+    RequesterF("Close", "Could not allocate arena size of %ld", size);
     return NULL;
+  }
 
   hdr->ah_Size = size;
   hdr->ah_Magic = ARENA_MAGIC;
   hdr->ah_Used = 0;
   hdr->ah_Base = (APTR)(hdr + 1);
-
+  
   return (APTR)(hdr);
 }
 
@@ -138,19 +143,32 @@ EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class)
 {
   struct ARENA_HEADER* hdr;
   struct ARENA_ALLOC* alloc;
+  APTR result;
+
+  result = NULL;
+
 
   if (NULL == arena)
-    return 0UL;
+  {
+    RequesterF("Close", "Arena is null");
+    goto CLEAN_EXIT;
+  }
 
   hdr = ((struct ARENA_HEADER*) arena);
 
   if (ARENA_MAGIC != hdr->ah_Magic)
-    return 0UL;
+  {
+    RequesterF("Close", "Arena magic is not correct");
+    goto CLEAN_EXIT;
+  }
 
   size = (size + 3) & ~0x03;
   
-  if ( (hdr->ah_Used + size + sizeof(struct ARENA_ALLOC)) >= hdr->ah_Size)
-    return 0UL;
+  if ((hdr->ah_Used + size + sizeof(struct ARENA_ALLOC)) >= hdr->ah_Size)
+  {
+    RequesterF("Close", "Out of Area mem");
+    goto CLEAN_EXIT;
+  }
 
   alloc = (struct ARENA_ALLOC*) (hdr->ah_Base + hdr->ah_Used);
   alloc->aa_Class = class;
@@ -158,7 +176,11 @@ EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class)
 
   hdr->ah_Used += size + sizeof(struct ARENA_ALLOC);
 
-  return (APTR) (alloc + 1);
+  result = (APTR) (&alloc[1]);
+
+  CLEAN_EXIT:
+
+  return result;
 }
 
 EXPORT ULONG ObjGetClass(APTR alloc)
