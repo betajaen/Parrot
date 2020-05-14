@@ -2,3 +2,6 @@
 *.o
 DevTools*
 Disk.info
+
+*.LFL
+*.Parrot
