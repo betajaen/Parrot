@@ -53,16 +53,11 @@ struct IntuitionBase* IntuitionBase;
 #define CHAR char
 #endif
 
-STATIC BPTR SrcFile;
 STATIC struct IFFHandle* DstIff;
-STATIC UBYTE RoomNo;
-STATIC UWORD RoomAssetCounter;
-STATIC UWORD RoomWidth, RoomHeight;
-STATIC ULONG RoomBackdropOffset;
-STATIC ULONG RoomMaskOffset;
-STATIC ULONG RoomNumObjs;
+STATIC UBYTE  ArchiveId;
 STATIC UBYTE* SrcFileData;
 STATIC UBYTE* SrcFilePos;
+STATIC UBYTE* SrcFileEnd;
 
 ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
 ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
@@ -72,7 +67,7 @@ STATIC VOID MemClear(APTR pMem, ULONG size);
 STATIC VOID OpenParrotIff(UBYTE id);
 STATIC VOID CloseParrotIff();
 STATIC VOID ExportGame();
-STATIC VOID ExportPalette();
+STATIC VOID ExportPalette(UWORD id);
 STATIC VOID ExportRoom();
 STATIC VOID ExportBackdrop();
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h);
@@ -83,9 +78,9 @@ STATIC VOID Chunky2Planar(UBYTE* chunky, UBYTE* planar, UWORD w, UWORD h);
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
-STATIC VOID OpenFile(CONST CHAR* path);
+STATIC ULONG OpenFile(CONST CHAR* path);
 STATIC VOID CloseFile();
-STATIC VOID SeekFile(ULONG pos);
+STATIC BOOL SeekFile(ULONG pos);
 
 INT main()
 {
@@ -95,7 +90,6 @@ INT main()
   struct Message* wbMsg;
   struct CHUNK_GAME_INFO version;
 
-  SrcFile = 0;
   DstIff = NULL;
   rc = RETURN_OK;
 
@@ -139,14 +133,16 @@ INT main()
   ExportPalette(1);
   CloseParrotIff();
 
-  OpenFile("PROGDIR:01.LFL");
+  if (OpenFile("PROGDIR:01.LFL") > 0)
+  {
 
-  OpenParrotIff(1);
-  ExportRoom();
-  ExportBackdrop();
-  CloseParrotIff();
+    OpenParrotIff(1);
+    ExportRoom();
+    ExportBackdrop();
+    CloseParrotIff();
 
-  CloseFile();
+    CloseFile();
+  }
 
 CLEAN_EXIT:
 
@@ -220,11 +216,10 @@ STATIC UWORD ReadUWORDBE()
 {
   UWORD r = 0;
 
-  /* Read(SrcFile, &r, 2); */
   r = SrcFilePos[0] << 8 | SrcFilePos[1];
-  SrcFilePos += 2;
-
   r ^= 0xFFFF;  /* Copy Protection */
+
+  SrcFilePos += 2;
 
   return r;
 }
@@ -233,14 +228,10 @@ STATIC UWORD ReadUWORDLE()
 {
   UWORD r = 0;
 
-  //Read(SrcFile, &r, 2)
-
-  r = SrcFilePos[1] << 8 | SrcFilePos[0];
-  SrcFilePos += 2;
-
-
+  r = SrcFilePos[1] << 8 | SrcFilePos[0]; /* Little Endian to Big Endian */
   r ^= 0xFFFF;  /* Copy Protection */
-  // r = ( (r >> 8) | (r << 8) ) & 0xFFFF; /* Little Endian to Big Endian */
+
+  SrcFilePos += 2;
 
   return r;
 }
@@ -249,13 +240,11 @@ STATIC UBYTE ReadUBYTE()
 {
   UBYTE r = 0;
 
-  // Read(SrcFile, &r, 1);
-
   r = SrcFilePos[0];
+  r ^= 0xFF;  /* Copy Protection */
+
   SrcFilePos += 1;
 
-  r ^= 0xFF;  /* Copy Protection */
-  
   return r;
 }
 
@@ -263,13 +252,7 @@ STATIC VOID OpenParrotIff(UBYTE id)
 {
   CHAR filename[26];
 
-  RoomNo = id;
-  RoomAssetCounter = 1;
-  RoomWidth = 0;
-  RoomHeight = 0;
-  RoomBackdropOffset = 0;
-  RoomMaskOffset = 0;
-  RoomNumObjs = 0;
+  ArchiveId = id;
 
   StrFormat(filename, sizeof(filename), "PROGDIR:%ld.Parrot", (ULONG)id);
   
@@ -302,7 +285,7 @@ STATIC VOID ExportPalette(UWORD id)
 
   palette.Header.Schema = CHUNK_COLOUR_PALETTE_SCHEMA;
   palette.Header.MinVersion = CHUNK_COLOUR_PALETTE_MIN_VERSION;
-  palette.Header.Id = MAKE_ASSET_ID(RoomNo, ASSET_TYPE_COLOUR_PALETTE, id);
+  palette.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_COLOUR_PALETTE, id);
   
   palette.NumColours = 16;
   
@@ -418,23 +401,23 @@ STATIC VOID ExportGame()
 STATIC VOID ExportBackdrop()
 {
   struct CHUNK_BACKDROP backdrop;
-  ULONG  chunkySize, planarSize, p;
+  ULONG  chunkySize, planarSize, p, imgOffset;
   UBYTE* chunky, * planar;
-  UWORD  x, y;
+  UWORD  x, y, w, h;
   UBYTE  r, col, len, ii;
 
   MemClear(&backdrop, sizeof(struct CHUNK_BACKDROP));
 
   SeekFile(4);
-  RoomWidth = ReadUWORDLE();
-  RoomHeight = ReadUWORDLE();
+  w = ReadUWORDLE();
+  h = ReadUWORDLE();
 
   SeekFile(10);
-  RoomBackdropOffset = ReadUWORDLE();
+  imgOffset = ReadUWORDLE();
 
   x = 0;
   y = 0;
-  chunkySize = RoomWidth * RoomHeight;
+  chunkySize = w * h;
   planarSize = chunkySize / 2;
 
   chunky = AllocVec(chunkySize, MEMF_CLEAR);
@@ -442,16 +425,16 @@ STATIC VOID ExportBackdrop()
 
   backdrop.Header.Schema = CHUNK_BACKDROP_SCHEMA;
   backdrop.Header.MinVersion = CHUNK_BACKDROP_MIN_VERSION;
-  backdrop.Header.Id = MAKE_ASSET_ID(RoomNo, ASSET_TYPE_BACKDROP, 1);
+  backdrop.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_BACKDROP, 1);
 
-  backdrop.Width = RoomWidth;
-  backdrop.Height = RoomHeight;
+  backdrop.Width = w;
+  backdrop.Height = h;
   backdrop.PaletteId = MAKE_ASSET_ID(0, ASSET_TYPE_COLOUR_PALETTE, 1);
 
   PushChunk(DstIff, ID_SQWK, CHUNK_BACKDROP_ID, IFFSIZE_UNKNOWN);
   WriteChunkBytes(DstIff, &backdrop, sizeof(struct CHUNK_BACKDROP));
-  SeekFile(RoomBackdropOffset);
-  ReadImageData(chunky, RoomWidth, RoomHeight);
+  SeekFile(imgOffset);
+  ReadImageData(chunky, w, h);
   WriteChunkBytes(DstIff, chunky, chunkySize);
   PopChunk(DstIff);
 
@@ -466,18 +449,15 @@ STATIC VOID ExportRoom()
   struct CHUNK_ROOM room;
 
   MemClear(&room, sizeof(struct CHUNK_ROOM));
-
-  SeekFile(4);
-  RoomWidth = ReadUWORDLE();
-  RoomHeight = ReadUWORDLE();
   
   room.Header.Schema = CHUNK_ROOM_SCHEMA;
   room.Header.MinVersion = CHUNK_ROOM_MIN_VERSION;
   room.Header.Id = CHUNK_ROOM_ID;
 
-  room.Width = RoomWidth;
-  room.Height = RoomHeight;
-  room.Backdrops[0] = MAKE_ASSET_ID(RoomNo, ASSET_TYPE_BACKDROP, 1);
+  SeekFile(4);
+  room.Width = ReadUWORDLE();
+  room.Height = ReadUWORDLE();
+  room.Backdrops[0] = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_BACKDROP, 1);
 
   PushChunk(DstIff, ID_SQWK, CHUNK_ROOM_ID, sizeof(struct CHUNK_ROOM));
   WriteChunkBytes(DstIff, &room, sizeof(struct CHUNK_ROOM));
@@ -489,7 +469,7 @@ STATIC VOID ExportRoom()
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
 {
   UWORD x, y;
-  UBYTE r, len, col, ii;
+  UBYTE r, len, col;
   ULONG offset;
 
   x = 0;
@@ -511,9 +491,8 @@ STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
         len = ReadUBYTE();
       }
 
-      for(ii=0;ii < len;ii++)
+      while(len--)
       {
-        //offset = x + (y * w);
         tgt[offset] = col;
         y++;
         offset += w;
@@ -535,11 +514,9 @@ STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
         len = ReadUBYTE();
       }
 
-      for (ii = 0; ii < len; ii++)
+      while (len--)
       {
-        //offset = (x-1) + (y * w);
         col = tgt[offset - 1];
-        //offset = (x) + (y * w);
         tgt[offset] = col;
         offset += w;
         y++;
@@ -569,27 +546,34 @@ STATIC VOID MemClear(APTR pMem, ULONG size)
   }
 }
 
-STATIC VOID OpenFile(CONST CHAR* path)
+STATIC ULONG OpenFile(CONST CHAR* path)
 {
   ULONG len;
+  BPTR  file;
 
-  SrcFile = Open(path, MODE_OLDFILE);
-  Seek(SrcFile, 0, OFFSET_END);
-  len = Seek(SrcFile, 0, OFFSET_BEGINING);
+  file = Open(path, MODE_OLDFILE);
+
+  if (NULL == file)
+  {
+    return 0ul;
+  }
+
+  Seek(file, 0, OFFSET_END);
+  len = Seek(file, 0, OFFSET_BEGINING);
 
   SrcFileData = AllocVec(len, 0);
   SrcFilePos = SrcFileData;
+  SrcFileEnd = SrcFileData + len;
 
-  Read(SrcFile, SrcFileData, len);
+  Read(file, SrcFileData, len);
+
+  Close(file);
+
+  return len;
 }
 
 STATIC VOID CloseFile()
 {
-  if (NULL != SrcFile)
-  {
-    Close(SrcFile);
-  }
-
   if (NULL != SrcFileData)
   {
     FreeVec(SrcFileData);
@@ -598,7 +582,18 @@ STATIC VOID CloseFile()
 }
 
 
-STATIC VOID SeekFile(ULONG pos)
+STATIC BOOL SeekFile(ULONG pos)
 {
-  SrcFilePos = SrcFileData + pos;
+  UBYTE* nextPos;
+
+  nextPos = SrcFileData + pos;
+
+  if (nextPos < SrcFileEnd)
+  {
+    SrcFilePos = nextPos;
+
+    return TRUE;
+  }
+
+  return FALSE;
 }
