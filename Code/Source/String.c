@@ -97,3 +97,51 @@ ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...)
   return 0; /* Unimplemented */
 #endif
 }
+
+ULONG StrLen(CONST CHAR* pSrc)
+{
+  ULONG ii;
+  
+  ii = 0;
+
+  if (NULL == pSrc)
+  {
+    goto CLEAN_EXIT;
+  }
+
+  while (*pSrc++ != '\0')
+  {
+    ii++;
+  }
+
+CLEAN_EXIT:
+  return ii;
+}
+
+ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc)
+{
+  ULONG copyLen;
+  
+  copyLen = 0;
+
+  if (NULL == pDst || NULL == pSrc || 0 == pDstCapacity)
+  {
+    goto CLEAN_EXIT;
+  }
+
+  copyLen = StrLen(pSrc);
+  
+  if ((copyLen + 1) > pDstCapacity)
+  {
+    copyLen = 0;
+    pDst[0] = '\0';
+    goto CLEAN_EXIT;
+  }
+
+  CopyMem(pSrc, pDst, copyLen);
+  pDst[copyLen] = '\0';
+
+  CLEAN_EXIT:
+  
+  return copyLen;
+}
