@@ -36,10 +36,13 @@
 
 #define MAKE_ASSET_ID(ROOM, TYPE, ID) ( ((128+TYPE) << 24) | (ROOM << 16) | (ID & 0xFFff) )
 
-#define ASSET_TYPE_GAME_INFO            1
-#define ASSET_TYPE_ROOM_BACKDROP        2
-#define ASSET_TYPE_ROOM_COLOUR_PALETTE  3
-#define ASSET_TYPE_IMAGE_DATA           4
+#define ASSET_TYPE_GAME       1
+#define ASSET_TYPE_ROOM       2
+#define ASSET_TYPE_MAP        3
+#define ASSET_TYPE_MENU       4
+
+#define ASSET_TYPE_BACKDROP        5
+#define ASSET_TYPE_COLOUR_PALETTE  6
 
 struct CHUNK_HEADER
 {
@@ -102,6 +105,23 @@ struct CHUNK_COLOUR_PALETTE
 
   UBYTE NumColours;
   UBYTE Palette[256 * 3];
+};
+
+/*
+    Room Info
+*/
+
+#define CHUNK_ROOM_ID             MAKE_ID('R','O','O','M')
+#define CHUNK_ROOM_SCHEMA         0x0100
+#define CHUNK_ROOM_MIN_VERSION    0x0100
+
+struct CHUNK_ROOM
+{
+  struct CHUNK_HEADER Header;
+
+  UWORD Width;
+  UWORD Height;
+  ULONG Backdrops[4];
 };
 
 #endif
