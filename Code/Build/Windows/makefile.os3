@@ -29,14 +29,14 @@
 
 CC      = vc
 CPU     = 68020
-CFLAGS  = -lamiga -nostdlib -IInclude
+CFLAGS  = -lamiga -nostdlib -IInclude -O2
 
 # PARROT
 
 PARROT_OBJ = main.o
 PARROT_LIB_OBJ = lib.o mem.o string.o requester.o screen.o game.o arena.o room.o
 GAME_MANIAC_OBJ = maniac_lib.o maniac_main.o
-CONVERTER_MANIAC_OBJ = maniac_conv_main.o
+CONVERTER_MANIAC_OBJ = maniac_conv_main.o string.o
 
 parrot: $(PARROT_OBJ) $(PARROT_LIB_OBJ) $(GAME_MANIAC_OBJ) $(CONVERTER_MANIAC_OBJ)
 	$(CC) $(CFLAGS) $(PARROT_OBJ) -o ../Parrot/Parrot

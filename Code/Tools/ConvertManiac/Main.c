@@ -62,11 +62,21 @@ STATIC ULONG RoomBackdropOffset;
 STATIC ULONG RoomMaskOffset;
 STATIC ULONG RoomNumObjs;
 
+ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
+ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
+
+STATIC VOID MemClear(APTR pMem, ULONG size);
+
+STATIC VOID OpenParrotIff(UBYTE id);
+STATIC VOID CloseParrotIff();
+STATIC VOID ExportGameInfo();
+STATIC VOID ExportPalette();
 STATIC VOID DecodeRoomData();
-STATIC VOID DecodeRoomBackground();
+STATIC VOID ExportBackdrop();
 STATIC UWORD ReadUWORDBE();
 STATIC UWORD ReadUWORDLE();
 STATIC UBYTE ReadUBYTE();
+STATIC VOID Chunky2Planar(UBYTE* chunky, UBYTE* planar, UWORD w, UWORD h);
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
@@ -76,7 +86,7 @@ INT main()
 
   struct Process* process;
   struct Message* wbMsg;
-  struct CHUNK_VERSION version;
+  struct CHUNK_GAME_INFO version;
 
   SrcFile = 0;
   DstIff = NULL;
@@ -89,7 +99,7 @@ INT main()
   if (process->pr_CLI != NULL)
   {
     DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 0);
-    Write(Output(), "Maniac Game can only be launched from Workbench\n", 44);
+    Write(Output(), "Maniac Mansion Converter can only be launched from Workbench\n", 44);
     goto CLEAN_EXIT;
   }
 
@@ -118,37 +128,23 @@ INT main()
   }
 
   SrcFile = Open("PROGDIR:01.LFL", MODE_OLDFILE);
-  
-  RoomNo = 1;
-  RoomAssetCounter = 1;
-  RoomWidth = 0;
-  RoomHeight = 0;
-  RoomBackdropOffset = 0;
-  RoomMaskOffset = 0;
-  RoomNumObjs = 0;
+
 
   if (0 == SrcFile)
   {
     goto CLEAN_EXIT;
   }
 
-  DstIff = AllocIFF();
-  DstIff->iff_Stream = Open("PROGDIR:01.Parrot", MODE_NEWFILE);
-  
-  InitIFFasDOS(DstIff);
-  OpenIFF(DstIff, IFFF_WRITE);
-  
-  PushChunk(DstIff, ID_MNIC, ID_FORM, IFFSIZE_UNKNOWN);
+  OpenParrotIff(0);
+  ExportGameInfo();
+  ExportPalette(1);
+  CloseParrotIff();
 
-  version.GameId = ID_MNIC;
-  version.ParrotVersionMajor = 1;
-  version.ParrotVersionMinor = 0;
+  SrcFile = Open("PROGDIR:01.LFL", MODE_OLDFILE);
 
-  PushChunk(DstIff, ID_MNIC, CHUNK_VERSION_ID, sizeof(struct CHUNK_VERSION));
-  WriteChunkBytes(DstIff, &version, sizeof(struct CHUNK_VERSION));
-  PopChunk(DstIff);
-
-  DecodeRoomBackground();
+  OpenParrotIff(1);
+  ExportBackdrop();
+  CloseParrotIff();
 
 CLEAN_EXIT:
 
@@ -158,15 +154,7 @@ CLEAN_EXIT:
     SrcFile = 0;
   }
 
-  if (NULL != DstIff)
-  {
-    PopChunk(DstIff); /* ID_FORM */
-
-    CloseIFF(DstIff);
-    Close(DstIff->iff_Stream);
-    FreeIFF(DstIff);
-    DstIff = NULL;
-  }
+  CloseParrotIff();
 
   if (NULL != IFFParseBase)
   {
@@ -229,104 +217,10 @@ STATIC LONG DebugF(CONST_STRPTR pFmt, ...)
 
 }
 
-STATIC VOID DecodeRoomBackground()
+STATIC VOID Chunky2Planar(UBYTE* chunky, UBYTE* planar, UWORD w, UWORD h)
 {
-  struct CHUNK_BACKDROP backdrop;
-  ULONG  size, p;
-  UBYTE* dst;
-  UWORD  x, y;
-  UBYTE  r, col, len, ii;
-
-  Seek(SrcFile, 4, OFFSET_BEGINNING);
-  RoomWidth = ReadUWORDLE();
-  RoomHeight = ReadUWORDLE();
-
-  Seek(SrcFile, 10, OFFSET_BEGINNING);
-  RoomBackdropOffset = ReadUWORDLE();
-  
-  x = 0;
-  y = 0;
-  size = RoomWidth * RoomHeight;
-  dst = AllocVec(size, MEMF_CLEAR);
-
-  backdrop.Width = RoomWidth;
-  backdrop.Height = RoomHeight;
-  backdrop.Format = IMAGE_FORMAT_PALETTE;
-  backdrop.Compression = IMAGE_COMPRESSION_NONE;
-  backdrop.PaletteAssetId = MAKE_ASSET_ID(ASSET_TYPE_ROOM_PALETTE, 0, 1);
-  backdrop.ImageAssetId = MAKE_ASSET_ID(ASSET_TYPE_ROOM_BACKDROP, 0, RoomAssetCounter);
-  RoomAssetCounter++;
-  
-  PushChunk(DstIff, ID_MNIC, CHUNK_BACKDROP_ID, sizeof(struct CHUNK_BACKDROP));
-  WriteChunkBytes(DstIff, &backdrop, sizeof(struct CHUNK_BACKDROP));
-  PopChunk(DstIff);
-
-  Seek(SrcFile, RoomBackdropOffset, OFFSET_BEGINNING);
-  while (x < RoomWidth)
-  {
-    r = ReadUBYTE();
-
-    if (r < 0x80)
-    {
-      len = (r >> 4) & 0xF;
-      col = r & 0xF;
-
-      if (0 == len)
-      {
-        len = ReadUBYTE();
-      }
-
-
-      for (ii = 0; ii < len; ii++)
-      {
-        p = x + (y * RoomWidth);
-        dst[p] = col;
-        y++;
-        if (y >= RoomHeight)
-        {
-          y = 0;
-          x++;
-        }
-      }
-
-    }
-    else
-    {
-      len = r & 0x7F;
-
-      if (0 == len)
-      {
-        len = ReadUBYTE();
-      }
-
-      for (ii = 0; ii < len; ii++)
-      {
-        p = x - 1 + (y * RoomWidth);
-        col = dst[p];
-        p = x + (y * RoomWidth);
-        dst[p] = col;
-        y++;
-        if (y >= RoomHeight)
-        {
-          y = 0;
-          x++;
-        }
-      }
-    }
-
-  }
-  
-
-  DebugF("Converted = %ld", Seek(SrcFile, 0, OFFSET_CURRENT));
-
-
-  PushChunk(DstIff, ID_MNIC, MAKE_ID('X', 'X', 'X', 'X'), size);  /* backdrop.ImageAssetId, size); */
-  WriteChunkBytes(DstIff, dst, size);
-  PopChunk(DstIff);
-
-
-  FreeVec(dst);
 }
+
 
 STATIC UWORD ReadUWORDBE()
 {
@@ -361,3 +255,273 @@ STATIC UBYTE ReadUBYTE()
   
   return r;
 }
+
+STATIC VOID OpenParrotIff(UBYTE id)
+{
+  CHAR filename[26];
+
+  RoomNo = id;
+  RoomAssetCounter = 1;
+  RoomWidth = 0;
+  RoomHeight = 0;
+  RoomBackdropOffset = 0;
+  RoomMaskOffset = 0;
+  RoomNumObjs = 0;
+
+  StrFormat(filename, sizeof(filename), "PROGDIR:%ld.Parrot", (ULONG)id);
+  
+  DstIff = AllocIFF();
+  DstIff->iff_Stream = Open(filename, MODE_NEWFILE);
+
+  InitIFFasDOS(DstIff);
+  OpenIFF(DstIff, IFFF_WRITE);
+
+  PushChunk(DstIff, ID_SQWK, ID_FORM, IFFSIZE_UNKNOWN);
+
+}
+
+STATIC VOID CloseParrotIff()
+{
+  if (NULL != DstIff)
+  {
+    PopChunk(DstIff); /* ID_FORM */
+
+    CloseIFF(DstIff);
+    Close(DstIff->iff_Stream);
+    FreeIFF(DstIff);
+    DstIff = NULL;
+  }
+}
+
+STATIC VOID ExportPalette(UWORD id)
+{
+  struct CHUNK_COLOUR_PALETTE palette;
+
+  palette.Header.Schema = CHUNK_COLOUR_PALETTE_SCHEMA;
+  palette.Header.MinVersion = CHUNK_COLOUR_PALETTE_MIN_VERSION;
+  palette.Header.Id = MAKE_ASSET_ID(RoomNo, ASSET_TYPE_ROOM_COLOUR_PALETTE, id);
+  
+  palette.NumColours = 16;
+  
+  /* Black */
+  palette.Palette[0] = 0x00;
+  palette.Palette[1] = 0x00;
+  palette.Palette[2] = 0x00;
+
+  /* Blue */
+  palette.Palette[3] = 0x00;
+  palette.Palette[4] = 0x00;
+  palette.Palette[5] = 0xAA;
+
+  /* Green */
+  palette.Palette[6] = 0x00;
+  palette.Palette[7] = 0xAA;
+  palette.Palette[8] = 0x00;
+
+  /* Cyan */
+  palette.Palette[9] = 0x00;
+  palette.Palette[10] = 0xAA;
+  palette.Palette[11] = 0xAA;
+
+  /* Red */
+  palette.Palette[12] = 0xAA;
+  palette.Palette[13] = 0x00;
+  palette.Palette[14] = 0x00;
+
+  /* Magenta */
+  palette.Palette[15] = 0xAA;
+  palette.Palette[16] = 0x00;
+  palette.Palette[17] = 0xAA;
+
+  /* Brown */
+  palette.Palette[18] = 0xAA;
+  palette.Palette[19] = 0x55;
+  palette.Palette[20] = 0x00;
+
+  /* Light Gray */
+  palette.Palette[21] = 0xAA;
+  palette.Palette[22] = 0xAA;
+  palette.Palette[23] = 0xAA;
+
+  /* Dark Gray */
+  palette.Palette[24] = 0x55;
+  palette.Palette[25] = 0x55;
+  palette.Palette[26] = 0x55;
+
+  /* Bright Blue */
+  palette.Palette[27] = 0x55;
+  palette.Palette[28] = 0x55;
+  palette.Palette[29] = 0xFF;
+
+  /* Bright Green */
+  palette.Palette[30] = 0x55;
+  palette.Palette[31] = 0xFF;
+  palette.Palette[32] = 0x55;
+  
+  /* Bright Cyan */
+  palette.Palette[33] = 0x55;
+  palette.Palette[34] = 0xFF;
+  palette.Palette[35] = 0xFF;
+
+  /* Bright Red */
+  palette.Palette[36] = 0xFF;
+  palette.Palette[37] = 0x55;
+  palette.Palette[38] = 0x55;
+
+  /* Bright Magenta */
+  palette.Palette[39] = 0xFF;
+  palette.Palette[40] = 0x55;
+  palette.Palette[41] = 0xFF;
+
+  /* Bright Yellow */
+  palette.Palette[42] = 0xFF;
+  palette.Palette[43] = 0xFF;
+  palette.Palette[44] = 0x55;
+
+  /* Bright White */
+  palette.Palette[45] = 0xFF;
+  palette.Palette[46] = 0xFF;
+  palette.Palette[47] = 0xFF;
+
+  PushChunk(DstIff, ID_SQWK, CHUNK_COLOUR_PALETTE_ID, sizeof(struct CHUNK_HEADER) + sizeof(UBYTE) + 48);  /* backdrop.ImageAssetId, size); */
+  WriteChunkBytes(DstIff, &palette, sizeof(struct CHUNK_HEADER) + sizeof(UBYTE) + 48);
+  PopChunk(DstIff);
+}
+
+STATIC VOID ExportGameInfo()
+{
+  struct CHUNK_GAME_INFO info;
+  MemClear(&info, sizeof(struct CHUNK_GAME_INFO));
+
+  info.Header.Schema = CHUNK_GAME_INFO_SCHEMA_VERSION;
+  info.Header.MinVersion = CHUNK_GAME_INFO_MIN_VERSION;
+  info.Header.Id = MAKE_ASSET_ID(0, ASSET_TYPE_GAME_INFO, 1);
+
+  StrCopy(&info.Title[0], sizeof(info.Title), "Maniac Mansion");
+  StrCopy(&info.ShortTitle[0], sizeof(info.ShortTitle), "Maniac");
+  StrCopy(&info.Author[0], sizeof(info.Author), "Lucasfilm Games LLC");
+  StrCopy(&info.Release[0], sizeof(info.Release), "Commodore Amiga");
+
+  info.Width = 320;
+  info.Height = 200;
+  info.Depth = 4;
+
+  PushChunk(DstIff, ID_SQWK, CHUNK_GAME_INFO_ID, sizeof(struct CHUNK_GAME_INFO));
+  WriteChunkBytes(DstIff, &info, sizeof(struct CHUNK_GAME_INFO));
+  PopChunk(DstIff);
+
+}
+
+STATIC VOID ExportBackdrop()
+{
+  struct CHUNK_BACKDROP backdrop;
+  ULONG  chunkySize, planarSize, p;
+  UBYTE* chunky, * planar;
+  UWORD  x, y;
+  UBYTE  r, col, len, ii;
+
+  Seek(SrcFile, 4, OFFSET_BEGINNING);
+  RoomWidth = ReadUWORDLE();
+  RoomHeight = ReadUWORDLE();
+
+  Seek(SrcFile, 10, OFFSET_BEGINNING);
+  RoomBackdropOffset = ReadUWORDLE();
+
+  x = 0;
+  y = 0;
+  chunkySize = RoomWidth * RoomHeight;
+  planarSize = chunkySize / 2;
+
+  chunky = AllocVec(chunkySize, MEMF_CLEAR);
+  planar = AllocVec(planarSize, MEMF_CLEAR);
+
+  backdrop.Header.Schema = CHUNK_BACKDROP_SCHEMA;
+  backdrop.Header.MinVersion = CHUNK_BACKDROP_MIN_VERSION;
+  backdrop.Header.Id = MAKE_ASSET_ID(RoomNo, ASSET_TYPE_ROOM_BACKDROP, 1);
+
+  backdrop.Width = RoomWidth;
+  backdrop.Height = RoomHeight;
+  backdrop.PaletteId = MAKE_ASSET_ID(0, ASSET_TYPE_ROOM_COLOUR_PALETTE, 1);
+
+  PushChunk(DstIff, ID_SQWK, CHUNK_BACKDROP_ID, IFFSIZE_UNKNOWN);
+
+  WriteChunkBytes(DstIff, &backdrop, sizeof(struct CHUNK_BACKDROP));
+
+  Seek(SrcFile, RoomBackdropOffset, OFFSET_BEGINNING);
+
+  while (x < RoomWidth)
+  {
+    r = ReadUBYTE();
+
+    if (r < 0x80)
+    {
+      len = (r >> 4) & 0xF;
+      col = r & 0xF;
+
+      if (0 == len)
+      {
+        len = ReadUBYTE();
+      }
+
+
+      for (ii = 0; ii < len; ii++)
+      {
+        p = x + (y * RoomWidth);
+        chunky[p] = col;
+        y++;
+        if (y >= RoomHeight)
+        {
+          y = 0;
+          x++;
+        }
+      }
+
+    }
+    else
+    {
+      len = r & 0x7F;
+
+      if (0 == len)
+      {
+        len = ReadUBYTE();
+      }
+
+      for (ii = 0; ii < len; ii++)
+      {
+        p = x - 1 + (y * RoomWidth);
+        col = chunky[p];
+        p = x + (y * RoomWidth);
+        chunky[p] = col;
+        y++;
+        if (y >= RoomHeight)
+        {
+          y = 0;
+          x++;
+        }
+      }
+    }
+
+  }
+
+  WriteChunkBytes(DstIff, planar, planarSize);
+
+  PopChunk(DstIff);
+
+
+  FreeVec(chunky);
+  FreeVec(planar);
+}
+
+STATIC VOID MemClear(APTR pMem, ULONG size)
+{
+  ULONG ii;
+  UBYTE* m;
+
+  m = (UBYTE*)pMem;
+
+  for (ii = 0; ii < size; ii++)
+  {
+    m[ii] = 0;
+  }
+}
+

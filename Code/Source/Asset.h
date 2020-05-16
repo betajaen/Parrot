@@ -29,45 +29,79 @@
 #define PARROT_IFF_H
 
 #include <exec/types.h>
+#include "Common.h"
 
-#define ID_MNIC MAKE_ID('M','N','I','C')
+#define ID_SQWK MAKE_ID('S','Q','W','K')
+#define ID_MNIC MAKE_ID('M','N','C','M')
 
-#define MAKE_ASSET_ID(ROOM, TYPE, ID) ( ((128+TYPE) << 24) | (ROOM << 24) | (ID & 0xFFff) )
+#define MAKE_ASSET_ID(ROOM, TYPE, ID) ( ((128+TYPE) << 24) | (ROOM << 16) | (ID & 0xFFff) )
 
-#define ASSET_TYPE_ROOM_BACKDROP 1
-#define ASSET_TYPE_ROOM_PALETTE  2
+#define ASSET_TYPE_GAME_INFO            1
+#define ASSET_TYPE_ROOM_BACKDROP        2
+#define ASSET_TYPE_ROOM_COLOUR_PALETTE  3
+#define ASSET_TYPE_IMAGE_DATA           4
+
+struct CHUNK_HEADER
+{
+  UWORD Schema;
+  UWORD MinVersion;
+  ULONG Id;
+};
 
 /* 
-    Version
+    Game Info
 */
 
-#define CHUNK_VERSION_ID MAKE_ID('V','E','R','S')
+#define CHUNK_GAME_INFO_ID MAKE_ID('G','A','M','E')
+#define CHUNK_GAME_INFO_SCHEMA_VERSION 0x0100
+#define CHUNK_GAME_INFO_MIN_VERSION    0x0100
 
-struct CHUNK_VERSION
+struct CHUNK_GAME_INFO
 {
+  struct CHUNK_HEADER Header;
+
   ULONG GameId;
-  UWORD ParrotVersionMajor;
-  UWORD ParrotVersionMinor;
+  ULONG GameVersion;
+  CHAR  Title[64];
+  CHAR  ShortTitle[16];
+  CHAR  Author[128];
+  CHAR  Release[128];
+  UWORD Width;
+  UWORD Height;
+  UWORD Depth;
 };
 
 /*
     Backdrop
 */
 
-#define CHUNK_BACKDROP_ID MAKE_ID('I','M','G','E')
+#define CHUNK_BACKDROP_ID MAKE_ID('B','K','D','P')
+#define CHUNK_BACKDROP_SCHEMA 0x0100
+#define CHUNK_BACKDROP_MIN_VERSION    0x0100
 
 struct CHUNK_BACKDROP
 {
+  struct CHUNK_HEADER Header;
+
   UWORD Width;
   UWORD Height;
-  UWORD Format;
-  UWORD Compression;
-  ULONG PaletteAssetId;
-  ULONG ImageAssetId;
+  ULONG PaletteId;
 };
 
-#define IMAGE_FORMAT_PALETTE 1
+/*
+    Colour Palette
+*/
 
-#define IMAGE_COMPRESSION_NONE 0
+#define CHUNK_COLOUR_PALETTE_ID  MAKE_ID('C','P','A','L')
+#define CHUNK_COLOUR_PALETTE_SCHEMA 0x0100
+#define CHUNK_COLOUR_PALETTE_MIN_VERSION    0x0100
+
+struct CHUNK_COLOUR_PALETTE
+{
+  struct CHUNK_HEADER Header;
+
+  UBYTE NumColours;
+  UBYTE Palette[256 * 3];
+};
 
 #endif
