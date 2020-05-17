@@ -71,10 +71,10 @@ STATIC VOID ExportPalette(UWORD id);
 STATIC VOID ExportRoom();
 STATIC VOID ExportBackdrop();
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h);
+STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UBYTE* dst, UWORD w, UWORD h);
 STATIC UWORD ReadUWORDBE();
 STATIC UWORD ReadUWORDLE();
 STATIC UBYTE ReadUBYTE();
-STATIC VOID Chunky2Planar(UBYTE* chunky, UBYTE* planar, UWORD w, UWORD h);
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
@@ -205,10 +205,6 @@ STATIC LONG DebugF(CONST_STRPTR pFmt, ...)
 
   EasyRequest(NULL, &EasyRequesterStruct, NULL);
 
-}
-
-STATIC VOID Chunky2Planar(UBYTE* chunky, UBYTE* planar, UWORD w, UWORD h)
-{
 }
 
 
@@ -435,7 +431,8 @@ STATIC VOID ExportBackdrop()
   WriteChunkBytes(DstIff, &backdrop, sizeof(struct CHUNK_BACKDROP));
   SeekFile(imgOffset);
   ReadImageData(chunky, w, h);
-  WriteChunkBytes(DstIff, chunky, chunkySize);
+  ConvertImageDataToPlanar(chunky, planar, w, h);
+  WriteChunkBytes(DstIff, planar, planarSize);
   PopChunk(DstIff);
 
 
@@ -532,6 +529,40 @@ STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
   }
 }
 
+STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UBYTE* dst, UWORD w, UWORD h)
+{
+  ULONG idx;
+  UBYTE bp, shift;
+  UWORD y, x, i;
+
+  idx = 0;
+
+  for (y = 0; y < h; y++)
+  {
+    for (bp = 0; bp < 4; bp++)
+    {
+      UBYTE shift = 1 << bp;
+
+      for (x = 0; x < w; x += 8)
+      {
+        UBYTE byte = 0;
+
+        for (i = 0; i < 8; i++)
+        {
+          UBYTE col = src[idx + x + i];
+          UBYTE bit = (col & shift) != 0 ? 1 : 0;
+
+          if (bit)
+            byte |= (1 << (7 - i));
+        }
+
+        *dst++ = byte;
+      }
+    }
+
+    idx += w;
+  }
+}
 
 STATIC VOID MemClear(APTR pMem, ULONG size)
 {

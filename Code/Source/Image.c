@@ -29,58 +29,20 @@
 
 #include <proto/exec.h>
 
-#define ROOM_MAGIC 0x524F4F4Dul
+#define IMAGE_MAGIC 0x0bac4b20ul
 
 APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
 struct ASSET* LoadAsset(APTR arena, ULONG id);
 void UnloadAsset(APTR arena, struct ASSET* asset);
 
-EXPORT struct ASSET* LoadRoom(APTR arena, ULONG id)
+EXPORT struct ASSET* LoadImage(APTR arena, ULONG id)
 {
-  struct ROOM* room;
+  struct IMAGE* image;
 
-  room = ObjAlloc(arena, sizeof(struct ROOM), ROOM_MAGIC);
-
-  return (struct ASSET*) room;
-}
+  image = ObjAlloc(arena, sizeof(struct IMAGE), IMAGE_MAGIC);
 
 
-EXPORT VOID UnpackRoom(APTR arena, struct ROOM* room, ULONG unpack)
-{
-  UBYTE ii;
-  struct IMAGE_REF* backdrop;
 
-  if ((unpack & UNPACK_ROOM_BACKDROPS) != 0)
-  {
-    for (ii = 0; ii < 4; ii++)
-    {
-      backdrop = &room->rm_Backdrops[ii];
-
-      if (0 != backdrop->ar_Id && NULL == backdrop->ar_Ptr)
-      {
-        backdrop->ar_Ptr = (struct IMAGE*) LoadAsset(arena, backdrop->ar_Id);
-      }
-    }
-  }
-}
-
-EXPORT VOID PackRoom(APTR arena, struct ROOM* room, ULONG pack)
-{
-  UBYTE ii;
-  struct IMAGE_REF* backdrop;
-
-  if ((pack & UNPACK_ROOM_BACKDROPS) != 0)
-  {
-    for (ii = 0; ii < 4; ii++)
-    {
-      backdrop = &room->rm_Backdrops[ii];
-
-      if (0 != backdrop->ar_Id && NULL != backdrop->ar_Ptr)
-      {
-        UnloadAsset(arena, (struct ASSET*) backdrop->ar_Ptr);
-        backdrop->ar_Ptr = NULL;
-      }
-    }
-  }
+  return (struct ASSET*) image;
 }

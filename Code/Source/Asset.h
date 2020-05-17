@@ -1,5 +1,5 @@
 /**
-    $Id: Iff.h, 1.0, 2020/05/13 19:11:00, betajaen Exp $
+    $Id: Asset.h, 1.0, 2020/05/13 19:11:00, betajaen Exp $
 
     Game Converter for Parrot
     =========================
@@ -25,8 +25,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PARROT_IFF_H
-#define PARROT_IFF_H
+#ifndef PARROT_ASSET_H
+#define PARROT_ASSET_H
 
 #include <exec/types.h>
 #include "Common.h"

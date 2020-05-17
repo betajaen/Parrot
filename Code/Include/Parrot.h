@@ -117,10 +117,52 @@ struct SCREEN_INFO
 #define CURSOR_LOCK   27
 #define CURSOR_UNLOCK 28
 
+struct ASSET
+{
+  struct MinNode    as_Node;
+  ULONG             as_Id;
+};
+
+struct ASSET_REF
+{
+  APTR              ar_Ptr;
+  ULONG             ar_Id;
+};
+
+#define IS_REF_LOADED(REF) (NULL != (REF).ar_Ptr)
+
+struct IMAGE
+{
+  struct ASSET      as_Asset;
+
+  UWORD             im_Width;
+  UWORD             im_Height;
+  UBYTE             im_Depth;
+  UBYTE             im_Format;
+  BYTE*             im_Data;
+};
+
+struct IMAGE_REF
+{
+  struct IMAGE*     ar_Ptr;
+  ULONG             ar_Id;
+};
+
 struct ROOM
 {
-  struct Node     rm_Node;
-  ULONG           rm_Id;
+  struct ASSET      as_Asset;
+
+  UWORD             rm_Width;
+  UWORD             rm_Height;
+  struct IMAGE_REF  rm_Backdrops[4];
 };
+
+struct ROOM_REF
+{
+  struct ROOM*      ar_Ptr;
+  ULONG             ar_Id;
+};
+
+#define UNPACK_ROOM_BACKDROPS  1
 
 #endif

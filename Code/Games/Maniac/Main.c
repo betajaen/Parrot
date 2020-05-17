@@ -31,7 +31,6 @@ VOID GameInitialise()
 {
   struct SCREEN_INFO info;
   struct ROOM* testRoom;
-  struct ROOM* testRoom2;
 
 
   THIS_GAME->gb_ArenaGame = ArenaNew(ARENA_GENERIC_SIZE, 0);
@@ -47,12 +46,6 @@ VOID GameInitialise()
 
   THIS_GAME->gb_Screen = ScreenNew(THIS_GAME->gb_ArenaGame, &info);
   NewList(THIS_ROOMS);
-
-  testRoom = RoomNew(THIS_GAME->gb_ArenaChapter);
-  AddTail(THIS_ROOMS, (struct Node*) testRoom);
-
-  testRoom2 = RoomNew(THIS_GAME->gb_ArenaChapter);
-  AddTail(THIS_ROOMS, (struct Node*) testRoom2);
 
   ScreenClear(THIS_SCREEN);
   ScreenSwapBuffers(THIS_SCREEN);

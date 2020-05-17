@@ -1,5 +1,5 @@
 /**
-    $Id: Room.c, 0.1, 2020/05/11 15:49:00, betajaen Exp $
+    $Id: Arena.c, 0.1, 2020/05/11 10:48:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -26,61 +26,57 @@
 */
 
 #include "Common.h"
+#include "Asset.h"
 
 #include <proto/exec.h>
 
-#define ROOM_MAGIC 0x524F4F4Dul
+struct MinList Assets = {
+    NULL,
+    NULL,
+    NULL
+};
 
-APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-struct ASSET* LoadAsset(APTR arena, ULONG id);
-void UnloadAsset(APTR arena, struct ASSET* asset);
+struct ASSET* LoadRoom(APTR arena, ULONG id);
+struct ASSET* LoadImage(APTR arena, ULONG id);
 
-EXPORT struct ASSET* LoadRoom(APTR arena, ULONG id)
+EXPORT struct ASSET* LoadAsset(APTR arena, ULONG id)
 {
-  struct ROOM* room;
+  struct ASSET* asset;
+  UBYTE         type;
 
-  room = ObjAlloc(arena, sizeof(struct ROOM), ROOM_MAGIC);
-
-  return (struct ASSET*) room;
-}
-
-
-EXPORT VOID UnpackRoom(APTR arena, struct ROOM* room, ULONG unpack)
-{
-  UBYTE ii;
-  struct IMAGE_REF* backdrop;
-
-  if ((unpack & UNPACK_ROOM_BACKDROPS) != 0)
+  for (asset = ((struct ASSET*) Assets.mlh_Head);
+       asset != NULL; 
+       asset = ((struct ASSET*)asset->as_Node.mln_Succ))
   {
-    for (ii = 0; ii < 4; ii++)
+    if (asset->as_Id == id)
     {
-      backdrop = &room->rm_Backdrops[ii];
-
-      if (0 != backdrop->ar_Id && NULL == backdrop->ar_Ptr)
-      {
-        backdrop->ar_Ptr = (struct IMAGE*) LoadAsset(arena, backdrop->ar_Id);
-      }
+      return asset;
     }
   }
+
+
+  type = (id >> 24) & 0xFF;
+  type -= 128;
+
+  switch (type)
+  {
+    case ASSET_TYPE_ROOM:
+      asset = LoadRoom(arena, id);
+      AddTail((struct List*) &Assets, (struct Node*) asset);
+    return asset;
+    case ASSET_TYPE_BACKDROP:
+      asset = LoadImage(arena, id);
+      AddTail((struct List*) &Assets, (struct Node*) asset);
+    return asset;
+  }
+
+  RequesterF("OK", "Could not load asset %lx", id);
+
+  return NULL;
 }
 
-EXPORT VOID PackRoom(APTR arena, struct ROOM* room, ULONG pack)
+EXPORT void UnloadAsset(APTR arena, struct ASSET* asset)
 {
-  UBYTE ii;
-  struct IMAGE_REF* backdrop;
-
-  if ((pack & UNPACK_ROOM_BACKDROPS) != 0)
-  {
-    for (ii = 0; ii < 4; ii++)
-    {
-      backdrop = &room->rm_Backdrops[ii];
-
-      if (0 != backdrop->ar_Id && NULL != backdrop->ar_Ptr)
-      {
-        UnloadAsset(arena, (struct ASSET*) backdrop->ar_Ptr);
-        backdrop->ar_Ptr = NULL;
-      }
-    }
-  }
+  
 }

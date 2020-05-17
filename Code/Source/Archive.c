@@ -1,5 +1,5 @@
 /**
-    $Id: Room.c, 0.1, 2020/05/11 15:49:00, betajaen Exp $
+    $Id: Arena.c, 0.1, 2020/05/11 10:48:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -26,61 +26,57 @@
 */
 
 #include "Common.h"
+#include "Asset.h"
 
 #include <proto/exec.h>
+#include <proto/dos.h>
 
-#define ROOM_MAGIC 0x524F4F4Dul
+struct List OpenArchives = {
+    NULL,
+    NULL,
+    NULL,
+    NT_USER - 1,
+    0,
+};
 
-APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-struct ASSET* LoadAsset(APTR arena, ULONG id);
-void UnloadAsset(APTR arena, struct ASSET* asset);
-
-EXPORT struct ASSET* LoadRoom(APTR arena, ULONG id)
+struct PARROT_ARCHIVE
 {
-  struct ROOM* room;
+  struct Node       pa_Node;
+  BPTR              pa_File;
+  struct IFFHandle* pa_Handle;
+  ULONG             pa_Usage;
+  UWORD             pa_Id;
+};
 
-  room = ObjAlloc(arena, sizeof(struct ROOM), ROOM_MAGIC);
-
-  return (struct ASSET*) room;
-}
-
-
-EXPORT VOID UnpackRoom(APTR arena, struct ROOM* room, ULONG unpack)
+EXPORT APTR OpenArchive(UBYTE id)
 {
-  UBYTE ii;
-  struct IMAGE_REF* backdrop;
+  struct PARROT_ARCHIVE* archive;
 
-  if ((unpack & UNPACK_ROOM_BACKDROPS) != 0)
+  for (archive = ((struct PARROT_ARCHIVE*) OpenArchives.lh_Head);
+       archive != NULL;
+       archive = ((struct PARROT_ARCHIVE*) archive->pa_Node.ln_Succ))
   {
-    for (ii = 0; ii < 4; ii++)
+    if (archive->pa_Id == id)
     {
-      backdrop = &room->rm_Backdrops[ii];
-
-      if (0 != backdrop->ar_Id && NULL == backdrop->ar_Ptr)
-      {
-        backdrop->ar_Ptr = (struct IMAGE*) LoadAsset(arena, backdrop->ar_Id);
-      }
+      return archive;
     }
   }
+
+
+  return NULL;
 }
 
-EXPORT VOID PackRoom(APTR arena, struct ROOM* room, ULONG pack)
+EXPORT VOID CloseArchive(APTR archive)
 {
-  UBYTE ii;
-  struct IMAGE_REF* backdrop;
-
-  if ((pack & UNPACK_ROOM_BACKDROPS) != 0)
-  {
-    for (ii = 0; ii < 4; ii++)
-    {
-      backdrop = &room->rm_Backdrops[ii];
-
-      if (0 != backdrop->ar_Id && NULL != backdrop->ar_Ptr)
-      {
-        UnloadAsset(arena, (struct ASSET*) backdrop->ar_Ptr);
-        backdrop->ar_Ptr = NULL;
-      }
-    }
-  }
 }
+
+EXPORT ULONG GetChunkSize(APTR archive, ULONG id)
+{
+  return FALSE;
+}
+
+EXPORT BOOL ReadChunk(APTR archive, ULONG id, UBYTE* data, ULONG dataCapacity)
+{
+  return FALSE;
+}
+

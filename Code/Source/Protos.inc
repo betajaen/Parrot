@@ -181,13 +181,6 @@ VOID EXPORT_ScreenSwapBuffers(__reg("a6") struct ParrotBase*, __reg("a0") APTR o
   ScreenSwapBuffers(obj);
 }
 
-/* RoomNew */
-struct ROOM* RoomNew(APTR arena);
-struct ROOM* EXPORT_RoomNew(__reg("a6") struct ParrotBase*, __reg("a0") APTR arena)
-{
-  return RoomNew(arena);
-}
-
 
 #define EXPORT_Vectors \
   , (APTR) EXPORT_GameStart\
@@ -211,7 +204,6 @@ struct ROOM* EXPORT_RoomNew(__reg("a6") struct ParrotBase*, __reg("a0") APTR are
   , (APTR) EXPORT_ArenaRollback\
   , (APTR) EXPORT_ArenaSpace\
   , (APTR) EXPORT_ScreenClear\
-  , (APTR) EXPORT_ScreenSwapBuffers\
-  , (APTR) EXPORT_RoomNew
+  , (APTR) EXPORT_ScreenSwapBuffers
 
 /***END***/
