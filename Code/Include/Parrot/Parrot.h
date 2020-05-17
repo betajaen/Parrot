@@ -30,7 +30,7 @@
 #include <exec/types.h>
 #include <exec/nodes.h>
 
-#include "SDI_compiler.h"
+#include <Parrot/Private/SDI_compiler.h>
 
 #if defined(__M68K__)
 #define IS_M68K
@@ -51,6 +51,10 @@
 
 #ifndef STATIC
 #define STATIC static
+#endif
+
+#ifndef EXPORT
+#define EXPORT
 #endif
 
 /**

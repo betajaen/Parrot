@@ -1,8 +1,8 @@
 /**
-    $Id: Config.h, 1.0, 2020/05/11 12:23:00, betajaen Exp $
+    $Id: Asset.h 0.1, 2020/05/17 16:49:00, betajaen Exp $
 
-    Maniac Game Module for Parrot
-    =============================
+    Parrot - Point and Click Adventure Game Player
+    ==============================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -24,10 +24,7 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
-#ifndef PARROT_MANIAC_CONFIG_H
-#define PARROT_MANIAC_CONFIG_H
 
-#define ARENA_GENERIC_SIZE 2048
-#define ARENA_CHAPTER_SIZE 16384
+struct ASSET* LoadAsset(APTR arena, ULONG id);
 
-#endif
+void UnloadAsset(APTR arena, struct ASSET* asset);

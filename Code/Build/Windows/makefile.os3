@@ -33,26 +33,15 @@ CFLAGS  = -lamiga -nostdlib -IInclude -O2
 
 # PARROT
 
-PARROT_OBJ = main.o
-PARROT_LIB_OBJ = lib.o mem.o string.o requester.o screen.o game.o arena.o room.o image.o asset.o archive.o
-GAME_MANIAC_OBJ = maniac_lib.o maniac_main.o
+PARROT_OBJ = main.o arena.o string.o requester.o screen.o game.o room.o image.o asset.o archive.o
 CONVERTER_MANIAC_OBJ = maniac_conv_main.o string.o
 
-parrot: $(PARROT_OBJ) $(PARROT_LIB_OBJ) $(GAME_MANIAC_OBJ) $(CONVERTER_MANIAC_OBJ)
+parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
 	$(CC) $(CFLAGS) $(PARROT_OBJ) -o ../Parrot/Parrot
-	$(CC) $(CFLAGS) $(PARROT_LIB_OBJ) -o ../Parrot/Parrot.library
-	$(CC) $(CFLAGS) $(GAME_MANIAC_OBJ) -o ../Parrot/Games/Maniac.library
 	$(CC) $(CFLAGS) $(CONVERTER_MANIAC_OBJ) -o ../Parrot/Tools/ConvertManiac
-
 
 main.o: Source/Main.c
 	$(CC) $(CFLAGS) -c Source/Main.c -o main.o
-
-lib.o: Source/Lib.c Source/Protos.inc
-	$(CC) $(CFLAGS) -c Source/Lib.c -o lib.o
-
-mem.o: Source/Mem.c
-	$(CC) $(CFLAGS) -c Source/Mem.c -o mem.o
 
 string.o: Source/String.c
 	$(CC) $(CFLAGS) -c Source/String.c -o string.o
@@ -60,34 +49,28 @@ string.o: Source/String.c
 requester.o: Source/Requester.c
 	$(CC) $(CFLAGS) -c Source/Requester.c -o requester.o
 
-screen.o: Source/Screen.c Include/Parrot.h
+screen.o: Source/Screen.c
 	$(CC) $(CFLAGS) -c Source/Screen.c -o screen.o
 
-game.o: Source/Game.c Include/Parrot.h
+game.o: Source/Game.c
 	$(CC) $(CFLAGS) -c Source/Game.c -o game.o
 	
 arena.o: Source/Arena.c
 	$(CC) $(CFLAGS) -c Source/Arena.c -o arena.o
 
-room.o: Source/Room.c Include/Parrot.h
+room.o: Source/Room.c
 	$(CC) $(CFLAGS) -c Source/Room.c -o room.o
 
-image.o: Source/Image.c Include/Parrot.h
+image.o: Source/Image.c
 	$(CC) $(CFLAGS) -c Source/Image.c -o image.o
 
-asset.o: Source/Asset.c Include/Parrot.h
+asset.o: Source/Asset.c
 	$(CC) $(CFLAGS) -c Source/Asset.c -o asset.o
 
-archive.o: Source/Archive.c Include/Parrot.h
+archive.o: Source/Archive.c
 	$(CC) $(CFLAGS) -c Source/Archive.c -o archive.o
 
 # MANIAC
-
-maniac_lib.o: Games/Lib.c
-	$(CC) $(CFLAGS) -c Games/Lib.c -o maniac_lib.o -IGames/Maniac
-
-maniac_main.o: Games/Maniac/Main.c Include/Parrot.h
-	$(CC) $(CFLAGS) -c Games/Maniac/Main.c -o maniac_main.o -IGames/Maniac
 
 maniac_conv_main.o: Tools/ConvertManiac/Main.c
 	$(CC) $(CFLAGS) -c Tools/ConvertManiac/Main.c -o maniac_conv_main.o -ISource
@@ -96,5 +79,4 @@ maniac_conv_main.o: Tools/ConvertManiac/Main.c
 
 clean:
 	rm ../Parrot/Parrot
-	rm ../Parrot/*.library
 	rm $(objects)

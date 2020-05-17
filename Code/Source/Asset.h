@@ -28,8 +28,7 @@
 #ifndef PARROT_ASSET_H
 #define PARROT_ASSET_H
 
-#include <exec/types.h>
-#include "Common.h"
+#include <Parrot/Parrot.h>
 
 #define ID_SQWK MAKE_ID('S','Q','W','K')
 #define ID_MNIC MAKE_ID('M','N','C','M')

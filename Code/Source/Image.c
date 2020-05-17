@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Common.h"
+#include <Parrot/Parrot.h>
 
 #include <proto/exec.h>
 

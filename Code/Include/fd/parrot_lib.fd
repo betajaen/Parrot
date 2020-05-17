@@ -1,7 +1,0 @@
-##base _GameBase
-##bias 30
-##public
-GameInitialise(ctx)(a0)
-GameShutdown(ctx)(a0)
-OnGameEvent(ctx, event, user)(a0, d0, d1)
-##end

@@ -1,5 +1,5 @@
 /**
-    $Id: Mem.c, 0.1, 2020/05/07 07:29:00, betajaen Exp $
+    $Id: Screen.h 0.1, 2020/05/17 16:10:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,68 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Common.h"
+APTR ScreenNew(APTR arena, struct SCREEN_INFO* info);
 
-#include <proto/exec.h>
+VOID ScreenDelete(APTR obj);
 
-#define MEM_MAGIC 0X944825DFUL
+VOID ScreenSetCursor(APTR screen, UBYTE cursor);
 
-struct MEM_HEADER
-{
-  ULONG   mh_Size;
-  ULONG   mh_Magic;
-};
+UBYTE ScreenGetCursor(APTR screen);
 
-EXPORT APTR MemNew(ULONG size, ULONG requirements)
-{
-  struct MEM_HEADER* hdr;
+VOID ScreenSetColour(APTR screen, UWORD index, UBYTE r, UBYTE g, UBYTE b);
 
-  /* Round up to nearest 4th byte */
-  size = (size + 3) & ~0x03;
+VOID ScreenClear(APTR obj);
 
-  hdr = (struct MEM_HEADER*) AllocVec(size + sizeof(struct MEM_HEADER),
-                                      requirements);
-
-  if (NULL == hdr)
-    return NULL;
-
-  hdr->mh_Size  = size;
-  hdr->mh_Magic = MEM_MAGIC;
-
-  return (APTR)(hdr + 1);
-}
-
-EXPORT BOOL MemDelete(APTR pMem)
-{
-  struct MEM_HEADER* hdr;
-
-  if (NULL == pMem)
-    return FALSE;
-
-  hdr = ((struct MEM_HEADER*) pMem) - 1;
-
-  if (MEM_MAGIC != hdr->mh_Magic)
-    return FALSE;
-
-  hdr->mh_Magic = 0;
-  hdr->mh_Size = 0;
-  
-  FreeVec(hdr);
-
-  return TRUE;
-}
-
-EXPORT ULONG MemSize(APTR pMem)
-{
-  struct MEM_HEADER* hdr;
-
-  if (NULL == pMem)
-    return 0UL;
-
-  hdr = ((struct MEM_HEADER*) pMem) - 1;
-
-  if (MEM_MAGIC != hdr->mh_Magic)
-    return 0UL;
-
-  return hdr->mh_Size;
-}
+VOID ScreenSwapBuffers(APTR obj);

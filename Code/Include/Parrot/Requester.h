@@ -1,5 +1,5 @@
 /**
-    $Id: Game.c, 0.1, 2020/05/07 08:54:00, betajaen Exp $
+    $Id: Requester.h 0.1, 2020/05/17 16:09:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,40 +25,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <Parrot/Parrot.h>
-
-#include <proto/exec.h>
-#include <proto/dos.h>
-
-extern struct ParrotBase* ParrotBase;
+LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText);
 
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
-APTR OpenArchive(UBYTE id);
-EXPORT VOID SetArchivesPath(CONST CHAR* path);
-EXPORT APTR ArenaNew(ULONG size, ULONG requirements);
-
-EXPORT APTR ArenaGame;
-
-STATIC APTR ArenaChapter, ArenaRoom;
-STATIC APTR GameArchive;
-
-EXPORT VOID GameStart(CONST_STRPTR path)
-{
-  SetArchivesPath(path);
-  ArenaGame = ArenaNew(16384, 0ul);
-  ArenaChapter = NULL;
-  ArenaRoom = NULL;
-
-  GameArchive = OpenArchive(0);
-}
-
-EXPORT VOID GameDelayTicks(UWORD ticks)
-{
-  Delay(ticks);
-}
-
-EXPORT VOID GameDelaySeconds(UWORD seconds)
-{
-  Delay(seconds * 50);
-}

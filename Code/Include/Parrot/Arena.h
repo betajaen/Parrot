@@ -1,5 +1,5 @@
 /**
-    $Id: Common.h 0.1, 2020/05/07 06:44:00, betajaen Exp $
+    $Id: Arena.h 0.1, 2020/05/17 16:07:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -24,11 +24,23 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
-#ifndef PARROT_COMMON_H
-#define PARROT_COMMON_H
 
-#include "Parrot.h"
+extern APTR ArenaGame;
+extern APTR ArenaChapter;
+extern APTR ArenaRoom;
 
-#define EXPORT
+APTR ArenaNew(ULONG size, ULONG requirements);
 
-#endif
+BOOL ArenaDelete(APTR arena);
+
+BOOL ArenaRollback(APTR arena);
+
+ULONG ArenaSpace(APTR arena);
+
+ULONG ArenaSize(APTR arena);
+
+APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
+
+ULONG ObjGetClass(APTR alloc);
+
+ULONG ObjGetSize(APTR alloc);

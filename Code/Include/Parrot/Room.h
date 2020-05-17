@@ -1,8 +1,8 @@
 /**
-    $Id: Main.c, 1.0, 2020/05/10 07:17:00, betajaen Exp $
+    $Id: Room.h 0.1, 2020/05/17 16:49:00, betajaen Exp $
 
-    Maniac Game Module for Parrot
-    =============================
+    Parrot - Point and Click Adventure Game Player
+    ==============================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -25,45 +25,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Game.h"
+struct ASSET* LoadRoom(APTR arena, ULONG id);
 
-VOID GameInitialise()
-{
-  struct SCREEN_INFO info;
-  struct ROOM* testRoom;
+VOID UnpackRoom(APTR arena, struct ROOM* room, ULONG unpack);
 
-
-  THIS_GAME->gb_ArenaGame = ArenaNew(ARENA_GENERIC_SIZE, 0);
-  THIS_GAME->gb_ArenaChapter = ArenaNew(ARENA_CHAPTER_SIZE, 0);
-
-  info.si_Depth = 3;
-  info.si_Flags = SIF_IS_PUBLIC;
-  info.si_Left = 0;
-  info.si_Top = 0;
-  info.si_Width = 320;
-  info.si_Height = 200;
-  info.si_Title = "Maniac Mansion";
-
-  THIS_GAME->gb_Screen = ScreenNew(THIS_GAME->gb_ArenaGame, &info);
-  NewList(THIS_ROOMS);
-
-  ScreenClear(THIS_SCREEN);
-  ScreenSwapBuffers(THIS_SCREEN);
-}
-
-VOID GameShutdown()
-{
-  ArenaDelete(THIS_GAME->gb_ArenaChapter);
-  THIS_GAME->gb_ArenaChapter = 0;
-
-  ScreenDelete(THIS_GAME->gb_Screen);
-  THIS_GAME->gb_Screen = 0;
-
-  ArenaDelete(THIS_GAME->gb_ArenaGame);
-  THIS_GAME->gb_ArenaGame = 0;
-}
-
-BOOL OnGameEvent(ULONG event, ULONG data)
-{
-  return TRUE;
-}
+VOID PackRoom(APTR arena, struct ROOM* room, ULONG pack);

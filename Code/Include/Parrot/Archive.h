@@ -1,8 +1,8 @@
 /**
-    $Id: Game.h, 1.0, 2020/05/11 12:11:00, betajaen Exp $
+    $Id: Archive.h 0.1, 2020/05/17 16:56:00, betajaen Exp $
 
-    Maniac Game Module for Parrot
-    =============================
+    Parrot - Point and Click Adventure Game Player
+    ==============================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -24,38 +24,15 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
-#ifndef PARROT_MANIAC_GAME_H
-#define PARROT_MANIAC_GAME_H
 
-#include "Parrot.h"
-#include "Config.h"
+VOID SetArchivesPath(CHAR* path);
 
-#include <proto/exec.h>
-#include <proto/dos.h>
-#include <proto/parrot.h>
+struct ARCHIVE* LoadArchive(UBYTE id);
 
-struct GameBase
-{
-  struct Library     gb_LibBase;
-  struct Library*    gb_SysBase;
-  ULONG              gb_SegList;
-  struct DosLibrary* gb_DOSBase;
-  struct ParrotBase* gb_ParrotBase;
-  /* Generic Arena used for full life-time objects. Such as the Screen */
-  APTR               gb_ArenaGame;
-  /* Arena used for chapter objects. */
-  APTR               gb_ArenaChapter;
-  /* Arena used for current cell objects. */
-  APTR               gb_ArenaCell;
-  /* Current Screen */
-  APTR               gb_Screen;
-  /* Rooms */
-  struct List        gb_Rooms;
-};
+APTR OpenArchive(UBYTE id);
 
-extern struct GameBase* GameBase;
+VOID CloseArchive(APTR archive);
 
-#define THIS_GAME   (GameBase)
-#define THIS_ROOMS  (&(GameBase->gb_Rooms))
-#define THIS_SCREEN (GameBase->gb_Screen)
-#endif
+ULONG GetChunkSize(APTR archive, ULONG id);
+
+BOOL ReadChunk(APTR archive, ULONG id, UBYTE* data, ULONG dataCapacity);

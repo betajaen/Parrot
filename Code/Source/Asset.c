@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Common.h"
+#include <Parrot/Parrot.h>
 #include "Asset.h"
 
 #include <proto/exec.h>
@@ -54,7 +54,6 @@ EXPORT struct ASSET* LoadAsset(APTR arena, ULONG id)
       return asset;
     }
   }
-
 
   type = (id >> 24) & 0xFF;
   type -= 128;

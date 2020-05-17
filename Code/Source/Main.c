@@ -25,21 +25,25 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Common.h"
+#include <Parrot/Parrot.h>
+#include <Parrot/Requester.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
+#include <proto/iffparse.h>
 #include <dos/dos.h>
 #include <workbench/startup.h>
-
-#include <proto/parrot.h>
 
 BYTE VersionString[]   = "$VER: Parrot 0.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
 
 struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
-struct ParrotBase*    ParrotBase;
+struct IntuitionBase* IntuitionBase;
+struct GfxBase*       GfxBase;
+struct Library*       IFFParseBase;
+
+EXPORT VOID GameStart(CONST_STRPTR name);
 
 INT main()
 {
@@ -52,6 +56,9 @@ INT main()
   rc = RETURN_OK;
   SysBase = NULL;
   DOSBase = NULL;
+  IntuitionBase = NULL;
+  GfxBase = NULL;
+  IFFParseBase = NULL;
 
   SysBase = *(struct ExecBase**) 4L;
 
@@ -76,16 +83,33 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  ParrotBase = (struct ParrotBase*) OpenLibrary("PROGDIR:Parrot.library", 0);
-  if (NULL == ParrotBase)
+  IntuitionBase = (struct IntuitionBase*) OpenLibrary("intuition.library", 0);
+
+  if (NULL == IntuitionBase)
   {
     rc = RETURN_FAIL;
     goto CLEAN_EXIT;
   }
 
-  GameStart("Maniac");
+  GfxBase = (struct GfxBase*) OpenLibrary("graphics.library", 0);
 
-  CloseLibrary((struct Library*) ParrotBase);
+  if (NULL == GfxBase)
+  {
+    rc = RETURN_FAIL;
+    goto CLEAN_EXIT;
+  }
+
+  IFFParseBase = OpenLibrary("iffparse.library", 0);
+
+  if (NULL == IFFParseBase)
+  {
+    rc = RETURN_FAIL;
+    goto CLEAN_EXIT;
+  }
+
+  RequesterF("OK", "Started.");
+
+  GameStart("PROGDIR:Tools/");
   
   CLEAN_EXIT:
 
@@ -93,6 +117,24 @@ INT main()
   {
     Forbid();
     ReplyMsg(wbMsg);
+  }
+
+  if (NULL != IFFParseBase)
+  {
+    CloseLibrary((struct Library*) IFFParseBase);
+    IFFParseBase = NULL;
+  }
+
+  if (NULL != GfxBase)
+  {
+    CloseLibrary((struct Library*) GfxBase);
+    GfxBase = NULL;
+  }
+
+  if (NULL != IntuitionBase)
+  {
+    CloseLibrary((struct Library*) IntuitionBase);
+    IntuitionBase = NULL;
   }
 
   if (NULL != DOSBase)

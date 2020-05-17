@@ -25,36 +25,71 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Common.h"
+#include <Parrot/Parrot.h>
+#include <Parrot/Arena.h>
+
 #include "Asset.h"
 
 #include <proto/exec.h>
 #include <proto/dos.h>
+#include <proto/iffparse.h>
 
-struct List OpenArchives = {
+ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
+
+STATIC struct MinList OpenArchives = {
     NULL,
     NULL,
-    NULL,
-    NT_USER - 1,
-    0,
+    NULL
 };
 
-struct PARROT_ARCHIVE
+STATIC CHAR* BasePath;
+
+#define ARCHIVE_ID 0x9640c817ul
+
+struct ARCHIVE
 {
-  struct Node       pa_Node;
+  struct MinNode    pa_Node;
   BPTR              pa_File;
   struct IFFHandle* pa_Handle;
   ULONG             pa_Usage;
   UWORD             pa_Id;
 };
 
+EXPORT VOID SetArchivesPath(CHAR* path)
+{
+  BasePath = path;
+}
+
+STATIC struct ARCHIVE* LoadArchive(UBYTE id)
+{
+  struct ARCHIVE* archive;
+  CHAR path[128];
+
+  if (0 == StrFormat(&path[0], sizeof(path), "%s/%d.Parrot", BasePath, id))
+  {
+    return NULL;
+  }
+  
+  archive = (struct ARCHIVE*) ObjAlloc(ArenaGame, sizeof(struct ARCHIVE), ARCHIVE_ID);
+  AddTail((struct List*) & OpenArchives, (struct Node*) archive);
+  
+  archive->pa_Handle = AllocIFF();
+  archive->pa_Handle->iff_Stream = Open(&path[0], MODE_OLDFILE);
+
+  InitIFFasDOS(archive->pa_Handle);
+  OpenIFF(archive->pa_Handle, IFFF_READ);
+
+  return archive;
+}
+
+
 EXPORT APTR OpenArchive(UBYTE id)
 {
-  struct PARROT_ARCHIVE* archive;
+  struct ARCHIVE* archive;
 
-  for (archive = ((struct PARROT_ARCHIVE*) OpenArchives.lh_Head);
+  for (archive = ((struct ARCHIVE*) OpenArchives.mlh_Head);
        archive != NULL;
-       archive = ((struct PARROT_ARCHIVE*) archive->pa_Node.ln_Succ))
+       archive = ((struct ARCHIVE*) archive->pa_Node.mln_Succ))
   {
     if (archive->pa_Id == id)
     {
@@ -62,8 +97,7 @@ EXPORT APTR OpenArchive(UBYTE id)
     }
   }
 
-
-  return NULL;
+  return LoadArchive(id);
 }
 
 EXPORT VOID CloseArchive(APTR archive)
