@@ -34,3 +34,7 @@ ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
 ULONG StrLen(CONST CHAR* pSrc);
 
 ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
+
+BOOL StrStartsWith(CONST CHAR* pTest, CHAR value);
+
+BOOL StrEndsWith(CONST CHAR* test, CHAR value);

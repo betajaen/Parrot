@@ -25,14 +25,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+struct ARCHIVE;
+
 VOID SetArchivesPath(CHAR* path);
 
-struct ARCHIVE* LoadArchive(UBYTE id);
+struct ARCHIVE* OpenArchive(UBYTE id);
 
-APTR OpenArchive(UBYTE id);
+VOID CloseArchive(struct ARCHIVE* archive);
 
-VOID CloseArchive(APTR archive);
+ULONG GetChunkSize(struct ARCHIVE*, ULONG id);
 
-ULONG GetChunkSize(APTR archive, ULONG id);
-
-BOOL ReadChunk(APTR archive, ULONG id, UBYTE* data, ULONG dataCapacity);
+BOOL ReadChunk(struct ARCHIVE*, ULONG id, UBYTE* data, ULONG dataCapacity);

@@ -145,3 +145,40 @@ ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc)
   
   return copyLen;
 }
+
+BOOL StrStartsWith(CONST CHAR* pTest, CHAR value)
+{
+  BOOL rc;
+
+  rc = FALSE;
+
+  if (NULL == pTest || *pTest == '\0')
+  {
+    goto CLEAN_EXIT;
+  }
+
+  rc = (pTest[0] == value);
+
+CLEAN_EXIT:
+  return rc;
+}
+
+BOOL StrEndsWith(CONST CHAR* pTest, CHAR value)
+{
+  BOOL rc;
+
+  rc = FALSE;
+
+  if (NULL == pTest || *pTest == '\0')
+  {
+    goto CLEAN_EXIT;
+  }
+
+  while (*pTest++ != '\0')
+    ;
+
+  rc = (pTest[-2] == value);
+
+CLEAN_EXIT:
+  return rc;
+}

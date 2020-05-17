@@ -45,6 +45,8 @@ struct ARENA_ALLOC
   ULONG   aa_Class;
 };
 
+APTR ArenaGame, ArenaChapter, ArenaRoom;
+
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
 
 EXPORT APTR ArenaNew(ULONG size, ULONG requirements)

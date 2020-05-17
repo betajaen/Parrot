@@ -43,7 +43,7 @@ struct IntuitionBase* IntuitionBase;
 struct GfxBase*       GfxBase;
 struct Library*       IFFParseBase;
 
-EXPORT VOID GameStart(CONST_STRPTR name);
+EXPORT VOID GameStart(STRPTR name);
 
 INT main()
 {
@@ -107,9 +107,7 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  RequesterF("OK", "Started.");
-
-  GameStart("PROGDIR:Tools/");
+  GameStart("PROGDIR:Tools");
   
   CLEAN_EXIT:
 

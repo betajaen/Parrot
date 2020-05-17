@@ -26,31 +26,27 @@
 */
 
 #include <Parrot/Parrot.h>
+#include <Parrot/Archive.h>
+#include <Parrot/Arena.h>
+#include <Parrot/Requester.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
 
-extern struct ParrotBase* ParrotBase;
+APTR GameArchive;
 
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
-APTR OpenArchive(UBYTE id);
-EXPORT VOID SetArchivesPath(CONST CHAR* path);
-EXPORT APTR ArenaNew(ULONG size, ULONG requirements);
-
-EXPORT APTR ArenaGame;
-
-STATIC APTR ArenaChapter, ArenaRoom;
-STATIC APTR GameArchive;
-
-EXPORT VOID GameStart(CONST_STRPTR path)
+EXPORT VOID GameStart(STRPTR path)
 {
-  SetArchivesPath(path);
   ArenaGame = ArenaNew(16384, 0ul);
   ArenaChapter = NULL;
   ArenaRoom = NULL;
 
+  SetArchivesPath(path);
   GameArchive = OpenArchive(0);
+
+  RequesterF("OK", "Archive 0 = %lx", GameArchive);
+
+  CloseArchive(GameArchive);
 }
 
 EXPORT VOID GameDelayTicks(UWORD ticks)

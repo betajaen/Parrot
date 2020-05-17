@@ -27,14 +27,14 @@
 
 #include <Parrot/Parrot.h>
 #include <Parrot/Arena.h>
+#include <Parrot/Requester.h>
+#include <Parrot/String.h>
 
 #include "Asset.h"
 
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <proto/iffparse.h>
-
-ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
 
 STATIC struct MinList OpenArchives = {
     NULL,
@@ -43,6 +43,7 @@ STATIC struct MinList OpenArchives = {
 };
 
 STATIC CHAR* BasePath;
+STATIC CHAR* JoinPathStr;
 
 #define ARCHIVE_ID 0x9640c817ul
 
@@ -58,32 +59,49 @@ struct ARCHIVE
 EXPORT VOID SetArchivesPath(CHAR* path)
 {
   BasePath = path;
+
+  if (StrEndsWith(BasePath, '/'))
+    JoinPathStr = "%s%d.Parrot";
+  else
+    JoinPathStr = "%s/%d.Parrot";
 }
 
 STATIC struct ARCHIVE* LoadArchive(UBYTE id)
 {
   struct ARCHIVE* archive;
+  BPTR file;
   CHAR path[128];
-
-  if (0 == StrFormat(&path[0], sizeof(path), "%s/%d.Parrot", BasePath, id))
+  
+  if (0 == StrFormat(&path[0], sizeof(path), JoinPathStr, BasePath, id))
   {
     return NULL;
   }
-  
+
+  RequesterF("OK", "Path is %s", &path[0]);
+
+  file = Open(&path[0], MODE_OLDFILE);
+
+  if (NULL == file)
+  {
+    return NULL;
+  }
+
   archive = (struct ARCHIVE*) ObjAlloc(ArenaGame, sizeof(struct ARCHIVE), ARCHIVE_ID);
   AddTail((struct List*) & OpenArchives, (struct Node*) archive);
   
   archive->pa_Handle = AllocIFF();
-  archive->pa_Handle->iff_Stream = Open(&path[0], MODE_OLDFILE);
+  archive->pa_Handle->iff_Stream = file;
 
   InitIFFasDOS(archive->pa_Handle);
   OpenIFF(archive->pa_Handle, IFFF_READ);
+
+  RequesterF("OK", "Loaded Archive %ld for IFF reading %lx", (ULONG) id, archive->pa_Handle);
 
   return archive;
 }
 
 
-EXPORT APTR OpenArchive(UBYTE id)
+EXPORT struct ARCHIVE* OpenArchive(UBYTE id)
 {
   struct ARCHIVE* archive;
 
@@ -100,16 +118,29 @@ EXPORT APTR OpenArchive(UBYTE id)
   return LoadArchive(id);
 }
 
-EXPORT VOID CloseArchive(APTR archive)
+EXPORT VOID CloseArchive(struct ARCHIVE* archive)
 {
+  if (NULL != archive)
+  {
+    CloseIFF(archive->pa_Handle);
+    Close(archive->pa_Handle->iff_Stream);
+    FreeIFF(archive->pa_Handle);
+
+    Remove((struct Node*) archive);
+
+    archive->pa_File = NULL;
+    archive->pa_Handle = NULL;
+    archive->pa_Id = 0;
+    archive->pa_Usage = 0;
+  }
 }
 
-EXPORT ULONG GetChunkSize(APTR archive, ULONG id)
+EXPORT ULONG GetChunkSize(struct ARCHIVE* archive, ULONG id)
 {
   return FALSE;
 }
 
-EXPORT BOOL ReadChunk(APTR archive, ULONG id, UBYTE* data, ULONG dataCapacity)
+EXPORT BOOL ReadChunk(struct ARCHIVE* archive, ULONG id, UBYTE* data, ULONG dataCapacity)
 {
   return FALSE;
 }
