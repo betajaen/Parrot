@@ -30,8 +30,11 @@
 
 #include <Parrot/Parrot.h>
 
-#define ID_SQWK MAKE_ID('S','Q','W','K')
-#define ID_MNIC MAKE_ID('M','N','C','M')
+#define MAKE_NODE_ID(a,b,c,d)	\
+	((ULONG) (a)<<24 | (ULONG) (b)<<16 | (ULONG) (c)<<8 | (ULONG) (d))
+
+#define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
+#define ID_MNIC MAKE_NODE_ID('M','N','C','M')
 
 #define MAKE_ASSET_ID(ROOM, TYPE, ID) ( ((128+TYPE) << 24) | (ROOM << 16) | (ID & 0xFFff) )
 
@@ -54,7 +57,7 @@ struct CHUNK_HEADER
     Game Info
 */
 
-#define CHUNK_GAME_INFO_ID MAKE_ID('G','A','M','E')
+#define CHUNK_GAME_INFO_ID MAKE_NODE_ID('G','A','M','E')
 #define CHUNK_GAME_INFO_SCHEMA_VERSION 0x0100
 #define CHUNK_GAME_INFO_MIN_VERSION    0x0100
 
@@ -77,7 +80,7 @@ struct CHUNK_GAME_INFO
     Backdrop
 */
 
-#define CHUNK_BACKDROP_ID MAKE_ID('B','K','D','P')
+#define CHUNK_BACKDROP_ID MAKE_NODE_ID('B','K','D','P')
 #define CHUNK_BACKDROP_SCHEMA 0x0100
 #define CHUNK_BACKDROP_MIN_VERSION    0x0100
 
@@ -94,7 +97,7 @@ struct CHUNK_BACKDROP
     Colour Palette
 */
 
-#define CHUNK_COLOUR_PALETTE_ID  MAKE_ID('C','P','A','L')
+#define CHUNK_COLOUR_PALETTE_ID  MAKE_NODE_ID('C','P','A','L')
 #define CHUNK_COLOUR_PALETTE_SCHEMA 0x0100
 #define CHUNK_COLOUR_PALETTE_MIN_VERSION    0x0100
 
@@ -110,7 +113,7 @@ struct CHUNK_COLOUR_PALETTE
     Room Info
 */
 
-#define CHUNK_ROOM_ID             MAKE_ID('R','O','O','M')
+#define CHUNK_ROOM_ID             MAKE_NODE_ID('R','O','O','M')
 #define CHUNK_ROOM_SCHEMA         0x0100
 #define CHUNK_ROOM_MIN_VERSION    0x0100
 

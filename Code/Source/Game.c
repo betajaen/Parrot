@@ -30,10 +30,14 @@
 #include <Parrot/Arena.h>
 #include <Parrot/Requester.h>
 
+#include "Asset.h"
+
 #include <proto/exec.h>
 #include <proto/dos.h>
 
-APTR GameArchive;
+struct ARCHIVE* GameArchive;
+
+struct CHUNK_GAME_INFO GameInfo;
 
 EXPORT VOID GameStart(STRPTR path)
 {
@@ -44,7 +48,9 @@ EXPORT VOID GameStart(STRPTR path)
   SetArchivesPath(path);
   GameArchive = OpenArchive(0);
 
-  RequesterF("OK", "Archive 0 = %lx", GameArchive);
+  ReadAssetFromArchive(GameArchive, CHUNK_GAME_INFO_ID, &GameInfo, sizeof(struct CHUNK_GAME_INFO));
+
+  RequesterF("OK", "Game is %s by %s", &GameInfo.Title[0], &GameInfo.Author[0]);
 
   CloseArchive(GameArchive);
 }

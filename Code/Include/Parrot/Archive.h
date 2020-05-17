@@ -33,6 +33,6 @@ struct ARCHIVE* OpenArchive(UBYTE id);
 
 VOID CloseArchive(struct ARCHIVE* archive);
 
-ULONG GetChunkSize(struct ARCHIVE*, ULONG id);
+ULONG GetChunkSize(struct ARCHIVE* archive, ULONG id);
 
-BOOL ReadChunk(struct ARCHIVE*, ULONG id, UBYTE* data, ULONG dataCapacity);
+BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG id, APTR* data, ULONG dataCapacity);

@@ -77,8 +77,6 @@ STATIC struct ARCHIVE* LoadArchive(UBYTE id)
     return NULL;
   }
 
-  RequesterF("OK", "Path is %s", &path[0]);
-
   file = Open(&path[0], MODE_OLDFILE);
 
   if (NULL == file)
@@ -94,8 +92,6 @@ STATIC struct ARCHIVE* LoadArchive(UBYTE id)
 
   InitIFFasDOS(archive->pa_Handle);
   OpenIFF(archive->pa_Handle, IFFF_READ);
-
-  RequesterF("OK", "Loaded Archive %ld for IFF reading %lx", (ULONG) id, archive->pa_Handle);
 
   return archive;
 }
@@ -140,8 +136,45 @@ EXPORT ULONG GetChunkSize(struct ARCHIVE* archive, ULONG id)
   return FALSE;
 }
 
-EXPORT BOOL ReadChunk(struct ARCHIVE* archive, ULONG id, UBYTE* data, ULONG dataCapacity)
+EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG id, APTR* data, ULONG dataCapacity)
 {
+  struct ContextNode* node;
+  LONG err;
+  CHAR idBuf[5];
+
+  Seek(archive->pa_File, 0, OFFSET_BEGINNING);
+
+  while (TRUE)
+  {
+    err = ParseIFF(archive->pa_Handle, IFFPARSE_RAWSTEP);
+
+    if (err == IFFERR_EOC)
+      continue;
+    else if (err)
+      break;
+    
+    node = CurrentChunk(archive->pa_Handle);
+
+    if (node->cn_ID == id)
+    {
+      if (node->cn_Size <= dataCapacity)
+      {
+        ReadChunkBytes(archive->pa_Handle, data, node->cn_Size);
+        return TRUE;
+      }
+
+      RequesterF("OK", "Error Chunk %s is to large (%ld) to fit into capacity (%ld)", 
+        IDtoStr(node->cn_ID, idBuf),
+        node->cn_Size,
+        dataCapacity
+      );
+
+      return FALSE;
+    }
+  }
+
+  RequesterF("OK", "Chunk End");
+
   return FALSE;
 }
 
