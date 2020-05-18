@@ -39,6 +39,8 @@
 struct ARCHIVE* GameArchive;
 struct CHUNK_GAME_INFO GameInfo;
 struct CHUNK_PALETTE_32 GamePalette;
+struct CHUNK_SPRITE_PALETTE_32 GameCursorPalette;
+
 APTR GameScreen;
 
 EXPORT VOID GameStart(STRPTR path)
@@ -54,6 +56,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   ReadAssetFromArchive(GameArchive, CHUNK_GAME_INFO_ID, (APTR) &GameInfo, sizeof(struct CHUNK_GAME_INFO));
   ReadAssetFromArchive(GameArchive, CHUNK_PALETTE_32_ID, (APTR)&GamePalette, sizeof(struct CHUNK_PALETTE_32));
+  ReadAssetFromArchive(GameArchive, CHUNK_SPRITE_PALETTE_32_ID, (APTR)&GameCursorPalette, sizeof(struct CHUNK_SPRITE_PALETTE_32));
 
   screenInfo.si_Width = GameInfo.Width;
   screenInfo.si_Height = GameInfo.Height;
@@ -64,7 +67,9 @@ EXPORT VOID GameStart(STRPTR path)
   screenInfo.si_Title = &GameInfo.Title[0];
 
   GameScreen = ScreenNew(ArenaGame, &screenInfo);
-  ScreenLoadPalette32(GameScreen, &GamePalette.Palette32[0], GamePalette.NumColours);
+  ScreenLoadPaletteTable32(GameScreen, (ULONG*) &GamePalette.Palette32);
+  ScreenLoadPaletteTable32(GameScreen, (ULONG*) &GameCursorPalette.Palette);
+  
   Delay(50 * 3);
   ScreenDelete(GameScreen);
 

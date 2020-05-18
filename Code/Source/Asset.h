@@ -45,6 +45,7 @@
 
 #define ASSET_TYPE_BACKDROP        5
 #define ASSET_TYPE_PALETTE_32  6
+#define ASSET_TYPE_SPRITE_PALETTE  7
 
 struct CHUNK_HEADER
 {
@@ -98,8 +99,22 @@ struct CHUNK_BACKDROP
 */
 
 #define CHUNK_PALETTE_32_ID  MAKE_NODE_ID('P','A','L','5')
-#define CHUNK_PALETTE_32_SCHEMA 0x0101
-#define CHUNK_PALETTE_32_MIN_VERSION    0x0101
+#define CHUNK_PALETTE_32_SCHEMA 0x0102
+#define CHUNK_PALETTE_32_MIN_VERSION    0x0102
+
+struct PALETTE_TABLE_32x32
+{
+  ULONG Count_Start;
+  ULONG Palette[32 * 3];
+  ULONG Terminator;
+};
+
+struct PALETTE_TABLE_32x4
+{
+  ULONG Count_Start;
+  ULONG Palette[4 * 3];
+  ULONG Terminator;
+};
 
 struct CHUNK_PALETTE_32
 {
@@ -107,7 +122,22 @@ struct CHUNK_PALETTE_32
 
   UBYTE NumColours;
   UBYTE Palette4[32 * 3];
-  ULONG Palette32[32 * 3];
+  struct PALETTE_TABLE_32x32 Palette32;
+};
+
+/*
+    Sprite Palette - Upto 3 colours
+*/
+
+#define CHUNK_SPRITE_PALETTE_32_ID  MAKE_NODE_ID('P','A','L','S')
+#define CHUNK_SPRITE_PALETTE_32_SCHEMA 0x0102
+#define CHUNK_SPRITE_PALETTE_32_MIN_VERSION    0x0102
+
+struct CHUNK_SPRITE_PALETTE_32
+{
+  struct CHUNK_HEADER Header;
+
+  struct PALETTE_TABLE_32x4 Palette;
 };
 
 /*

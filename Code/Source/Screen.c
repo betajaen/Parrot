@@ -209,21 +209,19 @@ EXPORT UBYTE ScreenGetCursor(APTR screen)
   return CURSOR_POINT;
 }
 
-EXPORT VOID ScreenLoadPalette32(APTR obj, ULONG* palette, UWORD numColours)
+EXPORT VOID ScreenLoadPaletteTable32(APTR obj, ULONG* paletteTable)
 {
   struct SCREEN_TARGET* screen;
-  struct ViewPort* viewport;
-  UWORD ii;
 
   if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
   {
     screen = (struct SCREEN_TARGET*) (obj);
-    viewport = &screen->st_Screen->ViewPort;
+    LoadRGB32(&screen->st_Screen->ViewPort, paletteTable);
 
-    for (ii = 0; ii < numColours; ii++)
-    {
-      SetRGB32(viewport, ii, *palette++, *palette++, *palette++);
-    }
+    // for (ii = 0; ii < numColours; ii++)
+    // {
+    //   SetRGB32(viewport, ii, *palette++, *palette++, *palette++);
+    // }
   }
 }
 

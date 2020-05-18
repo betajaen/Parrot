@@ -69,6 +69,7 @@ STATIC VOID OpenParrotIff(UBYTE id);
 STATIC VOID CloseParrotIff();
 STATIC VOID ExportGame();
 STATIC VOID ExportPalette(UWORD id);
+STATIC VOID ExportCursorPalette(UWORD id);
 STATIC VOID ExportRoom();
 STATIC VOID ExportBackdrop();
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h);
@@ -132,6 +133,7 @@ INT main()
   OpenParrotIff(0);
   ExportGame();
   ExportPalette(1);
+  ExportCursorPalette(1);
   CloseParrotIff();
 
   if (OpenFile("PROGDIR:01.LFL") > 0)
@@ -367,88 +369,122 @@ STATIC VOID ExportPalette(UWORD id)
   palette.Palette4[46] = 0xF;
   palette.Palette4[47] = 0xF;
 
+
+  palette.Palette32.Count_Start = (16l << 16) | 0;
+  
   /* Black */
-  palette.Palette32[0] = 0x00000000;
-  palette.Palette32[1] = 0x00000000;
-  palette.Palette32[2] = 0x00000000;
+  palette.Palette32.Palette[0] = 0x00000000;
+  palette.Palette32.Palette[1] = 0x00000000;
+  palette.Palette32.Palette[2] = 0x00000000;
 
   /* Blue */
-  palette.Palette32[3] = 0x00000000;
-  palette.Palette32[4] = 0x00000000;
-  palette.Palette32[5] = 0xAAAAAAAA;
+  palette.Palette32.Palette[3] = 0x00000000;
+  palette.Palette32.Palette[4] = 0x00000000;
+  palette.Palette32.Palette[5] = 0xAAAAAAAA;
 
   /* Green */
-  palette.Palette32[6] = 0x00000000;
-  palette.Palette32[7] = 0xAAAAAAAA;
-  palette.Palette32[8] = 0x00000000;
+  palette.Palette32.Palette[6] = 0x00000000;
+  palette.Palette32.Palette[7] = 0xAAAAAAAA;
+  palette.Palette32.Palette[8] = 0x00000000;
 
   /* Cyan */
-  palette.Palette32[9] = 0x00000000;
-  palette.Palette32[10] = 0xAAAAAAAA;
-  palette.Palette32[11] = 0xAAAAAAAA;
+  palette.Palette32.Palette[9] = 0x00000000;
+  palette.Palette32.Palette[10] = 0xAAAAAAAA;
+  palette.Palette32.Palette[11] = 0xAAAAAAAA;
 
   /* Red */
-  palette.Palette32[12] = 0xAAAAAAAA;
-  palette.Palette32[13] = 0x00000000;
-  palette.Palette32[14] = 0x00000000;
+  palette.Palette32.Palette[12] = 0xAAAAAAAA;
+  palette.Palette32.Palette[13] = 0x00000000;
+  palette.Palette32.Palette[14] = 0x00000000;
 
   /* Magenta */
-  palette.Palette32[15] = 0xAAAAAAAA;
-  palette.Palette32[16] = 0x00000000;
-  palette.Palette32[17] = 0xAAAAAAAA;
+  palette.Palette32.Palette[15] = 0xAAAAAAAA;
+  palette.Palette32.Palette[16] = 0x00000000;
+  palette.Palette32.Palette[17] = 0xAAAAAAAA;
 
   /* Brown */
-  palette.Palette32[18] = 0xAAAAAAAA;
-  palette.Palette32[19] = 0x55555555;
-  palette.Palette32[20] = 0x00000000;
+  palette.Palette32.Palette[18] = 0xAAAAAAAA;
+  palette.Palette32.Palette[19] = 0x55555555;
+  palette.Palette32.Palette[20] = 0x00000000;
 
   /* Light Gray */
-  palette.Palette32[21] = 0xAAAAAAAA;
-  palette.Palette32[22] = 0xAAAAAAAA;
-  palette.Palette32[23] = 0xAAAAAAAA;
+  palette.Palette32.Palette[21] = 0xAAAAAAAA;
+  palette.Palette32.Palette[22] = 0xAAAAAAAA;
+  palette.Palette32.Palette[23] = 0xAAAAAAAA;
 
   /* Dark Gray */
-  palette.Palette32[24] = 0x55555555;
-  palette.Palette32[25] = 0x55555555;
-  palette.Palette32[26] = 0x55555555;
+  palette.Palette32.Palette[24] = 0x55555555;
+  palette.Palette32.Palette[25] = 0x55555555;
+  palette.Palette32.Palette[26] = 0x55555555;
 
   /* Bright Blue */
-  palette.Palette32[27] = 0x55555555;
-  palette.Palette32[28] = 0x55555555;
-  palette.Palette32[29] = 0xFFFFFFFF;
+  palette.Palette32.Palette[27] = 0x55555555;
+  palette.Palette32.Palette[28] = 0x55555555;
+  palette.Palette32.Palette[29] = 0xFFFFFFFF;
 
   /* Bright Green */
-  palette.Palette32[30] = 0x55555555;
-  palette.Palette32[31] = 0xFFFFFFFF;
-  palette.Palette32[32] = 0x55555555;
+  palette.Palette32.Palette[30] = 0x55555555;
+  palette.Palette32.Palette[31] = 0xFFFFFFFF;
+  palette.Palette32.Palette[32] = 0x55555555;
 
   /* Bright Cyan */
-  palette.Palette32[33] = 0x55555555;
-  palette.Palette32[34] = 0xFFFFFFFF;
-  palette.Palette32[35] = 0xFFFFFFFF;
+  palette.Palette32.Palette[33] = 0x55555555;
+  palette.Palette32.Palette[34] = 0xFFFFFFFF;
+  palette.Palette32.Palette[35] = 0xFFFFFFFF;
 
   /* Bright Red */
-  palette.Palette32[36] = 0xFFFFFFFF;
-  palette.Palette32[37] = 0x55555555;
-  palette.Palette32[38] = 0x55555555;
+  palette.Palette32.Palette[36] = 0xFFFFFFFF;
+  palette.Palette32.Palette[37] = 0x55555555;
+  palette.Palette32.Palette[38] = 0x55555555;
 
   /* Bright Magenta */
-  palette.Palette32[39] = 0xFFFFFFFF;
-  palette.Palette32[40] = 0x55555555;
-  palette.Palette32[41] = 0xFFFFFFFF;
+  palette.Palette32.Palette[39] = 0xFFFFFFFF;
+  palette.Palette32.Palette[40] = 0x55555555;
+  palette.Palette32.Palette[41] = 0xFFFFFFFF;
 
   /* Bright Yellow */
-  palette.Palette32[42] = 0xFFFFFFFF;
-  palette.Palette32[43] = 0xFFFFFFFF;
-  palette.Palette32[44] = 0x55555555;
+  palette.Palette32.Palette[42] = 0xFFFFFFFF;
+  palette.Palette32.Palette[43] = 0xFFFFFFFF;
+  palette.Palette32.Palette[44] = 0x55555555;
 
   /* Bright White */
-  palette.Palette32[45] = 0xFFFFFFFF;
-  palette.Palette32[46] = 0xFFFFFFFF;
-  palette.Palette32[47] = 0xFFFFFFFF;
+  palette.Palette32.Palette[45] = 0xFFFFFFFF;
+  palette.Palette32.Palette[46] = 0xFFFFFFFF;
+  palette.Palette32.Palette[47] = 0xFFFFFFFF;
 
-  PushChunk(DstIff, ID_SQWK, CHUNK_PALETTE_32_ID, sizeof(struct CHUNK_PALETTE_32));  /* backdrop.ImageAssetId, size); */
+  palette.Palette32.Terminator = 0;
+
+  PushChunk(DstIff, ID_SQWK, CHUNK_PALETTE_32_ID, sizeof(struct CHUNK_PALETTE_32));
   WriteChunkBytes(DstIff, &palette, sizeof(struct CHUNK_PALETTE_32));
+  PopChunk(DstIff);
+}
+
+STATIC VOID ExportCursorPalette(UWORD id)
+{
+  struct CHUNK_SPRITE_PALETTE_32 palette;
+  MemClear((APTR)&palette, sizeof(struct CHUNK_SPRITE_PALETTE_32));
+
+  palette.Header.Schema = CHUNK_SPRITE_PALETTE_32_SCHEMA;
+  palette.Header.MinVersion = CHUNK_SPRITE_PALETTE_32_MIN_VERSION;
+  palette.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_SPRITE_PALETTE, id);
+
+  palette.Palette.Count_Start = 4 << 16 | 17;
+  palette.Palette.Palette[0] = 0xFFffFFff;
+  palette.Palette.Palette[1] = 0x00ffFFff;
+  palette.Palette.Palette[2] = 0x00ffFFff;
+
+  palette.Palette.Palette[3] = 0x00ffFFff;
+  palette.Palette.Palette[4] = 0xFFffFFff;
+  palette.Palette.Palette[5] = 0x00ffFFff;
+
+  palette.Palette.Palette[6] = 0x00ffFFff;
+  palette.Palette.Palette[7] = 0x00ffFFff;
+  palette.Palette.Palette[8] = 0xFFffFFff;
+
+  palette.Palette.Terminator = 0;
+
+  PushChunk(DstIff, ID_SQWK, CHUNK_SPRITE_PALETTE_32_ID, sizeof(struct CHUNK_SPRITE_PALETTE_32));
+  WriteChunkBytes(DstIff, &palette, sizeof(struct CHUNK_SPRITE_PALETTE_32));
   PopChunk(DstIff);
 }
 

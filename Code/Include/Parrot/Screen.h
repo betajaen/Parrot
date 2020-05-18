@@ -39,4 +39,4 @@ VOID ScreenClear(APTR obj);
 
 VOID ScreenSwapBuffers(APTR obj);
 
-VOID ScreenLoadPalette32(APTR screen, ULONG* palette, UWORD numColours);
+VOID ScreenLoadPaletteTable32(APTR screen, ULONG* palette);
