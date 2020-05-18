@@ -182,3 +182,11 @@ BOOL StrEndsWith(CONST CHAR* pTest, CHAR value)
 CLEAN_EXIT:
   return rc;
 }
+
+VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value)
+{
+  while (length--)
+  {
+    *pDst++ = value;
+  }
+}

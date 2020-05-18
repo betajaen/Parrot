@@ -32,6 +32,7 @@
 #include <proto/iffparse.h>
 #include <libraries/iffparse.h>
 
+
 #include <Asset.h>
 
 struct ExecBase* SysBase;
@@ -277,96 +278,177 @@ STATIC VOID CloseParrotIff()
 
 STATIC VOID ExportPalette(UWORD id)
 {
-  struct CHUNK_COLOUR_PALETTE palette;
+  struct CHUNK_PALETTE_32 palette;
+  MemClear((APTR)&palette, sizeof(struct CHUNK_PALETTE_32));
 
-  palette.Header.Schema = CHUNK_COLOUR_PALETTE_SCHEMA;
-  palette.Header.MinVersion = CHUNK_COLOUR_PALETTE_MIN_VERSION;
-  palette.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_COLOUR_PALETTE, id);
+  palette.Header.Schema = CHUNK_PALETTE_32_SCHEMA;
+  palette.Header.MinVersion = CHUNK_PALETTE_32_MIN_VERSION;
+  palette.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_PALETTE_32, id);
   
   palette.NumColours = 16;
   
   /* Black */
-  palette.Palette[0] = 0x00;
-  palette.Palette[1] = 0x00;
-  palette.Palette[2] = 0x00;
+  palette.Palette4[0] = 0x0;
+  palette.Palette4[1] = 0x0;
+  palette.Palette4[2] = 0x0;
 
   /* Blue */
-  palette.Palette[3] = 0x00;
-  palette.Palette[4] = 0x00;
-  palette.Palette[5] = 0xAA;
+  palette.Palette4[3] = 0x0;
+  palette.Palette4[4] = 0x0;
+  palette.Palette4[5] = 0xA;
 
   /* Green */
-  palette.Palette[6] = 0x00;
-  palette.Palette[7] = 0xAA;
-  palette.Palette[8] = 0x00;
+  palette.Palette4[6] = 0x0;
+  palette.Palette4[7] = 0xA;
+  palette.Palette4[8] = 0x0;
 
   /* Cyan */
-  palette.Palette[9] = 0x00;
-  palette.Palette[10] = 0xAA;
-  palette.Palette[11] = 0xAA;
+  palette.Palette4[9] = 0x0;
+  palette.Palette4[10] = 0xA;
+  palette.Palette4[11] = 0xA;
 
   /* Red */
-  palette.Palette[12] = 0xAA;
-  palette.Palette[13] = 0x00;
-  palette.Palette[14] = 0x00;
+  palette.Palette4[12] = 0xA;
+  palette.Palette4[13] = 0x0;
+  palette.Palette4[14] = 0x0;
 
   /* Magenta */
-  palette.Palette[15] = 0xAA;
-  palette.Palette[16] = 0x00;
-  palette.Palette[17] = 0xAA;
+  palette.Palette4[15] = 0xA;
+  palette.Palette4[16] = 0x0;
+  palette.Palette4[17] = 0xA;
 
   /* Brown */
-  palette.Palette[18] = 0xAA;
-  palette.Palette[19] = 0x55;
-  palette.Palette[20] = 0x00;
+  palette.Palette4[18] = 0xA;
+  palette.Palette4[19] = 0x5;
+  palette.Palette4[20] = 0x0;
 
   /* Light Gray */
-  palette.Palette[21] = 0xAA;
-  palette.Palette[22] = 0xAA;
-  palette.Palette[23] = 0xAA;
+  palette.Palette4[21] = 0xA;
+  palette.Palette4[22] = 0xA;
+  palette.Palette4[23] = 0xA;
 
   /* Dark Gray */
-  palette.Palette[24] = 0x55;
-  palette.Palette[25] = 0x55;
-  palette.Palette[26] = 0x55;
+  palette.Palette4[24] = 0x5;
+  palette.Palette4[25] = 0x5;
+  palette.Palette4[26] = 0x5;
 
   /* Bright Blue */
-  palette.Palette[27] = 0x55;
-  palette.Palette[28] = 0x55;
-  palette.Palette[29] = 0xFF;
+  palette.Palette4[27] = 0x5;
+  palette.Palette4[28] = 0x5;
+  palette.Palette4[29] = 0xF;
 
   /* Bright Green */
-  palette.Palette[30] = 0x55;
-  palette.Palette[31] = 0xFF;
-  palette.Palette[32] = 0x55;
+  palette.Palette4[30] = 0x5;
+  palette.Palette4[31] = 0xF;
+  palette.Palette4[32] = 0x5;
   
   /* Bright Cyan */
-  palette.Palette[33] = 0x55;
-  palette.Palette[34] = 0xFF;
-  palette.Palette[35] = 0xFF;
+  palette.Palette4[33] = 0x5;
+  palette.Palette4[34] = 0xF;
+  palette.Palette4[35] = 0xF;
 
   /* Bright Red */
-  palette.Palette[36] = 0xFF;
-  palette.Palette[37] = 0x55;
-  palette.Palette[38] = 0x55;
+  palette.Palette4[36] = 0xF;
+  palette.Palette4[37] = 0x5;
+  palette.Palette4[38] = 0x5;
 
   /* Bright Magenta */
-  palette.Palette[39] = 0xFF;
-  palette.Palette[40] = 0x55;
-  palette.Palette[41] = 0xFF;
+  palette.Palette4[39] = 0xF;
+  palette.Palette4[40] = 0x5;
+  palette.Palette4[41] = 0xF;
 
   /* Bright Yellow */
-  palette.Palette[42] = 0xFF;
-  palette.Palette[43] = 0xFF;
-  palette.Palette[44] = 0x55;
+  palette.Palette4[42] = 0xF;
+  palette.Palette4[43] = 0xF;
+  palette.Palette4[44] = 0x5;
 
   /* Bright White */
-  palette.Palette[45] = 0xFF;
-  palette.Palette[46] = 0xFF;
-  palette.Palette[47] = 0xFF;
+  palette.Palette4[45] = 0xF;
+  palette.Palette4[46] = 0xF;
+  palette.Palette4[47] = 0xF;
 
-  PushChunk(DstIff, ID_SQWK, CHUNK_COLOUR_PALETTE_ID, sizeof(struct CHUNK_HEADER) + sizeof(UBYTE) + 48);  /* backdrop.ImageAssetId, size); */
-  WriteChunkBytes(DstIff, &palette, sizeof(struct CHUNK_HEADER) + sizeof(UBYTE) + 48);
+  /* Black */
+  palette.Palette32[0] = 0x00000000;
+  palette.Palette32[1] = 0x00000000;
+  palette.Palette32[2] = 0x00000000;
+
+  /* Blue */
+  palette.Palette32[3] = 0x00000000;
+  palette.Palette32[4] = 0x00000000;
+  palette.Palette32[5] = 0xAAAAAAAA;
+
+  /* Green */
+  palette.Palette32[6] = 0x00000000;
+  palette.Palette32[7] = 0xAAAAAAAA;
+  palette.Palette32[8] = 0x00000000;
+
+  /* Cyan */
+  palette.Palette32[9] = 0x00000000;
+  palette.Palette32[10] = 0xAAAAAAAA;
+  palette.Palette32[11] = 0xAAAAAAAA;
+
+  /* Red */
+  palette.Palette32[12] = 0xAAAAAAAA;
+  palette.Palette32[13] = 0x00000000;
+  palette.Palette32[14] = 0x00000000;
+
+  /* Magenta */
+  palette.Palette32[15] = 0xAAAAAAAA;
+  palette.Palette32[16] = 0x00000000;
+  palette.Palette32[17] = 0xAAAAAAAA;
+
+  /* Brown */
+  palette.Palette32[18] = 0xAAAAAAAA;
+  palette.Palette32[19] = 0x55555555;
+  palette.Palette32[20] = 0x00000000;
+
+  /* Light Gray */
+  palette.Palette32[21] = 0xAAAAAAAA;
+  palette.Palette32[22] = 0xAAAAAAAA;
+  palette.Palette32[23] = 0xAAAAAAAA;
+
+  /* Dark Gray */
+  palette.Palette32[24] = 0x55555555;
+  palette.Palette32[25] = 0x55555555;
+  palette.Palette32[26] = 0x55555555;
+
+  /* Bright Blue */
+  palette.Palette32[27] = 0x55555555;
+  palette.Palette32[28] = 0x55555555;
+  palette.Palette32[29] = 0xFFFFFFFF;
+
+  /* Bright Green */
+  palette.Palette32[30] = 0x55555555;
+  palette.Palette32[31] = 0xFFFFFFFF;
+  palette.Palette32[32] = 0x55555555;
+
+  /* Bright Cyan */
+  palette.Palette32[33] = 0x55555555;
+  palette.Palette32[34] = 0xFFFFFFFF;
+  palette.Palette32[35] = 0xFFFFFFFF;
+
+  /* Bright Red */
+  palette.Palette32[36] = 0xFFFFFFFF;
+  palette.Palette32[37] = 0x55555555;
+  palette.Palette32[38] = 0x55555555;
+
+  /* Bright Magenta */
+  palette.Palette32[39] = 0xFFFFFFFF;
+  palette.Palette32[40] = 0x55555555;
+  palette.Palette32[41] = 0xFFFFFFFF;
+
+  /* Bright Yellow */
+  palette.Palette32[42] = 0xFFFFFFFF;
+  palette.Palette32[43] = 0xFFFFFFFF;
+  palette.Palette32[44] = 0x55555555;
+
+  /* Bright White */
+  palette.Palette32[45] = 0xFFFFFFFF;
+  palette.Palette32[46] = 0xFFFFFFFF;
+  palette.Palette32[47] = 0xFFFFFFFF;
+
+  PushChunk(DstIff, ID_SQWK, CHUNK_PALETTE_32_ID, sizeof(struct CHUNK_PALETTE_32));  /* backdrop.ImageAssetId, size); */
+  WriteChunkBytes(DstIff, &palette, sizeof(struct CHUNK_PALETTE_32));
   PopChunk(DstIff);
 }
 
@@ -397,6 +479,7 @@ STATIC VOID ExportGame()
 STATIC VOID ExportBackdrop()
 {
   struct CHUNK_BACKDROP backdrop;
+
   ULONG  chunkySize, planarSize, p, imgOffset;
   UBYTE* chunky, * planar;
   UWORD  x, y, w, h;
@@ -425,7 +508,7 @@ STATIC VOID ExportBackdrop()
 
   backdrop.Width = w;
   backdrop.Height = h;
-  backdrop.PaletteId = MAKE_ASSET_ID(0, ASSET_TYPE_COLOUR_PALETTE, 1);
+  backdrop.PaletteId = MAKE_ASSET_ID(0, ASSET_TYPE_PALETTE_32, 1);
 
   PushChunk(DstIff, ID_SQWK, CHUNK_BACKDROP_ID, IFFSIZE_UNKNOWN);
   WriteChunkBytes(DstIff, &backdrop, sizeof(struct CHUNK_BACKDROP));

@@ -26,10 +26,14 @@
 */
 
 #include <Parrot/Parrot.h>
+#include <Parrot/Requester.h>
+#include <Parrot/Arena.h>
+#include <Parrot/String.h>
 
 #include <proto/exec.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
+
 
 #define PARROT_SCREEN_CLASS 0x44a2d27d 
 
@@ -43,14 +47,6 @@ struct SCREEN_TARGET
   struct RastPort      st_RastPorts[2];
 };
 
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
-ULONG ObjGetClass(APTR alloc);
-
-VOID ScreenClear(APTR screen);
-
-VOID ScreenSwapBuffers(APTR screen);
-
 EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
 {
   struct NewScreen      newScreen;
@@ -58,6 +54,8 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
   struct SCREEN_TARGET* screen;
 
   screen = NULL;
+  ZeroInit(struct NewScreen, newScreen);
+  ZeroInit(struct NewWindow, newWindow);
 
   if (info->si_Width < 320)
   {
@@ -96,7 +94,7 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
     newScreen.ViewModes |= LACE;
   }
 
-  newScreen.Type = CUSTOMSCREEN;
+  newScreen.Type = CUSTOMSCREEN | SCREENQUIET;
 
   // if ((info->si_Flags & SIF_IS_PUBLIC) != 0)
   // {
@@ -110,7 +108,7 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
   newScreen.DefaultTitle = (UBYTE*)info->si_Title;
   newScreen.Gadgets = NULL;
   newScreen.CustomBitMap = NULL;
-
+ 
   screen = (struct SCREEN_TARGET*) ObjAlloc(arena, sizeof(struct SCREEN_TARGET), PARROT_SCREEN_CLASS);
 
   if (NULL == screen)
@@ -119,14 +117,7 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
     goto CLEAN_EXIT;
   }
 
-  screen->st_Screen = OpenScreenTags(&newScreen,
-    SA_Quiet, TRUE,
-    SA_ShowTitle, FALSE,
-    SA_Draggable, FALSE,
-    SA_Exclusive, TRUE,
-    SA_Type, CUSTOMSCREEN,
-    TAG_END
-  );
+  screen->st_Screen = OpenScreen(&newScreen);
 
   if (NULL == screen->st_Screen)
   {
@@ -136,37 +127,29 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
 
   screen->st_ReadBuffer = 0;
   screen->st_WriteBuffer = 1;
-
+  
   screen->st_Buffers[0] = AllocScreenBuffer(screen->st_Screen, NULL, SB_SCREEN_BITMAP);
   InitRastPort(&screen->st_RastPorts[0]);
   screen->st_RastPorts[0].BitMap = screen->st_Buffers[0]->sb_BitMap;
-
+  
   screen->st_Buffers[1] = AllocScreenBuffer(screen->st_Screen, NULL, 0);
   InitRastPort(&screen->st_RastPorts[1]);
   screen->st_RastPorts[1].BitMap = screen->st_Buffers[1]->sb_BitMap;
 
-  newWindow.LeftEdge = 0;
-  newWindow.TopEdge = 0;
   newWindow.Width = info->si_Width;
   newWindow.Height = info->si_Height;
-
-  screen->st_Window = OpenWindowTags(&newWindow,
-    WA_CustomScreen, (Tag) screen->st_Screen,
-    WA_Backdrop, TRUE,
-    WA_DragBar, FALSE,
-    WA_Borderless, TRUE,
-    WA_SimpleRefresh, TRUE,
-    WA_NoCareRefresh, TRUE,
-    WA_Activate, TRUE,
-    TAG_END
-  );
-
+  newWindow.Screen = screen->st_Screen;
+  newWindow.Type = CUSTOMSCREEN;
+  newWindow.Flags = WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_ACTIVATE;
+  
+  screen->st_Window = OpenWindow(&newWindow);
+  
   if (NULL == screen->st_Window)
   {
     RequesterF("Close", "Could not open window for Parrot", info->si_Width, info->si_Height, info->si_Depth);
     goto CLEAN_EXIT;
   }
-
+  
   CLEAN_EXIT:
 
   return (APTR) screen;
@@ -226,8 +209,22 @@ EXPORT UBYTE ScreenGetCursor(APTR screen)
   return CURSOR_POINT;
 }
 
-EXPORT VOID ScreenSetColour(APTR screen, UWORD index, UBYTE r, UBYTE g, UBYTE b)
+EXPORT VOID ScreenLoadPalette32(APTR obj, ULONG* palette, UWORD numColours)
 {
+  struct SCREEN_TARGET* screen;
+  struct ViewPort* viewport;
+  UWORD ii;
+
+  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
+  {
+    screen = (struct SCREEN_TARGET*) (obj);
+    viewport = &screen->st_Screen->ViewPort;
+
+    for (ii = 0; ii < numColours; ii++)
+    {
+      SetRGB32(viewport, ii, *palette++, *palette++, *palette++);
+    }
+  }
 }
 
 EXPORT VOID ScreenClear(APTR obj)

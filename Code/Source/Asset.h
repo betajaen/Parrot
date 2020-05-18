@@ -44,7 +44,7 @@
 #define ASSET_TYPE_MENU       4
 
 #define ASSET_TYPE_BACKDROP        5
-#define ASSET_TYPE_COLOUR_PALETTE  6
+#define ASSET_TYPE_PALETTE_32  6
 
 struct CHUNK_HEADER
 {
@@ -94,19 +94,20 @@ struct CHUNK_BACKDROP
 };
 
 /*
-    Colour Palette
+    Colour Palette - Upto 32 colours
 */
 
-#define CHUNK_COLOUR_PALETTE_ID  MAKE_NODE_ID('C','P','A','L')
-#define CHUNK_COLOUR_PALETTE_SCHEMA 0x0100
-#define CHUNK_COLOUR_PALETTE_MIN_VERSION    0x0100
+#define CHUNK_PALETTE_32_ID  MAKE_NODE_ID('P','A','L','5')
+#define CHUNK_PALETTE_32_SCHEMA 0x0101
+#define CHUNK_PALETTE_32_MIN_VERSION    0x0101
 
-struct CHUNK_COLOUR_PALETTE
+struct CHUNK_PALETTE_32
 {
   struct CHUNK_HEADER Header;
 
   UBYTE NumColours;
-  UBYTE Palette[256 * 3];
+  UBYTE Palette4[32 * 3];
+  ULONG Palette32[32 * 3];
 };
 
 /*

@@ -38,3 +38,7 @@ ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
 BOOL StrStartsWith(CONST CHAR* pTest, CHAR value);
 
 BOOL StrEndsWith(CONST CHAR* test, CHAR value);
+
+VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value);
+
+#define ZeroInit(T, X) FillMem((UBYTE*) &X, sizeof(T), 0);

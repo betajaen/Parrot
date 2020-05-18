@@ -38,3 +38,5 @@ VOID ScreenSetColour(APTR screen, UWORD index, UBYTE r, UBYTE g, UBYTE b);
 VOID ScreenClear(APTR obj);
 
 VOID ScreenSwapBuffers(APTR obj);
+
+VOID ScreenLoadPalette32(APTR screen, ULONG* palette, UWORD numColours);

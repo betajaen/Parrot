@@ -29,6 +29,7 @@
 #include <Parrot/Archive.h>
 #include <Parrot/Arena.h>
 #include <Parrot/Requester.h>
+#include <Parrot/Screen.h>
 
 #include "Asset.h"
 
@@ -36,11 +37,14 @@
 #include <proto/dos.h>
 
 struct ARCHIVE* GameArchive;
-
 struct CHUNK_GAME_INFO GameInfo;
+struct CHUNK_PALETTE_32 GamePalette;
+APTR GameScreen;
 
 EXPORT VOID GameStart(STRPTR path)
 {
+  struct SCREEN_INFO screenInfo;
+
   ArenaGame = ArenaNew(16384, 0ul);
   ArenaChapter = NULL;
   ArenaRoom = NULL;
@@ -48,9 +52,21 @@ EXPORT VOID GameStart(STRPTR path)
   SetArchivesPath(path);
   GameArchive = OpenArchive(0);
 
-  ReadAssetFromArchive(GameArchive, CHUNK_GAME_INFO_ID, &GameInfo, sizeof(struct CHUNK_GAME_INFO));
+  ReadAssetFromArchive(GameArchive, CHUNK_GAME_INFO_ID, (APTR) &GameInfo, sizeof(struct CHUNK_GAME_INFO));
+  ReadAssetFromArchive(GameArchive, CHUNK_PALETTE_32_ID, (APTR)&GamePalette, sizeof(struct CHUNK_PALETTE_32));
 
-  RequesterF("OK", "Game is %s by %s", &GameInfo.Title[0], &GameInfo.Author[0]);
+  screenInfo.si_Width = GameInfo.Width;
+  screenInfo.si_Height = GameInfo.Height;
+  screenInfo.si_Depth = GameInfo.Depth;
+  screenInfo.si_Flags = 0;
+  screenInfo.si_Left = 0;
+  screenInfo.si_Top = 0;
+  screenInfo.si_Title = &GameInfo.Title[0];
+
+  GameScreen = ScreenNew(ArenaGame, &screenInfo);
+  ScreenLoadPalette32(GameScreen, &GamePalette.Palette32[0], GamePalette.NumColours);
+  Delay(50 * 3);
+  ScreenDelete(GameScreen);
 
   CloseArchive(GameArchive);
 }

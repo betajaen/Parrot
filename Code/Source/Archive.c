@@ -157,6 +157,8 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG id, APTR* data, 
 
     if (node->cn_ID == id)
     {
+
+
       if (node->cn_Size <= dataCapacity)
       {
         ReadChunkBytes(archive->pa_Handle, data, node->cn_Size);
