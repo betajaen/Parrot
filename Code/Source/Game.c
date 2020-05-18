@@ -69,7 +69,8 @@ EXPORT VOID GameStart(STRPTR path)
   GameScreen = ScreenNew(ArenaGame, &screenInfo);
   ScreenLoadPaletteTable32(GameScreen, (ULONG*) &GamePalette.Palette32);
   ScreenLoadPaletteTable32(GameScreen, (ULONG*) &GameCursorPalette.Palette);
-  
+  ScreenSetCursor(GameScreen, 3);
+
   Delay(50 * 3);
   ScreenDelete(GameScreen);
 

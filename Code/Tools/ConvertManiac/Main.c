@@ -469,17 +469,17 @@ STATIC VOID ExportCursorPalette(UWORD id)
   palette.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_SPRITE_PALETTE, id);
 
   palette.Palette.Count_Start = 4 << 16 | 17;
-  palette.Palette.Palette[0] = 0xFFffFFff;
-  palette.Palette.Palette[1] = 0x00ffFFff;
-  palette.Palette.Palette[2] = 0x00ffFFff;
+  palette.Palette.Palette[0] = 0x00000000;
+  palette.Palette.Palette[1] = 0x00000000;
+  palette.Palette.Palette[2] = 0x00000000;
 
-  palette.Palette.Palette[3] = 0x00ffFFff;
-  palette.Palette.Palette[4] = 0xFFffFFff;
-  palette.Palette.Palette[5] = 0x00ffFFff;
+  palette.Palette.Palette[3] = 0xFFFFFFFF;
+  palette.Palette.Palette[4] = 0xFFFFFFFF;
+  palette.Palette.Palette[5] = 0xFFFFFFFF;
 
-  palette.Palette.Palette[6] = 0x00ffFFff;
-  palette.Palette.Palette[7] = 0x00ffFFff;
-  palette.Palette.Palette[8] = 0xFFffFFff;
+  palette.Palette.Palette[6] = 0xAAAAAAAA;
+  palette.Palette.Palette[7] = 0xAAAAAAAA;
+  palette.Palette.Palette[8] = 0xAAAAAAAA;
 
   palette.Palette.Terminator = 0;
 

@@ -34,6 +34,7 @@
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 
+#include "Cursor.inc"
 
 #define PARROT_SCREEN_CLASS 0x44a2d27d 
 
@@ -200,8 +201,23 @@ EXPORT VOID ScreenDelete(APTR obj)
   }
 }
 
-EXPORT VOID ScreenSetCursor(APTR screen, UBYTE cursor)
+EXPORT VOID ScreenSetCursor(APTR obj, UBYTE type)
 {
+  struct SCREEN_TARGET* screen;
+
+  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
+  {
+    screen = (struct SCREEN_TARGET*) (obj);
+    UWORD* cursor = NULL;
+
+    switch (type)
+    {
+      case 0: ClearPointer(screen->st_Window); break;
+      case 1: SetPointer(screen->st_Window, Cursor0, 5, 5, 3, 3); break;
+      case 2: SetPointer(screen->st_Window, Cursor1, 13, 13, 6, 6); break;
+      case 3: SetPointer(screen->st_Window, Cursor2, 15, 15, 7, 7); break;
+    }
+  }
 }
 
 EXPORT UBYTE ScreenGetCursor(APTR screen)
