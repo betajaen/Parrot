@@ -76,6 +76,7 @@ struct ASSET_FACTORY AssetFactories[] = {
   { CT_PALETTE32, sizeof(struct PALETTE32_TABLE) },
   { CT_PALETTE4, sizeof(struct PALETTE4_TABLE) },
   { CT_ROOM, sizeof(struct ROOM) },
+  { CT_IMAGE, sizeof(struct IMAGE) },
   { 0, 0 }
 };
 
@@ -99,18 +100,18 @@ EXPORT VOID SetArchivesPath(CHAR* path)
   BasePath = path;
 
   if (StrEndsWith(BasePath, '/'))
-    JoinPathStr = "%s%d.Parrot";
+    JoinPathStr = "%s%ld.Parrot";
   else
-    JoinPathStr = "%s/%d.Parrot";
+    JoinPathStr = "%s/%ld.Parrot";
 }
 
-STATIC struct ARCHIVE* LoadArchive(UBYTE id)
+STATIC struct ARCHIVE* LoadArchive(UWORD id)
 {
   struct ARCHIVE* archive;
   BPTR file;
   CHAR path[128];
 
-  if (0 == StrFormat(&path[0], sizeof(path), JoinPathStr, BasePath, id))
+  if (0 == StrFormat(&path[0], sizeof(path), JoinPathStr, BasePath, (ULONG) id))
   {
     return NULL;
   }
@@ -119,6 +120,7 @@ STATIC struct ARCHIVE* LoadArchive(UBYTE id)
 
   if (NULL == file)
   {
+    RequesterF("OK", "Could not open archive %s", path);
     return NULL;
   }
 
@@ -127,15 +129,17 @@ STATIC struct ARCHIVE* LoadArchive(UBYTE id)
 
   archive->pa_Handle = AllocIFF();
   archive->pa_Handle->iff_Stream = file;
+  archive->pa_Id = id;
+  archive->pa_Usage = 0;
 
   InitIFFasDOS(archive->pa_Handle);
-  OpenIFF(archive->pa_Handle, IFFF_READ);
+  LONG v = OpenIFF(archive->pa_Handle, IFFF_READ);
 
   return archive;
 }
 
 
-EXPORT struct ARCHIVE* OpenArchive(UBYTE id)
+EXPORT struct ARCHIVE* OpenArchive(UWORD id)
 {
   struct ARCHIVE* archive;
 
@@ -184,9 +188,14 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
     err = ParseIFF(archive->pa_Handle, IFFPARSE_RAWSTEP);
 
     if (err == IFFERR_EOC)
+    {
       continue;
+    }
     else if (err)
+    {
+      RequesterF("OK", "Chunk Read Error %ld", err);
       break;
+    }
 
     node = CurrentChunk(archive->pa_Handle);
 
@@ -197,11 +206,17 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
       {
         ReadChunkBytes(archive->pa_Handle, &chunkHeader, sizeof(struct CHUNK_HEADER));
 
-        if (chunkHeader.Id != chunkId)
+        if (chunkHeader.ch_Id != chunkId)
+        {
+          RequesterF("OK", "Id dont match");
           continue;
+        }
 
-        if ((chunkHeader.Flags & chunkArch) == 0)
+        if ((chunkHeader.ch_Flags & chunkArch) == 0)
+        {
+          RequesterF("OK", "Flags dont match");
           continue;
+        }
 
         ReadChunkBytes(archive->pa_Handle, data, dataSize);
 
@@ -229,6 +244,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
   struct ASSET* asset;
   struct ARCHIVE* archive;
   ULONG  assetSize;
+  CHAR   strtype[5];
 
   for (asset = ((struct ASSET*) Assets.mlh_Head);
        asset != NULL; 
@@ -252,7 +268,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 
   if (assetSize == 0)
   {
-    RequesterF("OK", "Could not find registered factory for %lx", nodeType);
+    RequesterF("OK", "Could not find registered factory for \"%s\"", IDtoStr(nodeType, strtype) );
     return NULL;
   }
 
@@ -260,7 +276,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 
   if (ReadAssetFromArchive(archive, nodeType, assetId, arch, (APTR) (asset + 1), assetSize) == FALSE)
   {
-    RequesterF("OK", "Could not find registered factory for %ld, %lx", nodeType, (ULONG) assetId);
+    RequesterF("OK", "Could not load asset %s:%ld from archive %ld", IDtoStr(nodeType, strtype), (ULONG) assetId, (ULONG) archiveId);
     return NULL;
   }
   

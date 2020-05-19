@@ -41,4 +41,4 @@ BOOL StrEndsWith(CONST CHAR* test, CHAR value);
 
 VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value);
 
-#define ZeroInit(T, X) FillMem((UBYTE*) &X, sizeof(T), 0);
+#define InitStackVar(T, X) FillMem((UBYTE*) &X, sizeof(T), 0);

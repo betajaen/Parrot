@@ -29,6 +29,6 @@ struct ARCHIVE;
 
 VOID SetArchivesPath(CHAR* path);
 
-struct ARCHIVE* OpenArchive(UBYTE id);
+struct ARCHIVE* OpenArchive(UWORD id);
 
 VOID CloseArchive(struct ARCHIVE* archive);

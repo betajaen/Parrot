@@ -26,60 +26,44 @@
 */
 
 #include <Parrot/Parrot.h>
-
-#include <proto/exec.h>
-
-#define ROOM_MAGIC 0x524F4F4Dul
-
-APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-struct ASSET* LoadAsset(APTR arena, ULONG id);
-void UnloadAsset(APTR arena, struct ASSET* asset);
-
-EXPORT struct ASSET* LoadRoom(APTR arena, ULONG id)
-{
-  struct ROOM* room;
-
-  room = ObjAlloc(arena, sizeof(struct ROOM), ROOM_MAGIC);
-
-  return (struct ASSET*) room;
-}
+#include <Parrot/Arena.h>
+#include <Parrot/Asset.h>
 
 
-EXPORT VOID UnpackRoom(APTR arena, struct ROOM* room, ULONG unpack)
+EXPORT VOID UnpackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG unpack)
 {
   UBYTE ii;
-  struct IMAGE_REF* backdrop;
+  UWORD backdrop;
 
   if ((unpack & UNPACK_ROOM_BACKDROPS) != 0)
   {
     for (ii = 0; ii < 4; ii++)
     {
-      backdrop = &room->rm_Backdrops[ii];
+      backdrop = room->rm_Backdrops[ii];
 
-      if (0 != backdrop->ar_Id && NULL == backdrop->ar_Ptr)
+      if (0 != backdrop && NULL == unpackedRoom->ur_Backdrops[ii])
       {
-        backdrop->ar_Ptr = (struct IMAGE*) LoadAsset(arena, backdrop->ar_Id);
+        unpackedRoom->ur_Backdrops[ii] = LoadAsset(arena, ARCHIVE_UNKNOWN, CT_IMAGE, backdrop, CHUNK_FLAG_ARCH_ANY);
       }
     }
   }
 }
 
-EXPORT VOID PackRoom(APTR arena, struct ROOM* room, ULONG pack)
+EXPORT VOID PackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG pack)
 {
   UBYTE ii;
-  struct IMAGE_REF* backdrop;
+  UWORD backdrop;
 
   if ((pack & UNPACK_ROOM_BACKDROPS) != 0)
   {
     for (ii = 0; ii < 4; ii++)
     {
-      backdrop = &room->rm_Backdrops[ii];
+      backdrop = room->rm_Backdrops[ii];
 
-      if (0 != backdrop->ar_Id && NULL != backdrop->ar_Ptr)
+      if (0 != backdrop && NULL != unpackedRoom->ur_Backdrops[ii])
       {
-        UnloadAsset(arena, (struct ASSET*) backdrop->ar_Ptr);
-        backdrop->ar_Ptr = NULL;
+        UnloadAsset(arena, unpackedRoom->ur_Backdrops[ii]);
+        unpackedRoom->ur_Backdrops[ii] = NULL;
       }
     }
   }

@@ -55,8 +55,8 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
   struct SCREEN_TARGET* screen;
 
   screen = NULL;
-  ZeroInit(struct NewScreen, newScreen);
-  ZeroInit(struct NewWindow, newWindow);
+  InitStackVar(struct NewScreen, newScreen);
+  InitStackVar(struct NewWindow, newWindow);
 
   if (info->si_Width < 320)
   {
@@ -257,7 +257,7 @@ EXPORT VOID ScreenLoadPaletteTable32(APTR obj, struct PALETTE32_TABLE* paletteTa
   if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
   {
     screen = (struct SCREEN_TARGET*) (obj);
-    LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->Count_Start);
+    LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
   }
 }
 
@@ -268,7 +268,7 @@ EXPORT VOID ScreenLoadPaletteTable4(APTR obj, struct PALETTE4_TABLE* paletteTabl
   if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
   {
     screen = (struct SCREEN_TARGET*) (obj);
-    LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->Count_Start);
+    LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
   }
 }
 

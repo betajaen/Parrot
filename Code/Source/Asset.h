@@ -33,16 +33,4 @@
 #define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
 #define ID_MNIC MAKE_NODE_ID('M','N','C','M')
 
-/*
-    Room Info
-*/
-struct CHUNK_ROOM
-{
-  struct CHUNK_HEADER Header;
-
-  UWORD Width;
-  UWORD Height;
-  UWORD Backdrops[4];
-};
-
 #endif

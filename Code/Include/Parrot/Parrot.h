@@ -154,16 +154,17 @@ struct ASSET_REF
 */
 struct CHUNK_HEADER
 {
-  UWORD Id;
-  UWORD Flags;
+  UWORD ch_Id;
+  UWORD ch_Flags;
 };
 
-#define CHUNK_FLAG_ARCH_ECS  (1 << 0)
-#define CHUNK_FLAG_ARCH_AGA  (1 << 1)
-#define CHUNK_FLAG_ARCH_RTG  (1 << 2)
-#define CHUNK_FLAG_ARCH_ANY  (CHUNK_FLAG_ARCH_ECS | CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG)
+#define CHUNK_FLAG_ARCH_ECS       (1 << 0)
+#define CHUNK_FLAG_ARCH_AGA       (1 << 1)
+#define CHUNK_FLAG_ARCH_RTG       (1 << 2)
+#define CHUNK_FLAG_ARCH_ANY       (CHUNK_FLAG_ARCH_ECS | CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG)
 
-#define CHUNK_FLAG_IGNORE    (1 << 15)
+#define CHUNK_FLAG_HAS_DATA     (1 << 14)
+#define CHUNK_FLAG_IGNORE         (1 << 15)
 
 
 /*
@@ -172,15 +173,15 @@ struct CHUNK_HEADER
 
 struct GAME_INFO
 {
-  ULONG             GameId;
-  ULONG             GameVersion;
-  CHAR              Title[64];
-  CHAR              ShortTitle[16];
-  CHAR              Author[128];
-  CHAR              Release[128];
-  UWORD             Width;
-  UWORD             Height;
-  UWORD             Depth;
+  ULONG             gi_GameId;
+  ULONG             gi_GameVersion;
+  CHAR              gi_Title[64];
+  CHAR              gi_ShortTitle[16];
+  CHAR              gi_Author[128];
+  CHAR              gi_Release[128];
+  UWORD             gi_Width;
+  UWORD             gi_Height;
+  UWORD             gi_Depth;
 };
 
 /*
@@ -189,9 +190,9 @@ struct GAME_INFO
 */
 struct PALETTE32_TABLE
 {
-  ULONG Count_Start;
-  ULONG Index[32 * 3];
-  ULONG Terminator;
+  ULONG pt_Header;
+  ULONG pt_Data[32 * 3];
+  ULONG pt_Null;
 };
 
 /*
@@ -199,9 +200,9 @@ struct PALETTE32_TABLE
 */
 struct PALETTE4_TABLE
 {
-  ULONG Count_Start;
-  ULONG Index[4 * 3];
-  ULONG Terminator;
+  ULONG pt_Header;
+  ULONG pt_Data[4 * 3];
+  ULONG pt_Null;
 };
 
 
@@ -211,49 +212,31 @@ struct PALETTE4_TABLE
 
 struct IMAGE
 {
-  struct ASSET      as_Asset;
-
   UWORD             im_Width;
   UWORD             im_Height;
   UBYTE             im_Depth;
   UBYTE             im_Format;
-  BYTE*             im_Data;
+  ULONG             im_Length;
+  UWORD             im_Palette;
 };
 
-struct IMAGE_REF
-{
-  struct IMAGE*     ar_Ptr;
-  UWORD             ar_Id;
-};
+/*
 
-struct IMAGE_CHUNK
-{
-  struct CHUNK_HEADER Header;
+      Room
 
-  UWORD Width;
-  UWORD Height;
-  UWORD Palette;
-};
-
-
+*/
 
 struct ROOM
 {
   UWORD             rm_Width;
   UWORD             rm_Height;
-  struct IMAGE_REF  rm_Backdrops[4];
+  UWORD             rm_Backdrops[4];
 };
 
-struct ROOM_ASSET
+struct UNPACKED_ROOM
 {
-  struct ASSET      as_Asset;
-  struct ROOM       as_Data;
-};
-
-struct ROOM_REF
-{
-  struct ROOM*      ar_Ptr;
-  UWORD             ar_Id;
+  struct ROOM*      ur_Room;
+  struct IMAGE*     ur_Backdrops[4];
 };
 
 #define UNPACK_ROOM_BACKDROPS  1

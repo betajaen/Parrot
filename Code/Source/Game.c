@@ -32,6 +32,7 @@
 #include <Parrot/Screen.h>
 #include <Parrot/Asset.h>
 #include <Parrot/Room.h>
+#include <Parrot/String.h>
 
 #include "Asset.h"
 
@@ -59,8 +60,10 @@ EXPORT VOID GameStart(STRPTR path)
 {
   struct SCREEN_INFO screenInfo;
   struct ROOM* room;
-
+  struct UNPACKED_ROOM uroom;
   UBYTE ii;
+
+  InitStackVar(struct UNPACKED_ROOM, uroom);
 
   ArenaGame = ArenaNew(16384, 0ul);
   ArenaChapter = ArenaNew(131072, 0ul);
@@ -73,22 +76,23 @@ EXPORT VOID GameStart(STRPTR path)
   GamePalette = LoadAssetT(struct PALETTE32_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE32, 1, CHUNK_FLAG_ARCH_AGA);
   GameCursorPalette = LoadAssetT(struct PALETTE4_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE4, 1, CHUNK_FLAG_ARCH_AGA);
 
-  screenInfo.si_Width = GameInfo->Width;
-  screenInfo.si_Height = GameInfo->Height;
-  screenInfo.si_Depth = GameInfo->Depth;
+  screenInfo.si_Width = GameInfo->gi_Width;
+  screenInfo.si_Height = GameInfo->gi_Height;
+  screenInfo.si_Depth = GameInfo->gi_Depth;
   screenInfo.si_Flags = 0;
   screenInfo.si_Left = 0;
   screenInfo.si_Top = 0;
-  screenInfo.si_Title = &GameInfo->Title[0];
+  screenInfo.si_Title = &GameInfo->gi_Title[0];
 
   GameScreen = ScreenNew(ArenaGame, &screenInfo);
   ScreenLoadPaletteTable32(GameScreen, GamePalette);
   ScreenLoadPaletteTable4(GameScreen, GameCursorPalette);
-
+   
   Busy();
   
-  /* ArenaRollback(ArenaRoom);
-  room = (struct ROOM*) LoadAsset(ArenaChapter, MAKE_ASSET_ID(1, ASSET_TYPE_ROOM, 1));
+  /*
+
+  room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
 
   if (room == NULL)
   {
@@ -96,11 +100,12 @@ EXPORT VOID GameStart(STRPTR path)
   }
   else
   {
-    UnpackRoom(ArenaRoom, room, UNPACK_ROOM_BACKDROPS);
+    UnpackRoom(ArenaRoom, room, &uroom, UNPACK_ROOM_BACKDROPS);
 
     RequesterF("OK", "Room W=%ld H=%ld", (ULONG)room->rm_Width, (ULONG)room->rm_Height);
 
-    RequesterF("OK", "Backdrop pointer Id=[%lx] == %lx", room->rm_Backdrops[0].ar_Id, room->rm_Backdrops[0].ar_Ptr);
+    RequesterF("OK", "Backdrop pointer Id=[%ld] == %lx", room->rm_Backdrops[0], uroom.ur_Backdrops[0]);
+
   }
   */
 
