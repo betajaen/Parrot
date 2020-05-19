@@ -213,9 +213,34 @@ EXPORT VOID ScreenSetCursor(APTR obj, UBYTE type)
     switch (type)
     {
       case 0: ClearPointer(screen->st_Window); break;
-      case 1: SetPointer(screen->st_Window, Cursor0, 5, 5, 3, 3); break;
-      case 2: SetPointer(screen->st_Window, Cursor1, 13, 13, 6, 6); break;
-      case 3: SetPointer(screen->st_Window, Cursor2, 15, 15, 7, 7); break;
+      case 1: SetPointer(screen->st_Window, Cursor1, 5, 5, -3, -3);   break;
+      case 2: SetPointer(screen->st_Window, Cursor2, 13, 13, -6, -6); break;
+      case 3: SetPointer(screen->st_Window, Cursor3, 15, 15, -7, -7); break;
+      case 4: SetPointer(screen->st_Window, Cursor4, 9, 9, 0, 0); break;
+      case 5: SetPointer(screen->st_Window, Cursor5, 9, 11, -3, 0); break;
+      case 6: SetPointer(screen->st_Window, Cursor6, 9, 9, -8, 0); break;
+      case 7: SetPointer(screen->st_Window, Cursor7, 11, 9, -10, -3); break;
+      case 8: SetPointer(screen->st_Window, Cursor8, 9, 9, -8, -8); break;
+      case 9: SetPointer(screen->st_Window, Cursor9, 9, 11, -3, -8); break;
+      case 10: SetPointer(screen->st_Window, Cursor10, 9, 9, 0, -8); break;
+      case 11: SetPointer(screen->st_Window, Cursor11, 11, 9, 0, -3); break;
+      case 12: SetPointer(screen->st_Window, Cursor12, 15, 15, -7, -7); break;
+      case 13: SetPointer(screen->st_Window, Cursor13, 9, 15, -3, 0); break;
+      case 14: SetPointer(screen->st_Window, Cursor14, 9, 15, -3, 0); break;
+      case 15: SetPointer(screen->st_Window, Cursor15, 9, 15, -3, 0); break;
+      case 16: SetPointer(screen->st_Window, Cursor16, 13, 13, -6, -3); break;
+      case 17: SetPointer(screen->st_Window, Cursor17, 15, 13, -6, -3); break;
+      case 18: SetPointer(screen->st_Window, Cursor18, 15, 13, -6, -3); break;
+      case 19: SetPointer(screen->st_Window, Cursor19, 14, 13, -6, -3); break;
+      case 20: SetPointer(screen->st_Window, Cursor20, 16, 13, -7, -3); break;
+      case 21: SetPointer(screen->st_Window, Cursor21, 16, 13, -7, -3); break;
+      case 22: SetPointer(screen->st_Window, Cursor22, 16, 13, -7, -3); break;
+      case 23: SetPointer(screen->st_Window, Cursor23, 15, 13, -7, -3); break;
+      case 24: SetPointer(screen->st_Window, Cursor24, 16, 13, -7, -3); break;
+      case 25: SetPointer(screen->st_Window, Cursor25, 16, 13, -7, -3); break;
+      case 26: SetPointer(screen->st_Window, Cursor26, 16, 13, -7, -3); break;
+      case 27: SetPointer(screen->st_Window, Cursor27, 14, 13, -6, -3); break;
+      case 28: SetPointer(screen->st_Window, Cursor28, 16, 13, -7, -3); break;
     }
   }
 }
