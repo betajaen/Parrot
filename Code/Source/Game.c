@@ -30,6 +30,8 @@
 #include <Parrot/Arena.h>
 #include <Parrot/Requester.h>
 #include <Parrot/Screen.h>
+#include <Parrot/Asset.h>
+#include <Parrot/Room.h>
 
 #include "Asset.h"
 
@@ -37,44 +39,83 @@
 #include <proto/dos.h>
 
 struct ARCHIVE* GameArchive;
-struct CHUNK_GAME_INFO GameInfo;
-struct CHUNK_PALETTE_32 GamePalette;
-struct CHUNK_SPRITE_PALETTE_32 GameCursorPalette;
+struct GAME_INFO* GameInfo;
+struct PALETTE32_TABLE* GamePalette;
+struct PALETTE4_TABLE*  GameCursorPalette;
 
 APTR GameScreen;
+
+STATIC VOID Busy()
+{
+  ScreenSetCursor(GameScreen, CURSOR_BUSY);
+}
+
+STATIC VOID NotBusy()
+{
+  ScreenSetCursor(GameScreen, CURSOR_POINT);
+}
 
 EXPORT VOID GameStart(STRPTR path)
 {
   struct SCREEN_INFO screenInfo;
+  struct ROOM* room;
+
+  UBYTE ii;
 
   ArenaGame = ArenaNew(16384, 0ul);
-  ArenaChapter = NULL;
-  ArenaRoom = NULL;
+  ArenaChapter = ArenaNew(131072, 0ul);
+  ArenaRoom = ArenaNew(131072, 0ul);
 
   SetArchivesPath(path);
   GameArchive = OpenArchive(0);
 
-  ReadAssetFromArchive(GameArchive, CHUNK_GAME_INFO_ID, (APTR) &GameInfo, sizeof(struct CHUNK_GAME_INFO));
-  ReadAssetFromArchive(GameArchive, CHUNK_PALETTE_32_ID, (APTR)&GamePalette, sizeof(struct CHUNK_PALETTE_32));
-  ReadAssetFromArchive(GameArchive, CHUNK_SPRITE_PALETTE_32_ID, (APTR)&GameCursorPalette, sizeof(struct CHUNK_SPRITE_PALETTE_32));
+  GameInfo = LoadAssetT(struct GAME_INFO, ArenaGame, ARCHIVE_GLOBAL, CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
+  GamePalette = LoadAssetT(struct PALETTE32_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE32, 1, CHUNK_FLAG_ARCH_AGA);
+  GameCursorPalette = LoadAssetT(struct PALETTE4_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE4, 1, CHUNK_FLAG_ARCH_AGA);
 
-  screenInfo.si_Width = GameInfo.Width;
-  screenInfo.si_Height = GameInfo.Height;
-  screenInfo.si_Depth = GameInfo.Depth;
+  screenInfo.si_Width = GameInfo->Width;
+  screenInfo.si_Height = GameInfo->Height;
+  screenInfo.si_Depth = GameInfo->Depth;
   screenInfo.si_Flags = 0;
   screenInfo.si_Left = 0;
   screenInfo.si_Top = 0;
-  screenInfo.si_Title = &GameInfo.Title[0];
+  screenInfo.si_Title = &GameInfo->Title[0];
 
   GameScreen = ScreenNew(ArenaGame, &screenInfo);
-  ScreenLoadPaletteTable32(GameScreen, (ULONG*) &GamePalette.Palette32);
-  ScreenLoadPaletteTable32(GameScreen, (ULONG*) &GameCursorPalette.Palette);
-  ScreenSetCursor(GameScreen, 3);
+  ScreenLoadPaletteTable32(GameScreen, GamePalette);
+  ScreenLoadPaletteTable4(GameScreen, GameCursorPalette);
 
-  Delay(50 * 3);
+  Busy();
+  
+  /* ArenaRollback(ArenaRoom);
+  room = (struct ROOM*) LoadAsset(ArenaChapter, MAKE_ASSET_ID(1, ASSET_TYPE_ROOM, 1));
+
+  if (room == NULL)
+  {
+    RequesterF("OK", "Could not load room!");
+  }
+  else
+  {
+    UnpackRoom(ArenaRoom, room, UNPACK_ROOM_BACKDROPS);
+
+    RequesterF("OK", "Room W=%ld H=%ld", (ULONG)room->rm_Width, (ULONG)room->rm_Height);
+
+    RequesterF("OK", "Backdrop pointer Id=[%lx] == %lx", room->rm_Backdrops[0].ar_Id, room->rm_Backdrops[0].ar_Ptr);
+  }
+  */
+
+  Delay(50 * 2);
+
+  NotBusy();
+
   ScreenDelete(GameScreen);
 
   CloseArchive(GameArchive);
+
+  ArenaDelete(ArenaRoom);
+  ArenaDelete(ArenaChapter);
+  ArenaDelete(ArenaGame);
+
 }
 
 EXPORT VOID GameDelayTicks(UWORD ticks)

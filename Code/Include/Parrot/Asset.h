@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-struct ASSET* LoadAsset(APTR arena, ULONG id);
+APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId, UWORD arch);
 
-void UnloadAsset(APTR arena, struct ASSET* asset);
+void UnloadAsset(APTR arena, APTR asset);
+
+#define LoadAssetT(T, ARENA, ARCHIVE, TYPE, ID, ARCH) \
+  ( (T*) LoadAsset(ARENA, ARCHIVE, TYPE, ID, ARCH) )

@@ -33,7 +33,7 @@ CFLAGS  = -lamiga -nostdlib -IInclude -O2
 
 # PARROT
 
-PARROT_OBJ = main.o arena.o string.o requester.o screen.o game.o room.o image.o asset.o archive.o
+PARROT_OBJ = main.o arena.o string.o requester.o screen.o game.o room.o image.o asset.o
 CONVERTER_MANIAC_OBJ = maniac_conv_main.o string.o
 
 parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
@@ -66,9 +66,6 @@ image.o: Source/Image.c
 
 asset.o: Source/Asset.c
 	$(CC) $(CFLAGS) -c Source/Asset.c -o asset.o
-
-archive.o: Source/Archive.c
-	$(CC) $(CFLAGS) -c Source/Archive.c -o archive.o
 
 # MANIAC
 

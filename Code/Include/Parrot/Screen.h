@@ -33,10 +33,10 @@ VOID ScreenSetCursor(APTR screen, UBYTE cursor);
 
 UBYTE ScreenGetCursor(APTR screen);
 
-VOID ScreenSetColour(APTR screen, UWORD index, UBYTE r, UBYTE g, UBYTE b);
-
 VOID ScreenClear(APTR obj);
 
 VOID ScreenSwapBuffers(APTR obj);
 
-VOID ScreenLoadPaletteTable32(APTR screen, ULONG* palette);
+VOID ScreenLoadPaletteTable32(APTR obj, struct PALETTE32_TABLE* paletteTable);
+
+VOID ScreenLoadPaletteTable4(APTR obj, struct PALETTE4_TABLE* paletteTable);

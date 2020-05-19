@@ -59,6 +59,8 @@ STATIC UBYTE  ArchiveId;
 STATIC UBYTE* SrcFileData;
 STATIC UBYTE* SrcFilePos;
 STATIC UBYTE* SrcFileEnd;
+STATIC ULONG  NextRoomId;
+STATIC ULONG  NextBackdropId;
 
 ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
 ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
@@ -90,7 +92,6 @@ INT main()
 
   struct Process* process;
   struct Message* wbMsg;
-  struct CHUNK_GAME_INFO version;
 
   DstIff = NULL;
   rc = RETURN_OK;
@@ -131,7 +132,7 @@ INT main()
   }
 
   OpenParrotIff(0);
-  ExportGame();
+  ExportGame(1);
   ExportPalette(1);
   ExportCursorPalette(1);
   CloseParrotIff();
@@ -140,8 +141,9 @@ INT main()
   {
 
     OpenParrotIff(1);
-    ExportRoom();
-    ExportBackdrop();
+    ExportRoom(1, NextBackdropId);
+    ExportBackdrop(NextBackdropId++, 1);
+    NextBackdropId++;
     CloseParrotIff();
 
     CloseFile();
@@ -280,248 +282,171 @@ STATIC VOID CloseParrotIff()
 
 STATIC VOID ExportPalette(UWORD id)
 {
-  struct CHUNK_PALETTE_32 palette;
-  MemClear((APTR)&palette, sizeof(struct CHUNK_PALETTE_32));
+  struct CHUNK_HEADER hdr;
+  struct PALETTE32_TABLE aga;
 
-  palette.Header.Schema = CHUNK_PALETTE_32_SCHEMA;
-  palette.Header.MinVersion = CHUNK_PALETTE_32_MIN_VERSION;
-  palette.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_PALETTE_32, id);
+  MemClear((APTR)&aga, sizeof(aga));
   
-  palette.NumColours = 16;
-  
+  hdr.Id = id;
+  hdr.Flags = CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG;
+
+  aga.Count_Start = (16l << 16) | 0;
+
   /* Black */
-  palette.Palette4[0] = 0x0;
-  palette.Palette4[1] = 0x0;
-  palette.Palette4[2] = 0x0;
+  aga.Index[0] = 0x00000000;
+  aga.Index[1] = 0x00000000;
+  aga.Index[2] = 0x00000000;
 
   /* Blue */
-  palette.Palette4[3] = 0x0;
-  palette.Palette4[4] = 0x0;
-  palette.Palette4[5] = 0xA;
+  aga.Index[3] = 0x00000000;
+  aga.Index[4] = 0x00000000;
+  aga.Index[5] = 0xAAAAAAAA;
 
   /* Green */
-  palette.Palette4[6] = 0x0;
-  palette.Palette4[7] = 0xA;
-  palette.Palette4[8] = 0x0;
+  aga.Index[6] = 0x00000000;
+  aga.Index[7] = 0xAAAAAAAA;
+  aga.Index[8] = 0x00000000;
 
   /* Cyan */
-  palette.Palette4[9] = 0x0;
-  palette.Palette4[10] = 0xA;
-  palette.Palette4[11] = 0xA;
+  aga.Index[9] = 0x00000000;
+  aga.Index[10] = 0xAAAAAAAA;
+  aga.Index[11] = 0xAAAAAAAA;
 
   /* Red */
-  palette.Palette4[12] = 0xA;
-  palette.Palette4[13] = 0x0;
-  palette.Palette4[14] = 0x0;
+  aga.Index[12] = 0xAAAAAAAA;
+  aga.Index[13] = 0x00000000;
+  aga.Index[14] = 0x00000000;
 
   /* Magenta */
-  palette.Palette4[15] = 0xA;
-  palette.Palette4[16] = 0x0;
-  palette.Palette4[17] = 0xA;
+  aga.Index[15] = 0xAAAAAAAA;
+  aga.Index[16] = 0x00000000;
+  aga.Index[17] = 0xAAAAAAAA;
 
   /* Brown */
-  palette.Palette4[18] = 0xA;
-  palette.Palette4[19] = 0x5;
-  palette.Palette4[20] = 0x0;
+  aga.Index[18] = 0xAAAAAAAA;
+  aga.Index[19] = 0x55555555;
+  aga.Index[20] = 0x00000000;
 
   /* Light Gray */
-  palette.Palette4[21] = 0xA;
-  palette.Palette4[22] = 0xA;
-  palette.Palette4[23] = 0xA;
+  aga.Index[21] = 0xAAAAAAAA;
+  aga.Index[22] = 0xAAAAAAAA;
+  aga.Index[23] = 0xAAAAAAAA;
 
   /* Dark Gray */
-  palette.Palette4[24] = 0x5;
-  palette.Palette4[25] = 0x5;
-  palette.Palette4[26] = 0x5;
+  aga.Index[24] = 0x55555555;
+  aga.Index[25] = 0x55555555;
+  aga.Index[26] = 0x55555555;
 
   /* Bright Blue */
-  palette.Palette4[27] = 0x5;
-  palette.Palette4[28] = 0x5;
-  palette.Palette4[29] = 0xF;
+  aga.Index[27] = 0x55555555;
+  aga.Index[28] = 0x55555555;
+  aga.Index[29] = 0xFFFFFFFF;
 
   /* Bright Green */
-  palette.Palette4[30] = 0x5;
-  palette.Palette4[31] = 0xF;
-  palette.Palette4[32] = 0x5;
-  
-  /* Bright Cyan */
-  palette.Palette4[33] = 0x5;
-  palette.Palette4[34] = 0xF;
-  palette.Palette4[35] = 0xF;
-
-  /* Bright Red */
-  palette.Palette4[36] = 0xF;
-  palette.Palette4[37] = 0x5;
-  palette.Palette4[38] = 0x5;
-
-  /* Bright Magenta */
-  palette.Palette4[39] = 0xF;
-  palette.Palette4[40] = 0x5;
-  palette.Palette4[41] = 0xF;
-
-  /* Bright Yellow */
-  palette.Palette4[42] = 0xF;
-  palette.Palette4[43] = 0xF;
-  palette.Palette4[44] = 0x5;
-
-  /* Bright White */
-  palette.Palette4[45] = 0xF;
-  palette.Palette4[46] = 0xF;
-  palette.Palette4[47] = 0xF;
-
-
-  palette.Palette32.Count_Start = (16l << 16) | 0;
-  
-  /* Black */
-  palette.Palette32.Palette[0] = 0x00000000;
-  palette.Palette32.Palette[1] = 0x00000000;
-  palette.Palette32.Palette[2] = 0x00000000;
-
-  /* Blue */
-  palette.Palette32.Palette[3] = 0x00000000;
-  palette.Palette32.Palette[4] = 0x00000000;
-  palette.Palette32.Palette[5] = 0xAAAAAAAA;
-
-  /* Green */
-  palette.Palette32.Palette[6] = 0x00000000;
-  palette.Palette32.Palette[7] = 0xAAAAAAAA;
-  palette.Palette32.Palette[8] = 0x00000000;
-
-  /* Cyan */
-  palette.Palette32.Palette[9] = 0x00000000;
-  palette.Palette32.Palette[10] = 0xAAAAAAAA;
-  palette.Palette32.Palette[11] = 0xAAAAAAAA;
-
-  /* Red */
-  palette.Palette32.Palette[12] = 0xAAAAAAAA;
-  palette.Palette32.Palette[13] = 0x00000000;
-  palette.Palette32.Palette[14] = 0x00000000;
-
-  /* Magenta */
-  palette.Palette32.Palette[15] = 0xAAAAAAAA;
-  palette.Palette32.Palette[16] = 0x00000000;
-  palette.Palette32.Palette[17] = 0xAAAAAAAA;
-
-  /* Brown */
-  palette.Palette32.Palette[18] = 0xAAAAAAAA;
-  palette.Palette32.Palette[19] = 0x55555555;
-  palette.Palette32.Palette[20] = 0x00000000;
-
-  /* Light Gray */
-  palette.Palette32.Palette[21] = 0xAAAAAAAA;
-  palette.Palette32.Palette[22] = 0xAAAAAAAA;
-  palette.Palette32.Palette[23] = 0xAAAAAAAA;
-
-  /* Dark Gray */
-  palette.Palette32.Palette[24] = 0x55555555;
-  palette.Palette32.Palette[25] = 0x55555555;
-  palette.Palette32.Palette[26] = 0x55555555;
-
-  /* Bright Blue */
-  palette.Palette32.Palette[27] = 0x55555555;
-  palette.Palette32.Palette[28] = 0x55555555;
-  palette.Palette32.Palette[29] = 0xFFFFFFFF;
-
-  /* Bright Green */
-  palette.Palette32.Palette[30] = 0x55555555;
-  palette.Palette32.Palette[31] = 0xFFFFFFFF;
-  palette.Palette32.Palette[32] = 0x55555555;
+  aga.Index[30] = 0x55555555;
+  aga.Index[31] = 0xFFFFFFFF;
+  aga.Index[32] = 0x55555555;
 
   /* Bright Cyan */
-  palette.Palette32.Palette[33] = 0x55555555;
-  palette.Palette32.Palette[34] = 0xFFFFFFFF;
-  palette.Palette32.Palette[35] = 0xFFFFFFFF;
+  aga.Index[33] = 0x55555555;
+  aga.Index[34] = 0xFFFFFFFF;
+  aga.Index[35] = 0xFFFFFFFF;
 
   /* Bright Red */
-  palette.Palette32.Palette[36] = 0xFFFFFFFF;
-  palette.Palette32.Palette[37] = 0x55555555;
-  palette.Palette32.Palette[38] = 0x55555555;
+  aga.Index[36] = 0xFFFFFFFF;
+  aga.Index[37] = 0x55555555;
+  aga.Index[38] = 0x55555555;
 
   /* Bright Magenta */
-  palette.Palette32.Palette[39] = 0xFFFFFFFF;
-  palette.Palette32.Palette[40] = 0x55555555;
-  palette.Palette32.Palette[41] = 0xFFFFFFFF;
+  aga.Index[39] = 0xFFFFFFFF;
+  aga.Index[40] = 0x55555555;
+  aga.Index[41] = 0xFFFFFFFF;
 
   /* Bright Yellow */
-  palette.Palette32.Palette[42] = 0xFFFFFFFF;
-  palette.Palette32.Palette[43] = 0xFFFFFFFF;
-  palette.Palette32.Palette[44] = 0x55555555;
+  aga.Index[42] = 0xFFFFFFFF;
+  aga.Index[43] = 0xFFFFFFFF;
+  aga.Index[44] = 0x55555555;
 
   /* Bright White */
-  palette.Palette32.Palette[45] = 0xFFFFFFFF;
-  palette.Palette32.Palette[46] = 0xFFFFFFFF;
-  palette.Palette32.Palette[47] = 0xFFFFFFFF;
+  aga.Index[45] = 0xFFFFFFFF;
+  aga.Index[46] = 0xFFFFFFFF;
+  aga.Index[47] = 0xFFFFFFFF;
 
-  palette.Palette32.Terminator = 0;
+  aga.Terminator = 0;
 
-  PushChunk(DstIff, ID_SQWK, CHUNK_PALETTE_32_ID, sizeof(struct CHUNK_PALETTE_32));
-  WriteChunkBytes(DstIff, &palette, sizeof(struct CHUNK_PALETTE_32));
+  PushChunk(DstIff, ID_SQWK, CT_PALETTE32, sizeof(aga) + sizeof(hdr));
+  WriteChunkBytes(DstIff, &hdr, sizeof(hdr));
+  WriteChunkBytes(DstIff, &aga, sizeof(aga));
   PopChunk(DstIff);
 }
 
 STATIC VOID ExportCursorPalette(UWORD id)
 {
-  struct CHUNK_SPRITE_PALETTE_32 palette;
-  MemClear((APTR)&palette, sizeof(struct CHUNK_SPRITE_PALETTE_32));
+  struct CHUNK_HEADER   hdr;
+  struct PALETTE4_TABLE aga;
 
-  palette.Header.Schema = CHUNK_SPRITE_PALETTE_32_SCHEMA;
-  palette.Header.MinVersion = CHUNK_SPRITE_PALETTE_32_MIN_VERSION;
-  palette.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_SPRITE_PALETTE, id);
+  MemClear((APTR)&aga, sizeof(aga));
 
-  palette.Palette.Count_Start = 4 << 16 | 17;
-  palette.Palette.Palette[0] = 0x00000000;
-  palette.Palette.Palette[1] = 0x00000000;
-  palette.Palette.Palette[2] = 0x00000000;
+  hdr.Id = id;
+  hdr.Flags = CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG;
 
-  palette.Palette.Palette[3] = 0xFFFFFFFF;
-  palette.Palette.Palette[4] = 0xFFFFFFFF;
-  palette.Palette.Palette[5] = 0xFFFFFFFF;
+  aga.Count_Start = (4l << 16) | 17;
 
-  palette.Palette.Palette[6] = 0xAAAAAAAA;
-  palette.Palette.Palette[7] = 0xAAAAAAAA;
-  palette.Palette.Palette[8] = 0xAAAAAAAA;
+  aga.Index[0] = 0x00000000;
+  aga.Index[1] = 0x00000000;
+  aga.Index[2] = 0x00000000;
 
-  palette.Palette.Terminator = 0;
+  aga.Index[3] = 0xFFFFFFFF;
+  aga.Index[4] = 0xFFFFFFFF;
+  aga.Index[5] = 0xFFFFFFFF;
 
-  PushChunk(DstIff, ID_SQWK, CHUNK_SPRITE_PALETTE_32_ID, sizeof(struct CHUNK_SPRITE_PALETTE_32));
-  WriteChunkBytes(DstIff, &palette, sizeof(struct CHUNK_SPRITE_PALETTE_32));
+  aga.Index[6] = 0xAAAAAAAA;
+  aga.Index[7] = 0xAAAAAAAA;
+  aga.Index[8] = 0xAAAAAAAA;
+
+  aga.Terminator = 0;
+
+  PushChunk(DstIff, ID_SQWK, CT_PALETTE4, sizeof(hdr) + sizeof(aga));
+  WriteChunkBytes(DstIff, &hdr, sizeof(hdr));
+  WriteChunkBytes(DstIff, &aga, sizeof(aga));
   PopChunk(DstIff);
 }
 
-STATIC VOID ExportGame()
+STATIC VOID ExportGame(UWORD id)
 {
-  struct CHUNK_GAME_INFO info;
-  MemClear(&info, sizeof(struct CHUNK_GAME_INFO));
+  struct CHUNK_HEADER hdr;
+  struct GAME_INFO info;
+  MemClear(&info, sizeof(info));
 
-  info.Header.Schema = CHUNK_GAME_INFO_SCHEMA_VERSION;
-  info.Header.MinVersion = CHUNK_GAME_INFO_MIN_VERSION;
-  info.Header.Id = MAKE_ASSET_ID(0, ASSET_TYPE_GAME, 1);
+  hdr.Id = id;
+  hdr.Flags = CHUNK_FLAG_ARCH_ANY;
 
   StrCopy(&info.Title[0], sizeof(info.Title), "Maniac Mansion");
   StrCopy(&info.ShortTitle[0], sizeof(info.ShortTitle), "Maniac");
   StrCopy(&info.Author[0], sizeof(info.Author), "Lucasfilm Games LLC");
   StrCopy(&info.Release[0], sizeof(info.Release), "Commodore Amiga");
 
-  info.Width = 320;
+  info.Width  = 320;
   info.Height = 200;
-  info.Depth = 4;
+  info.Depth  = 4;
 
-  PushChunk(DstIff, ID_SQWK, CHUNK_GAME_INFO_ID, sizeof(struct CHUNK_GAME_INFO));
-  WriteChunkBytes(DstIff, &info, sizeof(struct CHUNK_GAME_INFO));
+  PushChunk(DstIff, ID_SQWK, CT_GAME_INFO, sizeof(struct CHUNK_HEADER) + sizeof(struct GAME_INFO));
+  WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
+  WriteChunkBytes(DstIff, &info, sizeof(struct GAME_INFO));
   PopChunk(DstIff);
 
 }
 
-STATIC VOID ExportBackdrop()
+STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
 {
-  struct CHUNK_BACKDROP backdrop;
+  struct IMAGE_CHUNK backdrop;
 
   ULONG  chunkySize, planarSize, p, imgOffset;
   UBYTE* chunky, * planar;
   UWORD  x, y, w, h;
   UBYTE  r, col, len, ii;
 
-  MemClear(&backdrop, sizeof(struct CHUNK_BACKDROP));
+  MemClear(&backdrop, sizeof(struct IMAGE_CHUNK));
 
   SeekFile(4);
   w = ReadUWORDLE();
@@ -538,16 +463,15 @@ STATIC VOID ExportBackdrop()
   chunky = AllocVec(chunkySize, MEMF_CLEAR);
   planar = AllocVec(planarSize, MEMF_CLEAR);
 
-  backdrop.Header.Schema = CHUNK_BACKDROP_SCHEMA;
-  backdrop.Header.MinVersion = CHUNK_BACKDROP_MIN_VERSION;
-  backdrop.Header.Id = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_BACKDROP, 1);
+  backdrop.Header.Id = id;
+  backdrop.Header.Flags = CHUNK_FLAG_ARCH_ANY;
 
   backdrop.Width = w;
   backdrop.Height = h;
-  backdrop.PaletteId = MAKE_ASSET_ID(0, ASSET_TYPE_PALETTE_32, 1);
+  backdrop.Palette = palette;
 
-  PushChunk(DstIff, ID_SQWK, CHUNK_BACKDROP_ID, IFFSIZE_UNKNOWN);
-  WriteChunkBytes(DstIff, &backdrop, sizeof(struct CHUNK_BACKDROP));
+  PushChunk(DstIff, ID_SQWK, CT_IMAGE, IFFSIZE_UNKNOWN);
+  WriteChunkBytes(DstIff, &backdrop, sizeof(struct IMAGE_CHUNK));
   SeekFile(imgOffset);
   ReadImageData(chunky, w, h);
   ConvertImageDataToPlanar(chunky, planar, w, h);
@@ -560,22 +484,21 @@ STATIC VOID ExportBackdrop()
 }
 
 
-STATIC VOID ExportRoom()
+STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
 {
   struct CHUNK_ROOM room;
 
   MemClear(&room, sizeof(struct CHUNK_ROOM));
   
-  room.Header.Schema = CHUNK_ROOM_SCHEMA;
-  room.Header.MinVersion = CHUNK_ROOM_MIN_VERSION;
-  room.Header.Id = CHUNK_ROOM_ID;
+  room.Header.Id = id;
+  room.Header.Flags = CHUNK_FLAG_ARCH_ANY;
 
   SeekFile(4);
   room.Width = ReadUWORDLE();
   room.Height = ReadUWORDLE();
-  room.Backdrops[0] = MAKE_ASSET_ID(ArchiveId, ASSET_TYPE_BACKDROP, 1);
+  room.Backdrops[0] = backdrop;
 
-  PushChunk(DstIff, ID_SQWK, CHUNK_ROOM_ID, sizeof(struct CHUNK_ROOM));
+  PushChunk(DstIff, ID_SQWK, CT_ROOM, sizeof(struct CHUNK_ROOM));
   WriteChunkBytes(DstIff, &room, sizeof(struct CHUNK_ROOM));
   PopChunk(DstIff);
 

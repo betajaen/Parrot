@@ -68,6 +68,9 @@
   (X)->lh_TailPred = (struct Node*) &(X)->lh_Head;
 #endif
 
+#define MAKE_NODE_ID(a,b,c,d)	\
+	((ULONG) (a)<<24 | (ULONG) (b)<<16 | (ULONG) (c)<<8 | (ULONG) (d))
+
 /**
     SDL Banned Functions
 */
@@ -121,19 +124,90 @@ struct SCREEN_INFO
 #define CURSOR_LOCK   27
 #define CURSOR_UNLOCK 28
 
+#define ARCHIVE_GLOBAL  0
+#define ARCHIVE_UNKNOWN 65535
+
+#define CT_GAME_INFO      MAKE_NODE_ID('G','A','M','E')
+#define CT_ROOM           MAKE_NODE_ID('R','O','O','M')
+#define CT_IMAGE          MAKE_NODE_ID('I','M','G','E')
+#define CT_PALETTE32      MAKE_NODE_ID('P','A','L','5')
+#define CT_PALETTE4       MAKE_NODE_ID('P','A','L','2')
+
 struct ASSET
 {
   struct MinNode    as_Node;
-  ULONG             as_Id;
+  UWORD             as_Id;
+  UWORD             as_Arch;
 };
 
 struct ASSET_REF
 {
   APTR              ar_Ptr;
-  ULONG             ar_Id;
+  UWORD             ar_Id;
 };
 
 #define IS_REF_LOADED(REF) (NULL != (REF).ar_Ptr)
+
+/*
+  A chunk header is a 4-byte header after the IFF chunk containing the 16-bit ID
+  and 16-bit chunk flags.
+*/
+struct CHUNK_HEADER
+{
+  UWORD Id;
+  UWORD Flags;
+};
+
+#define CHUNK_FLAG_ARCH_ECS  (1 << 0)
+#define CHUNK_FLAG_ARCH_AGA  (1 << 1)
+#define CHUNK_FLAG_ARCH_RTG  (1 << 2)
+#define CHUNK_FLAG_ARCH_ANY  (CHUNK_FLAG_ARCH_ECS | CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG)
+
+#define CHUNK_FLAG_IGNORE    (1 << 15)
+
+
+/*
+      Game Info
+*/
+
+struct GAME_INFO
+{
+  ULONG             GameId;
+  ULONG             GameVersion;
+  CHAR              Title[64];
+  CHAR              ShortTitle[16];
+  CHAR              Author[128];
+  CHAR              Release[128];
+  UWORD             Width;
+  UWORD             Height;
+  UWORD             Depth;
+};
+
+/*
+    Palette 32 Table
+
+*/
+struct PALETTE32_TABLE
+{
+  ULONG Count_Start;
+  ULONG Index[32 * 3];
+  ULONG Terminator;
+};
+
+/*
+  Palette 4 Table
+*/
+struct PALETTE4_TABLE
+{
+  ULONG Count_Start;
+  ULONG Index[4 * 3];
+  ULONG Terminator;
+};
+
+
+/*
+      Image
+*/
 
 struct IMAGE
 {
@@ -149,22 +223,37 @@ struct IMAGE
 struct IMAGE_REF
 {
   struct IMAGE*     ar_Ptr;
-  ULONG             ar_Id;
+  UWORD             ar_Id;
 };
+
+struct IMAGE_CHUNK
+{
+  struct CHUNK_HEADER Header;
+
+  UWORD Width;
+  UWORD Height;
+  UWORD Palette;
+};
+
+
 
 struct ROOM
 {
-  struct ASSET      as_Asset;
-
   UWORD             rm_Width;
   UWORD             rm_Height;
   struct IMAGE_REF  rm_Backdrops[4];
 };
 
+struct ROOM_ASSET
+{
+  struct ASSET      as_Asset;
+  struct ROOM       as_Data;
+};
+
 struct ROOM_REF
 {
   struct ROOM*      ar_Ptr;
-  ULONG             ar_Id;
+  UWORD             ar_Id;
 };
 
 #define UNPACK_ROOM_BACKDROPS  1
