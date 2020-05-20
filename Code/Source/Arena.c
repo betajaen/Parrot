@@ -175,8 +175,6 @@ EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class)
 
   result = (APTR) (&alloc[1]);
 
-  CLEAN_EXIT:
-
   return result;
 }
 

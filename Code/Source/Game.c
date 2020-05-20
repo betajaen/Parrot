@@ -44,16 +44,14 @@ struct GAME_INFO* GameInfo;
 struct PALETTE32_TABLE* GamePalette;
 struct PALETTE4_TABLE*  GameCursorPalette;
 
-APTR GameScreen;
-
 STATIC VOID Busy()
 {
-  ScreenSetCursor(GameScreen, CURSOR_BUSY);
+  ScreenSetCursor(0, CURSOR_BUSY);
 }
 
 STATIC VOID NotBusy()
 {
-  ScreenSetCursor(GameScreen, CURSOR_POINT);
+  ScreenSetCursor(0, CURSOR_POINT);
 }
 
 EXPORT VOID GameStart(STRPTR path)
@@ -84,9 +82,9 @@ EXPORT VOID GameStart(STRPTR path)
   screenInfo.si_Top = 0;
   screenInfo.si_Title = &GameInfo->gi_Title[0];
 
-  GameScreen = ScreenNew(ArenaGame, &screenInfo);
-  ScreenLoadPaletteTable32(GameScreen, GamePalette);
-  ScreenLoadPaletteTable4(GameScreen, GameCursorPalette);
+  ScreenOpen(0, &screenInfo);
+  ScreenLoadPaletteTable32(0, GamePalette);
+  ScreenLoadPaletteTable4(0, GameCursorPalette);
    
   Busy();
   
@@ -121,7 +119,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   NotBusy();
 
-  ScreenDelete(GameScreen);
+  ScreenClose(0);
 
   CloseArchives();
 

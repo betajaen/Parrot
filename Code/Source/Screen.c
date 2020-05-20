@@ -27,7 +27,6 @@
 
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
-#include <Parrot/Arena.h>
 #include <Parrot/String.h>
 
 #include <proto/exec.h>
@@ -38,7 +37,7 @@
 
 #define PARROT_SCREEN_CLASS 0x44a2d27d 
 
-struct SCREEN_TARGET
+struct SCREEN
 {
   struct Screen*       st_Screen;
   struct Window*       st_Window;
@@ -48,15 +47,22 @@ struct SCREEN_TARGET
   struct RastPort      st_RastPorts[2];
 };
 
-EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
+struct SCREEN Screens[4];
+
+EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
 {
   struct NewScreen      newScreen;
   struct NewWindow      newWindow;
-  struct SCREEN_TARGET* screen;
+  struct SCREEN* screen;
 
   screen = NULL;
   InitStackVar(struct NewScreen, newScreen);
   InitStackVar(struct NewWindow, newWindow);
+
+  if (id >= 4)
+  {
+    ErrorF("Could not open screen %ld. Limit has reached", (ULONG) id);
+  }
 
   if (info->si_Width < 320)
   {
@@ -110,20 +116,12 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
   newScreen.Gadgets = NULL;
   newScreen.CustomBitMap = NULL;
  
-  screen = (struct SCREEN_TARGET*) ObjAlloc(arena, sizeof(struct SCREEN_TARGET), PARROT_SCREEN_CLASS);
-
-  if (NULL == screen)
-  {
-    ErrorF("Out of arena memory for a new screen!");
-    goto CLEAN_EXIT;
-  }
-
+  screen = &Screens[id];
   screen->st_Screen = OpenScreen(&newScreen);
 
   if (NULL == screen->st_Screen)
   {
     ErrorF("Could not open screen %ldx%ldx%ld for Parrot", info->si_Width, info->si_Height, info->si_Depth);
-    goto CLEAN_EXIT;
   }
 
   screen->st_ReadBuffer = 0;
@@ -147,155 +145,165 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
   
   if (NULL == screen->st_Window)
   {
-    RequesterF("Close", "Could not open window for Parrot", info->si_Width, info->si_Height, info->si_Depth);
-    goto CLEAN_EXIT;
+    ErrorF("Could not open window for Parrot", info->si_Width, info->si_Height, info->si_Depth);
   }
   
-  CLEAN_EXIT:
-
-  return (APTR) screen;
 }
 
 
-EXPORT VOID ScreenDelete(APTR obj)
+EXPORT VOID ScreenClose(UWORD id)
 {
-  struct SCREEN_TARGET* screen;
+  struct SCREEN* screen;
 
-  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
+  if (id >= 4)
   {
-    screen = (struct SCREEN_TARGET*) (obj);
+    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+  }
 
-    if (NULL != screen->st_Window)
+  screen = &Screens[id];
+
+  if (NULL != screen->st_Window)
+  {
+    ClearPointer(screen->st_Window);
+
+    CloseWindow(screen->st_Window);
+    screen->st_Window = 0;
+  }
+
+  if (NULL != screen->st_Screen)
+  {
+    if (NULL != screen->st_Buffers[0])
     {
-      ClearPointer(screen->st_Window);
-
-      CloseWindow(screen->st_Window);
-      screen->st_Window = 0;
+      ChangeScreenBuffer(screen->st_Screen, screen->st_Buffers[0]);
+      WaitTOF();
+      WaitTOF();
+      FreeScreenBuffer(screen->st_Screen, screen->st_Buffers[0]);
     }
 
-    if (NULL != screen->st_Screen)
+    if (NULL != screen->st_Buffers[1])
     {
-      if (NULL != screen->st_Buffers[0])
-      {
-        ChangeScreenBuffer(screen->st_Screen, screen->st_Buffers[0]);
-        WaitTOF();
-        WaitTOF();
-        FreeScreenBuffer(screen->st_Screen, screen->st_Buffers[0]);
-      }
-
-      if (NULL != screen->st_Buffers[1])
-      {
-        ChangeScreenBuffer(screen->st_Screen, screen->st_Buffers[1]);
-        WaitTOF();
-        WaitTOF();
-        FreeScreenBuffer(screen->st_Screen, screen->st_Buffers[1]);
-      }
-
-      screen->st_RastPorts[0].BitMap = NULL;
-      screen->st_RastPorts[1].BitMap = NULL;
-
-      CloseScreen(screen->st_Screen);
-      screen->st_Screen = 0;
-
+      ChangeScreenBuffer(screen->st_Screen, screen->st_Buffers[1]);
+      WaitTOF();
+      WaitTOF();
+      FreeScreenBuffer(screen->st_Screen, screen->st_Buffers[1]);
     }
+
+    screen->st_RastPorts[0].BitMap = NULL;
+    screen->st_RastPorts[1].BitMap = NULL;
+
+    CloseScreen(screen->st_Screen);
+    screen->st_Screen = 0;
+
   }
-}
-
-EXPORT VOID ScreenSetCursor(APTR obj, UBYTE type)
-{
-  struct SCREEN_TARGET* screen;
-
-  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
-  {
-    screen = (struct SCREEN_TARGET*) (obj);
-    UWORD* cursor = NULL;
-
-    switch (type)
-    {
-      case 0: ClearPointer(screen->st_Window); break;
-      case 1: SetPointer(screen->st_Window, Cursor1, 5, 5, -3, -3);   break;
-      case 2: SetPointer(screen->st_Window, Cursor2, 13, 13, -6, -6); break;
-      case 3: SetPointer(screen->st_Window, Cursor3, 15, 15, -7, -7); break;
-      case 4: SetPointer(screen->st_Window, Cursor4, 9, 9, 0, 0); break;
-      case 5: SetPointer(screen->st_Window, Cursor5, 9, 11, -3, 0); break;
-      case 6: SetPointer(screen->st_Window, Cursor6, 9, 9, -8, 0); break;
-      case 7: SetPointer(screen->st_Window, Cursor7, 11, 9, -10, -3); break;
-      case 8: SetPointer(screen->st_Window, Cursor8, 9, 9, -8, -8); break;
-      case 9: SetPointer(screen->st_Window, Cursor9, 9, 11, -3, -8); break;
-      case 10: SetPointer(screen->st_Window, Cursor10, 9, 9, 0, -8); break;
-      case 11: SetPointer(screen->st_Window, Cursor11, 11, 9, 0, -3); break;
-      case 12: SetPointer(screen->st_Window, Cursor12, 15, 15, -7, -7); break;
-      case 13: SetPointer(screen->st_Window, Cursor13, 9, 15, -3, 0); break;
-      case 14: SetPointer(screen->st_Window, Cursor14, 9, 15, -3, 0); break;
-      case 15: SetPointer(screen->st_Window, Cursor15, 9, 15, -3, 0); break;
-      case 16: SetPointer(screen->st_Window, Cursor16, 13, 13, -6, -3); break;
-      case 17: SetPointer(screen->st_Window, Cursor17, 15, 13, -6, -3); break;
-      case 18: SetPointer(screen->st_Window, Cursor18, 15, 13, -6, -3); break;
-      case 19: SetPointer(screen->st_Window, Cursor19, 14, 13, -6, -3); break;
-      case 20: SetPointer(screen->st_Window, Cursor20, 16, 13, -7, -3); break;
-      case 21: SetPointer(screen->st_Window, Cursor21, 16, 13, -7, -3); break;
-      case 22: SetPointer(screen->st_Window, Cursor22, 16, 13, -7, -3); break;
-      case 23: SetPointer(screen->st_Window, Cursor23, 15, 13, -7, -3); break;
-      case 24: SetPointer(screen->st_Window, Cursor24, 16, 13, -7, -3); break;
-      case 25: SetPointer(screen->st_Window, Cursor25, 16, 13, -7, -3); break;
-      case 26: SetPointer(screen->st_Window, Cursor26, 16, 13, -7, -3); break;
-      case 27: SetPointer(screen->st_Window, Cursor27, 14, 13, -6, -3); break;
-      case 28: SetPointer(screen->st_Window, Cursor28, 16, 13, -7, -3); break;
-    }
-  }
-}
-
-EXPORT UBYTE ScreenGetCursor(APTR screen)
-{
-  return CURSOR_POINT;
-}
-
-EXPORT VOID ScreenLoadPaletteTable32(APTR obj, struct PALETTE32_TABLE* paletteTable)
-{
-  struct SCREEN_TARGET* screen;
-
-  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
-  {
-    screen = (struct SCREEN_TARGET*) (obj);
-    LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
-  }
-}
-
-EXPORT VOID ScreenLoadPaletteTable4(APTR obj, struct PALETTE4_TABLE* paletteTable)
-{
-  struct SCREEN_TARGET* screen;
-
-  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
-  {
-    screen = (struct SCREEN_TARGET*) (obj);
-    LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
-  }
-}
-
-EXPORT VOID ScreenClear(APTR obj)
-{
-  struct SCREEN_TARGET* screen;
   
-  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
-  {
-    screen = (struct SCREEN_TARGET*) (obj);
-
-    ClearScreen(&screen->st_RastPorts[screen->st_WriteBuffer]);
-  }
 }
 
-EXPORT VOID ScreenSwapBuffers(APTR obj)
+EXPORT VOID ScreenSetCursor(UWORD id, UBYTE type)
 {
-  struct SCREEN_TARGET* screen;
+  struct SCREEN* screen;
 
-  if (NULL != obj && PARROT_SCREEN_CLASS == ObjGetClass(obj))
+  if (id >= 4)
   {
-    screen = (struct SCREEN_TARGET*) (obj);
+    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+  }
 
-    if (ChangeScreenBuffer(screen->st_Screen, screen->st_Buffers[screen->st_WriteBuffer]))
-    {
-      screen->st_ReadBuffer ^= 1;
-      screen->st_WriteBuffer ^= 1;
-    }
+  screen = &Screens[id];
+
+  UWORD* cursor = NULL;
+
+  switch (type)
+  {
+    case 0: ClearPointer(screen->st_Window); break;
+    case 1: SetPointer(screen->st_Window, Cursor1, 5, 5, -3, -3);   break;
+    case 2: SetPointer(screen->st_Window, Cursor2, 13, 13, -6, -6); break;
+    case 3: SetPointer(screen->st_Window, Cursor3, 15, 15, -7, -7); break;
+    case 4: SetPointer(screen->st_Window, Cursor4, 9, 9, 0, 0); break;
+    case 5: SetPointer(screen->st_Window, Cursor5, 9, 11, -3, 0); break;
+    case 6: SetPointer(screen->st_Window, Cursor6, 9, 9, -8, 0); break;
+    case 7: SetPointer(screen->st_Window, Cursor7, 11, 9, -10, -3); break;
+    case 8: SetPointer(screen->st_Window, Cursor8, 9, 9, -8, -8); break;
+    case 9: SetPointer(screen->st_Window, Cursor9, 9, 11, -3, -8); break;
+    case 10: SetPointer(screen->st_Window, Cursor10, 9, 9, 0, -8); break;
+    case 11: SetPointer(screen->st_Window, Cursor11, 11, 9, 0, -3); break;
+    case 12: SetPointer(screen->st_Window, Cursor12, 15, 15, -7, -7); break;
+    case 13: SetPointer(screen->st_Window, Cursor13, 9, 15, -3, 0); break;
+    case 14: SetPointer(screen->st_Window, Cursor14, 9, 15, -3, 0); break;
+    case 15: SetPointer(screen->st_Window, Cursor15, 9, 15, -3, 0); break;
+    case 16: SetPointer(screen->st_Window, Cursor16, 13, 13, -6, -3); break;
+    case 17: SetPointer(screen->st_Window, Cursor17, 15, 13, -6, -3); break;
+    case 18: SetPointer(screen->st_Window, Cursor18, 15, 13, -6, -3); break;
+    case 19: SetPointer(screen->st_Window, Cursor19, 14, 13, -6, -3); break;
+    case 20: SetPointer(screen->st_Window, Cursor20, 16, 13, -7, -3); break;
+    case 21: SetPointer(screen->st_Window, Cursor21, 16, 13, -7, -3); break;
+    case 22: SetPointer(screen->st_Window, Cursor22, 16, 13, -7, -3); break;
+    case 23: SetPointer(screen->st_Window, Cursor23, 15, 13, -7, -3); break;
+    case 24: SetPointer(screen->st_Window, Cursor24, 16, 13, -7, -3); break;
+    case 25: SetPointer(screen->st_Window, Cursor25, 16, 13, -7, -3); break;
+    case 26: SetPointer(screen->st_Window, Cursor26, 16, 13, -7, -3); break;
+    case 27: SetPointer(screen->st_Window, Cursor27, 14, 13, -6, -3); break;
+    case 28: SetPointer(screen->st_Window, Cursor28, 16, 13, -7, -3); break;
+  }
+  
+}
+
+EXPORT VOID ScreenLoadPaletteTable32(UWORD id, struct PALETTE32_TABLE* paletteTable)
+{
+  struct SCREEN* screen;
+
+  if (id >= 4)
+  {
+    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+
+  LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
+  
+}
+
+EXPORT VOID ScreenLoadPaletteTable4(UWORD id, struct PALETTE4_TABLE* paletteTable)
+{
+  struct SCREEN* screen;
+
+  if (id >= 4)
+  {
+    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+
+  LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
+}
+
+EXPORT VOID ScreenClear(UWORD id)
+{
+  struct SCREEN* screen;
+
+  if (id >= 4)
+  {
+    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+
+  ClearScreen(&screen->st_RastPorts[screen->st_WriteBuffer]);
+
+}
+
+EXPORT VOID ScreenSwapBuffers(UWORD id)
+{
+  struct SCREEN* screen;
+
+  if (id >= 4)
+  {
+    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+
+  if (ChangeScreenBuffer(screen->st_Screen, screen->st_Buffers[screen->st_WriteBuffer]))
+  {
+    screen->st_ReadBuffer ^= 1;
+    screen->st_WriteBuffer ^= 1;
   }
 }

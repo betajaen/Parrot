@@ -25,18 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-APTR ScreenNew(APTR arena, struct SCREEN_INFO* info);
+VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info);
 
-VOID ScreenDelete(APTR obj);
+VOID ScreenClose(UWORD id);
 
-VOID ScreenSetCursor(APTR screen, UBYTE cursor);
+VOID ScreenSetCursor(UWORD id, UBYTE cursor);
 
-UBYTE ScreenGetCursor(APTR screen);
+VOID ScreenClear(UWORD id);
 
-VOID ScreenClear(APTR obj);
+VOID ScreenSwapBuffers(UWORD id);
 
-VOID ScreenSwapBuffers(APTR obj);
+VOID ScreenLoadPaletteTable32(UWORD id, struct PALETTE32_TABLE* paletteTable);
 
-VOID ScreenLoadPaletteTable32(APTR obj, struct PALETTE32_TABLE* paletteTable);
-
-VOID ScreenLoadPaletteTable4(APTR obj, struct PALETTE4_TABLE* paletteTable);
+VOID ScreenLoadPaletteTable4(UWORD id, struct PALETTE4_TABLE* paletteTable);
