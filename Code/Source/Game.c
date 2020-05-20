@@ -90,21 +90,31 @@ EXPORT VOID GameStart(STRPTR path)
    
   Busy();
   
-  room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
-
-  if (room == NULL)
+  for (ii = 0; ii < 16; ii++)
   {
-    RequesterF("OK", "Could not load room!");
+    if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
+      break;
+
+    RequesterF("OK", "Loading table %ld", ii);
+
+    LoadObjectTable(&GameInfo->gi_StartTables[ii]);
   }
-  else
-  {
-    UnpackRoom(ArenaRoom, room, &uroom, UNPACK_ROOM_BACKDROPS);
-
-    RequesterF("OK", "Room W=%ld H=%ld", (ULONG)room->rm_Width, (ULONG)room->rm_Height);
-
-    RequesterF("OK", "Backdrop pointer Id=[%ld] == %lx", room->rm_Backdrops[0], uroom.ur_Backdrops[0]);
-
-  }
+  
+  // room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
+  // 
+  // if (room == NULL)
+  // {
+  //   RequesterF("OK", "Could not load room!");
+  // }
+  // else
+  // {
+  //   UnpackRoom(ArenaRoom, room, &uroom, UNPACK_ROOM_BACKDROPS);
+  // 
+  //   RequesterF("OK", "Room W=%ld H=%ld", (ULONG)room->rm_Width, (ULONG)room->rm_Height);
+  // 
+  //   RequesterF("OK", "Backdrop pointer Id=[%ld] == %lx", room->rm_Backdrops[0], uroom.ur_Backdrops[0]);
+  // 
+  // }
   
 
   Delay(50 * 2);
@@ -113,7 +123,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   ScreenDelete(GameScreen);
 
-  CloseArchive(GameArchive);
+  CloseArchives();
 
   ArenaDelete(ArenaRoom);
   ArenaDelete(ArenaChapter);

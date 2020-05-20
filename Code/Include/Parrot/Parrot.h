@@ -164,9 +164,15 @@ struct CHUNK_HEADER
 #define CHUNK_FLAG_ARCH_RTG       (1 << 2)
 #define CHUNK_FLAG_ARCH_ANY       (CHUNK_FLAG_ARCH_ECS | CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG)
 
-#define CHUNK_FLAG_HAS_DATA     (1 << 14)
+#define CHUNK_FLAG_HAS_DATA       (1 << 14)
 #define CHUNK_FLAG_IGNORE         (1 << 15)
 
+struct OBJECT_TABLE_REF
+{
+  ULONG tr_ClassType;
+  UWORD tr_ChunkHeaderId;
+  UWORD tr_ArchiveId;
+};
 
 /*
       Game Info
@@ -174,15 +180,16 @@ struct CHUNK_HEADER
 
 struct GAME_INFO
 {
-  ULONG             gi_GameId;
-  ULONG             gi_GameVersion;
-  CHAR              gi_Title[64];
-  CHAR              gi_ShortTitle[16];
-  CHAR              gi_Author[128];
-  CHAR              gi_Release[128];
-  UWORD             gi_Width;
-  UWORD             gi_Height;
-  UWORD             gi_Depth;
+  ULONG                     gi_GameId;
+  ULONG                     gi_GameVersion;
+  CHAR                      gi_Title[64];
+  CHAR                      gi_ShortTitle[16];
+  CHAR                      gi_Author[128];
+  CHAR                      gi_Release[128];
+  UWORD                     gi_Width;
+  UWORD                     gi_Height;
+  UWORD                     gi_Depth;
+  struct OBJECT_TABLE_REF   gi_StartTables[16];
 };
 
 /*
@@ -201,10 +208,11 @@ struct OBJECT_TABLE_ITEM
 struct OBJECT_TABLE
 {
   APTR                      ot_Next;
+  struct OBJECT_TABLE_REF   ot_NextRef;
   ULONG                     ot_ClassType;
   UWORD                     ot_IdMin;
   UWORD                     ot_IdMax;
-  struct OBJECT_TABLE_ITEM  ot_Items[256];
+  struct OBJECT_TABLE_ITEM  ot_Items[32];
 };
 
 /*

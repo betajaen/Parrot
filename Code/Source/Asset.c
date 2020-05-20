@@ -53,6 +53,8 @@ STATIC struct MinList OpenArchives = {
 
 STATIC CHAR* BasePath;
 STATIC CHAR* JoinPathStr;
+STATIC struct OBJECT_TABLE RoomTable;
+STATIC struct OBJECT_TABLE ImageTable;
 
 #define ARCHIVE_ID 0x9640c817ul
 
@@ -69,14 +71,15 @@ struct ASSET_FACTORY
 {
   ULONG af_NodeType;
   ULONG af_Size;
+  struct OBJECT_TABLE* af_Table;
 };
 
 struct ASSET_FACTORY AssetFactories[] = {
-  { CT_GAME_INFO, sizeof(struct GAME_INFO) },
-  { CT_PALETTE32, sizeof(struct PALETTE32_TABLE) },
-  { CT_PALETTE4, sizeof(struct PALETTE4_TABLE) },
-  { CT_ROOM, sizeof(struct ROOM) },
-  { CT_IMAGE, sizeof(struct IMAGE) },
+  { CT_GAME_INFO, sizeof(struct GAME_INFO), NULL },
+  { CT_PALETTE32, sizeof(struct PALETTE32_TABLE), NULL },
+  { CT_PALETTE4, sizeof(struct PALETTE4_TABLE), NULL },
+  { CT_ROOM, sizeof(struct ROOM), &RoomTable },
+  { CT_IMAGE, sizeof(struct IMAGE), &ImageTable },
   { 0, 0 }
 };
 
@@ -173,6 +176,20 @@ EXPORT VOID CloseArchive(struct ARCHIVE* archive)
   }
 }
 
+
+EXPORT VOID CloseArchives()
+{
+  struct ARCHIVE* archive, *next;
+
+  archive = ((struct ARCHIVE*) OpenArchives.mlh_Head);
+
+  while(archive != NULL)
+  {
+    next = ((struct ARCHIVE*) archive->pa_Node.mln_Succ);
+    CloseArchive(archive);
+    archive = next;
+  }
+}
 
 EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, APTR data, ULONG dataSize)
 {
@@ -291,7 +308,96 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 
 }
 
-EXPORT void UnloadAsset(APTR arena, struct ASSET* asset)
+EXPORT VOID UnloadAsset(APTR arena, struct ASSET* asset)
 {
   
+}
+
+EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
+{
+  struct ARCHIVE* archive;
+  struct OBJECT_TABLE* table;
+  struct ASSET_FACTORY* assetFactory;
+  struct ContextNode* node;
+  struct CHUNK_HEADER chunkHeader;
+  LONG err;
+  CHAR idtype[5];
+  
+  table = NULL;
+  assetFactory = &AssetFactories[0];
+
+  while (assetFactory->af_NodeType != 0)
+  {
+    if (assetFactory->af_NodeType == ref->tr_ClassType)
+    {
+      table = assetFactory->af_Table;
+      break;
+    }
+
+    assetFactory++;
+  }
+
+  if (table == NULL)
+  {
+    RequesterF("OK", "Could not find suitable OBJECT_TABLE for %s", IDtoStr(ref->tr_ClassType, idtype));
+    return;
+  }
+  
+  archive = LoadArchive(ref->tr_ArchiveId);
+  
+  if (archive == NULL)
+  {
+    RequesterF("OK", "Could not find archive for %ld", (ULONG) ref->tr_ArchiveId);
+    return;
+  }
+  
+
+  Seek(archive->pa_File, 0, OFFSET_BEGINNING);
+
+  while (TRUE)
+  {
+    err = ParseIFF(archive->pa_Handle, IFFPARSE_RAWSTEP);
+
+    if (err == IFFERR_EOC)
+    {
+      continue;
+    }
+    else if (err)
+    {
+      RequesterF("OK", "Chunk Read Error %ld", err);
+      break;
+    }
+
+    node = CurrentChunk(archive->pa_Handle);
+
+    if (node->cn_ID == CT_TABLE)
+    {
+      if ((node->cn_Size - sizeof(chunkHeader)) == sizeof(struct OBJECT_TABLE))
+      {
+        ReadChunkBytes(archive->pa_Handle, &chunkHeader, sizeof(struct CHUNK_HEADER));
+
+        if (chunkHeader.ch_Id != ref->tr_ChunkHeaderId)
+        {
+          continue;
+        }
+
+        ReadChunkBytes(archive->pa_Handle, table, sizeof(struct CHUNK_HEADER));
+
+        return;
+      }
+
+      RequesterF("OK", "Error Table Chunk %s is to large (%ld) to fit into capacity (%ld)",
+        IDtoStr(node->cn_ID, idtype),
+        node->cn_Size,
+        sizeof(struct OBJECT_TABLE)
+      );
+
+      return;
+    }
+  }
+
+  RequesterF("OK", "Did not load Object Table %s it was not found in archive %ld",
+    IDtoStr(node->cn_ID, idtype),
+    ref->tr_ArchiveId
+  );
 }

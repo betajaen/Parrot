@@ -32,3 +32,7 @@ VOID SetArchivesPath(CHAR* path);
 struct ARCHIVE* OpenArchive(UWORD id);
 
 VOID CloseArchive(struct ARCHIVE* archive);
+
+VOID CloseArchives();
+
+VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref);

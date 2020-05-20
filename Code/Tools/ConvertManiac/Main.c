@@ -69,7 +69,7 @@ STATIC VOID MemClear(APTR pMem, ULONG size);
 
 STATIC VOID OpenParrotIff(UWORD id);
 STATIC VOID CloseParrotIff();
-STATIC VOID ExportGame(UWORD id);
+STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables);
 STATIC VOID ExportPalette(UWORD id);
 STATIC VOID ExportCursorPalette(UWORD id);
 STATIC VOID ExportRoom(UWORD id, UWORD backdrop);
@@ -81,7 +81,7 @@ STATIC UWORD ReadUWORDLE();
 STATIC UBYTE ReadUBYTE();
 STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size);
 STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG type);
-STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id);
+STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot);
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
@@ -89,6 +89,7 @@ STATIC ULONG OpenFile(CONST CHAR* path);
 STATIC VOID CloseFile();
 STATIC BOOL SeekFile(ULONG pos);
 
+STATIC struct OBJECT_TABLE_REF TableRefs[16];
 STATIC struct OBJECT_TABLE RoomTable;
 STATIC struct OBJECT_TABLE ImageTable;
 
@@ -159,11 +160,12 @@ INT main()
 
   OpenParrotIff(0);
 
-  ExportGame(1);
   ExportPalette(1);
   ExportCursorPalette(1);
-  ExportTable(&RoomTable, 1);
-  ExportTable(&ImageTable, 2);
+  ExportTable(&RoomTable, 1, 0);
+  ExportTable(&ImageTable, 2, 1);
+
+  ExportGame(1, &TableRefs[0]);
 
   CloseParrotIff();
 
@@ -432,10 +434,13 @@ STATIC VOID ExportCursorPalette(UWORD id)
   PopChunk(DstIff);
 }
 
-STATIC VOID ExportGame(UWORD id)
+STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables)
 {
   struct CHUNK_HEADER hdr;
   struct GAME_INFO info;
+  UWORD  tableCount;
+
+  tableCount = 0;
   MemClear(&info, sizeof(info));
 
   hdr.ch_Id = id;
@@ -449,6 +454,15 @@ STATIC VOID ExportGame(UWORD id)
   info.gi_Width  = 320;
   info.gi_Height = 200;
   info.gi_Depth  = 4;
+
+  while (tables->tr_ChunkHeaderId != 0 && tableCount < 16)
+  {
+    info.gi_StartTables[tableCount].tr_ArchiveId = tables->tr_ArchiveId;
+    info.gi_StartTables[tableCount].tr_ChunkHeaderId = tables->tr_ChunkHeaderId;
+    info.gi_StartTables[tableCount].tr_ClassType = tables->tr_ClassType;
+    tableCount++;
+    tables++;
+  }
 
   PushChunk(DstIff, ID_SQWK, CT_GAME_INFO, sizeof(struct CHUNK_HEADER) + sizeof(struct GAME_INFO));
   WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
@@ -732,13 +746,20 @@ STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG classType)
   table->ot_Next = &table->ot_Items[0];
 }
 
-STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id)
+STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot)
 {
   struct CHUNK_HEADER hdr;
+  struct OBJECT_TABLE_REF* ref;
   APTR t;
+  ref = NULL;
 
   hdr.ch_Id = id;
   hdr.ch_Flags = CHUNK_FLAG_ARCH_ANY;
+
+  if (tableRefSlot < 16)
+  {
+    ref = &TableRefs[tableRefSlot];
+  }
 
   t = table->ot_Next;
   table->ot_Next = NULL;
@@ -749,4 +770,12 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id)
   PopChunk(DstIff);
 
   table->ot_Next = t;
+
+  if (ref != NULL)
+  {
+    ref->tr_ArchiveId = CurrentArchiveId;
+    ref->tr_ChunkHeaderId = hdr.ch_Id;
+    ref->tr_ClassType = table->ot_ClassType;
+  }
+
 }
