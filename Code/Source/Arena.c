@@ -26,6 +26,7 @@
 */
 
 #include <Parrot/Parrot.h>
+#include <Parrot/Requester.h>
 
 #include <proto/exec.h>
 
@@ -47,8 +48,6 @@ struct ARENA_ALLOC
 
 APTR ArenaGame, ArenaChapter, ArenaRoom;
 
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-
 EXPORT APTR ArenaNew(ULONG size, ULONG requirements)
 {
   struct ARENA_HEADER* hdr;
@@ -61,8 +60,7 @@ EXPORT APTR ArenaNew(ULONG size, ULONG requirements)
 
   if (NULL == hdr)
   {
-    RequesterF("Close", "Could not allocate arena size of %ld", size);
-    return NULL;
+    ErrorF("Could not allocate arena size of %ld", size);
   }
 
   hdr->ah_Size = size;
@@ -152,24 +150,21 @@ EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class)
 
   if (NULL == arena)
   {
-    RequesterF("Close", "Arena is null");
-    goto CLEAN_EXIT;
+    ErrorF("Arena is null");
   }
 
   hdr = ((struct ARENA_HEADER*) arena);
 
   if (ARENA_MAGIC != hdr->ah_Magic)
   {
-    RequesterF("Close", "Arena magic is not correct");
-    goto CLEAN_EXIT;
+    ErrorF("Arena magic is not correct. It is likely memory is corrupted");
   }
 
   size = (size + 3) & ~0x03;
   
   if ((hdr->ah_Used + size + sizeof(struct ARENA_ALLOC)) >= hdr->ah_Size)
   {
-    RequesterF("Close", "Out of Area mem");
-    goto CLEAN_EXIT;
+    ErrorF("Out of Area memory");
   }
 
   alloc = (struct ARENA_ALLOC*) (hdr->ah_Base + hdr->ah_Used);

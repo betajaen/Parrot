@@ -28,3 +28,7 @@
 LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText);
 
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
+
+VOID TraceF(CONST_STRPTR pFmt, ...);
+
+VOID ErrorF(CONST_STRPTR pFmt, ...);

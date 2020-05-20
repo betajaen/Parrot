@@ -114,7 +114,7 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
 
   if (NULL == screen)
   {
-    RequesterF("Close", "Out of arena memory for a new screen!");
+    ErrorF("Out of arena memory for a new screen!");
     goto CLEAN_EXIT;
   }
 
@@ -122,7 +122,7 @@ EXPORT APTR ScreenNew(APTR arena, struct SCREEN_INFO* info)
 
   if (NULL == screen->st_Screen)
   {
-    RequesterF("Close", "Could not open screen %ldx%ldx%ld for Parrot", info->si_Width, info->si_Height, info->si_Depth);
+    ErrorF("Could not open screen %ldx%ldx%ld for Parrot", info->si_Width, info->si_Height, info->si_Depth);
     goto CLEAN_EXIT;
   }
 

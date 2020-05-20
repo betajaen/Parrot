@@ -123,8 +123,7 @@ STATIC struct ARCHIVE* LoadArchive(UWORD id)
 
   if (NULL == file)
   {
-    RequesterF("OK", "Could not open archive %s", path);
-    return NULL;
+    ErrorF("Could not open archive %s", path);
   }
 
   archive = (struct ARCHIVE*) ObjAlloc(ArenaGame, sizeof(struct ARCHIVE), ARCHIVE_ID);
@@ -210,7 +209,7 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
     }
     else if (err)
     {
-      RequesterF("OK", "Chunk Read Error %ld", err);
+      ErrorF("Chunk Read Error %ld", err);
       break;
     }
 
@@ -225,13 +224,11 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
 
         if (chunkHeader.ch_Id != chunkId)
         {
-          RequesterF("OK", "Id dont match");
           continue;
         }
 
         if ((chunkHeader.ch_Flags & chunkArch) == 0)
         {
-          RequesterF("OK", "Flags dont match");
           continue;
         }
 
@@ -240,7 +237,7 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
         return TRUE;
       }
 
-      RequesterF("OK", "Error Chunk %s is to large (%ld) to fit into capacity (%ld)",
+      ErrorF("Error Chunk %s is to large (%ld) to fit into capacity (%ld)",
         IDtoStr(node->cn_ID, idBuf),
         node->cn_Size,
         dataSize
@@ -249,8 +246,6 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
       return FALSE;
     }
   }
-
-  RequesterF("OK", "Chunk End");
 
   return FALSE;
 }
@@ -277,7 +272,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 
   if (archive == NULL)
   {
-    RequesterF("OK", "Could not open archive %ld", (ULONG)archiveId);
+    ErrorF("Could not open archive %ld", (ULONG)archiveId);
     return NULL;
   }
 
@@ -285,7 +280,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 
   if (assetSize == 0)
   {
-    RequesterF("OK", "Could not find registered factory for \"%s\"", IDtoStr(nodeType, strtype) );
+    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(nodeType, strtype) );
     return NULL;
   }
 
@@ -293,7 +288,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 
   if (ReadAssetFromArchive(archive, nodeType, assetId, arch, (APTR) (asset + 1), assetSize) == FALSE)
   {
-    RequesterF("OK", "Could not load asset %s:%ld from archive %ld", IDtoStr(nodeType, strtype), (ULONG) assetId, (ULONG) archiveId);
+    ErrorF("Could not load asset %s:%ld from archive %ld", IDtoStr(nodeType, strtype), (ULONG) assetId, (ULONG) archiveId);
     return NULL;
   }
   
@@ -339,7 +334,7 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
 
   if (table == NULL)
   {
-    RequesterF("OK", "Could not find suitable OBJECT_TABLE for %s", IDtoStr(ref->tr_ClassType, idtype));
+    ErrorF("Could not find suitable OBJECT_TABLE for %s", IDtoStr(ref->tr_ClassType, idtype));
     return;
   }
   
@@ -347,7 +342,7 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
   
   if (archive == NULL)
   {
-    RequesterF("OK", "Could not find archive for %ld", (ULONG) ref->tr_ArchiveId);
+    ErrorF("Could not find archive for %ld", (ULONG) ref->tr_ArchiveId);
     return;
   }
   
@@ -364,7 +359,7 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
     }
     else if (err)
     {
-      RequesterF("OK", "Chunk Read Error %ld", err);
+      ErrorF("Chunk Read Error %ld", err);
       break;
     }
 
@@ -386,7 +381,7 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
         return;
       }
 
-      RequesterF("OK", "Error Table Chunk %s is to large (%ld) to fit into capacity (%ld)",
+      ErrorF("Error Table Chunk %s is to large (%ld) to fit into capacity (%ld)",
         IDtoStr(node->cn_ID, idtype),
         node->cn_Size,
         sizeof(struct OBJECT_TABLE)
@@ -396,7 +391,7 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
     }
   }
 
-  RequesterF("OK", "Did not load Object Table %s it was not found in archive %ld",
+  ErrorF("Did not load Object Table %s it was not found in archive %ld",
     IDtoStr(node->cn_ID, idtype),
     ref->tr_ArchiveId
   );

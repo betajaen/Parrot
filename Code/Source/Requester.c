@@ -28,6 +28,7 @@
 #include <Parrot/Parrot.h>
 
 #include <proto/exec.h>
+#include <proto/dos.h>
 #include <proto/intuition.h>
 
 struct EasyStruct EasyRequesterStruct =
@@ -92,7 +93,62 @@ LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...)
 #endif
 }
 
-EXPORT LONG TestRequester(LONG x)
+VOID TraceF(CONST_STRPTR pFmt, ...)
 {
-  return RequesterF("Okay", "This is a test. Value given is = %ld", x);
+#if defined(IS_M68K)
+  LONG size;;
+  STRPTR* arg;
+
+  size = 0;
+  arg = (STRPTR*)(&pFmt + 1);
+  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & CountChar, (STRPTR)&size);
+
+  if (size >= sizeof(RequesterText) || (0 == size))
+  {
+    return;
+  }
+
+  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & PutChar, (STRPTR)&RequesterText[0]);
+
+  EasyRequesterStruct.es_Title = "Parrot Trace";
+
+  EasyRequest(NULL, &EasyRequesterStruct, NULL);
+
+
+  EasyRequesterStruct.es_Title = "Parrot";
+#else
+  return; /* Unimplemented */
+#endif
+}
+
+VOID ErrorF(CONST_STRPTR pFmt, ...)
+{
+#if defined(IS_M68K)
+  LONG size;;
+  STRPTR* arg;
+
+  size = 0;
+  arg = (STRPTR*)(&pFmt + 1);
+  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & CountChar, (STRPTR)&size);
+
+  if (size >= sizeof(RequesterText) || (0 == size))
+  {
+    EasyRequesterStruct.es_Title = "Parrot Error";
+    EasyRequesterStruct.es_TextFormat = "No Message Given.";
+
+    EasyRequest(NULL, &EasyRequesterStruct, NULL);
+
+    Exit(RETURN_FAIL);
+  }
+
+  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & PutChar, (STRPTR)&RequesterText[0]);
+
+  EasyRequesterStruct.es_Title = "Parrot Error";
+
+  EasyRequest(NULL, &EasyRequesterStruct, NULL);
+
+  Exit(RETURN_FAIL);
+#else
+  return; /* Unimplemented */
+#endif
 }

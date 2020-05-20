@@ -95,7 +95,7 @@ EXPORT VOID GameStart(STRPTR path)
     if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
       break;
 
-    RequesterF("OK", "Loading table %ld", ii);
+    TraceF("Loading table %ld", ii);
 
     LoadObjectTable(&GameInfo->gi_StartTables[ii]);
   }
