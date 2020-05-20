@@ -90,8 +90,6 @@ EXPORT VOID GameStart(STRPTR path)
    
   Busy();
   
-  /*
-
   room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
 
   if (room == NULL)
@@ -107,7 +105,7 @@ EXPORT VOID GameStart(STRPTR path)
     RequesterF("OK", "Backdrop pointer Id=[%ld] == %lx", room->rm_Backdrops[0], uroom.ur_Backdrops[0]);
 
   }
-  */
+  
 
   Delay(50 * 2);
 

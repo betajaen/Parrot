@@ -55,19 +55,19 @@ struct IntuitionBase* IntuitionBase;
 #endif
 
 STATIC struct IFFHandle* DstIff;
-STATIC UBYTE  ArchiveId;
 STATIC UBYTE* SrcFileData;
 STATIC UBYTE* SrcFilePos;
 STATIC UBYTE* SrcFileEnd;
 STATIC ULONG  NextRoomId;
 STATIC ULONG  NextBackdropId;
+STATIC UWORD  CurrentArchiveId;
 
 ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
 ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
 
 STATIC VOID MemClear(APTR pMem, ULONG size);
 
-STATIC VOID OpenParrotIff(UBYTE id);
+STATIC VOID OpenParrotIff(UWORD id);
 STATIC VOID CloseParrotIff();
 STATIC VOID ExportGame(UWORD id);
 STATIC VOID ExportPalette(UWORD id);
@@ -79,12 +79,18 @@ STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UBYTE* dst, UWORD w, UWORD h);
 STATIC UWORD ReadUWORDBE();
 STATIC UWORD ReadUWORDLE();
 STATIC UBYTE ReadUBYTE();
+STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size);
+STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG type);
+STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id);
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
 STATIC ULONG OpenFile(CONST CHAR* path);
 STATIC VOID CloseFile();
 STATIC BOOL SeekFile(ULONG pos);
+
+STATIC struct OBJECT_TABLE RoomTable;
+STATIC struct OBJECT_TABLE ImageTable;
 
 INT main()
 {
@@ -133,11 +139,11 @@ INT main()
   
   NextBackdropId = 1;
 
-  OpenParrotIff(0);
-  ExportGame(1);
-  ExportPalette(1);
-  ExportCursorPalette(1);
-  CloseParrotIff();
+  MemClear((APTR)&RoomTable, sizeof(RoomTable));
+  MemClear((APTR)&ImageTable, sizeof(ImageTable));
+
+  InitTable(&RoomTable, CT_ROOM);
+  InitTable(&ImageTable, CT_IMAGE);
 
   if (OpenFile("PROGDIR:01.LFL") > 0)
   {
@@ -150,6 +156,16 @@ INT main()
 
     CloseFile();
   }
+
+  OpenParrotIff(0);
+
+  ExportGame(1);
+  ExportPalette(1);
+  ExportCursorPalette(1);
+  ExportTable(&RoomTable, 1);
+  ExportTable(&ImageTable, 2);
+
+  CloseParrotIff();
 
   DebugF("Converted.");
 
@@ -253,11 +269,11 @@ STATIC UBYTE ReadUBYTE()
   return r;
 }
 
-STATIC VOID OpenParrotIff(UBYTE id)
+STATIC VOID OpenParrotIff(UWORD id)
 {
   CHAR filename[26];
 
-  ArchiveId = id;
+  CurrentArchiveId = id;
 
   StrFormat(filename, sizeof(filename), "PROGDIR:%ld.Parrot", (ULONG)id);
   
@@ -487,6 +503,9 @@ STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
 
   FreeVec(chunky);
   FreeVec(planar);
+
+
+  AddToTable(&ImageTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct IMAGE) + planarSize);
 }
 
 
@@ -509,6 +528,8 @@ STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
   WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
   WriteChunkBytes(DstIff, &room, sizeof(struct ROOM));
   PopChunk(DstIff);
+
+  AddToTable(&RoomTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct ROOM));
 }
 
 
@@ -676,4 +697,56 @@ STATIC BOOL SeekFile(ULONG pos)
   }
 
   return FALSE;
+}
+STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size)
+{
+  struct OBJECT_TABLE_ITEM* item;
+
+  item = (struct OBJECT_TABLE_ITEM*) table->ot_Next;
+
+  item->ot_Id = id;
+  item->ot_Archive = archive;
+  item->ot_Flags = flags;
+  item->ot_Size = size;
+
+  if (id > table->ot_IdMax)
+  {
+    table->ot_IdMax = id;
+  }
+
+  if (id < table->ot_IdMin)
+  {
+    table->ot_IdMin = id;
+  }
+
+  table->ot_Next = (APTR)(item + 1);
+}
+
+STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG classType)
+{
+  MemClear(table, sizeof(struct OBJECT_TABLE));
+
+  table->ot_ClassType = classType;
+  table->ot_IdMin = 65535;
+  table->ot_IdMax = 0;
+  table->ot_Next = &table->ot_Items[0];
+}
+
+STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id)
+{
+  struct CHUNK_HEADER hdr;
+  APTR t;
+
+  hdr.ch_Id = id;
+  hdr.ch_Flags = CHUNK_FLAG_ARCH_ANY;
+
+  t = table->ot_Next;
+  table->ot_Next = NULL;
+
+  PushChunk(DstIff, ID_SQWK, CT_TABLE, sizeof(struct CHUNK_HEADER) + sizeof(struct OBJECT_TABLE));
+  WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
+  WriteChunkBytes(DstIff, table, sizeof(struct OBJECT_TABLE));
+  PopChunk(DstIff);
+
+  table->ot_Next = t;
 }

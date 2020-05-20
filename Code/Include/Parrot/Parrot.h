@@ -132,6 +132,7 @@ struct SCREEN_INFO
 #define CT_IMAGE          MAKE_NODE_ID('I','M','G','E')
 #define CT_PALETTE32      MAKE_NODE_ID('P','A','L','5')
 #define CT_PALETTE4       MAKE_NODE_ID('P','A','L','2')
+#define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
 
 struct ASSET
 {
@@ -182,6 +183,28 @@ struct GAME_INFO
   UWORD             gi_Width;
   UWORD             gi_Height;
   UWORD             gi_Depth;
+};
+
+/*
+    Object Table
+*/
+
+struct OBJECT_TABLE_ITEM
+{
+  UWORD ot_Id;
+  UWORD ot_Archive;
+  UWORD ot_Flags;
+  ULONG ot_Size;
+  APTR  ot_Ptr;
+};
+
+struct OBJECT_TABLE
+{
+  APTR                      ot_Next;
+  ULONG                     ot_ClassType;
+  UWORD                     ot_IdMin;
+  UWORD                     ot_IdMax;
+  struct OBJECT_TABLE_ITEM  ot_Items[256];
 };
 
 /*
