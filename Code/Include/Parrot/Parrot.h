@@ -61,12 +61,15 @@
     Helper Macros
 */
 
-#ifndef NewList
-#define NewList(X)\
-  (X)->lh_Head = (struct Node*) &(X)->lh_Tail;\
-  (X)->lh_Tail = 0;\
-  (X)->lh_TailPred = (struct Node*) &(X)->lh_Head;
-#endif
+#define NEW_LIST(list)\
+    list.lh_Head          = (struct Node *) &list.lh_Tail;\
+    list.lh_Tail          = 0;\
+    list.lh_TailPred      = (struct Node*) &list.lh_Head;\
+
+#define NEW_MIN_LIST(list)\
+    list.mlh_Head          = (struct MinNode *) &list.mlh_Tail;\
+    list.mlh_Tail          = 0;\
+    list.mlh_TailPred      = (struct MinNode*) &list.mlh_Head;
 
 #define MAKE_NODE_ID(a,b,c,d)	\
 	((ULONG) (a)<<24 | (ULONG) (b)<<16 | (ULONG) (c)<<8 | (ULONG) (d))

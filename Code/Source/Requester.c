@@ -110,10 +110,11 @@ VOID TraceF(CONST_STRPTR pFmt, ...)
 
   RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & PutChar, (STRPTR)&RequesterText[0]);
 
+  EasyRequesterStruct.es_GadgetFormat = "OK";
   EasyRequesterStruct.es_Title = "Parrot Trace";
+  EasyRequesterStruct.es_TextFormat = &RequesterText[0];
 
   EasyRequest(NULL, &EasyRequesterStruct, NULL);
-
 
   EasyRequesterStruct.es_Title = "Parrot";
 #else
@@ -143,7 +144,9 @@ VOID ErrorF(CONST_STRPTR pFmt, ...)
 
   RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & PutChar, (STRPTR)&RequesterText[0]);
 
+  EasyRequesterStruct.es_GadgetFormat = "OK";
   EasyRequesterStruct.es_Title = "Parrot Error";
+  EasyRequesterStruct.es_TextFormat = &RequesterText[0];
 
   EasyRequest(NULL, &EasyRequesterStruct, NULL);
 

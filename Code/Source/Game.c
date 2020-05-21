@@ -61,18 +61,51 @@ EXPORT VOID GameStart(STRPTR path)
   struct UNPACKED_ROOM uroom;
   UBYTE ii;
 
+  GameArchive = NULL;
+  GameInfo = NULL;
+  GamePalette = NULL;
+  GameCursorPalette = NULL;
+  ArenaGame = NULL;
+  ArenaChapter = NULL;
+  ArenaRoom = NULL;
+
   InitStackVar(struct UNPACKED_ROOM, uroom);
 
-  ArenaGame = ArenaNew(16384, 0ul);
-  ArenaChapter = ArenaNew(131072, 0ul);
-  ArenaRoom = ArenaNew(131072, 0ul);
+  ArenaGame = ArenaOpen(16384, 0ul);
+  ArenaChapter = ArenaOpen(131072, 0ul);
+  ArenaRoom = ArenaOpen(131072, 0ul);
 
-  SetArchivesPath(path);
+  InitialiseArchives(path);
+
   GameArchive = OpenArchive(0);
 
+  if (GameArchive == NULL)
+  {
+    ErrorF("Did not open Game Archive");
+  }
+
   GameInfo = LoadAssetT(struct GAME_INFO, ArenaGame, ARCHIVE_GLOBAL, CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
+
+  CloseArchive(0);
+
+  if (GameInfo == NULL)
+  {
+    ErrorF("Did not load Game Info");
+  }
+
   GamePalette = LoadAssetT(struct PALETTE32_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE32, 1, CHUNK_FLAG_ARCH_AGA);
+
+  if (GamePalette == NULL)
+  {
+    ErrorF("Did not load Game Palette");
+  }
+
   GameCursorPalette = LoadAssetT(struct PALETTE4_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE4, 1, CHUNK_FLAG_ARCH_AGA);
+
+  if (GamePalette == NULL)
+  {
+    ErrorF("Did not load Cursor Palette");
+  }
 
   screenInfo.si_Width = GameInfo->gi_Width;
   screenInfo.si_Height = GameInfo->gi_Height;
@@ -92,8 +125,6 @@ EXPORT VOID GameStart(STRPTR path)
   {
     if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
       break;
-
-    TraceF("Loading table %ld", ii);
 
     LoadObjectTable(&GameInfo->gi_StartTables[ii]);
   }
@@ -123,9 +154,9 @@ EXPORT VOID GameStart(STRPTR path)
 
   CloseArchives();
 
-  ArenaDelete(ArenaRoom);
-  ArenaDelete(ArenaChapter);
-  ArenaDelete(ArenaGame);
+  ArenaClose(ArenaRoom);
+  ArenaClose(ArenaChapter);
+  ArenaClose(ArenaGame);
 
 }
 

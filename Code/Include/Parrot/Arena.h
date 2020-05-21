@@ -29,9 +29,9 @@ extern APTR ArenaGame;
 extern APTR ArenaChapter;
 extern APTR ArenaRoom;
 
-APTR ArenaNew(ULONG size, ULONG requirements);
+APTR ArenaOpen(ULONG size, ULONG requirements);
 
-BOOL ArenaDelete(APTR arena);
+BOOL ArenaClose(APTR arena);
 
 BOOL ArenaRollback(APTR arena);
 
@@ -39,7 +39,7 @@ ULONG ArenaSpace(APTR arena);
 
 ULONG ArenaSize(APTR arena);
 
-APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
+APTR ObjAlloc(APTR arena, ULONG size, ULONG class, BOOL zeroFill);
 
 ULONG ObjGetClass(APTR alloc);
 

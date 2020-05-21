@@ -27,6 +27,7 @@
 
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
+#include <Parrot/String.h>
 
 #include <proto/exec.h>
 
@@ -48,7 +49,7 @@ struct ARENA_ALLOC
 
 APTR ArenaGame, ArenaChapter, ArenaRoom;
 
-EXPORT APTR ArenaNew(ULONG size, ULONG requirements)
+EXPORT APTR ArenaOpen(ULONG size, ULONG requirements)
 {
   struct ARENA_HEADER* hdr;
 
@@ -56,7 +57,7 @@ EXPORT APTR ArenaNew(ULONG size, ULONG requirements)
   size = (size + 3) & ~0x03;
 
   hdr = (struct ARENA_HEADER*) AllocVec(size + sizeof(struct ARENA_HEADER),
-    requirements);
+    requirements | MEMF_CLEAR);
 
   if (NULL == hdr)
   {
@@ -71,7 +72,7 @@ EXPORT APTR ArenaNew(ULONG size, ULONG requirements)
   return (APTR)(hdr);
 }
 
-EXPORT BOOL ArenaDelete(APTR arena)
+EXPORT BOOL ArenaClose(APTR arena)
 {
   struct ARENA_HEADER* hdr;
 
@@ -139,7 +140,7 @@ EXPORT ULONG ArenaSize(APTR arena)
 }
 
 
-EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class)
+EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class, BOOL zeroFill)
 {
   struct ARENA_HEADER* hdr;
   struct ARENA_ALLOC* alloc;
@@ -168,6 +169,12 @@ EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class)
   }
 
   alloc = (struct ARENA_ALLOC*) (hdr->ah_Base + hdr->ah_Used);
+
+  if (zeroFill == TRUE)
+  {
+    FillMem((UBYTE*)alloc, size, 0);
+  }
+
   alloc->aa_Class = class;
   alloc->aa_Size  = size;
 
@@ -186,6 +193,7 @@ EXPORT ULONG ObjGetClass(APTR alloc)
     return 0;
 
   hdr = ((struct ARENA_ALLOC*) (alloc)) - 1;
+
 
   return hdr->aa_Class;
 }

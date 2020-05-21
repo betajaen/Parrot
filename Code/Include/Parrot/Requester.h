@@ -32,3 +32,21 @@ LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
 VOID TraceF(CONST_STRPTR pFmt, ...);
 
 VOID ErrorF(CONST_STRPTR pFmt, ...);
+
+#define PARROT_SERIOUS_ERROR(MESSAGE, REASON, ...) \
+  ErrorF(MESSAGE "\nReason:" REASON, __VA_ARGS__)
+
+#define PARROT_ERR(MESSAGE, ...) \
+  ErrorF(MESSAGE, __VA_ARGS__);
+
+#define PARROT_ERR_PTR(NAME) \
+  "\n " NAME " = %lx"
+
+#define PARROT_ERR_INT(NAME) \
+  "\n " NAME " = %ld"
+
+#define PARROT_ERR_HEX(NAME) \
+  "\n " NAME " = %ld"
+
+#define PARROT_ERR_STR(NAME) \
+  "\n " NAME " = %s"

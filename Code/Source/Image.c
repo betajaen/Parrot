@@ -26,23 +26,3 @@
 */
 
 #include <Parrot/Parrot.h>
-
-#include <proto/exec.h>
-
-#define IMAGE_MAGIC 0x0bac4b20ul
-
-APTR ObjAlloc(APTR arena, ULONG size, ULONG class);
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-struct ASSET* LoadAsset(APTR arena, ULONG id);
-void UnloadAsset(APTR arena, struct ASSET* asset);
-
-EXPORT struct ASSET* LoadImage(APTR arena, ULONG id)
-{
-  struct IMAGE* image;
-
-  image = ObjAlloc(arena, sizeof(struct IMAGE), IMAGE_MAGIC);
-
-
-
-  return (struct ASSET*) image;
-}

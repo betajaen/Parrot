@@ -27,11 +27,11 @@
 
 struct ARCHIVE;
 
-VOID SetArchivesPath(CHAR* path);
+VOID InitialiseArchives(CHAR* path);
 
 struct ARCHIVE* OpenArchive(UWORD id);
 
-VOID CloseArchive(struct ARCHIVE* archive);
+VOID CloseArchive(UWORD id);
 
 VOID CloseArchives();
 
