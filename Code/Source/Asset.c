@@ -138,8 +138,6 @@ STATIC struct ARCHIVE* ArchiveReadFromFile(UWORD id)
   archive->pa_Iff->iff_Stream = archive->pa_File;
   InitIFFasDOS(archive->pa_Iff);
 
-  TraceF("Opened archive %s", path);
-
   return archive;
 }
 
@@ -293,7 +291,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
        asset != NULL; 
        asset = ((struct ASSET*)asset->as_Node.mln_Succ))
   {
-    if (asset->as_Id == assetId && (asset->as_Arch & arch) != 0)
+    if (asset->as_ClassType == nodeType && asset->as_Id == assetId && (asset->as_Arch & arch) != 0)
     {
       return (APTR) (asset+1);
     }
@@ -325,10 +323,11 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 
   asset->as_Id = assetId;
   asset->as_Arch = arch;
+  asset->as_ClassType = nodeType;
   asset->as_Node.mln_Succ = NULL;
   asset->as_Node.mln_Pred = NULL;
 
-  AddTail((struct List*) &Assets, (struct Node*) asset);
+  AddHead((struct List*) &Assets, (struct Node*) asset);
 
   return (APTR)(asset + 1);
 }
@@ -458,7 +457,7 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
           continue;
         }
 
-        ReadChunkBytes(archive->pa_Iff, table, sizeof(struct CHUNK_HEADER));
+        ReadChunkBytes(archive->pa_Iff, table, sizeof(struct OBJECT_TABLE));
 
         goto CLEAN_EXIT;
       }

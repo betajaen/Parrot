@@ -141,6 +141,7 @@ struct ASSET
 {
   struct MinNode    as_Node;
   UWORD             as_Id;
+  ULONG             as_ClassType;
   UWORD             as_Arch;
 };
 
