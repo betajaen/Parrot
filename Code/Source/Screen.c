@@ -49,6 +49,13 @@ struct SCREEN
 
 struct SCREEN Screens[4];
 
+STATIC struct TextAttr myta = {
+    "topaz.font",
+    11,
+    0,
+    NULL
+};
+
 EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
 {
   struct NewScreen      newScreen;
@@ -246,7 +253,7 @@ EXPORT VOID ScreenSetCursor(UWORD id, UBYTE type)
   
 }
 
-EXPORT VOID ScreenLoadPaletteTable32(UWORD id, struct PALETTE32_TABLE* paletteTable)
+EXPORT VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable)
 {
   struct SCREEN* screen;
 
@@ -257,22 +264,8 @@ EXPORT VOID ScreenLoadPaletteTable32(UWORD id, struct PALETTE32_TABLE* paletteTa
 
   screen = &Screens[id];
 
-  LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
+  LoadRGB32(&screen->st_Screen->ViewPort, (CONST ULONG*) &paletteTable->pt_Data);
   
-}
-
-EXPORT VOID ScreenLoadPaletteTable4(UWORD id, struct PALETTE4_TABLE* paletteTable)
-{
-  struct SCREEN* screen;
-
-  if (id >= 4)
-  {
-    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
-  }
-
-  screen = &Screens[id];
-
-  LoadRGB32(&screen->st_Screen->ViewPort, &paletteTable->pt_Header);
 }
 
 EXPORT VOID ScreenClear(UWORD id)

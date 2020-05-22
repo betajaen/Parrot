@@ -29,7 +29,7 @@
 
 CC      = vc
 CPU     = 68020
-CFLAGS  = -lamiga -nostdlib -IInclude -O2
+CFLAGS  = -lamiga -nostdlib -IInclude
 
 # PARROT
 

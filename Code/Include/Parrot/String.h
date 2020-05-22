@@ -43,3 +43,4 @@ VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value);
 
 #define InitStackVar(T, X) FillMem((UBYTE*) &X, sizeof(T), 0);
 
+CHAR* StrDuplicate(CONST CHAR* pSrc);

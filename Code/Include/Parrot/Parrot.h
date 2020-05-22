@@ -133,13 +133,11 @@ struct SCREEN_INFO
 #define CT_GAME_INFO      MAKE_NODE_ID('G','A','M','E')
 #define CT_ROOM           MAKE_NODE_ID('R','O','O','M')
 #define CT_IMAGE          MAKE_NODE_ID('I','M','G','E')
-#define CT_PALETTE32      MAKE_NODE_ID('P','A','L','5')
-#define CT_PALETTE4       MAKE_NODE_ID('P','A','L','2')
+#define CT_PALETTE        MAKE_NODE_ID('P','A','L','4')
 #define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
 
 struct ASSET
 {
-  struct MinNode    as_Node;
   UWORD             as_Id;
   ULONG             as_ClassType;
   UWORD             as_Arch;
@@ -194,6 +192,8 @@ struct GAME_INFO
   UWORD                     gi_Height;
   UWORD                     gi_Depth;
   struct OBJECT_TABLE_REF   gi_StartTables[16];
+  UWORD                     gi_StartPalette;
+  UWORD                     gi_StartCursorPalette;
 };
 
 /*
@@ -209,6 +209,8 @@ struct OBJECT_TABLE_ITEM
   APTR  ot_Ptr;
 };
 
+#define MAX_ITEMS_PER_TABLE 32
+
 struct OBJECT_TABLE
 {
   APTR                      ot_Next;
@@ -216,30 +218,20 @@ struct OBJECT_TABLE
   ULONG                     ot_ClassType;
   UWORD                     ot_IdMin;
   UWORD                     ot_IdMax;
-  struct OBJECT_TABLE_ITEM  ot_Items[32];
+  struct OBJECT_TABLE_ITEM  ot_Items[MAX_ITEMS_PER_TABLE];
 };
 
 /*
-    Palette 32 Table
+    Palette Table
 
+    Upto 16 Colours
 */
-struct PALETTE32_TABLE
+struct PALETTE_TABLE
 {
-  ULONG pt_Header;
-  ULONG pt_Data[32 * 3];
-  ULONG pt_Null;
+  UBYTE pt_Begin;
+  UBYTE pt_End;
+  ULONG pt_Data[64];
 };
-
-/*
-  Palette 4 Table
-*/
-struct PALETTE4_TABLE
-{
-  ULONG pt_Header;
-  ULONG pt_Data[4 * 3];
-  ULONG pt_Null;
-};
-
 
 /*
       Image

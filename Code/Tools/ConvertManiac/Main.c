@@ -69,7 +69,7 @@ STATIC VOID MemClear(APTR pMem, ULONG size);
 
 STATIC VOID OpenParrotIff(UWORD id);
 STATIC VOID CloseParrotIff();
-STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables);
+STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD mainPalette, UWORD cursorPalette);
 STATIC VOID ExportPalette(UWORD id);
 STATIC VOID ExportCursorPalette(UWORD id);
 STATIC VOID ExportRoom(UWORD id, UWORD backdrop);
@@ -92,6 +92,7 @@ STATIC BOOL SeekFile(ULONG pos);
 STATIC struct OBJECT_TABLE_REF TableRefs[16];
 STATIC struct OBJECT_TABLE RoomTable;
 STATIC struct OBJECT_TABLE ImageTable;
+STATIC struct OBJECT_TABLE PaletteTable;
 
 INT main()
 {
@@ -142,9 +143,11 @@ INT main()
 
   MemClear((APTR)&RoomTable, sizeof(RoomTable));
   MemClear((APTR)&ImageTable, sizeof(ImageTable));
+  MemClear((APTR)&PaletteTable, sizeof(PaletteTable));
 
   InitTable(&RoomTable, CT_ROOM);
   InitTable(&ImageTable, CT_IMAGE);
+  InitTable(&PaletteTable, CT_PALETTE);
 
   if (OpenFile("PROGDIR:01.LFL") > 0)
   {
@@ -161,11 +164,12 @@ INT main()
   OpenParrotIff(0);
 
   ExportPalette(1);
-  ExportCursorPalette(1);
-  ExportTable(&RoomTable, 1, 0);
-  ExportTable(&ImageTable, 2, 1);
+  ExportCursorPalette(2);
+  ExportTable(&PaletteTable, 1, 0);
+  ExportTable(&RoomTable, 2, 1);
+  ExportTable(&ImageTable, 3, 2);
 
-  ExportGame(1, &TableRefs[0]);
+  ExportGame(1, &TableRefs[0], 1, 2);
 
   CloseParrotIff();
 
@@ -305,136 +309,153 @@ STATIC VOID CloseParrotIff()
 STATIC VOID ExportPalette(UWORD id)
 {
   struct CHUNK_HEADER hdr;
-  struct PALETTE32_TABLE aga;
+  struct PALETTE_TABLE pal;
+  ULONG* pData;
 
-  MemClear((APTR)&aga, sizeof(aga));
+  MemClear((APTR)&pal, sizeof(pal));
   
   hdr.ch_Id = id;
   hdr.ch_Flags = CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG;
 
-  aga.pt_Header = (16l << 16) | 0;
+  pData = (ULONG*)&pal.pt_Data[0];
+
+  *pData++ = (16l << 16) | 0;
 
   /* Black */
-  aga.pt_Data[0] = 0x00000000;
-  aga.pt_Data[1] = 0x00000000;
-  aga.pt_Data[2] = 0x00000000;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
 
   /* Blue */
-  aga.pt_Data[3] = 0x00000000;
-  aga.pt_Data[4] = 0x00000000;
-  aga.pt_Data[5] = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
 
   /* Green */
-  aga.pt_Data[6] = 0x00000000;
-  aga.pt_Data[7] = 0xAAAAAAAA;
-  aga.pt_Data[8] = 0x00000000;
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
 
   /* Cyan */
-  aga.pt_Data[9] = 0x00000000;
-  aga.pt_Data[10] = 0xAAAAAAAA;
-  aga.pt_Data[11] = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
 
   /* Red */
-  aga.pt_Data[12] = 0xAAAAAAAA;
-  aga.pt_Data[13] = 0x00000000;
-  aga.pt_Data[14] = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
 
   /* Magenta */
-  aga.pt_Data[15] = 0xAAAAAAAA;
-  aga.pt_Data[16] = 0x00000000;
-  aga.pt_Data[17] = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
 
   /* Brown */
-  aga.pt_Data[18] = 0xAAAAAAAA;
-  aga.pt_Data[19] = 0x55555555;
-  aga.pt_Data[20] = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x55555555;
+  *pData++ = 0x00000000;
 
   /* Light Gray */
-  aga.pt_Data[21] = 0xAAAAAAAA;
-  aga.pt_Data[22] = 0xAAAAAAAA;
-  aga.pt_Data[23] = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
 
   /* Dark Gray */
-  aga.pt_Data[24] = 0x55555555;
-  aga.pt_Data[25] = 0x55555555;
-  aga.pt_Data[26] = 0x55555555;
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
 
   /* Bright Blue */
-  aga.pt_Data[27] = 0x55555555;
-  aga.pt_Data[28] = 0x55555555;
-  aga.pt_Data[29] = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
 
   /* Bright Green */
-  aga.pt_Data[30] = 0x55555555;
-  aga.pt_Data[31] = 0xFFFFFFFF;
-  aga.pt_Data[32] = 0x55555555;
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
 
   /* Bright Cyan */
-  aga.pt_Data[33] = 0x55555555;
-  aga.pt_Data[34] = 0xFFFFFFFF;
-  aga.pt_Data[35] = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
 
   /* Bright Red */
-  aga.pt_Data[36] = 0xFFFFFFFF;
-  aga.pt_Data[37] = 0x55555555;
-  aga.pt_Data[38] = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
 
   /* Bright Magenta */
-  aga.pt_Data[39] = 0xFFFFFFFF;
-  aga.pt_Data[40] = 0x55555555;
-  aga.pt_Data[41] = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
 
   /* Bright Yellow */
-  aga.pt_Data[42] = 0xFFFFFFFF;
-  aga.pt_Data[43] = 0xFFFFFFFF;
-  aga.pt_Data[44] = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
 
   /* Bright White */
-  aga.pt_Data[45] = 0xFFFFFFFF;
-  aga.pt_Data[46] = 0xFFFFFFFF;
-  aga.pt_Data[47] = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
 
-  aga.pt_Null = 0;
+  /* Terminator */
+  *pData = 0;
 
-  PushChunk(DstIff, ID_SQWK, CT_PALETTE32, sizeof(aga) + sizeof(hdr));
+  pal.pt_Begin = 0;
+  pal.pt_End = 15;
+
+  PushChunk(DstIff, ID_SQWK, CT_PALETTE, sizeof(pal) + sizeof(hdr));
   WriteChunkBytes(DstIff, &hdr, sizeof(hdr));
-  WriteChunkBytes(DstIff, &aga, sizeof(aga));
+  WriteChunkBytes(DstIff, &pal, sizeof(pal));
   PopChunk(DstIff);
+
+  AddToTable(&PaletteTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct PALETTE_TABLE));
 }
 
 STATIC VOID ExportCursorPalette(UWORD id)
 {
   struct CHUNK_HEADER   hdr;
-  struct PALETTE4_TABLE aga;
+  struct PALETTE_TABLE  pal;
+  ULONG* pData;
 
-  MemClear((APTR)&aga, sizeof(aga));
+  MemClear((APTR)&pal, sizeof(pal));
 
   hdr.ch_Id = id;
   hdr.ch_Flags = CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG;
 
-  aga.pt_Header = (4l << 16) | 17;
+  pData = (ULONG*) &pal.pt_Data[0];
 
-  aga.pt_Data[0] = 0x00000000;
-  aga.pt_Data[1] = 0x00000000;
-  aga.pt_Data[2] = 0x00000000;
+  *pData++ = (4l << 16) | 17;
 
-  aga.pt_Data[3] = 0xFFFFFFFF;
-  aga.pt_Data[4] = 0xFFFFFFFF;
-  aga.pt_Data[5] = 0xFFFFFFFF;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
 
-  aga.pt_Data[6] = 0xAAAAAAAA;
-  aga.pt_Data[7] = 0xAAAAAAAA;
-  aga.pt_Data[8] = 0xAAAAAAAA;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
 
-  aga.pt_Null = 0;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
 
-  PushChunk(DstIff, ID_SQWK, CT_PALETTE4, sizeof(hdr) + sizeof(aga));
+  *pData = 0;
+
+  pal.pt_Begin = 17;
+  pal.pt_End = 19;
+
+  PushChunk(DstIff, ID_SQWK, CT_PALETTE, sizeof(hdr) + sizeof(pal));
   WriteChunkBytes(DstIff, &hdr, sizeof(hdr));
-  WriteChunkBytes(DstIff, &aga, sizeof(aga));
+  WriteChunkBytes(DstIff, &pal, sizeof(pal));
   PopChunk(DstIff);
+
+  AddToTable(&PaletteTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct PALETTE_TABLE));
 }
 
-STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables)
+STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD startPalette, UWORD startCursorPalette)
 {
   struct CHUNK_HEADER hdr;
   struct GAME_INFO info;
@@ -454,6 +475,8 @@ STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables)
   info.gi_Width  = 320;
   info.gi_Height = 200;
   info.gi_Depth  = 4;
+  info.gi_StartPalette = startPalette;
+  info.gi_StartCursorPalette = startCursorPalette;
 
   while (tables->tr_ChunkHeaderId != 0 && tableCount < 16)
   {
@@ -759,6 +782,12 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot
   if (tableRefSlot < 16)
   {
     ref = &TableRefs[tableRefSlot];
+  }
+
+  if (table->ot_IdMin > table->ot_IdMax)
+  {
+    table->ot_IdMin = 0;
+    table->ot_IdMax = 0;
   }
 
   t = table->ot_Next;

@@ -41,8 +41,24 @@
 
 struct ARCHIVE* GameArchive;
 struct GAME_INFO* GameInfo;
-struct PALETTE32_TABLE* GamePalette;
-struct PALETTE4_TABLE*  GameCursorPalette;
+struct PALETTE_TABLE* GamePalette;
+struct PALETTE_TABLE* GameCursorPalette;
+
+struct PALETTE_TABLE DefaultPalette =
+{
+  0,0,
+  {
+    3 << 16 | 0,
+    0X33333333, 0X33333333,  0X33333333,
+    0X88888888, 0X88888888,  0X88888888,
+    0XFFFFFFFF, 0XFFFFFFFF,  0XFFFFFFFF,
+    3 << 16 | 17,
+    0,0,0,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
+    0
+  }
+};
 
 STATIC VOID Busy()
 {
@@ -52,6 +68,61 @@ STATIC VOID Busy()
 STATIC VOID NotBusy()
 {
   ScreenSetCursor(0, CURSOR_POINT);
+}
+
+STATIC VOID Load(STRPTR path)
+{
+  UWORD ii;
+
+  Busy();
+
+  for (ii = 0; ii < 16; ii++)
+  {
+    if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
+      break;
+
+    LoadObjectTable(&GameInfo->gi_StartTables[ii]);
+  }
+
+  GamePalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_UNKNOWN, CT_PALETTE, GameInfo->gi_StartPalette, CHUNK_FLAG_ARCH_AGA);
+
+  if (GamePalette == NULL)
+  {
+    ErrorF("Did not load Game Palette");
+  }
+
+  GameCursorPalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE, GameInfo->gi_StartCursorPalette, CHUNK_FLAG_ARCH_AGA);
+
+  if (GamePalette == NULL)
+  {
+    ErrorF("Did not load Cursor Palette");
+  }
+
+  ScreenLoadPaletteTable(0, GamePalette);
+  // ScreenLoadPaletteTable(0, GameCursorPalette);
+
+
+  // room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
+  // 
+  // if (room == NULL)
+  // {
+  //   RequesterF("OK", "Could not load room!");
+  // }
+  // else
+  // {
+  //   UnpackRoom(ArenaRoom, room, &uroom, UNPACK_ROOM_BACKDROPS);
+  // 
+  //   RequesterF("OK", "Room W=%ld H=%ld", (ULONG)room->rm_Width, (ULONG)room->rm_Height);
+  // 
+  //   RequesterF("OK", "Backdrop pointer Id=[%ld] == %lx", room->rm_Backdrops[0], uroom.ur_Backdrops[0]);
+  // 
+  // }
+
+
+  Delay(50 * 2);
+
+
+  NotBusy();
 }
 
 EXPORT VOID GameStart(STRPTR path)
@@ -86,26 +157,12 @@ EXPORT VOID GameStart(STRPTR path)
 
   GameInfo = LoadAssetT(struct GAME_INFO, ArenaGame, ARCHIVE_GLOBAL, CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
 
-  CloseArchive(0);
-
   if (GameInfo == NULL)
   {
     ErrorF("Did not load Game Info");
   }
 
-  GamePalette = LoadAssetT(struct PALETTE32_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE32, 1, CHUNK_FLAG_ARCH_AGA);
-
-  if (GamePalette == NULL)
-  {
-    ErrorF("Did not load Game Palette");
-  }
-
-  GameCursorPalette = LoadAssetT(struct PALETTE4_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE4, 1, CHUNK_FLAG_ARCH_AGA);
-
-  if (GamePalette == NULL)
-  {
-    ErrorF("Did not load Cursor Palette");
-  }
+  CloseArchive(0);
 
   screenInfo.si_Width = GameInfo->gi_Width;
   screenInfo.si_Height = GameInfo->gi_Height;
@@ -116,39 +173,10 @@ EXPORT VOID GameStart(STRPTR path)
   screenInfo.si_Title = &GameInfo->gi_Title[0];
 
   ScreenOpen(0, &screenInfo);
-  ScreenLoadPaletteTable32(0, GamePalette);
-  ScreenLoadPaletteTable4(0, GameCursorPalette);
-   
-  Busy();
-  
-  for (ii = 0; ii < 16; ii++)
-  {
-    if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
-      break;
+  ScreenLoadPaletteTable(0, &DefaultPalette);
 
-    LoadObjectTable(&GameInfo->gi_StartTables[ii]);
-  }
-  
-  // room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
-  // 
-  // if (room == NULL)
-  // {
-  //   RequesterF("OK", "Could not load room!");
-  // }
-  // else
-  // {
-  //   UnpackRoom(ArenaRoom, room, &uroom, UNPACK_ROOM_BACKDROPS);
-  // 
-  //   RequesterF("OK", "Room W=%ld H=%ld", (ULONG)room->rm_Width, (ULONG)room->rm_Height);
-  // 
-  //   RequesterF("OK", "Backdrop pointer Id=[%ld] == %lx", room->rm_Backdrops[0], uroom.ur_Backdrops[0]);
-  // 
-  // }
-  
+  Load(path);
 
-  Delay(50 * 2);
-
-  NotBusy();
 
   ScreenClose(0);
 

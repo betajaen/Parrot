@@ -146,6 +146,25 @@ ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc)
   return copyLen;
 }
 
+CHAR* StrDuplicate(CONST CHAR* pSrc)
+{
+  ULONG copyLen;
+  CHAR* dst;
+
+  copyLen = StrLen(pSrc);
+
+  if (0 == copyLen)
+  {
+    return NULL;
+  }
+
+  dst = AllocMem(copyLen + 1, 0);
+  CopyMem(pSrc, dst, copyLen);
+  dst[copyLen] = 0;
+
+  return dst;
+}
+
 BOOL StrStartsWith(CONST CHAR* pTest, CHAR value)
 {
   BOOL rc;

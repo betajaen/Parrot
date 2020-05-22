@@ -40,13 +40,13 @@
 #include <proto/iffparse.h>
 #include <exec/lists.h>
 
-STATIC struct MinList Assets;
 STATIC struct MinList OpenArchives;
 
 STATIC CHAR* BasePath;
 STATIC CHAR* JoinPathStr;
 STATIC struct OBJECT_TABLE RoomTable;
 STATIC struct OBJECT_TABLE ImageTable;
+STATIC struct OBJECT_TABLE PaletteTable;
 
 #define ARCHIVE_ID 0x9640c817ul
 
@@ -68,14 +68,13 @@ struct ASSET_FACTORY
 
 struct ASSET_FACTORY AssetFactories[] = {
   { CT_GAME_INFO, sizeof(struct GAME_INFO), NULL },
-  { CT_PALETTE32, sizeof(struct PALETTE32_TABLE), NULL },
-  { CT_PALETTE4, sizeof(struct PALETTE4_TABLE), NULL },
+  { CT_PALETTE, sizeof(struct PALETTE_TABLE), &PaletteTable },
   { CT_ROOM, sizeof(struct ROOM), &RoomTable },
   { CT_IMAGE, sizeof(struct IMAGE), &ImageTable },
   { 0, 0 }
 };
 
-STATIC ULONG FindFactory(ULONG nodeType)
+STATIC struct ASSET_FACTORY* FindFactory(ULONG nodeType)
 {
   struct ASSET_FACTORY* factory;
 
@@ -84,7 +83,29 @@ STATIC ULONG FindFactory(ULONG nodeType)
   while (factory->af_NodeType != 0)
   {
     if (factory->af_NodeType == nodeType)
-      return factory->af_Size;
+      return factory;
+
+    factory++;
+  }
+
+  return NULL;
+}
+
+STATIC VOID ClearTables()
+{
+  struct ASSET_FACTORY* factory;
+  struct OBJECT_TABLE* table;
+
+  factory = &AssetFactories[0];
+
+  while (factory->af_NodeType != 0)
+  {
+    table = factory->af_Table;
+    
+    if (NULL != table)
+    {
+      FillMem((UBYTE*)table, sizeof(struct OBJECT_TABLE), 0);
+    }
 
     factory++;
   }
@@ -92,7 +113,7 @@ STATIC ULONG FindFactory(ULONG nodeType)
 
 EXPORT VOID InitialiseArchives(CHAR* path)
 {
-  BasePath = path;
+  BasePath = path; /* StrDuplicate(path); */
 
   if (StrEndsWith(BasePath, '/'))
     JoinPathStr = "%s%ld.Parrot";
@@ -100,7 +121,7 @@ EXPORT VOID InitialiseArchives(CHAR* path)
     JoinPathStr = "%s/%ld.Parrot";
 
   NEW_MIN_LIST(OpenArchives);
-  NEW_MIN_LIST(Assets);
+  ClearTables();
 }
 
 STATIC struct ARCHIVE* ArchiveReadFromFile(UWORD id)
@@ -111,14 +132,30 @@ STATIC struct ARCHIVE* ArchiveReadFromFile(UWORD id)
 
   if (0 == StrFormat(&path[0], sizeof(path), JoinPathStr, BasePath, (ULONG) id))
   {
-    return NULL;
+    PARROT_ERR(
+      "Unable to load archive from disk.\n"
+      "Reason: Base path is to long to be assembled into an archive path"
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_STR("Base Path"),
+      (ULONG)id,
+      BasePath
+    );
   }
 
   file = Open(&path[0], MODE_OLDFILE);
 
   if (NULL == file)
   {
-    ErrorF("Could not open archive %s", path);
+    PARROT_ERR(
+      "Unable to load archive from disk.\n"
+      "Reason: Path does not exist or file is in use"
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_STR("Path")
+      PARROT_ERR_STR("Base Path"),
+      (ULONG)id,
+      path,
+      BasePath
+    );
   }
 
   archive = (struct ARCHIVE*) ObjAlloc(ArenaGame, sizeof(struct ARCHIVE), ARCHIVE_ID, TRUE);
@@ -242,7 +279,7 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
     if (node->cn_ID == nodeType)
     {
 
-      if ((node->cn_Size - sizeof(chunkHeader)) <= dataSize)
+      if ((node->cn_Size - sizeof(struct CHUNK_HEADER)) == dataSize)
       {
         ReadChunkBytes(archive->pa_Iff, &chunkHeader, sizeof(struct CHUNK_HEADER));
 
@@ -276,7 +313,48 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
 CLEAN_EXIT:
 
   CloseIFF(archive->pa_Iff);
+
   return rc;
+}
+
+STATIC struct OBJECT_TABLE_ITEM* FindInTable(struct OBJECT_TABLE* table, UWORD id, UWORD arch)
+{
+  struct OBJECT_TABLE_ITEM* item;
+
+  if (NULL == table)
+  {
+
+    PARROT_ERR(
+      "Unable to load asset from Object Table.\n"
+      "Reason: Object Table is null"
+      PARROT_ERR_STR("Asset Id")
+      PARROT_ERR_INT("Arch"),
+      (ULONG)id,
+      (ULONG) arch
+    );
+    return NULL;
+  }
+
+  if (id < table->ot_IdMin || id > table->ot_IdMax)
+  {
+    TraceF("Not in this table Min=%ld, Max=%ld, Need=%ld", (ULONG)table->ot_IdMin, (ULONG)table->ot_IdMax, (ULONG)item->ot_Id, (ULONG) id);
+
+    return NULL;
+  }
+
+  item = &table->ot_Items[0];
+
+  while (item->ot_Id != 0)
+  {
+    if (item->ot_Id == id && (item->ot_Flags & arch) != 0)
+    {
+      return item;
+    }
+
+    item++;
+  }
+
+  return NULL;
 }
 
 
@@ -284,52 +362,92 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
 {
   struct ASSET* asset;
   struct ARCHIVE* archive;
-  ULONG  assetSize;
+  struct ASSET_FACTORY* factory;
+  struct OBJECT_TABLE_ITEM* tableItem;
+  APTR   obj;
   CHAR   strtype[5];
 
-  for (asset = ((struct ASSET*) Assets.mlh_Head);
-       asset != NULL; 
-       asset = ((struct ASSET*)asset->as_Node.mln_Succ))
+  asset = NULL;
+  archive = NULL;
+  factory = NULL;
+  tableItem = NULL;
+  obj = NULL;
+
+  factory = FindFactory(nodeType);
+
+  if (factory == NULL)
   {
-    if (asset->as_ClassType == nodeType && asset->as_Id == assetId && (asset->as_Arch & arch) != 0)
+    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(nodeType, strtype));
+    return NULL;
+  }
+
+  if (archiveId == ARCHIVE_UNKNOWN)
+  {
+    if (factory->af_Table == NULL)
     {
-      return (APTR) (asset+1);
+      PARROT_ERR(
+        "Could not Load Asset.\n"
+        "Reason: It is in an Unknown Archive without a Table"
+        PARROT_ERR_STR("Class Type")
+        PARROT_ERR_INT("Asset Id")
+        PARROT_ERR_INT("Arch"),
+        IDtoStr(nodeType, strtype),
+        (ULONG)assetId,
+        (ULONG)arch
+      );
+      return NULL;
+    }
+
+    tableItem = FindInTable(factory->af_Table, assetId, arch);
+
+    if (tableItem != NULL && tableItem->ot_Ptr != NULL)
+    {
+      obj = (struct ASSET*) tableItem->ot_Ptr;
+      return (APTR) (obj);
+    }
+
+    archive = OpenArchive(tableItem->ot_Archive);
+
+    if (archive == NULL)
+    {
+      ErrorF("Could not open archive %ld", (ULONG)archiveId);
+      return NULL;
+    }
+  }
+  else
+  {
+    archive = OpenArchive(archiveId);
+
+    if (archive == NULL)
+    {
+      ErrorF("Could not open archive %ld", (ULONG)archiveId);
+      return NULL;
     }
   }
 
-  archive = OpenArchive(archiveId);
+  asset = ObjAlloc(arena, factory->af_Size + sizeof(struct ASSET), nodeType, TRUE);
+  obj = (APTR)(asset + 1);
 
-  if (archive == NULL)
-  {
-    ErrorF("Could not open archive %ld", (ULONG)archiveId);
-    return NULL;
-  }
-
-  assetSize = FindFactory(nodeType);
-
-  if (assetSize == 0)
-  {
-    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(nodeType, strtype) );
-    return NULL;
-  }
-
-  asset = ObjAlloc(arena, assetSize + sizeof(struct ASSET), nodeType, TRUE);
-
-  if (ReadAssetFromArchive(archive, nodeType, assetId, arch, (APTR) (asset + 1), assetSize) == FALSE)
+  if (ReadAssetFromArchive(archive, nodeType, assetId, arch, obj, factory->af_Size) == FALSE)
   {
     ErrorF("Could not load asset %s:%ld from archive %ld", IDtoStr(nodeType, strtype), (ULONG) assetId, (ULONG) archiveId);
     return NULL;
   }
-
   asset->as_Id = assetId;
   asset->as_Arch = arch;
   asset->as_ClassType = nodeType;
-  asset->as_Node.mln_Succ = NULL;
-  asset->as_Node.mln_Pred = NULL;
 
-  AddHead((struct List*) &Assets, (struct Node*) asset);
+  if (tableItem == NULL && factory->af_Table != NULL)
+  {
+    tableItem = FindInTable(factory->af_Table, assetId, arch);
+  }
 
-  return (APTR)(asset + 1);
+  if (tableItem != NULL)
+  {
+    tableItem->ot_Ptr = obj;
+  }
+
+  return obj;
 }
 
 EXPORT VOID UnloadAsset(APTR arena, struct ASSET* asset)
@@ -346,7 +464,8 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
   struct CHUNK_HEADER chunkHeader;
   LONG err;
   CHAR idtype[5];
-  
+  UWORD ii;
+
   table = NULL;
   assetFactory = &AssetFactories[0];
 
@@ -458,6 +577,13 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
         }
 
         ReadChunkBytes(archive->pa_Iff, table, sizeof(struct OBJECT_TABLE));
+
+        table->ot_Next = NULL;
+
+        for (ii = 0; ii < MAX_ITEMS_PER_TABLE; ii++)
+        {
+          table->ot_Items[ii].ot_Ptr = NULL;
+        }
 
         goto CLEAN_EXIT;
       }

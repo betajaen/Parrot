@@ -35,6 +35,4 @@ VOID ScreenClear(UWORD id);
 
 VOID ScreenSwapBuffers(UWORD id);
 
-VOID ScreenLoadPaletteTable32(UWORD id, struct PALETTE32_TABLE* paletteTable);
-
-VOID ScreenLoadPaletteTable4(UWORD id, struct PALETTE4_TABLE* paletteTable);
+VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable);
