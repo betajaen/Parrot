@@ -29,7 +29,6 @@
 #include <Parrot/Arena.h>
 #include <Parrot/Asset.h>
 
-
 EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 {
   UBYTE ii;

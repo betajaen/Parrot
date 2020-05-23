@@ -164,7 +164,7 @@ EXPORT VOID ScreenClose(UWORD id)
 
   if (id >= 4)
   {
-    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+    ErrorF("Could not close screen %ld. Limit has reached", (ULONG)id);
   }
 
   screen = &Screens[id];
@@ -211,7 +211,7 @@ EXPORT VOID ScreenSetCursor(UWORD id, UBYTE type)
 
   if (id >= 4)
   {
-    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+    ErrorF("Unknown screen %ld", (ULONG)id);
   }
 
   screen = &Screens[id];
@@ -259,7 +259,7 @@ EXPORT VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable)
 
   if (id >= 4)
   {
-    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+    ErrorF("Unknown screen %ld", (ULONG)id);
   }
 
   screen = &Screens[id];
@@ -274,7 +274,7 @@ EXPORT VOID ScreenClear(UWORD id)
 
   if (id >= 4)
   {
-    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+    ErrorF("Unknown screen %ld", (ULONG)id);
   }
 
   screen = &Screens[id];
@@ -289,7 +289,7 @@ EXPORT VOID ScreenSwapBuffers(UWORD id)
 
   if (id >= 4)
   {
-    ErrorF("Could not delete screen %ld. Limit has reached", (ULONG)id);
+    ErrorF("Unknown screen %ld", (ULONG)id);
   }
 
   screen = &Screens[id];
@@ -299,4 +299,31 @@ EXPORT VOID ScreenSwapBuffers(UWORD id)
     screen->st_ReadBuffer ^= 1;
     screen->st_WriteBuffer ^= 1;
   }
+}
+
+EXPORT VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD topOff)
+{
+  struct Image image;
+  struct SCREEN* screen;
+  struct RastPort* rp;
+
+  if (id >= 4)
+  {
+    ErrorF("Unknown screen %ld", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+  rp = &screen->st_RastPorts[screen->st_WriteBuffer];
+
+  image.LeftEdge = 0;
+  image.TopEdge = 0;
+  image.Width = data->im_Width;
+  image.Height = data->im_Height;
+  image.Depth = data->im_Depth;
+  image.ImageData = (APTR)(data + 1);
+  image.PlanePick = 15;
+  image.PlaneOnOff = 0;
+  image.NextImage = NULL;
+
+  DrawImage(rp, &image, leftOff, topOff);
 }

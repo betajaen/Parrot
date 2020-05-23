@@ -36,3 +36,5 @@ VOID ScreenClear(UWORD id);
 VOID ScreenSwapBuffers(UWORD id);
 
 VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable);
+
+VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD topOff);

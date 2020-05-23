@@ -169,6 +169,10 @@ STATIC VOID Load(STRPTR path)
 
   UnpackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
 
+  ScreenRpDrawImage(0, GameRoom.ur_Backdrops[0], 0, 0);
+
+  ScreenSwapBuffers(0);
+
   // room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
   // 
   // if (room == NULL)
@@ -186,7 +190,7 @@ STATIC VOID Load(STRPTR path)
   // }
 
 
-  Delay(50 * 2);
+  Delay(50 * 5);
 
 
   NotBusy();
@@ -211,7 +215,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   ArenaGame = ArenaOpen(16384, 0ul);
   ArenaChapter = ArenaOpen(131072, 0ul);
-  ArenaRoom = ArenaOpen(131072, 0ul);
+  ArenaRoom = ArenaOpen(131072, MEMF_CHIP);
 
   InitialiseArchives(path);
 

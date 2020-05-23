@@ -75,7 +75,7 @@ STATIC VOID ExportCursorPalette(UWORD id);
 STATIC VOID ExportRoom(UWORD id, UWORD backdrop);
 STATIC VOID ExportBackdrop(UWORD id, UWORD palette);
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h);
-STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UBYTE* dst, UWORD w, UWORD h);
+STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h);
 STATIC UWORD ReadUWORDBE();
 STATIC UWORD ReadUWORDLE();
 STATIC UBYTE ReadUBYTE();
@@ -493,7 +493,8 @@ STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
   struct IMAGE backdrop;
 
   ULONG  chunkySize, planarSize, p, imgOffset;
-  UBYTE* chunky, * planar;
+  UBYTE* chunky;
+  UWORD* planar;
   UWORD  x, y, w, h;
   UBYTE  r, col, len, ii;
 
@@ -629,38 +630,38 @@ STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
   }
 }
 
-STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UBYTE* dst, UWORD w, UWORD h)
+STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h)
 {
   ULONG idx;
   UBYTE bp, shift;
   UWORD y, x, i;
-
   idx = 0;
 
-  for (y = 0; y < h; y++)
+  for (bp = 0; bp < 4; bp++)
   {
-    for (bp = 0; bp < 4; bp++)
+    UBYTE shift = 1 << bp;
+    idx = 0;
+
+    for (y = 0; y < h; y++)
     {
-      UBYTE shift = 1 << bp;
-
-      for (x = 0; x < w; x += 8)
+      for (x = 0; x < w; x += 16)
       {
-        UBYTE byte = 0;
+        UWORD word = 0;
 
-        for (i = 0; i < 8; i++)
+        for (i = 0; i < 16; i++)
         {
           UBYTE col = src[idx + x + i];
           UBYTE bit = (col & shift) != 0 ? 1 : 0;
 
           if (bit)
-            byte |= (1 << (7 - i));
+            word |= (1 << (15 - i));
         }
 
-        *dst++ = byte;
+        *dst++ = word;
       }
+      idx += w;
     }
 
-    idx += w;
   }
 }
 
