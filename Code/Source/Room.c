@@ -48,7 +48,7 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
   }
 }
 
-EXPORT VOID PackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG pack)
+EXPORT VOID PackRoom(struct ARENA* arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG pack)
 {
   UBYTE ii;
   UWORD backdrop;

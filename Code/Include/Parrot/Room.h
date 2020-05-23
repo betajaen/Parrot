@@ -27,4 +27,4 @@
 
 VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
 
-VOID PackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG pack);
+VOID PackRoom(struct ARENA* arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG pack);

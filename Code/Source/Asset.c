@@ -158,7 +158,7 @@ STATIC struct ARCHIVE* ArchiveReadFromFile(UWORD id)
     );
   }
 
-  archive = (struct ARCHIVE*) ObjAlloc(ArenaGame, sizeof(struct ARCHIVE), ARCHIVE_ID, TRUE);
+  archive = (struct ARCHIVE*) NewObject(ArenaGame, sizeof(struct ARCHIVE), TRUE);
 
   if (NULL == archive)
   {
@@ -236,7 +236,7 @@ EXPORT VOID CloseArchives()
   }
 }
 
-EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, UWORD expectedSize, APTR arena)
+EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, UWORD expectedSize, struct ARENA* arena)
 {
   struct ContextNode* node;
   struct CHUNK_HEADER chunkHeader;
@@ -295,7 +295,7 @@ EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeTyp
           continue;
         }
 
-        asset = (struct ASSET*) ObjAlloc(arena, node->cn_Size + sizeof(struct ASSET), nodeType, FALSE);
+        asset = (struct ASSET*) NewObject(arena, node->cn_Size + sizeof(struct ASSET), FALSE);
 
         asset->as_Id = chunkId;
         asset->as_ClassType = nodeType;
@@ -366,7 +366,7 @@ STATIC struct OBJECT_TABLE_ITEM* FindInTable(struct OBJECT_TABLE* table, UWORD i
 }
 
 
-EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId, UWORD arch)
+EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWORD assetId, UWORD arch)
 {
   struct ASSET* asset;
   struct ARCHIVE* archive;
@@ -456,7 +456,7 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
   return obj;
 }
 
-EXPORT VOID UnloadAsset(APTR arena, struct ASSET* asset)
+EXPORT VOID UnloadAsset(struct ARENA* arena, struct ASSET* asset)
 {
   
 }

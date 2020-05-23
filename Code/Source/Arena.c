@@ -30,148 +30,145 @@
 #include <Parrot/String.h>
 
 #include <proto/exec.h>
+#include <proto/iffparse.h>
 
-#define ARENA_MAGIC 0xda9a5983UL
-
-struct ARENA_HEADER
+struct ARENA
 {
   ULONG   ah_Size;
-  ULONG   ah_Magic;
   ULONG   ah_Used;
-  ULONG*  ah_Base;
 };
 
-APTR ArenaGame, ArenaChapter, ArenaRoom;
+struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom;
 
-EXPORT APTR ArenaOpen(ULONG size, ULONG requirements)
+EXPORT struct ARENA* ArenaOpen(ULONG size, ULONG requirements)
 {
-  struct ARENA_HEADER* hdr;
+  struct ARENA* arena;
 
-  /* Round up to nearest 4th byte */
+  arena = NULL;
+
   size = (size + 3) & ~0x03;
+  arena = (struct ARENA*) AllocVec(size + sizeof(struct ARENA), requirements | MEMF_CLEAR);
 
-  hdr = (struct ARENA_HEADER*) AllocVec(size + sizeof(struct ARENA_HEADER),
-    requirements | MEMF_CLEAR);
-
-  if (NULL == hdr)
+  if (NULL == arena)
   {
-    ErrorF("Could not allocate arena size of %ld", size);
+    PARROT_ERR(
+      "Cannot Allocate Arena Memory!\n"
+      "Reason: AllocVec returned NULL"
+      PARROT_ERR_INT("size")
+      PARROT_ERR_HEX("requirements"),
+      size,
+      requirements
+    );
+    goto CLEAN_EXIT;
   }
 
-  hdr->ah_Size = size;
-  hdr->ah_Magic = ARENA_MAGIC;
-  hdr->ah_Used = 0;
-  hdr->ah_Base = (APTR)(hdr + 1);
+  arena->ah_Size = size;
+  arena->ah_Used = 0;
   
-  return (APTR)(hdr);
+CLEAN_EXIT:
+
+  return arena;
 }
 
-EXPORT BOOL ArenaClose(APTR arena)
+EXPORT VOID ArenaClose(struct ARENA* arena)
 {
-  struct ARENA_HEADER* hdr;
+  if (NULL == arena)
+  {
+    PARROT_ERR(
+      "Cannot Deallocate Arena Memory!\n"
+      "Reason: Arena pointer is NULL"
+      PARROT_ERR_PTR("arena"),
+      arena
+    );
+    goto CLEAN_EXIT;
+  }
 
+  arena->ah_Size = 0;
+
+  FreeVec(arena);
+
+CLEAN_EXIT:
+
+}
+
+EXPORT BOOL ArenaRollback(struct ARENA* arena)
+{
   if (NULL == arena)
     return FALSE;
 
-  hdr = ((struct ARENA_HEADER*) arena);
-
-  if (ARENA_MAGIC != hdr->ah_Magic)
-    return FALSE;
-
-  hdr->ah_Magic = 0;
-  hdr->ah_Size = 0;
-
-  FreeVec(hdr);
+  arena->ah_Used = 0;
 
   return TRUE;
 }
 
-EXPORT BOOL ArenaRollback(APTR arena)
+EXPORT ULONG ArenaSpace(struct ARENA* arena)
 {
-  struct ARENA_HEADER* hdr;
-
   if (NULL == arena)
     return FALSE;
 
-  hdr = ((struct ARENA_HEADER*) arena);
+  return arena->ah_Size - arena->ah_Used;
+}
 
-  if (ARENA_MAGIC != hdr->ah_Magic)
+EXPORT ULONG ArenaSize(struct ARENA* arena)
+{
+  if (NULL == arena)
     return FALSE;
 
-  hdr->ah_Used = 0;
-
-  return TRUE;
-}
-
-EXPORT ULONG ArenaSpace(APTR arena)
-{
-  struct ARENA_HEADER* hdr;
-
-  if (NULL == arena)
-    return 0UL;
-
-  hdr = ((struct ARENA_HEADER*) arena);
-
-  if (ARENA_MAGIC != hdr->ah_Magic)
-    return 0UL;
-
-  return hdr->ah_Size - hdr->ah_Used;
-}
-
-EXPORT ULONG ArenaSize(APTR arena)
-{
-  struct ARENA_HEADER* hdr;
-
-  if (NULL == arena)
-    return 0UL;
-
-  hdr = ((struct ARENA_HEADER*) arena);
-
-  if (ARENA_MAGIC != hdr->ah_Magic)
-    return 0UL;
-
-  return hdr->ah_Size;
+  return arena->ah_Size;
 }
 
 
-EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class, BOOL zeroFill)
+EXPORT APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill)
 {
-  struct ARENA_HEADER* hdr;
-  struct ARENA_ALLOC* alloc;
   APTR result;
+  CHAR strType;
 
   result = NULL;
 
-
   if (NULL == arena)
   {
-    ErrorF("Arena is null");
-  }
-
-  hdr = ((struct ARENA_HEADER*) arena);
-
-  if (ARENA_MAGIC != hdr->ah_Magic)
-  {
-    ErrorF("Arena magic is not correct. It is likely memory is corrupted");
+    PARROT_ERR(
+      "Cannot Allocate Memory!\n"
+      "Reason: Arena given is NULL"
+      PARROT_ERR_INT("ARENA::ah_Used")
+      PARROT_ERR_INT("ARENA::ah_Size"),
+      arena->ah_Used,
+      arena->ah_Size
+    );
+    goto CLEAN_EXIT;
   }
 
   size = (size + 3) & ~0x03;
   
-  if ((hdr->ah_Used + size) >= hdr->ah_Size)
+  if ((arena->ah_Used + size) >= arena->ah_Size)
   {
-    ErrorF("Out of Area memory");
+    PARROT_ERR
+    (
+      "Cannot Allocate Memory!\n"
+      "Reason: Allocation is to large for arena"
+      PARROT_ERR_INT("Arena")
+      PARROT_ERR_INT("ARENA::ah_Used")
+      PARROT_ERR_INT("ARENA::ah_Size")
+      PARROT_ERR_INT("arg size")
+      PARROT_ERR_INT("arg zeroFill"),
+      arena,
+      arena->ah_Used,
+      arena->ah_Size,
+      size,
+      zeroFill
+    );
+    goto CLEAN_EXIT;
   }
 
-  alloc = (struct ARENA_ALLOC*) (hdr->ah_Base + hdr->ah_Used);
+  result = (APTR) ((ULONG*) (arena + 1) + arena->ah_Used);
 
   if (zeroFill == TRUE)
   {
-    FillMem((UBYTE*)alloc, size, 0);
+    FillMem((UBYTE*)result, size, 0);
   }
 
-  hdr->ah_Used += size;
+  arena->ah_Used += size;
 
-  result = (APTR) alloc;
-
+CLEAN_EXIT:
   return result;
 }

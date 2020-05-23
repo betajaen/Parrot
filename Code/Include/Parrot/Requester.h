@@ -46,7 +46,7 @@ VOID ErrorF(CONST_STRPTR pFmt, ...);
   "\n " NAME " = %ld"
 
 #define PARROT_ERR_HEX(NAME) \
-  "\n " NAME " = %ld"
+  "\n " NAME " = %lx"
 
 #define PARROT_ERR_STR(NAME) \
   "\n " NAME " = %s"

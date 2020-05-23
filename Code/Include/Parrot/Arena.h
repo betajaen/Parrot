@@ -25,18 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-extern APTR ArenaGame;
-extern APTR ArenaChapter;
-extern APTR ArenaRoom;
+extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom;
 
-APTR ArenaOpen(ULONG size, ULONG requirements);
+struct ARENA* ArenaOpen(ULONG size, ULONG requirements);
 
-BOOL ArenaClose(APTR arena);
+BOOL ArenaClose(struct ARENA* arena);
 
-BOOL ArenaRollback(APTR arena);
+BOOL ArenaRollback(struct ARENA* arena);
 
-ULONG ArenaSpace(APTR arena);
+ULONG ArenaSpace(struct ARENA* arena);
 
-ULONG ArenaSize(APTR arena);
+ULONG ArenaSize(struct ARENA* arena);
 
-APTR ObjAlloc(APTR arena, ULONG size, ULONG class, BOOL zeroFill);
+APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill);
