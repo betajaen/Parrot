@@ -66,7 +66,7 @@ INT main()
 
   if (process->pr_CLI != NULL)
   {
-    DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 0);
+    DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 33L);
     Write(Output(), "Parrot can only be launched from Workbench\n", 44);
     rc = RETURN_FAIL;
     goto CLEAN_EXIT;
@@ -75,7 +75,7 @@ INT main()
   WaitPort(&process->pr_MsgPort);
   wbMsg = GetMsg(&process->pr_MsgPort);
 
-  DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 0);
+  DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 33L);
 
   if (NULL == DOSBase)
   {
@@ -83,7 +83,7 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  IntuitionBase = (struct IntuitionBase*) OpenLibrary("intuition.library", 0);
+  IntuitionBase = (struct IntuitionBase*) OpenLibrary("intuition.library", 33L);
 
   if (NULL == IntuitionBase)
   {
@@ -91,7 +91,7 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  GfxBase = (struct GfxBase*) OpenLibrary("graphics.library", 0);
+  GfxBase = (struct GfxBase*) OpenLibrary("graphics.library", 33L);
 
   if (NULL == GfxBase)
   {
@@ -99,7 +99,7 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  IFFParseBase = OpenLibrary("iffparse.library", 0);
+  IFFParseBase = OpenLibrary("iffparse.library", 33L);
 
   if (NULL == IFFParseBase)
   {

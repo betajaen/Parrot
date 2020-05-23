@@ -34,25 +34,39 @@
 EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
 {
   struct IMAGE*  img;
-  struct BitMap* bmp;
   UWORD          ii;
   
   img = (struct IMAGE*) asset;
 
-  if (img->im_BitMap != NULL)
+  if (img->im_Planes[0] != NULL)
   {
     goto CLEAN_EXIT;
   }
 
+  img->im_pad = 0;
+  img->im_Flags = 0;
 
-  bmp = AllocBitMap(img->im_Width, img->im_Height, img->im_Depth, 0, NULL);
-  
   for (ii = 0; ii < img->im_Depth; ii++)
   {
-    ReadChunkBytes(iff, bmp->Planes[ii], img->im_PlaneSize);
-  }
+    img->im_Planes[ii] = (PLANEPTR) AllocRaster(img->im_Width, img->im_Height);
 
-  img->im_BitMap = bmp;
+    if (img->im_Planes[ii] == NULL)
+    {
+      PARROT_ERR(
+        "Out of Memory!\n"
+        "Reason: No Chip Memory available for Raster"
+        PARROT_ERR_INT("IMAGE::im_Width")
+        PARROT_ERR_INT("IMAGE::im_Height")
+        PARROT_ERR_INT("IMAGE::im_Depth")
+        PARROT_ERR_INT("Bitplane"),
+        img->im_Width, img->im_Height, img->im_Depth, (ULONG)ii
+      );
+
+      goto CLEAN_EXIT;
+    }
+
+    ReadChunkBytes(iff, img->im_Planes[ii], img->im_PlaneSize);
+  }
 
   CLEAN_EXIT:
 }
@@ -60,10 +74,16 @@ EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
 EXPORT VOID PackBitmap(APTR asset)
 {
   struct IMAGE* img;
+  UWORD ii;
 
-  if (img->im_BitMap != NULL)
+  img = (struct IMAGE*) asset;
+
+  if (img->im_Planes[0] != NULL)
   {
-    FreeBitMap(img->im_BitMap);
-    img->im_BitMap = NULL;
+    for (ii = 0; ii < img->im_Depth; ii++)
+    {
+      FreeRaster(img->im_Planes[ii], img->im_Width, img->im_Height);
+      img->im_Planes[ii] = NULL;
+    }
   }
 }

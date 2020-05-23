@@ -342,5 +342,5 @@ EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD x, WORD y)
   screen = &Screens[id];
   rp = &screen->st_RastPorts[screen->st_WriteBuffer];
 
-  BltBitMapRastPort(image->im_BitMap, 0, 0, rp, x, y, image->im_Width, image->im_Height, 0xC0);
+  BltBitMapRastPort((struct BitMap*) image, 0, 0, rp, x, y, image->im_Width, image->im_Height, 0xC0);
 }
