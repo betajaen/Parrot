@@ -43,8 +43,9 @@ struct ARCHIVE* GameArchive;
 struct GAME_INFO* GameInfo;
 struct PALETTE_TABLE* GamePalette;
 struct PALETTE_TABLE* GameCursorPalette;
+struct UNPACKED_ROOM  GameRoom;
 
-struct PALETTE_TABLE DefaultPalette =
+STATIC struct PALETTE_TABLE DefaultPalette =
 {
   0,0,
   {
@@ -76,6 +77,8 @@ STATIC VOID Load(STRPTR path)
 
   Busy();
 
+  /* Load all Start Object Tables */
+
   for (ii = 0; ii < 16; ii++)
   {
     if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
@@ -84,23 +87,87 @@ STATIC VOID Load(STRPTR path)
     LoadObjectTable(&GameInfo->gi_StartTables[ii]);
   }
 
-  GamePalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_UNKNOWN, CT_PALETTE, GameInfo->gi_StartPalette, CHUNK_FLAG_ARCH_AGA);
+  /* Load and Use Start Palette */
 
-  if (GamePalette == NULL)
+  if (0 == GameInfo->gi_StartPalette)
   {
-    ErrorF("Did not load Game Palette");
+    PARROT_ERR(
+      "Unable to start Game!\n"
+      "Reason: Starting Palette was None"
+      PARROT_ERR_INT("GAME_INFO::gi_StartPalette"),
+      GameInfo->gi_StartPalette
+    );
   }
 
-  GameCursorPalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_GLOBAL, CT_PALETTE, GameInfo->gi_StartCursorPalette, CHUNK_FLAG_ARCH_AGA);
+  GamePalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_UNKNOWN, CT_PALETTE, GameInfo->gi_StartPalette, CHUNK_FLAG_ARCH_AGA);
 
-  if (GamePalette == NULL)
+  if (NULL == GamePalette)
   {
-    ErrorF("Did not load Cursor Palette");
+    PARROT_ERR(
+      "Unable to start Game!\n"
+      "Reason: Starting Palette Table was not found"
+      PARROT_ERR_INT("GAME_INFO::gi_StartPalette"),
+      (ULONG)GameInfo->gi_StartCursorPalette
+    );
   }
 
   ScreenLoadPaletteTable(0, GamePalette);
+
+  /* Load and Use Start Cursor Palette */
+
+  if (0 == GameInfo->gi_StartCursorPalette)
+  {
+    PARROT_ERR(
+      "Unable to start Game!\n"
+      "Reason: Starting Cursor Palette was None"
+      PARROT_ERR_INT("GAME_INFO::gi_StartCursorPalette"),
+      GameInfo->gi_StartCursorPalette
+    );
+  }
+
+  GameCursorPalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_UNKNOWN, CT_PALETTE, GameInfo->gi_StartCursorPalette, CHUNK_FLAG_ARCH_AGA);
+
+  if (NULL == GamePalette)
+  {
+    PARROT_ERR(
+      "Unable to start Game!\n"
+      "Reason: Starting Cursor Palette Table was not found"
+      PARROT_ERR_INT("GAME_INFO::gi_StartCursorPalette"),
+      (ULONG) GameInfo->gi_StartCursorPalette
+    );
+  }
+
   ScreenLoadPaletteTable(0, GameCursorPalette);
 
+  /* Load and Unpack Start Room */
+
+  InitStackVar(struct UNPACKED_ROOM, GameRoom);
+
+  if (0 == GameInfo->gi_StartRoom)
+  {
+    PARROT_ERR(
+      "Unable to start Game!\n"
+      "Reason: Starting ROOM was None"
+      PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
+      GameInfo->gi_StartRoom
+    );
+  }
+
+  GameRoom.ur_Room = LoadAssetT(struct ROOM, ArenaChapter, ARCHIVE_UNKNOWN, CT_ROOM, GameInfo->gi_StartRoom, CHUNK_FLAG_ARCH_ANY);
+
+  if (NULL == GameRoom.ur_Room)
+  {
+    PARROT_ERR(
+      "Unable to start Game!\n"
+      "Reason: Starting ROOM could not be loaded"
+      PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
+      GameInfo->gi_StartRoom
+    );
+  }
+
+  ArenaRollback(ArenaRoom);
+
+  UnpackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
 
   // room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
   // 

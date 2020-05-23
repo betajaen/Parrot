@@ -25,6 +25,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-VOID UnpackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG unpack);
+VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
 
 VOID PackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG pack);

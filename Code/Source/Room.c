@@ -30,7 +30,7 @@
 #include <Parrot/Asset.h>
 
 
-EXPORT VOID UnpackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG unpack)
+EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 {
   UBYTE ii;
   UWORD backdrop;
@@ -39,11 +39,11 @@ EXPORT VOID UnpackRoom(APTR arena, struct ROOM* room, struct UNPACKED_ROOM* unpa
   {
     for (ii = 0; ii < 4; ii++)
     {
-      backdrop = room->rm_Backdrops[ii];
+      backdrop = room->ur_Room->rm_Backdrops[ii];
 
-      if (0 != backdrop && NULL == unpackedRoom->ur_Backdrops[ii])
+      if (0 != backdrop && NULL == room->ur_Backdrops[ii])
       {
-        unpackedRoom->ur_Backdrops[ii] = LoadAsset(arena, ARCHIVE_UNKNOWN, CT_IMAGE, backdrop, CHUNK_FLAG_ARCH_ANY);
+        room->ur_Backdrops[ii] = LoadAsset(ArenaRoom, ARCHIVE_UNKNOWN, CT_IMAGE, backdrop, CHUNK_FLAG_ARCH_ANY);
       }
     }
   }

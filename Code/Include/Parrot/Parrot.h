@@ -194,6 +194,7 @@ struct GAME_INFO
   struct OBJECT_TABLE_REF   gi_StartTables[16];
   UWORD                     gi_StartPalette;
   UWORD                     gi_StartCursorPalette;
+  UWORD                     gi_StartRoom;
 };
 
 /*

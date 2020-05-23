@@ -70,7 +70,7 @@ struct ASSET_FACTORY AssetFactories[] = {
   { CT_GAME_INFO, sizeof(struct GAME_INFO), NULL },
   { CT_PALETTE, sizeof(struct PALETTE_TABLE), &PaletteTable },
   { CT_ROOM, sizeof(struct ROOM), &RoomTable },
-  { CT_IMAGE, sizeof(struct IMAGE), &ImageTable },
+  { CT_IMAGE, 0, &ImageTable },
   { 0, 0 }
 };
 
@@ -236,15 +236,17 @@ EXPORT VOID CloseArchives()
   }
 }
 
-EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, APTR data, ULONG dataSize)
+EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, UWORD expectedSize, APTR arena)
 {
   struct ContextNode* node;
   struct CHUNK_HEADER chunkHeader;
+  struct ASSET* asset;
+  APTR obj;
   LONG err;
   CHAR idBuf[5];
   BOOL rc;
 
-  rc = FALSE;
+  asset = NULL;
 
   if (NULL == archive)
   {
@@ -279,7 +281,7 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
     if (node->cn_ID == nodeType)
     {
 
-      if ((node->cn_Size - sizeof(struct CHUNK_HEADER)) == dataSize)
+      if (expectedSize == 0 || (node->cn_Size - sizeof(struct CHUNK_HEADER)) == expectedSize)
       {
         ReadChunkBytes(archive->pa_Iff, &chunkHeader, sizeof(struct CHUNK_HEADER));
 
@@ -293,17 +295,23 @@ EXPORT BOOL ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD 
           continue;
         }
 
-        ReadChunkBytes(archive->pa_Iff, data, dataSize);
+        asset = (struct ASSET*) ObjAlloc(arena, node->cn_Size + sizeof(struct ASSET), nodeType, FALSE);
 
-        rc = TRUE;
+        asset->as_Id = chunkId;
+        asset->as_ClassType = nodeType;
+        asset->as_Arch = chunkArch;
+
+        obj = (APTR)(asset + 1);
+
+        ReadChunkBytes(archive->pa_Iff, obj, node->cn_Size - sizeof(struct CHUNK_HEADER));
 
         goto CLEAN_EXIT;
       }
 
-      ErrorF("Error Chunk %s is to large (%ld) to fit into capacity (%ld)",
+      ErrorF("Error Chunk %s is a different size (%ld) to (%ld)",
         IDtoStr(node->cn_ID, idBuf),
         node->cn_Size,
-        dataSize
+        expectedSize
       );
 
       goto CLEAN_EXIT;
@@ -314,7 +322,7 @@ CLEAN_EXIT:
 
   CloseIFF(archive->pa_Iff);
 
-  return rc;
+  return asset;
 }
 
 STATIC struct OBJECT_TABLE_ITEM* FindInTable(struct OBJECT_TABLE* table, UWORD id, UWORD arch)
@@ -425,17 +433,15 @@ EXPORT APTR LoadAsset(APTR arena, UWORD archiveId, ULONG nodeType, UWORD assetId
     }
   }
 
-  asset = ObjAlloc(arena, factory->af_Size + sizeof(struct ASSET), nodeType, TRUE);
-  obj = (APTR)(asset + 1);
+  asset = ReadAssetFromArchive(archive, nodeType, assetId, arch, factory->af_Size, arena);
 
-  if (ReadAssetFromArchive(archive, nodeType, assetId, arch, obj, factory->af_Size) == FALSE)
+  if (asset == NULL)
   {
     ErrorF("Could not load asset %s:%ld from archive %ld", IDtoStr(nodeType, strtype), (ULONG) assetId, (ULONG) archiveId);
     return NULL;
   }
-  asset->as_Id = assetId;
-  asset->as_Arch = arch;
-  asset->as_ClassType = nodeType;
+
+  obj = (APTR)(asset + 1);
 
   if (tableItem == NULL && factory->af_Table != NULL)
   {
