@@ -520,7 +520,12 @@ STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
 
   backdrop.im_Width = w;
   backdrop.im_Height = h;
+  backdrop.im_Depth = 4;
   backdrop.im_Palette = palette;
+  backdrop.im_BytesPerRow = (w * 8) >> 4;
+  backdrop.im_PlaneSize = backdrop.im_BytesPerRow * h;
+  backdrop.im_BitMap = NULL;
+  
 
   PushChunk(DstIff, ID_SQWK, CT_IMAGE, IFFSIZE_UNKNOWN);
   WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));

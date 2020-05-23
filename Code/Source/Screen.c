@@ -327,3 +327,20 @@ EXPORT VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD t
 
   DrawImage(rp, &image, leftOff, topOff);
 }
+
+EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD x, WORD y)
+{
+  struct SCREEN* screen;
+  struct RastPort* rp;
+  PLANEPTR ptr;
+
+  if (id >= 4)
+  {
+    ErrorF("Unknown screen %ld", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+  rp = &screen->st_RastPorts[screen->st_WriteBuffer];
+
+  BltBitMapRastPort(image->im_BitMap, 0, 0, rp, x, y, image->im_Width, image->im_Height, 0xC0);
+}

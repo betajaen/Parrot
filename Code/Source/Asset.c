@@ -59,18 +59,26 @@ struct ARCHIVE
   UWORD             pa_Id;
 };
 
+EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff);
+EXPORT VOID PackBitmap(APTR asset);
+
+#define ASSET_CTOR VOID(*Ctor)(APTR, struct IFFHandle*)
+#define ASSET_DTOR VOID(*Dtor)(APTR)
+
 struct ASSET_FACTORY
 {
   ULONG af_NodeType;
   ULONG af_Size;
   struct OBJECT_TABLE* af_Table;
+  VOID(*af_Ctor)(APTR, struct IFFHandle*);
+  VOID(*af_Dtor)(APTR);
 };
 
 struct ASSET_FACTORY AssetFactories[] = {
-  { CT_GAME_INFO, sizeof(struct GAME_INFO), NULL },
-  { CT_PALETTE, sizeof(struct PALETTE_TABLE), &PaletteTable },
-  { CT_ROOM, sizeof(struct ROOM), &RoomTable },
-  { CT_IMAGE, 0, &ImageTable },
+  { CT_GAME_INFO, sizeof(struct GAME_INFO), NULL, NULL, NULL },
+  { CT_PALETTE, sizeof(struct PALETTE_TABLE), &PaletteTable, NULL, NULL },
+  { CT_ROOM, sizeof(struct ROOM), &RoomTable, NULL, NULL },
+  { CT_IMAGE, sizeof(struct IMAGE), &ImageTable, UnpackBitmap, PackBitmap },
   { 0, 0 }
 };
 
@@ -236,7 +244,7 @@ EXPORT VOID CloseArchives()
   }
 }
 
-EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, UWORD expectedSize, struct ARENA* arena)
+EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, UWORD expectedSize, ASSET_CTOR, struct ARENA* arena)
 {
   struct ContextNode* node;
   struct CHUNK_HEADER chunkHeader;
@@ -281,7 +289,7 @@ EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeTyp
     if (node->cn_ID == nodeType)
     {
 
-      if (expectedSize == 0 || (node->cn_Size - sizeof(struct CHUNK_HEADER)) == expectedSize)
+      if (Ctor != NULL || (node->cn_Size - sizeof(struct CHUNK_HEADER)) == expectedSize)
       {
         ReadChunkBytes(archive->pa_Iff, &chunkHeader, sizeof(struct CHUNK_HEADER));
 
@@ -303,7 +311,12 @@ EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeTyp
 
         obj = (APTR)(asset + 1);
 
-        ReadChunkBytes(archive->pa_Iff, obj, node->cn_Size - sizeof(struct CHUNK_HEADER));
+        ReadChunkBytes(archive->pa_Iff, obj, expectedSize);
+
+        if (Ctor != NULL)
+        {
+          Ctor(obj, archive->pa_Iff);
+        }
 
         goto CLEAN_EXIT;
       }
@@ -433,7 +446,7 @@ EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWOR
     }
   }
 
-  asset = ReadAssetFromArchive(archive, nodeType, assetId, arch, factory->af_Size, arena);
+  asset = ReadAssetFromArchive(archive, nodeType, assetId, arch, factory->af_Size, factory->af_Ctor, arena);
 
   if (asset == NULL)
   {

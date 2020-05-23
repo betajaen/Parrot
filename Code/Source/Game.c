@@ -169,29 +169,14 @@ STATIC VOID Load(STRPTR path)
 
   UnpackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
 
-  ScreenRpDrawImage(0, GameRoom.ur_Backdrops[0], 360, 0);
+  WORD x = 0;
 
-  ScreenSwapBuffers(0);
+  for (ii = 0; ii < 320; ii++, x++)
+  {
+    ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], x, 0);
 
-  // room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
-  // 
-  // if (room == NULL)
-  // {
-  //   RequesterF("OK", "Could not load room!");
-  // }
-  // else
-  // {
-  //   UnpackRoom(ArenaRoom, room, &uroom, UNPACK_ROOM_BACKDROPS);
-  // 
-  //   RequesterF("OK", "Room W=%ld H=%ld", (ULONG)room->rm_Width, (ULONG)room->rm_Height);
-  // 
-  //   RequesterF("OK", "Backdrop pointer Id=[%ld] == %lx", room->rm_Backdrops[0], uroom.ur_Backdrops[0]);
-  // 
-  // }
-
-
-  Delay(50 * 5);
-
+    ScreenSwapBuffers(0);
+  }
 
   NotBusy();
 }
@@ -213,9 +198,9 @@ EXPORT VOID GameStart(STRPTR path)
 
   InitStackVar(struct UNPACKED_ROOM, uroom);
 
-  ArenaGame = ArenaOpen(16384, 0ul);
-  ArenaChapter = ArenaOpen(131072, 0ul);
-  ArenaRoom = ArenaOpen(131072, MEMF_CHIP);
+  ArenaGame = ArenaOpen(16384, MEMF_CLEAR);
+  ArenaChapter = ArenaOpen(131072, MEMF_CLEAR);
+  ArenaRoom = ArenaOpen(131072, MEMF_CLEAR);
 
   InitialiseArchives(path);
 

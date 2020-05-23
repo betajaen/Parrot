@@ -240,6 +240,9 @@ struct PALETTE_TABLE
 
 struct IMAGE
 {
+  struct BitMap*    im_BitMap;
+  UWORD             im_BytesPerRow;
+  ULONG             im_PlaneSize;
   UWORD             im_Width;
   UWORD             im_Height;
   UBYTE             im_Depth;

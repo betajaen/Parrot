@@ -26,3 +26,44 @@
 */
 
 #include <Parrot/Parrot.h>
+#include <Parrot/Requester.h>
+
+#include <proto/iffparse.h>
+#include <proto/graphics.h>
+
+EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
+{
+  struct IMAGE*  img;
+  struct BitMap* bmp;
+  UWORD          ii;
+  
+  img = (struct IMAGE*) asset;
+
+  if (img->im_BitMap != NULL)
+  {
+    goto CLEAN_EXIT;
+  }
+
+
+  bmp = AllocBitMap(img->im_Width, img->im_Height, img->im_Depth, 0, NULL);
+  
+  for (ii = 0; ii < img->im_Depth; ii++)
+  {
+    ReadChunkBytes(iff, bmp->Planes[ii], img->im_PlaneSize);
+  }
+
+  img->im_BitMap = bmp;
+
+  CLEAN_EXIT:
+}
+
+EXPORT VOID PackBitmap(APTR asset)
+{
+  struct IMAGE* img;
+
+  if (img->im_BitMap != NULL)
+  {
+    FreeBitMap(img->im_BitMap);
+    img->im_BitMap = NULL;
+  }
+}
