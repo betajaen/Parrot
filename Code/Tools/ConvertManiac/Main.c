@@ -428,24 +428,16 @@ STATIC VOID ExportCursorPalette(UWORD id)
 
   pData = (ULONG*) &pal.pt_Data[0];
 
-  *pData++ = (4l << 16) | 17;
-
-  *pData++ = 0x00000000;
-  *pData++ = 0x00000000;
-  *pData++ = 0x00000000;
+  *pData++ = (1l << 16) | 18;
 
   *pData++ = 0xFFFFFFFF;
   *pData++ = 0xFFFFFFFF;
   *pData++ = 0xFFFFFFFF;
-
-  *pData++ = 0xAAAAAAAA;
-  *pData++ = 0xAAAAAAAA;
-  *pData++ = 0xAAAAAAAA;
 
   *pData = 0;
 
   pal.pt_Begin = 17;
-  pal.pt_End = 19;
+  pal.pt_End = 18;
 
   PushChunk(DstIff, ID_SQWK, CT_PALETTE, sizeof(hdr) + sizeof(pal));
   WriteChunkBytes(DstIff, &hdr, sizeof(hdr));

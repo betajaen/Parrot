@@ -99,7 +99,7 @@ STATIC VOID Load(STRPTR path)
   }
 
   ScreenLoadPaletteTable(0, GamePalette);
-  // ScreenLoadPaletteTable(0, GameCursorPalette);
+  ScreenLoadPaletteTable(0, GameCursorPalette);
 
 
   // room = LoadAssetT(struct ROOM, ArenaChapter, 1, CT_ROOM, 1, CHUNK_FLAG_ARCH_ANY);
