@@ -1,5 +1,5 @@
 /**
-    $Id: Screen.c, 0.1, 2020/05/07 15:55:00, betajaen Exp $
+    $Id: Screen.c, 1.1 2020/05/07 15:55:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================

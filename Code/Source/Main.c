@@ -1,5 +1,5 @@
 /**
-    $Id: Main.c, 0.1, 2020/05/06 20:56:00, betajaen Exp $
+    $Id: Main.c, 1.1 2020/05/06 20:56:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -34,7 +34,7 @@
 #include <dos/dos.h>
 #include <workbench/startup.h>
 
-BYTE VersionString[]   = "$VER: Parrot 0.1 (6.5.2020)\r\n";
+BYTE VersionString[]   = "$VER: Parrot 1.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
 
 struct ExecBase*      SysBase;

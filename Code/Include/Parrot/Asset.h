@@ -1,5 +1,5 @@
 /**
-    $Id: Asset.h 0.1, 2020/05/17 16:49:00, betajaen Exp $
+    $Id: Asset.h 1.1 2020/05/17 16:49:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================

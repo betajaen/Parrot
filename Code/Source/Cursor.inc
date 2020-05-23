@@ -1,5 +1,5 @@
 /**
-    $Id: Cursor.inc, 0.1, 2020/05/18 20:49:00, betajaen Exp $
+    $Id: Cursor.inc, 1.1 2020/05/18 20:49:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================

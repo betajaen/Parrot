@@ -1,5 +1,5 @@
 /**
-    $Id: String.c, 0.1, 2020/05/07 08:43:00, betajaen Exp $
+    $Id: String.c, 1.1 2020/05/07 08:43:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
