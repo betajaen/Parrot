@@ -169,7 +169,7 @@ STATIC VOID Load(STRPTR path)
 
   UnpackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
 
-  ScreenRpDrawImage(0, GameRoom.ur_Backdrops[0], 0, 0);
+  ScreenRpDrawImage(0, GameRoom.ur_Backdrops[0], 360, 0);
 
   ScreenSwapBuffers(0);
 

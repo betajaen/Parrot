@@ -40,7 +40,3 @@ ULONG ArenaSpace(APTR arena);
 ULONG ArenaSize(APTR arena);
 
 APTR ObjAlloc(APTR arena, ULONG size, ULONG class, BOOL zeroFill);
-
-ULONG ObjGetClass(APTR alloc);
-
-ULONG ObjGetSize(APTR alloc);

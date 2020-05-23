@@ -41,12 +41,6 @@ struct ARENA_HEADER
   ULONG*  ah_Base;
 };
 
-struct ARENA_ALLOC
-{
-  ULONG   aa_Size;
-  ULONG   aa_Class;
-};
-
 APTR ArenaGame, ArenaChapter, ArenaRoom;
 
 EXPORT APTR ArenaOpen(ULONG size, ULONG requirements)
@@ -163,7 +157,7 @@ EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class, BOOL zeroFill)
 
   size = (size + 3) & ~0x03;
   
-  if ((hdr->ah_Used + size + sizeof(struct ARENA_ALLOC)) >= hdr->ah_Size)
+  if ((hdr->ah_Used + size) >= hdr->ah_Size)
   {
     ErrorF("Out of Area memory");
   }
@@ -175,37 +169,9 @@ EXPORT APTR ObjAlloc(APTR arena, ULONG size, ULONG class, BOOL zeroFill)
     FillMem((UBYTE*)alloc, size, 0);
   }
 
-  alloc->aa_Class = class;
-  alloc->aa_Size  = size;
+  hdr->ah_Used += size;
 
-  hdr->ah_Used += size + sizeof(struct ARENA_ALLOC);
-
-  result = (APTR) (&alloc[1]);
+  result = (APTR) alloc;
 
   return result;
-}
-
-EXPORT ULONG ObjGetClass(APTR alloc)
-{
-  struct ARENA_ALLOC* hdr;
-  
-  if (NULL == alloc)
-    return 0;
-
-  hdr = ((struct ARENA_ALLOC*) (alloc)) - 1;
-
-
-  return hdr->aa_Class;
-}
-
-EXPORT ULONG ObjGetSize(APTR alloc)
-{
-  struct ARENA_ALLOC* hdr;
-
-  if (NULL == alloc)
-    return 0;
-
-  hdr = ((struct ARENA_ALLOC*) (alloc)) - 1;
-
-  return hdr->aa_Size;
 }
