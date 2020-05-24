@@ -85,8 +85,8 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
-STATIC ULONG OpenFile(CONST CHAR* path);
-STATIC VOID CloseFile();
+STATIC ULONG OpenLFL(CHAR* basePath, UWORD id);
+STATIC VOID CloseLFL();
 STATIC BOOL SeekFile(ULONG pos);
 
 STATIC struct OBJECT_TABLE_REF TableRefs[16];
@@ -97,6 +97,7 @@ STATIC struct OBJECT_TABLE PaletteTable;
 INT main()
 {
   INT rc;
+  UWORD ii;
 
   struct Process* process;
   struct Message* wbMsg;
@@ -149,18 +150,21 @@ INT main()
   InitTable(&ImageTable, CT_IMAGE);
   InitTable(&PaletteTable, CT_PALETTE);
 
-  if (OpenFile("PROGDIR:01.LFL") > 0)
+
+  for (ii = 1; ii <= 54; ii++)
   {
-
-    OpenParrotIff(1);
-    ExportRoom(1, NextBackdropId);
-    ExportBackdrop(NextBackdropId++, 1);
-    NextBackdropId++;
-    CloseParrotIff();
-
-    CloseFile();
+    if (OpenLFL("PROGDIR:", ii) > 0)
+    {
+      CurrentArchiveId = ii;
+      OpenParrotIff(ii);
+      ExportRoom(ii, ii);
+      ExportBackdrop(ii, 1);
+      CloseParrotIff();
+      CloseLFL();
+    }
   }
 
+  CurrentArchiveId = 0;
   OpenParrotIff(0);
 
   ExportPalette(1);
@@ -681,10 +685,14 @@ STATIC VOID MemClear(APTR pMem, ULONG size)
   }
 }
 
-STATIC ULONG OpenFile(CONST CHAR* path)
+STATIC ULONG OpenLFL(CHAR* basePath, UWORD id)
 {
+  CHAR path[512];
+
   ULONG len;
   BPTR  file;
+
+  StrFormat(path, sizeof(path), "%s%02ld.LFL", basePath, (ULONG) id);
 
   file = Open(path, MODE_OLDFILE);
 
@@ -707,7 +715,7 @@ STATIC ULONG OpenFile(CONST CHAR* path)
   return len;
 }
 
-STATIC VOID CloseFile()
+STATIC VOID CloseLFL()
 {
   if (NULL != SrcFileData)
   {

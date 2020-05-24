@@ -210,7 +210,7 @@ struct OBJECT_TABLE_ITEM
   APTR  ot_Ptr;
 };
 
-#define MAX_ITEMS_PER_TABLE 32
+#define MAX_ITEMS_PER_TABLE 64
 
 struct OBJECT_TABLE
 {

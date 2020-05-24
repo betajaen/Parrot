@@ -469,8 +469,56 @@ EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWOR
   return obj;
 }
 
-EXPORT VOID UnloadAsset(struct ARENA* arena, struct ASSET* asset)
+EXPORT VOID UnloadAsset(struct ARENA* arena, APTR obj)
 {
+  struct ASSET* asset;
+  struct ARCHIVE* archive;
+  struct ASSET_FACTORY* factory;
+  struct OBJECT_TABLE_ITEM* tableItem;
+  CHAR   strtype[5];
+
+  archive = NULL;
+  factory = NULL;
+  tableItem = NULL;
+  asset = NULL;
+
+  if (obj == NULL)
+  {
+    ErrorF("Could not unload an empty asset.");
+    goto CLEAN_EXIT;
+  }
+
+  asset = asset = ((struct ASSET*)obj) - 1;
+
+  factory = FindFactory(asset->as_ClassType);
+
+  if (factory == NULL)
+  {
+    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(asset->as_ClassType, strtype));
+    goto CLEAN_EXIT;
+  }
+  
+  if (factory->af_Table != NULL)
+  {
+    tableItem = FindInTable(factory->af_Table, asset->as_Id, asset->as_Arch);
+
+    if (tableItem != NULL && tableItem->ot_Ptr == obj)
+    {
+      tableItem->ot_Ptr = NULL;
+    }
+  }
+
+  if (factory->af_Dtor != NULL)
+  {
+    factory->af_Dtor(obj);
+  }
+
+CLEAN_EXIT:
+
+  if (obj != NULL)
+  {
+    FillMem(obj, factory->af_Size, 0);
+  }
   
 }
 

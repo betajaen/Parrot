@@ -73,7 +73,9 @@ STATIC VOID NotBusy()
 
 STATIC VOID Load(STRPTR path)
 {
-  UWORD ii;
+  UWORD ii, roomNo;
+
+  WORD w, lw;
 
   Busy();
 
@@ -133,49 +135,64 @@ STATIC VOID Load(STRPTR path)
       "Unable to start Game!\n"
       "Reason: Starting Cursor Palette Table was not found"
       PARROT_ERR_INT("GAME_INFO::gi_StartCursorPalette"),
-      (ULONG) GameInfo->gi_StartCursorPalette
+      (ULONG)GameInfo->gi_StartCursorPalette
     );
   }
 
   ScreenLoadPaletteTable(0, GameCursorPalette);
 
   /* Load and Unpack Start Room */
-
-  InitStackVar(struct UNPACKED_ROOM, GameRoom);
-
-  if (0 == GameInfo->gi_StartRoom)
+  for(roomNo =1; roomNo <= 54; roomNo++)
   {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting ROOM was None"
-      PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
-      GameInfo->gi_StartRoom
-    );
-  }
+    ArenaRollback(ArenaChapter);
 
-  GameRoom.ur_Room = LoadAssetT(struct ROOM, ArenaChapter, ARCHIVE_UNKNOWN, CT_ROOM, GameInfo->gi_StartRoom, CHUNK_FLAG_ARCH_ANY);
+    InitStackVar(struct UNPACKED_ROOM, GameRoom);
 
-  if (NULL == GameRoom.ur_Room)
-  {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting ROOM could not be loaded"
-      PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
-      GameInfo->gi_StartRoom
-    );
-  }
+    if (0 == GameInfo->gi_StartRoom)
+    {
+      PARROT_ERR(
+        "Unable to start Game!\n"
+        "Reason: Starting ROOM was None"
+        PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
+        GameInfo->gi_StartRoom
+      );
+    }
 
-  ArenaRollback(ArenaRoom);
+    GameRoom.ur_Room = LoadAssetT(struct ROOM, ArenaChapter, ARCHIVE_UNKNOWN, CT_ROOM, roomNo, CHUNK_FLAG_ARCH_ANY);
 
-  UnpackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
+    if (NULL == GameRoom.ur_Room)
+    {
+      PARROT_ERR(
+        "Unable to start Game!\n"
+        "Reason: Starting ROOM could not be loaded"
+        PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
+        GameInfo->gi_StartRoom
+      );
+    }
 
-  WORD x = 0;
+    ArenaRollback(ArenaRoom);
 
-  for (ii = 0; ii < 960-320; ii++, x++)
-  {
-    ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], 0, 0, x, 0, 320, 128);
+    UnpackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
+    lw = GameRoom.ur_Room->rm_Width - 320;
 
-    ScreenSwapBuffers(0);
+    Delay(25);
+
+    if (GameRoom.ur_Backdrops[0] != NULL)
+    {
+      ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], 0, 0, 0, 0, 320, 128);
+
+      for (ii = 0; ii < lw; ii++)
+      {
+        ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], 0, 0, ii, 0, 320, 128);
+
+        ScreenSwapBuffers(0);
+      }
+
+      Delay(25);
+    }
+
+    PackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
+
   }
 
   NotBusy();

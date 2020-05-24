@@ -48,7 +48,7 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
   }
 }
 
-EXPORT VOID PackRoom(struct ARENA* arena, struct ROOM* room, struct UNPACKED_ROOM* unpackedRoom, ULONG pack)
+EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 {
   UBYTE ii;
   UWORD backdrop;
@@ -57,12 +57,12 @@ EXPORT VOID PackRoom(struct ARENA* arena, struct ROOM* room, struct UNPACKED_ROO
   {
     for (ii = 0; ii < 4; ii++)
     {
-      backdrop = room->rm_Backdrops[ii];
+      backdrop = room->ur_Room->rm_Backdrops[ii];
 
-      if (0 != backdrop && NULL != unpackedRoom->ur_Backdrops[ii])
+      if (0 != backdrop && NULL != room->ur_Backdrops[ii])
       {
-        UnloadAsset(arena, unpackedRoom->ur_Backdrops[ii]);
-        unpackedRoom->ur_Backdrops[ii] = NULL;
+        UnloadAsset(ArenaRoom, room->ur_Backdrops[ii]);
+        room->ur_Backdrops[ii] = NULL;
       }
     }
   }
