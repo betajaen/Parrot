@@ -137,9 +137,6 @@ STATIC VOID Load(STRPTR path)
 
   NotBusy();
 
-  /* Start First Room */
-  PlayRoom(0, GameInfo->gi_StartRoom);
-
 }
 
 EXPORT VOID GameStart(STRPTR path)
@@ -148,6 +145,7 @@ EXPORT VOID GameStart(STRPTR path)
   struct ROOM* room;
   struct UNPACKED_ROOM uroom;
   UBYTE ii;
+  UWORD nextRoom;
 
   GameArchive = NULL;
   GameInfo = NULL;
@@ -193,6 +191,17 @@ EXPORT VOID GameStart(STRPTR path)
   ScreenLoadPaletteTable(0, &DefaultPalette);
 
   Load(path);
+
+  ArenaRollback(ArenaChapter);
+
+  nextRoom = GameInfo->gi_StartRoom;
+  while (nextRoom != 0)
+  {
+    ArenaRollback(ArenaRoom);
+
+    /* Start First Room */
+    nextRoom = PlayRoom(0, nextRoom, GameInfo);
+  }
 
   ScreenClose(0);
 

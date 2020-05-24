@@ -191,6 +191,7 @@ struct GAME_INFO
   UWORD                     gi_Width;
   UWORD                     gi_Height;
   UWORD                     gi_Depth;
+  UWORD                     gi_RoomCount;
   struct OBJECT_TABLE_REF   gi_StartTables[16];
   UWORD                     gi_StartPalette;
   UWORD                     gi_StartCursorPalette;

@@ -237,7 +237,7 @@ EXPORT VOID ScreenSetCursor(UWORD id, UBYTE type)
     case 0: ClearPointer(screen->st_Window); break;
     case 1: SetPointer(screen->st_Window, Cursor1, 5, 5, -3, -3);   break;
     case 2: SetPointer(screen->st_Window, Cursor2, 13, 13, -6, -6); break;
-    case 3: SetPointer(screen->st_Window, Cursor3, 15, 15, -7, -7); break;
+    case 3: SetPointer(screen->st_Window, Cursor3, 15, 15, -8, -8); break;
     case 4: SetPointer(screen->st_Window, Cursor4, 9, 9, 0, 0); break;
     case 5: SetPointer(screen->st_Window, Cursor5, 9, 11, -3, 0); break;
     case 6: SetPointer(screen->st_Window, Cursor6, 9, 9, -8, 0); break;

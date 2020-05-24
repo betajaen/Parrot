@@ -34,3 +34,5 @@ extern UWORD EvtKey;
 
 
 #define KC_ESC 0x45
+#define KC_F1  0x50
+#define KC_F2  0x51

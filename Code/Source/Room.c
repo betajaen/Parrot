@@ -91,7 +91,7 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
   }
 }
 
-VOID PlayRoom(UWORD screen, UWORD roomId)
+UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
 {
   UWORD screenW, screenH;
   UWORD exitRoom, nextRoom;
@@ -124,13 +124,42 @@ VOID PlayRoom(UWORD screen, UWORD roomId)
   {
     evt = WaitForEvents(0);
 
-    if ((evt & WE_KEY != 0) && EvtKey == KC_ESC)
+    if ((evt & WE_KEY != 0))
     {
-      exitRoom = TRUE;
+      switch (EvtKey)
+      {
+        case KC_ESC:
+        {
+          exitRoom = TRUE;
+          nextRoom = 0;
+        }
+        break;
+        case KC_F1:
+        {
+          if (roomId > 0)
+          {
+            exitRoom = TRUE;
+            nextRoom = roomId - 1;
+          }
+        }
+        break;
+        case KC_F2:
+        {
+          if (roomId < gameInfo->gi_RoomCount)
+          {
+            exitRoom = TRUE;
+            nextRoom = roomId + 1;
+          }
+        }
+        break;
+      }
     }
+
   }
 
   /* Unload */
-  PackRoom(&room, UNPACK_ROOM_ALL);
+  PackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS);
+
+  return nextRoom;
 }
 

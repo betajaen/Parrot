@@ -54,6 +54,8 @@ struct IntuitionBase* IntuitionBase;
 #define CHAR char
 #endif
 
+#define NO_ROOMS 54
+
 STATIC struct IFFHandle* DstIff;
 STATIC UBYTE* SrcFileData;
 STATIC UBYTE* SrcFilePos;
@@ -151,7 +153,7 @@ INT main()
   InitTable(&PaletteTable, CT_PALETTE);
 
 
-  for (ii = 1; ii <= 54; ii++)
+  for (ii = 1; ii <= NO_ROOMS; ii++)
   {
     if (OpenLFL("PROGDIR:", ii) > 0)
     {
@@ -471,6 +473,7 @@ STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD startPal
   info.gi_Width  = 320;
   info.gi_Height = 200;
   info.gi_Depth  = 4;
+  info.gi_RoomCount = NO_ROOMS;
   info.gi_StartPalette = startPalette;
   info.gi_StartCursorPalette = startCursorPalette;
   info.gi_StartRoom = startRoom;
