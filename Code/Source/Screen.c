@@ -328,7 +328,7 @@ EXPORT VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD t
   DrawImage(rp, &image, leftOff, topOff);
 }
 
-EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD x, WORD y)
+EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
 {
   struct SCREEN* screen;
   struct RastPort* rp;
@@ -342,5 +342,5 @@ EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD x, WORD y)
   screen = &Screens[id];
   rp = &screen->st_RastPorts[screen->st_WriteBuffer];
 
-  BltBitMapRastPort((struct BitMap*) image, 0, 0, rp, x, y, image->im_Width, image->im_Height, 0xC0);
+  BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy, sw, sh, 0xC0);
 }

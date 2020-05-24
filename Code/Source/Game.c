@@ -171,9 +171,9 @@ STATIC VOID Load(STRPTR path)
 
   WORD x = 0;
 
-  for (ii = 0; ii < 320; ii++, x++)
+  for (ii = 0; ii < 960-320; ii++, x++)
   {
-    ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], x, 0);
+    ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], 0, 0, x, 0, 320, 128);
 
     ScreenSwapBuffers(0);
   }
