@@ -45,6 +45,7 @@ struct SCREEN
   UWORD                st_WriteBuffer;
   struct ScreenBuffer* st_Buffers[2];
   struct RastPort      st_RastPorts[2];
+  UWORD                st_IsDirty;
 };
 
 struct SCREEN Screens[4];
@@ -133,6 +134,7 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
 
   screen->st_ReadBuffer = 0;
   screen->st_WriteBuffer = 1;
+  screen->st_IsDirty = FALSE;
   
   screen->st_Buffers[0] = AllocScreenBuffer(screen->st_Screen, NULL, SB_SCREEN_BITMAP);
   InitRastPort(&screen->st_RastPorts[0]);
@@ -280,7 +282,7 @@ EXPORT VOID ScreenClear(UWORD id)
   screen = &Screens[id];
 
   ClearScreen(&screen->st_RastPorts[screen->st_WriteBuffer]);
-
+  screen->st_IsDirty = TRUE;
 }
 
 EXPORT VOID ScreenSwapBuffers(UWORD id)
@@ -298,6 +300,7 @@ EXPORT VOID ScreenSwapBuffers(UWORD id)
   {
     screen->st_ReadBuffer ^= 1;
     screen->st_WriteBuffer ^= 1;
+    screen->st_IsDirty = FALSE;
   }
 }
 
@@ -326,6 +329,7 @@ EXPORT VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD t
   image.NextImage = NULL;
 
   DrawImage(rp, &image, leftOff, topOff);
+  screen->st_IsDirty = TRUE;
 }
 
 EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
@@ -343,4 +347,19 @@ EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, 
   rp = &screen->st_RastPorts[screen->st_WriteBuffer];
 
   BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy, sw, sh, 0xC0);
+  screen->st_IsDirty = TRUE;
+}
+
+BOOL ScreenIsDirty(UWORD id)
+{
+  struct SCREEN* screen;
+
+  if (id >= 4)
+  {
+    ErrorF("Unknown screen %ld", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+
+  return screen->st_IsDirty;
 }

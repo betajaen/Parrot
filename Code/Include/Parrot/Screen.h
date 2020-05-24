@@ -40,3 +40,5 @@ VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable);
 VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD topOff);
 
 VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
+
+BOOL ScreenIsDirty(UWORD id);
