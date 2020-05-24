@@ -363,3 +363,27 @@ BOOL ScreenIsDirty(UWORD id)
 
   return screen->st_IsDirty;
 }
+
+VOID ScreenGetWidthHeight(UWORD id, UWORD* out_W, UWORD* out_H)
+{
+  struct SCREEN* screen;
+
+  if (id >= 4)
+  {
+    ErrorF("Unknown screen %ld", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+  *out_W = screen->st_Window->Width;
+  *out_H = screen->st_Window->Height;
+}
+
+VOID Busy(UWORD screen)
+{
+  ScreenSetCursor(0, CURSOR_BUSY);
+}
+
+VOID NotBusy(UWORD screen)
+{
+  ScreenSetCursor(0, CURSOR_POINT);
+}

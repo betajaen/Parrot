@@ -28,13 +28,24 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Arena.h>
 #include <Parrot/Asset.h>
+#include <Parrot/Screen.h>
+#include <Parrot/String.h>
+
+#include <proto/dos.h>
 
 EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 {
   UBYTE ii;
   UWORD backdrop;
 
-  if ((unpack & UNPACK_ROOM_BACKDROPS) != 0)
+  if ((unpack & UNPACK_ROOM_ASSET) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ASSET) == 0)
+  {
+    room->ur_Room = LoadAssetT(struct ROOM, ArenaChapter, ARCHIVE_UNKNOWN, CT_ROOM, room->ur_Id, CHUNK_FLAG_ARCH_ANY);
+
+    room->ur_Unpacked |= UNPACK_ROOM_ASSET;
+  }
+
+  if ((unpack & UNPACK_ROOM_BACKDROPS) != 0 && (room->ur_Unpacked & UNPACK_ROOM_BACKDROPS) == 0)
   {
     for (ii = 0; ii < 4; ii++)
     {
@@ -45,6 +56,8 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
         room->ur_Backdrops[ii] = LoadAsset(ArenaRoom, ARCHIVE_UNKNOWN, CT_IMAGE, backdrop, CHUNK_FLAG_ARCH_ANY);
       }
     }
+
+    room->ur_Unpacked |= UNPACK_ROOM_BACKDROPS;
   }
 }
 
@@ -53,7 +66,7 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
   UBYTE ii;
   UWORD backdrop;
 
-  if ((pack & UNPACK_ROOM_BACKDROPS) != 0)
+  if ((pack & UNPACK_ROOM_BACKDROPS) != 0 && (room->ur_Unpacked & UNPACK_ROOM_BACKDROPS) != 0)
   {
     for (ii = 0; ii < 4; ii++)
     {
@@ -65,5 +78,45 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
         room->ur_Backdrops[ii] = NULL;
       }
     }
+
+    room->ur_Unpacked &= ~UNPACK_ROOM_BACKDROPS;
+  }
+
+  if ((pack & UNPACK_ROOM_ASSET) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ASSET) != 0)
+  {
+    UnloadAsset(ArenaChapter, room->ur_Room);
+    room->ur_Room = NULL;
+    room->ur_Unpacked &= ~UNPACK_ROOM_ASSET;
   }
 }
+
+VOID PlayRoom(UWORD screen, UWORD roomId)
+{
+  UWORD screenW, screenH;
+  struct UNPACKED_ROOM room;
+
+  Busy();
+
+  /* Get Screen Info */
+  ScreenGetWidthHeight(screen, &screenW, &screenH);
+
+  /* Load Room Asset and Backdrops */
+  InitStackVar(struct UNPACKED_ROOM, room);
+
+  room.ur_Id = roomId;
+
+  UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS);
+
+  NotBusy();
+  ScreenSetCursor(0, CURSOR_SELECT);
+
+  /* Show first backdrop on screen */
+  ScreenRpBlitBitmap(0, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
+  ScreenSwapBuffers(0);
+
+  Delay(50 * 5);
+
+  /* Unload */
+  PackRoom(&room, UNPACK_ROOM_ALL);
+}
+

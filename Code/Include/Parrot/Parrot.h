@@ -268,8 +268,15 @@ struct UNPACKED_ROOM
 {
   struct ROOM*      ur_Room;
   struct IMAGE*     ur_Backdrops[4];
+  UWORD             ur_Id;
+  ULONG             ur_Unpacked;
+  WORD              ur_CamX;
+  WORD              ur_CamY;
 };
 
-#define UNPACK_ROOM_BACKDROPS  1
+#define UNPACK_ROOM_ASSET      1
+#define UNPACK_ROOM_BACKDROPS  2
+
+#define UNPACK_ROOM_ALL        (UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS)
 
 #endif

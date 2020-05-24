@@ -61,15 +61,6 @@ STATIC struct PALETTE_TABLE DefaultPalette =
   }
 };
 
-STATIC VOID Busy()
-{
-  ScreenSetCursor(0, CURSOR_BUSY);
-}
-
-STATIC VOID NotBusy()
-{
-  ScreenSetCursor(0, CURSOR_POINT);
-}
 
 STATIC VOID Load(STRPTR path)
 {
@@ -141,61 +132,15 @@ STATIC VOID Load(STRPTR path)
 
   ScreenLoadPaletteTable(0, GameCursorPalette);
 
-  /* Load and Unpack Start Room */
-  for(roomNo =1; roomNo <= 54; roomNo++)
-  {
-    ArenaRollback(ArenaChapter);
 
-    InitStackVar(struct UNPACKED_ROOM, GameRoom);
-
-    if (0 == GameInfo->gi_StartRoom)
-    {
-      PARROT_ERR(
-        "Unable to start Game!\n"
-        "Reason: Starting ROOM was None"
-        PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
-        GameInfo->gi_StartRoom
-      );
-    }
-
-    GameRoom.ur_Room = LoadAssetT(struct ROOM, ArenaChapter, ARCHIVE_UNKNOWN, CT_ROOM, roomNo, CHUNK_FLAG_ARCH_ANY);
-
-    if (NULL == GameRoom.ur_Room)
-    {
-      PARROT_ERR(
-        "Unable to start Game!\n"
-        "Reason: Starting ROOM could not be loaded"
-        PARROT_ERR_INT("GAME_INFO::gi_StartRoom"),
-        GameInfo->gi_StartRoom
-      );
-    }
-
-    ArenaRollback(ArenaRoom);
-
-    UnpackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
-    lw = GameRoom.ur_Room->rm_Width - 320;
-
-    Delay(25);
-
-    if (GameRoom.ur_Backdrops[0] != NULL)
-    {
-      ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], 0, 0, 0, 0, 320, 128);
-
-      for (ii = 0; ii < lw; ii++)
-      {
-        ScreenRpBlitBitmap(0, GameRoom.ur_Backdrops[0], 0, 0, ii, 0, 320, 128);
-
-        ScreenSwapBuffers(0);
-      }
-
-      Delay(25);
-    }
-
-    PackRoom(&GameRoom, UNPACK_ROOM_BACKDROPS);
-
-  }
+  ArenaRollback(ArenaChapter);
+  ArenaRollback(ArenaRoom);
 
   NotBusy();
+
+  /* Start First Room */
+  PlayRoom(0, GameInfo->gi_StartRoom);
+
 }
 
 EXPORT VOID GameStart(STRPTR path)

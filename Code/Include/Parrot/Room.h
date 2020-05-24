@@ -28,3 +28,6 @@
 VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
 
 VOID PackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
+
+VOID PlayRoom(UWORD screen, UWORD roomId);
+
