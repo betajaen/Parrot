@@ -1,5 +1,5 @@
 /**
-    $Id: Screen.h 1.1 2020/05/17 16:10:00, betajaen Exp $
+    $Id: Events.h 1.1 2020/05/24 12:51:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,29 +25,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info);
+UWORD WaitForEvents(UWORD screen);
 
-VOID ScreenClose(UWORD id);
+#define WE_NONE 0
+#define WE_KEY  1
 
-VOID ScreenSetCursor(UWORD id, UBYTE cursor);
+extern UWORD EvtKey;
 
-VOID ScreenClear(UWORD id);
 
-VOID ScreenSwapBuffers(UWORD id);
-
-VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable);
-
-VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD topOff);
-
-VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
-
-BOOL ScreenIsDirty(UWORD id);
-
-VOID ScreenGetWidthHeight(UWORD id, UWORD* out_W, UWORD* out_H);
-
-VOID Busy();
-
-VOID NotBusy();
-
-struct Window* GetScreenWindow(UWORD id);
-
+#define KC_ESC 0x45

@@ -64,6 +64,8 @@ INT main()
 
   process = (struct Process*) FindTask(NULL);
 
+  SetRequesterWindow(NULL);
+
   if (process->pr_CLI != NULL)
   {
     DOSBase = (struct DosLibrary*) OpenLibrary("dos.library", 33L);

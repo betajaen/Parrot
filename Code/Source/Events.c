@@ -1,5 +1,5 @@
 /**
-    $Id: Screen.h 1.1 2020/05/17 16:10:00, betajaen Exp $
+    $Id: Events.c, 1.1 2020/05/24 12:50:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,29 +25,39 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info);
+#include <Parrot/Parrot.h>
+#include <Parrot/Screen.h>
+#include <Parrot/Requester.h>
+#include <Parrot/Events.h>
 
-VOID ScreenClose(UWORD id);
+#include <proto/exec.h>
+#include <proto/intuition.h>
 
-VOID ScreenSetCursor(UWORD id, UBYTE cursor);
+UWORD EvtKey;
 
-VOID ScreenClear(UWORD id);
+UWORD WaitForEvents(UWORD screen)
+{
+  struct Window* win;
+  struct IntuiMessage* imsg;
+  UWORD  rc;
 
-VOID ScreenSwapBuffers(UWORD id);
+  EvtKey = 0;
+  rc = 0;
+  win = GetScreenWindow(screen);
+  Wait(1L << win->UserPort->mp_SigBit);
 
-VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable);
-
-VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD topOff);
-
-VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
-
-BOOL ScreenIsDirty(UWORD id);
-
-VOID ScreenGetWidthHeight(UWORD id, UWORD* out_W, UWORD* out_H);
-
-VOID Busy();
-
-VOID NotBusy();
-
-struct Window* GetScreenWindow(UWORD id);
-
+  while (imsg = (struct IntuiMessage*)GetMsg(win->UserPort))
+  {
+    switch (imsg->Class)
+    {
+      case IDCMP_RAWKEY:
+      {
+        rc |= WE_KEY;
+        EvtKey = imsg->Code;
+      }
+      break;
+    }
+  }
+  
+  return rc;
+}

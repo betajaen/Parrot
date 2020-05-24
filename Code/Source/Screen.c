@@ -32,6 +32,7 @@
 #include <proto/exec.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
+#include <proto/dos.h>
 
 #include "Cursor.inc"
 
@@ -62,6 +63,7 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
   struct NewScreen      newScreen;
   struct NewWindow      newWindow;
   struct SCREEN* screen;
+  struct Process* process;
 
   screen = NULL;
   InitStackVar(struct NewScreen, newScreen);
@@ -109,7 +111,7 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
     newScreen.ViewModes |= LACE;
   }
 
-  newScreen.Type = CUSTOMSCREEN | SCREENQUIET;
+  newScreen.Type = CUSTOMSCREEN | PUBLICSCREEN | SCREENQUIET;
 
   // if ((info->si_Flags & SIF_IS_PUBLIC) != 0)
   // {
@@ -149,7 +151,8 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
   newWindow.Screen = screen->st_Screen;
   newWindow.Type = CUSTOMSCREEN;
   newWindow.Flags = WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_ACTIVATE;
-  
+  newWindow.IDCMPFlags = IDCMP_RAWKEY;
+
   screen->st_Window = OpenWindow(&newWindow);
   
   if (NULL == screen->st_Window)
@@ -157,6 +160,15 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
     ErrorF("Could not open window for Parrot", info->si_Width, info->si_Height, info->si_Depth);
   }
   
+
+  if (id == 0)
+  {
+    SetRequesterWindow((APTR)screen->st_Window);
+
+    process = (struct Process*) FindTask(NULL);
+    process->pr_WindowPtr = screen->st_Window;
+  }
+
 }
 
 
@@ -386,4 +398,14 @@ VOID Busy(UWORD screen)
 VOID NotBusy(UWORD screen)
 {
   ScreenSetCursor(0, CURSOR_POINT);
+}
+
+struct Window* GetScreenWindow(UWORD id)
+{
+  if (id >= 4)
+  {
+    ErrorF("Unknown screen %ld", (ULONG)id);
+  }
+
+  return Screens[id].st_Window;
 }

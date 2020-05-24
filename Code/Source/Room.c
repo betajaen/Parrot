@@ -30,6 +30,7 @@
 #include <Parrot/Asset.h>
 #include <Parrot/Screen.h>
 #include <Parrot/String.h>
+#include <Parrot/Events.h>
 
 #include <proto/dos.h>
 
@@ -93,7 +94,12 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 VOID PlayRoom(UWORD screen, UWORD roomId)
 {
   UWORD screenW, screenH;
+  UWORD exitRoom, nextRoom;
   struct UNPACKED_ROOM room;
+  UWORD evt;
+  
+  exitRoom = FALSE;
+  nextRoom = 0;
 
   Busy();
 
@@ -114,7 +120,15 @@ VOID PlayRoom(UWORD screen, UWORD roomId)
   ScreenRpBlitBitmap(0, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
   ScreenSwapBuffers(0);
 
-  Delay(50 * 5);
+  while (exitRoom == FALSE)
+  {
+    evt = WaitForEvents(0);
+
+    if ((evt & WE_KEY != 0) && EvtKey == KC_ESC)
+    {
+      exitRoom = TRUE;
+    }
+  }
 
   /* Unload */
   PackRoom(&room, UNPACK_ROOM_ALL);

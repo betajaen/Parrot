@@ -41,6 +41,8 @@ struct EasyStruct EasyRequesterStruct =
 };
 
 STATIC CHAR RequesterText[1024] = { 0 };
+struct Window* RequesterWindow;
+
 
 LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText)
 {
@@ -62,7 +64,7 @@ LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText)
     EasyRequesterStruct.es_TextFormat = (UBYTE*)pText;
   }
 
-  return EasyRequest(NULL, &EasyRequesterStruct, NULL);
+  return EasyRequest(RequesterWindow, &EasyRequesterStruct, NULL);
 }
 
 #if defined(IS_M68K)
@@ -154,4 +156,9 @@ VOID ErrorF(CONST_STRPTR pFmt, ...)
 #else
   return; /* Unimplemented */
 #endif
+}
+
+VOID SetRequesterWindow(APTR window)
+{
+  RequesterWindow = (struct Window*) window;
 }

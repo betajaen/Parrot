@@ -25,6 +25,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+VOID SetRequesterWindow(APTR window);
+
 LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText);
 
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);

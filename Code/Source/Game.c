@@ -61,7 +61,6 @@ STATIC struct PALETTE_TABLE DefaultPalette =
   }
 };
 
-
 STATIC VOID Load(STRPTR path)
 {
   UWORD ii, roomNo;
@@ -194,7 +193,6 @@ EXPORT VOID GameStart(STRPTR path)
   ScreenLoadPaletteTable(0, &DefaultPalette);
 
   Load(path);
-
 
   ScreenClose(0);
 
