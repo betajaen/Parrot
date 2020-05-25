@@ -38,8 +38,9 @@
 #error "Unsupported Arch"
 #endif
 
+#define MAX_SCREENS 2
 #define MAX_ROOM_BACKDROPS  2
-#define MAX_ROOM_EXITS 6
+#define MAX_ROOM_ENTITIES 20
 
 /**
     Typename consistency
@@ -138,6 +139,7 @@ struct SCREEN_INFO
 #define CT_IMAGE          MAKE_NODE_ID('I','M','G','E')
 #define CT_PALETTE        MAKE_NODE_ID('P','A','L','4')
 #define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
+#define CT_ENTITY         MAKE_NODE_ID('E','N','T','Y')
 
 struct ASSET
 {
@@ -286,37 +288,41 @@ struct POINT
   WORD pt_Top;
 };
 
-struct EXIT
+#define ET_INFO 1
+
+struct ENTITY
 {
-  UWORD             ur_CounterPart;
-  struct RECT       ur_HitBox;
-  struct POINT      ur_Center;
-  UWORD             ur_Flags;
-  UWORD             ur_Direction;
+  struct RECT         ob_HitBox;
+  UBYTE               ob_Type;
+  UBYTE               ob_State;
+  UWORD               ob_Name;
+  UWORD               ob_Friend;
 };
 
 struct ROOM
 {
-  UWORD             rm_Width;
-  UWORD             rm_Height;
-  UWORD             rm_Backdrops[MAX_ROOM_BACKDROPS];
-  struct EXIT       rm_Exits[MAX_ROOM_EXITS];
+  UWORD               rm_Width;
+  UWORD               rm_Height;
+  UWORD               rm_Backdrops[MAX_ROOM_BACKDROPS];
+  UWORD               rm_Entities[MAX_ROOM_ENTITIES];
 };
 
 struct UNPACKED_ROOM
 {
-  struct ROOM*      ur_Room;
-  struct IMAGE*     ur_Backdrops[MAX_ROOM_BACKDROPS];
-  UWORD             ur_Id;
-  ULONG             ur_Unpacked;
-  WORD              ur_CamX;
-  WORD              ur_CamY;
+  struct ROOM*        ur_Room;
+  struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
+  struct ENTITY*      ur_Entities[MAX_ROOM_ENTITIES];
+  UWORD               ur_Id;
+  ULONG               ur_Unpacked;
+  WORD                ur_CamX;
+  WORD                ur_CamY;
 };
 
 
 #define UNPACK_ROOM_ASSET      1
 #define UNPACK_ROOM_BACKDROPS  2
+#define UNPACK_ROOM_ENTITIES   4
 
-#define UNPACK_ROOM_ALL        (UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS)
+#define UNPACK_ROOM_ALL        (UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES)
 
 #endif

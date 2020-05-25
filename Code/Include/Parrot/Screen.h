@@ -51,3 +51,6 @@ VOID NotBusy();
 
 struct Window* GetScreenWindow(UWORD id);
 
+VOID ScreenRpDrawBox(UWORD id, struct RECT* rect);
+
+VOID ScreenRpSetAPen(UWORD id, UWORD pen);

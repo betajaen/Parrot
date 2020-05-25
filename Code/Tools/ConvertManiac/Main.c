@@ -63,6 +63,7 @@ STATIC UBYTE* SrcFileEnd;
 STATIC ULONG  NextRoomId;
 STATIC ULONG  NextBackdropId;
 STATIC UWORD  CurrentArchiveId;
+STATIC UWORD  NextEntityId;
 
 ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
 ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
@@ -90,11 +91,13 @@ STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 STATIC ULONG OpenLFL(CHAR* basePath, UWORD id);
 STATIC VOID CloseLFL();
 STATIC BOOL SeekFile(ULONG pos);
+STATIC BOOL JumpFile(LONG extraPos);
 
 STATIC struct OBJECT_TABLE_REF TableRefs[16];
 STATIC struct OBJECT_TABLE RoomTable;
 STATIC struct OBJECT_TABLE ImageTable;
 STATIC struct OBJECT_TABLE PaletteTable;
+STATIC struct OBJECT_TABLE EntityTable;
 
 INT main()
 {
@@ -143,6 +146,7 @@ INT main()
   }
   
   NextBackdropId = 1;
+  NextEntityId = 1;
 
   MemClear((APTR)&RoomTable, sizeof(RoomTable));
   MemClear((APTR)&ImageTable, sizeof(ImageTable));
@@ -151,9 +155,10 @@ INT main()
   InitTable(&RoomTable, CT_ROOM);
   InitTable(&ImageTable, CT_IMAGE);
   InitTable(&PaletteTable, CT_PALETTE);
+  InitTable(&EntityTable, CT_ENTITY);
 
 
-  for (ii = 1; ii <= NO_ROOMS; ii++)
+  for (ii = 1; ii <= 2;ii++) // NO_ROOMS; ii++)
   {
     if (OpenLFL("PROGDIR:", ii) > 0)
     {
@@ -174,6 +179,7 @@ INT main()
   ExportTable(&PaletteTable, 1, 0);
   ExportTable(&RoomTable, 2, 1);
   ExportTable(&ImageTable, 3, 2);
+  ExportTable(&EntityTable, 4, 3);
 
   ExportGame(1, &TableRefs[0], 1, 2, 1);
 
@@ -549,11 +555,43 @@ STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
   AddToTable(&ImageTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct IMAGE) + planarSize);
 }
 
+STATIC VOID ExportEntity(UWORD id)
+{
+  struct CHUNK_HEADER hdr;
+  struct ENTITY ent;
+
+  MemClear(&ent, sizeof(struct ENTITY));
+
+  hdr.ch_Id = id;
+  hdr.ch_Flags = CHUNK_FLAG_ARCH_ANY;
+
+  ent.ob_Type = ET_INFO;
+
+  JumpFile(7);
+  ent.ob_HitBox.rt_Left = ((UWORD) ReadUBYTE()) << 3;
+  ent.ob_HitBox.rt_Top = ((UWORD) (ReadUBYTE() & 0xF)) << 3;
+  ent.ob_HitBox.rt_Right =  ((UWORD)ReadUBYTE()) << 3;
+  ent.ob_HitBox.rt_Right += ent.ob_HitBox.rt_Left;
+  JumpFile(4);
+  ent.ob_HitBox.rt_Bottom =  ((UWORD)(ReadUBYTE() & 0xF8));
+  ent.ob_HitBox.rt_Bottom += ent.ob_HitBox.rt_Top;
+
+  PushChunk(DstIff, ID_SQWK, CT_ENTITY, sizeof(struct CHUNK_HEADER) + sizeof(struct ENTITY));
+  WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
+  WriteChunkBytes(DstIff, &ent, sizeof(struct ENTITY));
+  PopChunk(DstIff);
+
+  AddToTable(&EntityTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct ENTITY));
+}
 
 STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
 {
   struct CHUNK_HEADER hdr;
   struct ROOM room;
+  UWORD  numObjects;
+  UWORD  objImg[256];
+  UWORD  objDat[256];
+  UWORD  ii;
 
   MemClear(&room, sizeof(struct ROOM));
   
@@ -565,12 +603,42 @@ STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
   room.rm_Height = ReadUWORDLE();
   room.rm_Backdrops[0] = backdrop;
 
+  SeekFile(20);
+  numObjects = ReadUBYTE();
+
+  if (numObjects > MAX_ROOM_ENTITIES)
+  {
+    DebugF("Maximum entity count exceeded! %ld vs %ld in Room %ld", (ULONG) numObjects, (ULONG) MAX_ROOM_ENTITIES, (ULONG) id);
+    return;
+  }
+
+  SeekFile(28);
+
+  for (ii = 0; ii < numObjects; ii++)
+  {
+    objImg[ii] = ReadUWORDLE();
+  }
+
+  for (ii = 0; ii < numObjects; ii++)
+  {
+    objDat[ii] = ReadUWORDLE();
+  }
+
+  for (ii = 0; ii < numObjects; ii++)
+  {
+    SeekFile(objDat[ii]);
+    room.rm_Entities[ii] = NextEntityId;
+    ExportEntity(NextEntityId);
+    NextEntityId++;
+  }
+
   PushChunk(DstIff, ID_SQWK, CT_ROOM, sizeof(struct CHUNK_HEADER) + sizeof(struct ROOM));
   WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
   WriteChunkBytes(DstIff, &room, sizeof(struct ROOM));
   PopChunk(DstIff);
 
   AddToTable(&RoomTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct ROOM));
+
 }
 
 
@@ -743,6 +811,23 @@ STATIC BOOL SeekFile(ULONG pos)
 
   return FALSE;
 }
+
+STATIC BOOL JumpFile(LONG extraPos)
+{
+  UBYTE* nextPos;
+
+  nextPos = SrcFileData + (SrcFilePos - SrcFileData) + extraPos;
+
+  if (nextPos < SrcFileEnd)
+  {
+    SrcFilePos = nextPos;
+
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
 STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size)
 {
   struct OBJECT_TABLE_ITEM* item;

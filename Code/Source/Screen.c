@@ -36,8 +36,6 @@
 
 #include "Cursor.inc"
 
-#define PARROT_SCREEN_CLASS 0x44a2d27d 
-
 struct SCREEN
 {
   struct Screen*       st_Screen;
@@ -49,7 +47,7 @@ struct SCREEN
   UWORD                st_IsDirty;
 };
 
-struct SCREEN Screens[4];
+struct SCREEN Screens[MAX_SCREENS];
 
 STATIC struct TextAttr myta = {
     "topaz.font",
@@ -69,7 +67,7 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
   InitStackVar(struct NewScreen, newScreen);
   InitStackVar(struct NewWindow, newWindow);
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Could not open screen %ld. Limit has reached", (ULONG) id);
   }
@@ -79,9 +77,9 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
     info->si_Width = 320;
   }
   
-  if (info->si_Height < 240)
+  if (info->si_Height < 24)
   {
-    info->si_Height = 240;
+    info->si_Height = 24;
   }
 
   if (info->si_Depth < 2)
@@ -111,7 +109,7 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
     newScreen.ViewModes |= LACE;
   }
 
-  newScreen.Type = CUSTOMSCREEN | PUBLICSCREEN | SCREENQUIET;
+  newScreen.Type = CUSTOMSCREEN | SCREENQUIET;
 
   // if ((info->si_Flags & SIF_IS_PUBLIC) != 0)
   // {
@@ -176,7 +174,7 @@ EXPORT VOID ScreenClose(UWORD id)
 {
   struct SCREEN* screen;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Could not close screen %ld. Limit has reached", (ULONG)id);
   }
@@ -223,7 +221,7 @@ EXPORT VOID ScreenSetCursor(UWORD id, UBYTE type)
 {
   struct SCREEN* screen;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -271,7 +269,7 @@ EXPORT VOID ScreenLoadPaletteTable(UWORD id, struct PALETTE_TABLE* paletteTable)
 {
   struct SCREEN* screen;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -286,7 +284,7 @@ EXPORT VOID ScreenClear(UWORD id)
 {
   struct SCREEN* screen;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -301,7 +299,7 @@ EXPORT VOID ScreenSwapBuffers(UWORD id)
 {
   struct SCREEN* screen;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -322,7 +320,7 @@ EXPORT VOID ScreenRpDrawImage(UWORD id, struct IMAGE* data, WORD leftOff, WORD t
   struct SCREEN* screen;
   struct RastPort* rp;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -350,7 +348,7 @@ EXPORT VOID ScreenRpBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, 
   struct RastPort* rp;
   PLANEPTR ptr;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -366,7 +364,7 @@ BOOL ScreenIsDirty(UWORD id)
 {
   struct SCREEN* screen;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -380,7 +378,7 @@ VOID ScreenGetWidthHeight(UWORD id, UWORD* out_W, UWORD* out_H)
 {
   struct SCREEN* screen;
 
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
@@ -402,10 +400,49 @@ VOID NotBusy(UWORD screen)
 
 struct Window* GetScreenWindow(UWORD id)
 {
-  if (id >= 4)
+  if (id >= MAX_SCREENS)
   {
     ErrorF("Unknown screen %ld", (ULONG)id);
   }
 
   return Screens[id].st_Window;
+}
+
+VOID ScreenRpDrawBox(UWORD id, struct RECT* rect)
+{
+  struct SCREEN* screen;
+  struct RastPort* rp;
+  PLANEPTR ptr;
+
+  if (id >= MAX_SCREENS)
+  {
+    ErrorF("Unknown screen %ld", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+  rp = &screen->st_RastPorts[screen->st_WriteBuffer];
+
+  Move(rp, rect->rt_Left, rect->rt_Top);
+  Draw(rp, rect->rt_Right, rect->rt_Top);
+  Draw(rp, rect->rt_Right, rect->rt_Bottom);
+  Draw(rp, rect->rt_Left, rect->rt_Bottom);
+  Draw(rp, rect->rt_Left, rect->rt_Top);
+}
+
+VOID ScreenRpSetAPen(UWORD id, UWORD pen)
+{
+  struct SCREEN* screen;
+  struct RastPort* rp;
+  PLANEPTR ptr;
+
+  if (id >= MAX_SCREENS)
+  {
+    ErrorF("Unknown screen %ld", (ULONG)id);
+  }
+
+  screen = &Screens[id];
+  rp = &screen->st_RastPorts[screen->st_WriteBuffer];
+
+
+  SetAPen(rp, pen);
 }

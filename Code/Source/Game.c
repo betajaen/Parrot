@@ -180,7 +180,7 @@ EXPORT VOID GameStart(STRPTR path)
   CloseArchive(0);
 
   screenInfo.si_Width = GameInfo->gi_Width;
-  screenInfo.si_Height = GameInfo->gi_Height;
+  screenInfo.si_Height = 128; // GameInfo->gi_Height;
   screenInfo.si_Depth = GameInfo->gi_Depth;
   screenInfo.si_Flags = 0;
   screenInfo.si_Left = 0;

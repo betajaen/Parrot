@@ -47,6 +47,7 @@ STATIC CHAR* JoinPathStr;
 STATIC struct OBJECT_TABLE RoomTable;
 STATIC struct OBJECT_TABLE ImageTable;
 STATIC struct OBJECT_TABLE PaletteTable;
+STATIC struct OBJECT_TABLE EntityTable;
 
 #define ARCHIVE_ID 0x9640c817ul
 
@@ -79,6 +80,7 @@ struct ASSET_FACTORY AssetFactories[] = {
   { CT_PALETTE, sizeof(struct PALETTE_TABLE), &PaletteTable, NULL, NULL },
   { CT_ROOM, sizeof(struct ROOM), &RoomTable, NULL, NULL },
   { CT_IMAGE, sizeof(struct IMAGE), &ImageTable, UnpackBitmap, PackBitmap },
+  { CT_ENTITY, sizeof(struct ENTITY), &EntityTable, NULL, NULL },
   { 0, 0 }
 };
 

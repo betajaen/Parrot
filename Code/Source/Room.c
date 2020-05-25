@@ -38,7 +38,7 @@
 EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 {
   UBYTE ii;
-  UWORD backdrop;
+  UWORD id;
 
   if ((unpack & UNPACK_ROOM_ASSET) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ASSET) == 0)
   {
@@ -51,15 +51,30 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
   {
     for (ii = 0; ii < MAX_ROOM_BACKDROPS; ii++)
     {
-      backdrop = room->ur_Room->rm_Backdrops[ii];
+      id = room->ur_Room->rm_Backdrops[ii];
 
-      if (0 != backdrop && NULL == room->ur_Backdrops[ii])
+      if (0 != id && NULL == room->ur_Backdrops[ii])
       {
-        room->ur_Backdrops[ii] = LoadAsset(ArenaRoom, ARCHIVE_UNKNOWN, CT_IMAGE, backdrop, CHUNK_FLAG_ARCH_ANY);
+        room->ur_Backdrops[ii] = LoadAsset(ArenaRoom, ARCHIVE_UNKNOWN, CT_IMAGE, id, CHUNK_FLAG_ARCH_ANY);
       }
     }
 
     room->ur_Unpacked |= UNPACK_ROOM_BACKDROPS;
+  }
+
+  if ((unpack & UNPACK_ROOM_ENTITIES) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ENTITIES) == 0)
+  {
+    for (ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+    {
+      id = room->ur_Room->rm_Entities[ii];
+
+      if (0 != id && NULL == room->ur_Entities[ii])
+      {
+        room->ur_Entities[ii] = LoadAsset(ArenaRoom, ARCHIVE_UNKNOWN, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
+      }
+    }
+
+    room->ur_Unpacked |= UNPACK_ROOM_ENTITIES;
   }
 }
 
@@ -67,6 +82,20 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 {
   UBYTE ii;
   UWORD backdrop;
+
+  if ((pack & UNPACK_ROOM_ENTITIES) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ENTITIES) != 0)
+  {
+    for (ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+    {
+      if (NULL != room->ur_Entities[ii])
+      {
+        UnloadAsset(ArenaRoom, room->ur_Entities[ii]);
+        room->ur_Entities[ii] = NULL;
+      }
+    }
+
+    room->ur_Unpacked &= ~MAX_ROOM_ENTITIES;
+  }
 
   if ((pack & UNPACK_ROOM_BACKDROPS) != 0 && (room->ur_Unpacked & UNPACK_ROOM_BACKDROPS) != 0)
   {
@@ -102,6 +131,9 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
   UWORD mostLeftEdge;
   WORD screenUpdate;
   UWORD cursor;
+  UWORD ii;
+  struct ENTITY* ent;
+  WORD camRight;
 
   exitRoom = FALSE;
   nextRoom = 0;
@@ -119,7 +151,7 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
 
   room.ur_Id = roomId;
 
-  UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS);
+  UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
 
   mostLeftEdge = room.ur_Room->rm_Width - gameInfo->gi_Width;
 
@@ -198,11 +230,13 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
     if (scrollDir < 0 && room.ur_CamX >= 0)
     {
       room.ur_CamX -= 1;
+      camRight = room.ur_CamX + gameInfo->gi_Width;
       screenUpdate = TRUE;
     }
     else if (scrollDir > 0 && room.ur_CamX <= mostLeftEdge)
     {
       room.ur_CamX += 1;
+      camRight = room.ur_CamX + gameInfo->gi_Width;
       screenUpdate = TRUE;
     }
 
@@ -229,6 +263,27 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
       
       /* Show first backdrop on screen */
       ScreenRpBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
+
+      ScreenRpSetAPen(screen, 15);
+      for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+      {
+        ent = room.ur_Entities[ii];
+
+        if (0 == ent->ob_Type)
+          break;
+
+        struct RECT localRect;
+        localRect.rt_Left = ent->ob_HitBox.rt_Left - room.ur_CamX;
+        localRect.rt_Top = ent->ob_HitBox.rt_Top - room.ur_CamY;
+        localRect.rt_Right = ent->ob_HitBox.rt_Right - room.ur_CamX;
+        localRect.rt_Bottom = ent->ob_HitBox.rt_Bottom - room.ur_CamY;
+
+        if (localRect.rt_Left >= 0 && localRect.rt_Right < gameInfo->gi_Width)
+        {
+          ScreenRpDrawBox(screen, &localRect);
+        }
+      }
+
       ScreenSwapBuffers(screen);
 
       screenUpdate = FALSE;
@@ -240,7 +295,7 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
   }
 
   /* Unload */
-  PackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS);
+  PackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
 
   return nextRoom;
 }
