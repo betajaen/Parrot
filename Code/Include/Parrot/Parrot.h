@@ -38,6 +38,9 @@
 #error "Unsupported Arch"
 #endif
 
+#define MAX_ROOM_BACKDROPS  2
+#define MAX_ROOM_EXITS 6
+
 /**
     Typename consistency
 */
@@ -258,22 +261,58 @@ struct IMAGE
 
 */
 
+#define DIR_NW     0
+#define DIR_N      1
+#define DIR_NE     2
+#define DIR_E      3
+#define DIR_SE     4
+#define DIR_S      5
+#define DIR_SW     6
+#define DIR_W      7
+#define DIR_UP     DIR_N
+#define DIR_DOWN   DIR_S
+
+struct RECT
+{
+  WORD rt_Left;
+  WORD rt_Top;
+  WORD rt_Right;
+  WORD rt_Bottom;
+};
+
+struct POINT
+{
+  WORD pt_Left;
+  WORD pt_Top;
+};
+
+struct EXIT
+{
+  UWORD             ur_CounterPart;
+  struct RECT       ur_HitBox;
+  struct POINT      ur_Center;
+  UWORD             ur_Flags;
+  UWORD             ur_Direction;
+};
+
 struct ROOM
 {
   UWORD             rm_Width;
   UWORD             rm_Height;
-  UWORD             rm_Backdrops[4];
+  UWORD             rm_Backdrops[MAX_ROOM_BACKDROPS];
+  struct EXIT       rm_Exits[MAX_ROOM_EXITS];
 };
 
 struct UNPACKED_ROOM
 {
   struct ROOM*      ur_Room;
-  struct IMAGE*     ur_Backdrops[4];
+  struct IMAGE*     ur_Backdrops[MAX_ROOM_BACKDROPS];
   UWORD             ur_Id;
   ULONG             ur_Unpacked;
   WORD              ur_CamX;
   WORD              ur_CamY;
 };
+
 
 #define UNPACK_ROOM_ASSET      1
 #define UNPACK_ROOM_BACKDROPS  2

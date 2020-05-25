@@ -49,7 +49,7 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 
   if ((unpack & UNPACK_ROOM_BACKDROPS) != 0 && (room->ur_Unpacked & UNPACK_ROOM_BACKDROPS) == 0)
   {
-    for (ii = 0; ii < 4; ii++)
+    for (ii = 0; ii < MAX_ROOM_BACKDROPS; ii++)
     {
       backdrop = room->ur_Room->rm_Backdrops[ii];
 
@@ -70,7 +70,7 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 
   if ((pack & UNPACK_ROOM_BACKDROPS) != 0 && (room->ur_Unpacked & UNPACK_ROOM_BACKDROPS) != 0)
   {
-    for (ii = 0; ii < 4; ii++)
+    for (ii = 0; ii < MAX_ROOM_BACKDROPS; ii++)
     {
       backdrop = room->ur_Room->rm_Backdrops[ii];
 
