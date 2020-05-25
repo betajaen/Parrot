@@ -150,8 +150,8 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
   newWindow.Height = info->si_Height;
   newWindow.Screen = screen->st_Screen;
   newWindow.Type = CUSTOMSCREEN;
-  newWindow.Flags = WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_ACTIVATE;
-  newWindow.IDCMPFlags = IDCMP_RAWKEY;
+  newWindow.Flags = WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_ACTIVATE | WFLG_REPORTMOUSE | WFLG_RMBTRAP;
+  newWindow.IDCMPFlags = IDCMP_RAWKEY | IDCMP_MOUSEMOVE;
 
   screen->st_Window = OpenWindow(&newWindow);
   

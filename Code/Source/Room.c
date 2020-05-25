@@ -31,6 +31,7 @@
 #include <Parrot/Screen.h>
 #include <Parrot/String.h>
 #include <Parrot/Events.h>
+#include <Parrot/Requester.h>
 
 #include <proto/dos.h>
 
@@ -95,11 +96,18 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
 {
   UWORD screenW, screenH;
   UWORD exitRoom, nextRoom;
+  WORD scrollDir;
   struct UNPACKED_ROOM room;
   UWORD evt;
-  
+  UWORD mostLeftEdge;
+  WORD screenUpdate;
+  UWORD cursor;
+
   exitRoom = FALSE;
   nextRoom = 0;
+  scrollDir = 0;
+  cursor = CURSOR_BUSY;
+  screenUpdate = TRUE;
 
   Busy();
 
@@ -113,18 +121,21 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
 
   UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS);
 
-  NotBusy();
-  ScreenSetCursor(0, CURSOR_SELECT);
+  mostLeftEdge = room.ur_Room->rm_Width - gameInfo->gi_Width;
 
-  /* Show first backdrop on screen */
-  ScreenRpBlitBitmap(0, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
-  ScreenSwapBuffers(0);
+  if (mostLeftEdge > 1)
+  {
+    mostLeftEdge -= 1;
+  }
+
+  NotBusy();
+
+  evt = 0;
 
   while (exitRoom == FALSE)
   {
-    evt = WaitForEvents(0);
-
-    if ((evt & WE_KEY != 0))
+    
+    if ((evt & WE_KEY) != 0)
     {
       switch (EvtKey)
       {
@@ -136,7 +147,7 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
         break;
         case KC_F1:
         {
-          if (roomId > 0)
+          if (roomId > 1)
           {
             exitRoom = TRUE;
             nextRoom = roomId - 1;
@@ -152,9 +163,80 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
           }
         }
         break;
+        case KC_LEFT:
+        {
+          scrollDir = -1;
+        }
+        break;
+        case KC_RIGHT:
+        {
+          scrollDir = +1;
+        }
+        break;
       }
     }
+    
+    if ((evt & WE_CURSOR) != 0)
+    {
+    }
 
+
+    if (EvtMouseX < 10)
+    {
+      scrollDir = -1;
+    }
+    else if (EvtMouseX > gameInfo->gi_Width - 10)
+    {
+      scrollDir = +1;
+    }
+    else
+    {
+      scrollDir = 0;
+    }
+
+
+    if (scrollDir < 0 && room.ur_CamX >= 0)
+    {
+      room.ur_CamX -= 1;
+      screenUpdate = TRUE;
+    }
+    else if (scrollDir > 0 && room.ur_CamX <= mostLeftEdge)
+    {
+      room.ur_CamX += 1;
+      screenUpdate = TRUE;
+    }
+
+
+    if (scrollDir < 0 && cursor != CURSOR_W)
+    {
+      cursor = CURSOR_W;
+      ScreenSetCursor(screen, cursor);
+    }
+    else if (scrollDir > 0 && cursor != CURSOR_E)
+    {
+      cursor = CURSOR_E;
+      ScreenSetCursor(screen, cursor);
+    }
+
+    if (scrollDir == 0 && cursor != CURSOR_SELECT)
+    {
+      cursor = CURSOR_SELECT;
+      ScreenSetCursor(screen, cursor);
+    }
+
+    if (TRUE == screenUpdate)
+    {
+      
+      /* Show first backdrop on screen */
+      ScreenRpBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
+      ScreenSwapBuffers(screen);
+
+      screenUpdate = FALSE;
+      scrollDir = 0;
+    }
+
+
+    evt = WaitForEvents(0);
   }
 
   /* Unload */

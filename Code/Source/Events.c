@@ -34,6 +34,8 @@
 #include <proto/intuition.h>
 
 UWORD EvtKey;
+WORD EvtMouseX;
+WORD EvtMouseY;
 
 UWORD WaitForEvents(UWORD screen)
 {
@@ -44,7 +46,7 @@ UWORD WaitForEvents(UWORD screen)
   EvtKey = 0;
   rc = 0;
   win = GetScreenWindow(screen);
-  Wait(1L << win->UserPort->mp_SigBit);
+  /* Wait(1L << win->UserPort->mp_SigBit); */
 
   while (imsg = (struct IntuiMessage*)GetMsg(win->UserPort))
   {
@@ -56,7 +58,17 @@ UWORD WaitForEvents(UWORD screen)
         EvtKey = imsg->Code;
       }
       break;
+      case IDCMP_MOUSEMOVE:
+      {
+        rc |= WE_CURSOR;
+        EvtMouseX = imsg->MouseX;
+        EvtMouseY = imsg->MouseY;
+      }
+      break;
     }
+
+
+    ReplyMsg((struct Message*) imsg);
   }
   
   return rc;
