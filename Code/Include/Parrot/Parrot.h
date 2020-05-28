@@ -38,10 +38,11 @@
 #error "Unsupported Arch"
 #endif
 
-#define MAX_SCREENS 2
-#define MAX_ROOM_BACKDROPS  2
-#define MAX_ROOM_EXITS      10
-#define MAX_ROOM_ENTITIES   20
+#define MAX_SCREENS            2
+#define MAX_ROOM_BACKDROPS     2
+#define MAX_ROOM_EXITS         10
+#define MAX_ROOM_ENTITIES      20
+#define MAX_ENTITY_NAME_LENGTH 29
 
 /**
     Typename consistency
@@ -305,7 +306,7 @@ struct ENTITY
   UWORD                en_Type;
   UWORD                en_Flags;
   struct RECT          en_HitBox;
-  UWORD                en_Name;
+  UBYTE                en_Name[MAX_ENTITY_NAME_LENGTH + 1];
 };
 
 struct EXIT
@@ -313,7 +314,7 @@ struct EXIT
   UWORD                ex_Type;
   UWORD                ex_Flags;
   struct RECT          ex_HitBox;
-  UWORD                ex_Name;
+  UBYTE                ex_Name[MAX_ENTITY_NAME_LENGTH + 1];
   UWORD                ex_Target;
 };
 
