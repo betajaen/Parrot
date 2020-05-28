@@ -29,10 +29,19 @@
 
 UWORD RoomExportOrder[] = {
   44,
-  1
+  1,
+  10
 };
 
 #define ROOM_COUNT (sizeof(RoomExportOrder) / sizeof(UWORD))
+
+struct RM_Table
+{
+  UWORD rt_Mm;
+  UWORD rt_Parrot;
+};
+
+STATIC struct RM_Table MM_RoomId_Table[55] = { 0 };
 
 struct MM_EXIT
 {
@@ -43,10 +52,16 @@ struct MM_EXIT
 };
 
 STATIC struct MM_EXIT Mm_Exit_Table[] = {
-  { 258 /* Room 44 */ , 257 /* 1 */, 0,0 },
+  { 258 /* 44 */ , 257 /* 1 */, 0,0 },
+  { 61 /* 1 */, 67 /* 10 */, 0,0  },
   { 0,0, 0,0}
 };
 
+STATIC VOID AddRoom(UWORD mmId, UWORD parrotId)
+{
+  MM_RoomId_Table[mmId].rt_Mm = mmId;
+  MM_RoomId_Table[mmId].rt_Parrot = parrotId;
+}
 
 STATIC BOOL AddExit(UWORD mmId, UWORD parrotId)
 {
@@ -71,6 +86,18 @@ STATIC BOOL AddExit(UWORD mmId, UWORD parrotId)
     ex++;
   }
   return FALSE;
+}
+
+STATIC BOOL FindRoom(UWORD mmId, UWORD* out_parrotId)
+{
+  if (mmId >= 55)
+  {
+    return FALSE;
+  }
+
+  *out_parrotId = MM_RoomId_Table[mmId].rt_Parrot;
+
+  return TRUE;
 }
 
 STATIC BOOL FindExit(UWORD mmId, UWORD* out_parrotId, UWORD* out_targetId)

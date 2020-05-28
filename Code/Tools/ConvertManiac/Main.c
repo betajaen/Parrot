@@ -86,7 +86,7 @@ STATIC UBYTE ReadUBYTE();
 STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size);
 STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG type);
 STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot);
-STATIC VOID ResolveExitTables();
+STATIC VOID ResolveLookupTables();
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
@@ -159,7 +159,7 @@ INT main()
   InitTable(&PaletteTable, CT_PALETTE);
   InitTable(&EntityTable, CT_ENTITY);
 
-  ResolveExitTables();
+  ResolveLookupTables();
 
   ExportRooms();
 
@@ -584,34 +584,34 @@ STATIC VOID ExportEntity(UWORD id)
 STATIC VOID ExportExit(UWORD id, UWORD target)
 {
   struct CHUNK_HEADER hdr;
-  struct EXIT_ENTITY ent;
+  struct EXIT ent;
 
   MemClear(&ent, sizeof(struct ENTITY));
 
   hdr.ch_Id = id;
   hdr.ch_Flags = CHUNK_FLAG_ARCH_ANY;
 
-  ent.ex_Entity.ne_Type = ET_EXIT;
+  ent.ex_Type = ET_EXIT;
   ent.ex_Target = target;
   
   JumpFile(1);
    
-  ent.ex_Entity.ne_HitBox.rt_Left = ((UWORD)ReadUBYTE()) << 3;
-  ent.ex_Entity.ne_HitBox.rt_Top = ((UWORD)(ReadUBYTE() & 0xF)) << 3;
-  ent.ex_Entity.ne_HitBox.rt_Right = ((UWORD)ReadUBYTE()) << 3;
-  ent.ex_Entity.ne_HitBox.rt_Right += ent.ex_Entity.ne_HitBox.rt_Left;
+  ent.ex_HitBox.rt_Left = ((UWORD)ReadUBYTE()) << 3;
+  ent.ex_HitBox.rt_Top = ((UWORD)(ReadUBYTE() & 0xF)) << 3;
+  ent.ex_HitBox.rt_Right = ((UWORD)ReadUBYTE()) << 3;
+  ent.ex_HitBox.rt_Right += ent.ex_HitBox.rt_Left;
 
   JumpFile(4);
 
-  ent.ex_Entity.ne_HitBox.rt_Bottom = ((UWORD)(ReadUBYTE() & 0xF8));
-  ent.ex_Entity.ne_HitBox.rt_Bottom += ent.ex_Entity.ne_HitBox.rt_Top;
+  ent.ex_HitBox.rt_Bottom = ((UWORD)(ReadUBYTE() & 0xF8));
+  ent.ex_HitBox.rt_Bottom += ent.ex_HitBox.rt_Top;
   
-  PushChunk(DstIff, ID_SQWK, CT_ENTITY, sizeof(struct CHUNK_HEADER) + sizeof(struct EXIT_ENTITY));
+  PushChunk(DstIff, ID_SQWK, CT_ENTITY, sizeof(struct CHUNK_HEADER) + sizeof(struct EXIT));
   WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
-  WriteChunkBytes(DstIff, &ent, sizeof(struct EXIT_ENTITY));
+  WriteChunkBytes(DstIff, &ent, sizeof(struct EXIT));
   PopChunk(DstIff);
 
-  AddToTable(&EntityTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct EXIT_ENTITY));
+  AddToTable(&EntityTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct EXIT));
 }
 
 STATIC VOID ExportExits(UWORD numObjects, UWORD* objDat, UWORD* roomExits)
@@ -694,15 +694,23 @@ STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
 STATIC VOID ExportRooms()
 {
   UWORD ii;
+  UWORD mmId;
   UWORD room;
 
-  for (ii = 0; ii <= ROOM_COUNT; ii++)
+  for (ii = 0; ii < ROOM_COUNT; ii++)
   {
-    room = RoomExportOrder[ii];
+    mmId = RoomExportOrder[ii];
 
-    if (OpenLFL("PROGDIR:", room) > 0)
+    if (OpenLFL("PROGDIR:", mmId) > 0)
     {
       CurrentArchiveId = room;
+
+      if (FindRoom(mmId, &room) == FALSE)
+      {
+        DebugF("Room not found %ld", mmId);
+        return;
+      }
+
       OpenParrotIff(room);
       ExportRoom(room, room);
       ExportBackdrop(room, 1);
@@ -973,27 +981,31 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot
 
 }
 
-STATIC VOID ResolveExitTables()
+STATIC VOID ResolveLookupTables()
 {
   UWORD ii, jj;
   UWORD objDat[256];
   UWORD objCount;
   UWORD exitId;
   UWORD mmId;
-  UWORD room;
+  UWORD mmRoom;
+  UWORD roomId;
 
   exitId = 1;
+  roomId = 1;
 
-  for (ii = 0; ii <= ROOM_COUNT; ii++)
+  for (ii = 0; ii < ROOM_COUNT; ii++)
   {
-    room = RoomExportOrder[ii];
+    mmRoom = RoomExportOrder[ii];
 
-    if (OpenLFL("PROGDIR:", room) > 0)
+    if (OpenLFL("PROGDIR:", mmRoom) > 0)
     {
 
       SeekFile(20);
       objCount = ReadUBYTE();
 
+      AddRoom(mmRoom, roomId);
+      roomId++;
 
       SeekFile(28 + objCount * sizeof(UWORD));
 
