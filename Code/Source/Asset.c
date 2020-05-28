@@ -1,5 +1,5 @@
 /**
-    $Id: Arena.c, 1.1 2020/05/11 10:48:00, betajaen Exp $
+    $Id: Arena.c, 1.2 2020/05/11 10:48:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================

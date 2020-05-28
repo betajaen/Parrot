@@ -1,5 +1,5 @@
 /**
-    $Id: Main.c, 1.1 2020/05/06 20:56:00, betajaen Exp $
+    $Id: Main.c, 1.2 2020/05/06 20:56:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================

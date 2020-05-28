@@ -1,5 +1,5 @@
 /**
-    $Id: Events.h 1.1 2020/05/24 12:51:00, betajaen Exp $
+    $Id: Events.h 1.2 2020/05/24 12:51:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================

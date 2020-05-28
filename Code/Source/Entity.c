@@ -1,5 +1,5 @@
 /**
-    $Id: Entity.c, 1.1 2020/05/27 20:36:00, betajaen Exp $
+    $Id: Entity.c, 1.2 2020/05/27 20:36:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
