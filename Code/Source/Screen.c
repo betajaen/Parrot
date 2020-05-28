@@ -128,16 +128,11 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
 
   newScreen.Type = CUSTOMSCREEN | SCREENQUIET;
 
-  // if ((info->si_Flags & SIF_IS_PUBLIC) != 0)
-  // {
-  //   newScreen.Type |= PUBLICSCREEN;
-  // }
-
   newScreen.BlockPen = BLOCKPEN;
   newScreen.DetailPen = DETAILPEN;
 
   newScreen.Font = NULL;
-  newScreen.DefaultTitle = (UBYTE*)info->si_Title;
+  newScreen.DefaultTitle = NULL;
   newScreen.Gadgets = NULL;
   newScreen.CustomBitMap = NULL;
  
@@ -148,6 +143,8 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
   {
     ErrorF("Could not open screen %ldx%ldx%ld for Parrot", info->si_Width, info->si_Height, info->si_Depth);
   }
+
+  ShowTitle(screen->st_Screen, FALSE);
 
   screen->st_ReadBuffer = 0;
   screen->st_WriteBuffer = 1;
@@ -166,7 +163,7 @@ EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
   newWindow.Screen = screen->st_Screen;
   newWindow.Type = CUSTOMSCREEN;
   newWindow.Flags = WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_ACTIVATE | WFLG_REPORTMOUSE | WFLG_RMBTRAP;
-  newWindow.IDCMPFlags = IDCMP_RAWKEY | IDCMP_MOUSEMOVE;
+  newWindow.IDCMPFlags = IDCMP_RAWKEY | IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS;
 
   screen->st_Window = OpenWindow(&newWindow);
   

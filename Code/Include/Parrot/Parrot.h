@@ -147,10 +147,12 @@ struct SCREEN_INFO
 
 struct ASSET
 {
-  UWORD             as_Id;
   ULONG             as_ClassType;
   UWORD             as_Arch;
+  UWORD             as_Id;
 };
+
+#define GET_ASSET_ID(X) (((UWORD*)X)[-1])
 
 struct ASSET_REF
 {
@@ -300,22 +302,18 @@ struct POINT
 
 struct ENTITY
 {
-  UWORD               en_Type;
-  UWORD               en_Flags;
-  struct RECT         en_HitBox;
+  UWORD                en_Type;
+  UWORD                en_Flags;
+  struct RECT          en_HitBox;
+  UWORD                en_Name;
 };
 
-struct NAMED_ENTITY
+struct EXIT
 {
-  UWORD               ne_Type;
-  UWORD               ne_Flags;
-  struct RECT         ne_HitBox;
-  UWORD               ne_Name;
-};
-
-struct EXIT_ENTITY
-{
-  struct NAMED_ENTITY  ex_Entity;
+  UWORD                ex_Type;
+  UWORD                ex_Flags;
+  struct RECT          ex_HitBox;
+  UWORD                ex_Name;
   UWORD                ex_Target;
 };
 
@@ -332,11 +330,17 @@ struct UNPACKED_ROOM
 {
   struct ROOM*        ur_Room;
   struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
-  struct EXIT_ENTITY* ur_Exits[MAX_ROOM_EXITS];
+  struct EXIT* ur_Exits[MAX_ROOM_EXITS];
   UWORD               ur_Id;
   ULONG               ur_Unpacked;
   WORD                ur_CamX;
   WORD                ur_CamY;
+};
+
+struct ENTRANCE
+{
+  UWORD   en_Room;
+  UWORD   en_Exit;
 };
 
 #define UNPACK_ROOM_ASSET      1

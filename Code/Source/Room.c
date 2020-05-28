@@ -131,7 +131,7 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
   }
 }
 
-STATIC UWORD GetRoomFromExit(struct EXIT_ENTITY* exit)
+STATIC UWORD GetRoomFromExit(struct EXIT* exit)
 {
   UWORD archive;
   archive = FindAssetArchive(exit->ex_Target, CT_ENTITY, CHUNK_FLAG_ARCH_ANY);
@@ -139,10 +139,34 @@ STATIC UWORD GetRoomFromExit(struct EXIT_ENTITY* exit)
   return archive;
 }
 
-UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
+STATIC struct EXIT* FindExit(struct UNPACKED_ROOM* room, UWORD id)
+{
+  UWORD ii;
+  struct EXIT* exit;
+
+  for (ii = 0; ii < MAX_ROOM_EXITS; ii++)
+  {
+    exit = room->ur_Exits[ii];
+
+    if (NULL == exit)
+      break;
+    
+    if (GET_ASSET_ID(exit) == id)
+      break;
+  }
+
+  return exit;
+}
+
+STATIC BOOL PointInside(struct RECT* rect, WORD x, WORD y)
+{
+  return x >= rect->rt_Left && x <= rect->rt_Right && y >= rect->rt_Top && y <= rect->rt_Bottom;
+}
+
+VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInfo)
 {
   UWORD screenW, screenH;
-  UWORD exitRoom, nextRoom;
+  BOOL exitRoom;
   WORD scrollDir;
   struct UNPACKED_ROOM room;
   UWORD evt;
@@ -151,10 +175,11 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
   UWORD cursor;
   UWORD ii;
   struct ENTITY* ent;
+  struct EXIT* exit;
+  WORD rmMouseX, rmMouseY;
   WORD camRight;
 
   exitRoom = FALSE;
-  nextRoom = 0;
   scrollDir = 0;
   cursor = CURSOR_BUSY;
   screenUpdate = TRUE;
@@ -167,7 +192,7 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
   /* Load Room Asset and Backdrops */
   InitStackVar(struct UNPACKED_ROOM, room);
 
-  room.ur_Id = roomId;
+  room.ur_Id = entrance->en_Room;
 
   UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
 
@@ -176,6 +201,18 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
   if (mostLeftEdge > 1)
   {
     mostLeftEdge -= 1;
+  }
+
+  if (entrance->en_Exit != 0)
+  {
+    exit = FindExit(&room, entrance->en_Exit);
+    room.ur_CamX = exit->ex_HitBox.rt_Left;
+    room.ur_CamY = 0;
+
+    if (room.ur_CamX >= mostLeftEdge)
+      room.ur_CamX = mostLeftEdge;
+    else if (room.ur_CamX < 0)
+      room.ur_CamX = 0;
   }
 
   NotBusy();
@@ -192,7 +229,7 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
         case KC_ESC:
         {
           exitRoom = TRUE;
-          nextRoom = 0;
+          entrance->en_Room = 0;
         }
         break;
         case KC_F1:
@@ -200,7 +237,8 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
           if (room.ur_Exits[0] != NULL)
           {
             exitRoom = TRUE;
-            nextRoom = GetRoomFromExit(room.ur_Exits[0]);
+            entrance->en_Room = GetRoomFromExit(room.ur_Exits[0]);
+            entrance->en_Exit = room.ur_Exits[0]->ex_Target;
           }
           else
           {
@@ -210,12 +248,12 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
         break;
         case KC_LEFT:
         {
-          scrollDir = -1;
+          scrollDir = -10;
         }
         break;
         case KC_RIGHT:
         {
-          scrollDir = +1;
+          scrollDir = +10;
         }
         break;
       }
@@ -223,8 +261,29 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
     
     if ((evt & WE_CURSOR) != 0)
     {
+      rmMouseX = EvtMouseX + room.ur_CamX;
+      rmMouseY = EvtMouseY + room.ur_CamY;
     }
 
+    if ((evt & WE_SELECT) != 0)
+    {
+      for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+      {
+
+        exit = room.ur_Exits[ii];
+
+        if (NULL == exit)
+          break;
+
+        if (PointInside(&exit->ex_HitBox, rmMouseX, rmMouseY))
+        {
+          exitRoom = TRUE;
+          entrance->en_Room = GetRoomFromExit(exit);
+          entrance->en_Exit = exit->ex_Target;
+          break;
+        }
+      }
+    }
 
     if (EvtMouseX < 10)
     {
@@ -280,23 +339,23 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
       ScreenRpSetAPen(screen, 15);
       for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
       {
-#if 0
-        ent = room.ur_Entities[ii];
 
-        if (0 == ent->ob_Type)
+        exit = room.ur_Exits[ii];
+
+        if (NULL == exit)
           break;
 
         struct RECT localRect;
-        localRect.rt_Left = ent->ob_HitBox.rt_Left - room.ur_CamX;
-        localRect.rt_Top = ent->ob_HitBox.rt_Top - room.ur_CamY;
-        localRect.rt_Right = ent->ob_HitBox.rt_Right - room.ur_CamX;
-        localRect.rt_Bottom = ent->ob_HitBox.rt_Bottom - room.ur_CamY;
+        localRect.rt_Left = exit->ex_HitBox.rt_Left - room.ur_CamX;
+        localRect.rt_Top = exit->ex_HitBox.rt_Top - room.ur_CamY;
+        localRect.rt_Right = exit->ex_HitBox.rt_Right - room.ur_CamX;
+        localRect.rt_Bottom = exit->ex_HitBox.rt_Bottom - room.ur_CamY;
 
         if (localRect.rt_Left >= 0 && localRect.rt_Right < gameInfo->gi_Width)
         {
           ScreenRpDrawBox(screen, &localRect);
         }
-#endif
+
 
       }
 
@@ -312,7 +371,5 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
 
   /* Unload */
   PackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
-
-  return nextRoom;
 }
 

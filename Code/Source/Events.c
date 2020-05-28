@@ -65,6 +65,18 @@ UWORD WaitForEvents(UWORD screen)
         EvtMouseY = imsg->MouseY;
       }
       break;
+      case IDCMP_MOUSEBUTTONS:
+      {
+        if (imsg->Code == SELECTUP)
+        {
+          rc |= WE_SELECT;
+        }
+        else if (imsg->Code == MENUUP)
+        {
+          rc |= WE_MENU;
+        }
+      }
+      break;
     }
 
 

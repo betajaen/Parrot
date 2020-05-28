@@ -27,9 +27,11 @@
 
 UWORD WaitForEvents(UWORD screen);
 
-#define WE_NONE   0
-#define WE_KEY    1
-#define WE_CURSOR 2
+#define WE_NONE    (1 << 0)
+#define WE_KEY     (1 << 1)
+#define WE_CURSOR  (1 << 2)
+#define WE_SELECT  (1 << 3)
+#define WE_MENU    (1 << 4)
 
 extern UWORD EvtKey;
 extern WORD  EvtMouseX;

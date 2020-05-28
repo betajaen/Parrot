@@ -144,8 +144,9 @@ EXPORT VOID GameStart(STRPTR path)
   struct SCREEN_INFO screenInfo;
   struct ROOM* room;
   struct UNPACKED_ROOM uroom;
+  struct ENTRANCE entrance;
+
   UBYTE ii;
-  UWORD nextRoom;
 
   GameArchive = NULL;
   GameInfo = NULL;
@@ -194,13 +195,15 @@ EXPORT VOID GameStart(STRPTR path)
 
   ArenaRollback(ArenaChapter);
 
-  nextRoom = GameInfo->gi_StartRoom;
-  while (nextRoom != 0)
+  entrance.en_Room = GameInfo->gi_StartRoom;
+  entrance.en_Exit = 0;
+
+  while (entrance.en_Room != 0)
   {
     ArenaRollback(ArenaRoom);
 
     /* Start First Room */
-    nextRoom = PlayRoom(0, nextRoom, GameInfo);
+    PlayRoom(0,&entrance, GameInfo);
   }
 
   ScreenClose(0);
