@@ -73,6 +73,7 @@ STATIC VOID MemClear(APTR pMem, ULONG size);
 STATIC VOID OpenParrotIff(UWORD id);
 STATIC VOID CloseParrotIff();
 STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD mainPalette, UWORD cursorPalette, UWORD startRoom);
+STATIC VOID ExportRooms();
 STATIC VOID ExportPalette(UWORD id);
 STATIC VOID ExportCursorPalette(UWORD id);
 STATIC VOID ExportRoom(UWORD id, UWORD backdrop);
@@ -85,6 +86,7 @@ STATIC UBYTE ReadUBYTE();
 STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size);
 STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG type);
 STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot);
+STATIC VOID ResolveExitTables();
 
 STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
 
@@ -157,19 +159,9 @@ INT main()
   InitTable(&PaletteTable, CT_PALETTE);
   InitTable(&EntityTable, CT_ENTITY);
 
+  ResolveExitTables();
 
-  for (ii = 1; ii <= 2;ii++) // NO_ROOMS; ii++)
-  {
-    if (OpenLFL("PROGDIR:", ii) > 0)
-    {
-      CurrentArchiveId = ii;
-      OpenParrotIff(ii);
-      ExportRoom(ii, ii);
-      ExportBackdrop(ii, 1);
-      CloseParrotIff();
-      CloseLFL();
-    }
-  }
+  ExportRooms();
 
   CurrentArchiveId = 0;
   OpenParrotIff(0);
@@ -215,7 +207,6 @@ CLEAN_EXIT:
 
   return RETURN_OK;
 }
-
 
 STATIC CONST ULONG PutChar = 0x16c04e75;
 STATIC CONST ULONG CountChar = 0x52934E75;
@@ -317,6 +308,8 @@ STATIC VOID CloseParrotIff()
     DstIff = NULL;
   }
 }
+
+#include "Tables.h"
 
 STATIC VOID ExportPalette(UWORD id)
 {
@@ -555,6 +548,8 @@ STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
   AddToTable(&ImageTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct IMAGE) + planarSize);
 }
 
+#if 0
+
 STATIC VOID ExportEntity(UWORD id)
 {
   struct CHUNK_HEADER hdr;
@@ -582,6 +577,67 @@ STATIC VOID ExportEntity(UWORD id)
   PopChunk(DstIff);
 
   AddToTable(&EntityTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct ENTITY));
+}
+
+#endif
+
+STATIC VOID ExportExit(UWORD id, UWORD target)
+{
+  struct CHUNK_HEADER hdr;
+  struct EXIT_ENTITY ent;
+
+  MemClear(&ent, sizeof(struct ENTITY));
+
+  hdr.ch_Id = id;
+  hdr.ch_Flags = CHUNK_FLAG_ARCH_ANY;
+
+  ent.ex_Entity.ne_Type = ET_EXIT;
+  ent.ex_Target = target;
+  
+  JumpFile(1);
+   
+  ent.ex_Entity.ne_HitBox.rt_Left = ((UWORD)ReadUBYTE()) << 3;
+  ent.ex_Entity.ne_HitBox.rt_Top = ((UWORD)(ReadUBYTE() & 0xF)) << 3;
+  ent.ex_Entity.ne_HitBox.rt_Right = ((UWORD)ReadUBYTE()) << 3;
+  ent.ex_Entity.ne_HitBox.rt_Right += ent.ex_Entity.ne_HitBox.rt_Left;
+
+  JumpFile(4);
+
+  ent.ex_Entity.ne_HitBox.rt_Bottom = ((UWORD)(ReadUBYTE() & 0xF8));
+  ent.ex_Entity.ne_HitBox.rt_Bottom += ent.ex_Entity.ne_HitBox.rt_Top;
+  
+  PushChunk(DstIff, ID_SQWK, CT_ENTITY, sizeof(struct CHUNK_HEADER) + sizeof(struct EXIT_ENTITY));
+  WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
+  WriteChunkBytes(DstIff, &ent, sizeof(struct EXIT_ENTITY));
+  PopChunk(DstIff);
+
+  AddToTable(&EntityTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct EXIT_ENTITY));
+}
+
+STATIC VOID ExportExits(UWORD numObjects, UWORD* objDat, UWORD* roomExits)
+{
+  UWORD  ii, exitCount;
+  UWORD  mmId, id, target;
+
+  exitCount = 0;
+
+  for (ii = 0; ii < numObjects; ii++)
+  {
+    SeekFile(objDat[ii] + 4);
+
+    mmId = ReadUWORDLE();
+
+    if (FindExit(mmId, &id, &target))
+    {
+      if (exitCount >= MAX_ROOM_EXITS)
+      {
+        DebugF("Maximum exits reached for room!");
+        return;
+      }
+      ExportExit(id, target);
+      roomExits[exitCount++] = id;
+    }
+  }
 }
 
 STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
@@ -624,13 +680,7 @@ STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
     objDat[ii] = ReadUWORDLE();
   }
 
-  for (ii = 0; ii < numObjects; ii++)
-  {
-    SeekFile(objDat[ii]);
-    room.rm_Entities[ii] = NextEntityId;
-    ExportEntity(NextEntityId);
-    NextEntityId++;
-  }
+  ExportExits(numObjects, &objDat[0], &room.rm_Exits[0]);
 
   PushChunk(DstIff, ID_SQWK, CT_ROOM, sizeof(struct CHUNK_HEADER) + sizeof(struct ROOM));
   WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
@@ -641,6 +691,27 @@ STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
 
 }
 
+STATIC VOID ExportRooms()
+{
+  UWORD ii;
+  UWORD room;
+
+  for (ii = 0; ii <= ROOM_COUNT; ii++)
+  {
+    room = RoomExportOrder[ii];
+
+    if (OpenLFL("PROGDIR:", room) > 0)
+    {
+      CurrentArchiveId = room;
+      OpenParrotIff(room);
+      ExportRoom(room, room);
+      ExportBackdrop(room, 1);
+      CloseParrotIff();
+      CloseLFL();
+    }
+  }
+
+}
 
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
 {
@@ -900,4 +971,51 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot
     ref->tr_ClassType = table->ot_ClassType;
   }
 
+}
+
+STATIC VOID ResolveExitTables()
+{
+  UWORD ii, jj;
+  UWORD objDat[256];
+  UWORD objCount;
+  UWORD exitId;
+  UWORD mmId;
+  UWORD room;
+
+  exitId = 1;
+
+  for (ii = 0; ii <= ROOM_COUNT; ii++)
+  {
+    room = RoomExportOrder[ii];
+
+    if (OpenLFL("PROGDIR:", room) > 0)
+    {
+
+      SeekFile(20);
+      objCount = ReadUBYTE();
+
+
+      SeekFile(28 + objCount * sizeof(UWORD));
+
+      for (jj = 0; jj < objCount; jj++)
+      {
+        objDat[jj] = ReadUWORDLE();
+      }
+
+      for (jj = 0; jj < objCount; jj++)
+      {
+        SeekFile(objDat[jj] + 4);
+
+        mmId = ReadUWORDLE();
+
+        if (AddExit(mmId, exitId))
+        {
+          exitId++;
+        }
+
+      }
+
+      CloseLFL();
+    }
+  }
 }
