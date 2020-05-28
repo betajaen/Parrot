@@ -86,11 +86,17 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 {
   UBYTE ii;
   UWORD backdrop;
+  UWORD id;
 
   if ((pack & UNPACK_ROOM_ENTITIES) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ENTITIES) != 0)
   {
-    for (ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+    for (ii = 0; ii < MAX_ROOM_EXITS; ii++)
     {
+      id = room->ur_Room->rm_Exits[ii];
+
+      if (0 == id)
+        break;
+
       if (NULL != room->ur_Exits[ii])
       {
         UnloadAsset(ArenaRoom, room->ur_Exits[ii]);
@@ -129,7 +135,7 @@ STATIC UWORD GetRoomFromExit(struct EXIT_ENTITY* exit)
 {
   UWORD archive;
   archive = FindAssetArchive(exit->ex_Target, CT_ENTITY, CHUNK_FLAG_ARCH_ANY);
-  TraceF("Target %ld, Archive = %ld", exit->ex_Target);
+
   return archive;
 }
 

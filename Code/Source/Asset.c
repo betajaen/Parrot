@@ -494,7 +494,10 @@ EXPORT VOID UnloadAsset(struct ARENA* arena, APTR obj)
 
   if (obj == NULL)
   {
-    ErrorF("Could not unload an empty asset.");
+    ErrorF(
+      "Unable to unload asset.\n"
+      "Reason: Asset is null"
+    );
     goto CLEAN_EXIT;
   }
 
@@ -504,7 +507,17 @@ EXPORT VOID UnloadAsset(struct ARENA* arena, APTR obj)
 
   if (factory == NULL)
   {
-    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(asset->as_ClassType, strtype));
+    PARROT_ERR(
+      "Unable to unload asset.\n"
+      "Reason: Factory could not be found for asset"
+      PARROT_ERR_STR("Class Type")
+      PARROT_ERR_PTR("Id"),
+      PARROT_ERR_PTR("Asset"),
+      IDtoStr(asset->as_ClassType, strtype),
+      (ULONG) asset->as_Id,
+      obj
+    );
+
     goto CLEAN_EXIT;
   }
   
