@@ -39,6 +39,7 @@ extern WORD  EvtMouseY;
 #define KC_ESC 0x45
 #define KC_F1  0x50
 #define KC_F2  0x51
+#define KC_F3  0x52
 #define KC_LEFT 0x4F
 #define KC_RIGHT 0x4E
 #define KC_DOWN 0x4D

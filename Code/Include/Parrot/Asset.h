@@ -31,3 +31,5 @@ void UnloadAsset(struct ARENA* arena, APTR asset);
 
 #define LoadAssetT(T, ARENA, ARCHIVE, TYPE, ID, ARCH) \
   ( (T*) LoadAsset(ARENA, ARCHIVE, TYPE, ID, ARCH) )
+
+UWORD FindAssetArchive(UWORD assetId, ULONG classType, ULONG arch);

@@ -80,7 +80,7 @@ struct ASSET_FACTORY AssetFactories[] = {
   { CT_PALETTE, sizeof(struct PALETTE_TABLE), &PaletteTable, NULL, NULL },
   { CT_ROOM, sizeof(struct ROOM), &RoomTable, NULL, NULL },
   { CT_IMAGE, sizeof(struct IMAGE), &ImageTable, UnpackBitmap, PackBitmap },
-  { CT_ENTITY, sizeof(struct ENTITY), &EntityTable, NULL, NULL },
+  { CT_ENTITY, 0,  &EntityTable, NULL, NULL },
   { 0, 0 }
 };
 
@@ -291,7 +291,7 @@ EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeTyp
     if (node->cn_ID == nodeType)
     {
 
-      if (Ctor != NULL || (node->cn_Size - sizeof(struct CHUNK_HEADER)) == expectedSize)
+      if (Ctor != NULL || expectedSize == 0 || (node->cn_Size - sizeof(struct CHUNK_HEADER)) == expectedSize)
       {
         ReadChunkBytes(archive->pa_Iff, &chunkHeader, sizeof(struct CHUNK_HEADER));
 
@@ -303,6 +303,14 @@ EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeTyp
         if ((chunkHeader.ch_Flags & chunkArch) == 0)
         {
           continue;
+        }
+
+        /*
+          Entites may vary on size based on their sub-type.
+        */
+        if (nodeType == CT_ENTITY)
+        {
+          expectedSize = node->cn_Size;
         }
 
         asset = (struct ASSET*) NewObject(arena, node->cn_Size + sizeof(struct ASSET), FALSE);
@@ -381,7 +389,7 @@ STATIC struct OBJECT_TABLE_ITEM* FindInTable(struct OBJECT_TABLE* table, UWORD i
 }
 
 
-EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWORD assetId, UWORD arch)
+EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG classType, UWORD assetId, UWORD arch)
 {
   struct ASSET* asset;
   struct ARCHIVE* archive;
@@ -396,11 +404,11 @@ EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWOR
   tableItem = NULL;
   obj = NULL;
 
-  factory = FindFactory(nodeType);
+  factory = FindFactory(classType);
 
   if (factory == NULL)
   {
-    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(nodeType, strtype));
+    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(classType, strtype));
     return NULL;
   }
 
@@ -414,7 +422,7 @@ EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWOR
         PARROT_ERR_STR("Class Type")
         PARROT_ERR_INT("Asset Id")
         PARROT_ERR_INT("Arch"),
-        IDtoStr(nodeType, strtype),
+        IDtoStr(classType, strtype),
         (ULONG)assetId,
         (ULONG)arch
       );
@@ -448,11 +456,11 @@ EXPORT APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWOR
     }
   }
 
-  asset = ReadAssetFromArchive(archive, nodeType, assetId, arch, factory->af_Size, factory->af_Ctor, arena);
+  asset = ReadAssetFromArchive(archive, classType, assetId, arch, factory->af_Size, factory->af_Ctor, arena);
 
   if (asset == NULL)
   {
-    ErrorF("Could not load asset %s:%ld from archive %ld", IDtoStr(nodeType, strtype), (ULONG) assetId, (ULONG) archiveId);
+    ErrorF("Could not load asset %s:%ld from archive %ld", IDtoStr(classType, strtype), (ULONG) assetId, (ULONG) archiveId);
     return NULL;
   }
 
@@ -689,4 +697,38 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
 CLEAN_EXIT:
 
   CloseIFF(archive->pa_Iff);
+}
+
+UWORD FindAssetArchive(UWORD assetId, ULONG classType, ULONG arch)
+{
+  struct ASSET_FACTORY* factory;
+  struct OBJECT_TABLE_ITEM* tableItem;
+  UWORD archiveId;
+  char strtype[5];
+
+
+  archiveId = 0;
+
+  factory = FindFactory(classType);
+
+  if (factory == NULL)
+  {
+    ErrorF("Could not find registered factory for \"%s\"", IDtoStr(classType, strtype));
+    goto CLEAN_EXIT;
+  }
+
+  if (factory->af_Table != NULL)
+  {
+    tableItem = FindInTable(factory->af_Table, assetId, arch);
+
+    if (tableItem != NULL)
+    {
+      archiveId = tableItem->ot_Archive;
+    }
+  }
+
+
+CLEAN_EXIT:
+
+  return archiveId;
 }

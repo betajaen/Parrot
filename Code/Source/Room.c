@@ -64,14 +64,18 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 
   if ((unpack & UNPACK_ROOM_ENTITIES) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ENTITIES) == 0)
   {
-    for (ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+    for (ii = 0; ii < MAX_ROOM_EXITS; ii++)
     {
-      id = room->ur_Room->rm_Entities[ii];
+      id = room->ur_Room->rm_Exits[ii];
 
-      if (0 != id && NULL == room->ur_Entities[ii])
+      if (0 == id)
+        break;
+
+      if (NULL == room->ur_Exits[ii])
       {
-        room->ur_Entities[ii] = LoadAsset(ArenaRoom, ARCHIVE_UNKNOWN, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
+        room->ur_Exits[ii] = LoadAsset(ArenaRoom, ARCHIVE_UNKNOWN, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
       }
+
     }
 
     room->ur_Unpacked |= UNPACK_ROOM_ENTITIES;
@@ -87,10 +91,10 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
   {
     for (ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
     {
-      if (NULL != room->ur_Entities[ii])
+      if (NULL != room->ur_Exits[ii])
       {
-        UnloadAsset(ArenaRoom, room->ur_Entities[ii]);
-        room->ur_Entities[ii] = NULL;
+        UnloadAsset(ArenaRoom, room->ur_Exits[ii]);
+        room->ur_Exits[ii] = NULL;
       }
     }
 
@@ -119,6 +123,14 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
     room->ur_Room = NULL;
     room->ur_Unpacked &= ~UNPACK_ROOM_ASSET;
   }
+}
+
+STATIC UWORD GetRoomFromExit(struct EXIT_ENTITY* exit)
+{
+  UWORD archive;
+  archive = FindAssetArchive(exit->ex_Target, CT_ENTITY, CHUNK_FLAG_ARCH_ANY);
+  TraceF("Target %ld, Archive = %ld", exit->ex_Target);
+  return archive;
 }
 
 UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
@@ -179,19 +191,14 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
         break;
         case KC_F1:
         {
-          if (roomId > 1)
+          if (room.ur_Exits[0] != NULL)
           {
             exitRoom = TRUE;
-            nextRoom = roomId - 1;
+            nextRoom = GetRoomFromExit(room.ur_Exits[0]);
           }
-        }
-        break;
-        case KC_F2:
-        {
-          if (roomId < gameInfo->gi_RoomCount)
+          else
           {
-            exitRoom = TRUE;
-            nextRoom = roomId + 1;
+            TraceF("There are no exits in this room to go through!");
           }
         }
         break;
@@ -267,6 +274,7 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
       ScreenRpSetAPen(screen, 15);
       for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
       {
+#if 0
         ent = room.ur_Entities[ii];
 
         if (0 == ent->ob_Type)
@@ -282,6 +290,8 @@ UWORD PlayRoom(UWORD screen, UWORD roomId, struct GAME_INFO* gameInfo)
         {
           ScreenRpDrawBox(screen, &localRect);
         }
+#endif
+
       }
 
       ScreenSwapBuffers(screen);

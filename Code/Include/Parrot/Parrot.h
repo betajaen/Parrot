@@ -40,7 +40,8 @@
 
 #define MAX_SCREENS 2
 #define MAX_ROOM_BACKDROPS  2
-#define MAX_ROOM_ENTITIES 20
+#define MAX_ROOM_EXITS      10
+#define MAX_ROOM_ENTITIES   20
 
 /**
     Typename consistency
@@ -77,6 +78,9 @@
 
 #define MAKE_NODE_ID(a,b,c,d)	\
 	((ULONG) (a)<<24 | (ULONG) (b)<<16 | (ULONG) (c)<<8 | (ULONG) (d))
+
+#define MAKE_ENTITY_ID(a,b)	\
+	((USHORT) (a)<<8 | (USHORT) (b))
 
 /**
     SDL Banned Functions
@@ -288,15 +292,31 @@ struct POINT
   WORD pt_Top;
 };
 
-#define ET_INFO 1
+#define ET_EXIT MAKE_ENTITY_ID('E','X')
+
+#define ETF_IS_NAMED  (1 << 0)
+#define ETF_IS_LOCKED (1 << 14)
+#define ETF_IS_OPEN   (1 << 15)
 
 struct ENTITY
 {
-  struct RECT         ob_HitBox;
-  UBYTE               ob_Type;
-  UBYTE               ob_State;
-  UWORD               ob_Name;
-  UWORD               ob_Friend;
+  UWORD               en_Type;
+  UWORD               en_Flags;
+  struct RECT         en_HitBox;
+};
+
+struct NAMED_ENTITY
+{
+  UWORD               ne_Type;
+  UWORD               ne_Flags;
+  struct RECT         ne_HitBox;
+  UWORD               ne_Name;
+};
+
+struct EXIT_ENTITY
+{
+  struct NAMED_ENTITY  ex_Entity;
+  UWORD                ex_Target;
 };
 
 struct ROOM
@@ -304,6 +324,7 @@ struct ROOM
   UWORD               rm_Width;
   UWORD               rm_Height;
   UWORD               rm_Backdrops[MAX_ROOM_BACKDROPS];
+  UWORD               rm_Exits[MAX_ROOM_EXITS];
   UWORD               rm_Entities[MAX_ROOM_ENTITIES];
 };
 
@@ -311,13 +332,12 @@ struct UNPACKED_ROOM
 {
   struct ROOM*        ur_Room;
   struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
-  struct ENTITY*      ur_Entities[MAX_ROOM_ENTITIES];
+  struct EXIT_ENTITY* ur_Exits[MAX_ROOM_EXITS];
   UWORD               ur_Id;
   ULONG               ur_Unpacked;
   WORD                ur_CamX;
   WORD                ur_CamY;
 };
-
 
 #define UNPACK_ROOM_ASSET      1
 #define UNPACK_ROOM_BACKDROPS  2
