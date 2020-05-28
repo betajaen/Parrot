@@ -601,7 +601,7 @@ STATIC VOID ExportExit(UWORD id, UWORD target)
   ent.ex_HitBox.rt_Right = ((UWORD)ReadUBYTE()) << 3;
   ent.ex_HitBox.rt_Right += ent.ex_HitBox.rt_Left;
 
-  JumpFile(4);
+  JumpFile(3);
 
   ent.ex_HitBox.rt_Bottom = ((UWORD)(ReadUBYTE() & 0xF8));
   ent.ex_HitBox.rt_Bottom += ent.ex_HitBox.rt_Top;
