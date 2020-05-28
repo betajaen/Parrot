@@ -37,30 +37,27 @@
 BYTE VersionString[]   = "$VER: Parrot 1.1 (6.5.2020)\r\n";
 BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
 
-struct ExecBase*      SysBase;
+//struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
 struct IntuitionBase* IntuitionBase;
 struct GfxBase*       GfxBase;
 struct Library*       IFFParseBase;
+struct Message*       wbMsg;
 
 EXPORT VOID GameStart(STRPTR name);
 
 INT main()
 {
   struct Process* process;
-  struct Message* wbMsg;
   INT             rc;
   struct SCREEN_INFO screenInfo;
   ULONG  screen;
 
   rc = RETURN_OK;
-  SysBase = NULL;
   DOSBase = NULL;
   IntuitionBase = NULL;
   GfxBase = NULL;
   IFFParseBase = NULL;
-
-  SysBase = *(struct ExecBase**) 4L;
 
   process = (struct Process*) FindTask(NULL);
 
@@ -145,4 +142,47 @@ INT main()
 
 
   return rc;
+}
+
+VOID ExitArenaNow();
+VOID ExitScreenNow();
+extern VOID exit();
+
+VOID ExitNow()
+{
+
+  ExitArenaNow();
+  ExitScreenNow();
+
+  if (NULL != wbMsg)
+  {
+    Forbid();
+    ReplyMsg(wbMsg);
+  }
+
+  if (NULL != IFFParseBase)
+  {
+    CloseLibrary((struct Library*) IFFParseBase);
+    IFFParseBase = NULL;
+  }
+
+  if (NULL != GfxBase)
+  {
+    CloseLibrary((struct Library*) GfxBase);
+    GfxBase = NULL;
+  }
+
+  if (NULL != IntuitionBase)
+  {
+    CloseLibrary((struct Library*) IntuitionBase);
+    IntuitionBase = NULL;
+  }
+
+  if (NULL != DOSBase)
+  {
+    CloseLibrary((struct Library*) DOSBase);
+    DOSBase = NULL;
+  }
+
+  exit();
 }

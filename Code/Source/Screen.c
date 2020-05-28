@@ -28,6 +28,7 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
+#include <Parrot/Screen.h>
 
 #include <proto/exec.h>
 #include <proto/intuition.h>
@@ -47,7 +48,7 @@ struct SCREEN
   UWORD                st_IsDirty;
 };
 
-struct SCREEN Screens[MAX_SCREENS];
+struct SCREEN Screens[MAX_SCREENS] = { 0 };
 
 STATIC struct TextAttr myta = {
     "topaz.font",
@@ -55,6 +56,22 @@ STATIC struct TextAttr myta = {
     0,
     NULL
 };
+
+VOID ExitScreenNow()
+{
+  UWORD ii;
+  struct SCREEN* screen;
+
+  for (ii = 0; ii < MAX_SCREENS; ii++)
+  {
+    screen = &Screens[ii];
+
+    if (screen->st_Window != NULL && screen->st_Screen != NULL)
+    {
+      ScreenClose(ii);
+    }
+  }
+}
 
 EXPORT VOID ScreenOpen(UWORD id, struct SCREEN_INFO* info)
 {

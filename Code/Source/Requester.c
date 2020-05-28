@@ -124,6 +124,8 @@ VOID TraceF(CONST_STRPTR pFmt, ...)
 #endif
 }
 
+VOID ExitNow();
+
 VOID ErrorF(CONST_STRPTR pFmt, ...)
 {
 #if defined(IS_M68K)
@@ -141,7 +143,7 @@ VOID ErrorF(CONST_STRPTR pFmt, ...)
 
     EasyRequest(NULL, &EasyRequesterStruct, NULL);
 
-    Exit(RETURN_FAIL);
+    ExitNow();
   }
 
   RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & PutChar, (STRPTR)&RequesterText[0]);
@@ -152,7 +154,7 @@ VOID ErrorF(CONST_STRPTR pFmt, ...)
 
   EasyRequest(NULL, &EasyRequesterStruct, NULL);
 
-  Exit(RETURN_FAIL);
+  ExitNow();
 #else
   return; /* Unimplemented */
 #endif

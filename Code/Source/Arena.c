@@ -38,7 +38,9 @@ struct ARENA
   ULONG   ah_Used;
 };
 
-struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom;
+struct ARENA* ArenaGame = NULL;
+struct ARENA* ArenaChapter = NULL;
+struct ARENA* ArenaRoom = NULL;
 
 EXPORT struct ARENA* ArenaOpen(ULONG size, ULONG requirements)
 {
@@ -89,6 +91,25 @@ EXPORT VOID ArenaClose(struct ARENA* arena)
 
 CLEAN_EXIT:
 
+}
+
+
+VOID ExitArenaNow()
+{
+  if (ArenaRoom != NULL)
+  {
+    FreeVec(ArenaRoom);
+  }
+
+  if (ArenaChapter != NULL)
+  {
+    FreeVec(ArenaChapter);
+  }
+
+  if (ArenaGame != NULL)
+  {
+    FreeVec(ArenaGame);
+  }
 }
 
 EXPORT BOOL ArenaRollback(struct ARENA* arena)
