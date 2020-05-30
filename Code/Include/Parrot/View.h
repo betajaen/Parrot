@@ -37,4 +37,10 @@ EXPORT VOID ViewHide();
 
 EXPORT BOOL ViewIsPal();
 
+EXPORT VOID ViewSwapBuffers(UWORD id);
+
 EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table);
+
+EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen);
+
+EXPORT VOID ViewRectFill(UWORD vp, WORD x0, WORD y0, WORD x1, WORD y1);

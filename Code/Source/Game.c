@@ -233,8 +233,21 @@ EXPORT VOID GameStart(STRPTR path)
   ViewInitialise();
 
   ViewOpen(&viewLayouts);
-  ViewLoadColours32(0, &DefaultPalette.pt_Data);
+  ViewLoadColours32(0, &DefaultPalette.pt_Data[0]);
   ViewShow();
+
+  ViewSetAPen(0, 1);
+  ViewRectFill(0, 10, 20, 60, 30);
+
+  ViewSwapBuffers(0);
+
+  ViewSetAPen(0, 1);
+  ViewRectFill(0, 50, 50, 60, 60);
+
+  for (UWORD kk = 0; kk < 100; kk++)
+  {
+    ViewSwapBuffers(0);
+  }
 
   Delay(3 * 50);
 

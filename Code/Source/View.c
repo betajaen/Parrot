@@ -60,10 +60,11 @@ struct VIEWPORT
   struct ViewPort  v_ViewPort;
   struct RasInfo   v_RasInfo;
   struct RastPort  v_RastPort;
-  struct BitMap*   v_BitMaps[2];
+  struct BitMap*   v_Bitmap;
   struct ColorMap* v_ColorMap;
-  UWORD            v_ReadBitMap;
-  UWORD            v_WriteBitMap;
+  UWORD            v_Offset;
+  UWORD            v_ReadOffset;
+  UWORD            v_WriteOffset;
   UWORD            v_Width;
   UWORD            v_Height;
   UWORD            v_BitMapWidth;
@@ -126,8 +127,10 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
     vp = &ViewPorts[ii];
     vl = &layouts->v_Layouts[ii];
 
-    vp->v_ReadBitMap = 1;
-    vp->v_WriteBitMap = 0;
+    vp->v_Offset = vl->vl_Height;
+
+    vp->v_ReadOffset = 0;
+    vp->v_WriteOffset = vp->v_Offset;
 
     vp->v_Width = vl->vl_Width;
     vp->v_Height = vl->vl_Height;
@@ -137,23 +140,33 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
     vp->v_Vertical = vl->vl_Vertical;
     vp->v_Depth = vl->vl_Depth;
     
-    for (jj = 0; jj < 2; jj++)
-    {
-      vp->v_BitMaps[jj] = AllocBitMap(vp->v_BitMapWidth, vp->v_BitmapHeight, vp->v_Depth,
-        BMF_DISPLAYABLE | BMF_INTERLEAVED | BMF_CLEAR, NULL);
-    }
+    vp->v_Bitmap = AllocBitMap(
+      vp->v_BitMapWidth, 
+      vp->v_BitmapHeight << 1, 
+      vp->v_Depth,
+      BMF_DISPLAYABLE | BMF_INTERLEAVED | BMF_CLEAR, NULL);
+
+    InitRastPort(&vp->v_RastPort);
+    vp->v_RastPort.BitMap = vp->v_Bitmap;
+
+    SetAPen(&vp->v_RastPort, 1);
+    RectFill(
+      &vp->v_RastPort,
+      0, 0,
+      4, vp->v_Offset-1
+    );
 
     avp = &vp->v_ViewPort;
     InitVPort(avp);
 
     avp->RasInfo = &vp->v_RasInfo;
-    avp->RasInfo->BitMap = vp->v_BitMaps[0];
     avp->RasInfo->Next = NULL;
     avp->RasInfo->RxOffset = 0;
     avp->RasInfo->RyOffset = 0;
+    avp->RasInfo->BitMap = vp->v_Bitmap;
     avp->DWidth = vl->vl_Width;
     avp->DHeight = vl->vl_Height;
-    
+
     vp->v_ColorMap = GetColorMap(32);
     avp->ColorMap = vp->v_ColorMap;
 
@@ -190,17 +203,12 @@ EXPORT VOID ViewClose()
       vp->v_ColorMap = NULL;
     }
 
-    if (vp->v_BitMaps[0] != NULL)
+    if (vp->v_Bitmap != NULL)
     {
-      FreeBitMap(vp->v_BitMaps[0]);
-      vp->v_BitMaps[0] = NULL;
+      FreeBitMap(vp->v_Bitmap);
+      vp->v_Bitmap = NULL;
     }
     
-    if (vp->v_BitMaps[1] != NULL)
-    {
-      FreeBitMap(vp->v_BitMaps[1]);
-      vp->v_BitMaps[1] = NULL;
-    }
 
     FreeVPortCopLists(&vp->v_ViewPort);
     InitVPort(&vp->v_ViewPort);
@@ -256,4 +264,51 @@ EXPORT BOOL ViewIsPal()
 EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table)
 {
   LoadRGB32(&ViewPorts[vp].v_ViewPort, table);
+}
+
+EXPORT VOID ViewSwapBuffers(UWORD id)
+{
+  struct VIEWPORT* vp;
+  
+  vp = &ViewPorts[id];
+
+  if (vp->v_ReadOffset == 0)
+  {
+    vp->v_ReadOffset = vp->v_Offset;
+    vp->v_WriteOffset = 0;
+  }
+  else
+  {
+    vp->v_ReadOffset = 0;
+    vp->v_WriteOffset = vp->v_Offset;
+  }
+
+  vp->v_RasInfo.RyOffset = vp->v_ReadOffset;
+
+  ScrollVPort(&vp->v_ViewPort);
+  WaitTOF();
+}
+
+EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen)
+{
+  SetAPen(
+    &ViewPorts[vp].v_RastPort,
+    pen
+  );
+}
+
+EXPORT VOID ViewRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
+{
+  struct VIEWPORT* vp; 
+  vp = &ViewPorts[id];
+
+  WORD offset;
+
+  offset = vp->v_WriteOffset;
+
+  RectFill(
+    &vp->v_RastPort,
+    x0, offset + y0,
+    x1, offset + y1
+  );
 }
