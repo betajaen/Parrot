@@ -312,3 +312,15 @@ EXPORT VOID ViewRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
     x1, offset + y1
   );
 }
+
+EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
+{
+  struct RastPort* rp;
+  WORD offset;
+
+  offset = ViewPorts[id].v_WriteOffset;
+
+  rp = &ViewPorts[id].v_RastPort;
+  
+  BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy + offset, sw, sh, 0xC0);
+}

@@ -32,6 +32,7 @@
 #include <Parrot/String.h>
 #include <Parrot/Events.h>
 #include <Parrot/Requester.h>
+#include <Parrot/View.h>
 
 #include <proto/dos.h>
 
@@ -334,32 +335,34 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
     {
       
       /* Show first backdrop on screen */
-      ScreenRpBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
+      ViewBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
 
-      ScreenRpSetAPen(screen, 15);
-      for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
-      {
+      //ScreenRpSetAPen(screen, 15);
+      //for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+      //{
+      //
+      //  exit = room.ur_Exits[ii];
+      //
+      //  if (NULL == exit)
+      //    break;
+      //
+      //  struct RECT localRect;
+      //  localRect.rt_Left = exit->ex_HitBox.rt_Left - room.ur_CamX;
+      //  localRect.rt_Top = exit->ex_HitBox.rt_Top - room.ur_CamY;
+      //  localRect.rt_Right = exit->ex_HitBox.rt_Right - room.ur_CamX;
+      //  localRect.rt_Bottom = exit->ex_HitBox.rt_Bottom - room.ur_CamY;
+      //
+      //  if (localRect.rt_Left >= 0 && localRect.rt_Right < gameInfo->gi_Width)
+      //  {
+      //    ScreenRpDrawBox(screen, &localRect);
+      //  }
+      //
+      //
+      //}
 
-        exit = room.ur_Exits[ii];
+      ViewSwapBuffers(screen);
 
-        if (NULL == exit)
-          break;
-
-        struct RECT localRect;
-        localRect.rt_Left = exit->ex_HitBox.rt_Left - room.ur_CamX;
-        localRect.rt_Top = exit->ex_HitBox.rt_Top - room.ur_CamY;
-        localRect.rt_Right = exit->ex_HitBox.rt_Right - room.ur_CamX;
-        localRect.rt_Bottom = exit->ex_HitBox.rt_Bottom - room.ur_CamY;
-
-        if (localRect.rt_Left >= 0 && localRect.rt_Right < gameInfo->gi_Width)
-        {
-          ScreenRpDrawBox(screen, &localRect);
-        }
-
-
-      }
-
-      ScreenSwapBuffers(screen);
+      //ScreenSwapBuffers(screen);
 
       screenUpdate = FALSE;
       scrollDir = 0;

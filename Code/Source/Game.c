@@ -106,7 +106,7 @@ STATIC VOID Load(STRPTR path)
     );
   }
 
-  ScreenLoadPaletteTable(0, GamePalette);
+  ViewLoadColours32(0, &GamePalette->pt_Data);
 
   /* Load and Use Start Cursor Palette */
 
@@ -132,7 +132,7 @@ STATIC VOID Load(STRPTR path)
     );
   }
 
-  ScreenLoadPaletteTable(0, GameCursorPalette);
+  ViewLoadColours32(0, &GamePalette->pt_Data);
 
 
   ArenaRollback(ArenaChapter);
@@ -197,20 +197,7 @@ EXPORT VOID GameStart(STRPTR path)
   ScreenOpen(0, &screenInfo);
   ScreenLoadPaletteTable(0, &DefaultPalette);
 
-  Load(path);
-
-  ArenaRollback(ArenaChapter);
-
-  entrance.en_Room = GameInfo->gi_StartRoom;
-  entrance.en_Exit = 0;
-
-  while (entrance.en_Room != 0)
-  {
-    ArenaRollback(ArenaRoom);
-
-    /* Start First Room */
-    PlayRoom(0,&entrance, GameInfo);
-  }
+  
 
   ScreenClose(0);
 #else
@@ -236,20 +223,20 @@ EXPORT VOID GameStart(STRPTR path)
   ViewLoadColours32(0, &DefaultPalette.pt_Data[0]);
   ViewShow();
 
-  ViewSetAPen(0, 1);
-  ViewRectFill(0, 10, 20, 60, 30);
+  Load(path);
 
-  ViewSwapBuffers(0);
+  ArenaRollback(ArenaChapter);
 
-  ViewSetAPen(0, 1);
-  ViewRectFill(0, 50, 50, 60, 60);
+  entrance.en_Room = GameInfo->gi_StartRoom;
+  entrance.en_Exit = 0;
 
-  for (UWORD kk = 0; kk < 100; kk++)
+  while (entrance.en_Room != 0)
   {
-    ViewSwapBuffers(0);
-  }
+    ArenaRollback(ArenaRoom);
 
-  Delay(3 * 50);
+    /* Start First Room */
+    PlayRoom(0, &entrance, GameInfo);
+  }
 
   ViewHide();
   ViewClose();
