@@ -43,6 +43,7 @@
 #define MAX_ROOM_EXITS         10
 #define MAX_ROOM_ENTITIES      20
 #define MAX_ENTITY_NAME_LENGTH 29
+#define MAX_VIEW_LAYOUTS       2
 
 /**
     Typename consistency
@@ -104,6 +105,27 @@ struct SCREEN_INFO
   STRPTR  si_Title;
   UWORD   si_Depth;
   UWORD   si_Flags;  /* See SIF_* */
+};
+
+struct VIEW_LAYOUT
+{
+  UWORD  vl_Width;
+  UWORD  vl_Height;
+  UWORD  vl_BitMapWidth;
+  UWORD  vl_BitmapHeight;
+  WORD   vl_Horizontal;
+  WORD   vl_Vertical;
+  UWORD  vl_Depth;
+};
+
+struct VIEW_LAYOUTS
+{
+  LONG               v_Left;
+  LONG               v_Top;
+  LONG               v_Width;
+  LONG               v_Height;
+  UWORD              v_NumLayouts;
+  struct VIEW_LAYOUT v_Layouts[MAX_VIEW_LAYOUTS];
 };
 
 #define CURSOR_NONE   0

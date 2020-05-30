@@ -33,6 +33,7 @@
 #include <Parrot/Asset.h>
 #include <Parrot/Room.h>
 #include <Parrot/String.h>
+#include <Parrot/View.h>
 
 #include "Asset.h"
 
@@ -53,10 +54,12 @@ STATIC struct PALETTE_TABLE DefaultPalette =
     0X33333333, 0X33333333,  0X33333333,
     0X88888888, 0X88888888,  0X88888888,
     0XFFFFFFFF, 0XFFFFFFFF,  0XFFFFFFFF,
+    
     3 << 16 | 17,
     0,0,0,
     0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
     0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
+
     0
   }
 };
@@ -145,6 +148,8 @@ EXPORT VOID GameStart(STRPTR path)
   struct ROOM* room;
   struct UNPACKED_ROOM uroom;
   struct ENTRANCE entrance;
+  struct VIEW_LAYOUTS viewLayouts;
+  struct VIEW_LAYOUT* roomLayout;
 
   UBYTE ii;
 
@@ -180,6 +185,8 @@ EXPORT VOID GameStart(STRPTR path)
 
   CloseArchive(0);
 
+#if 0
+
   screenInfo.si_Width = GameInfo->gi_Width;
   screenInfo.si_Height = 128; // GameInfo->gi_Height;
   screenInfo.si_Depth = GameInfo->gi_Depth;
@@ -187,7 +194,6 @@ EXPORT VOID GameStart(STRPTR path)
   screenInfo.si_Left = 0;
   screenInfo.si_Top = 0;
   screenInfo.si_Title = &GameInfo->gi_Title[0];
-
   ScreenOpen(0, &screenInfo);
   ScreenLoadPaletteTable(0, &DefaultPalette);
 
@@ -207,7 +213,35 @@ EXPORT VOID GameStart(STRPTR path)
   }
 
   ScreenClose(0);
+#else
 
+  viewLayouts.v_NumLayouts = 1;
+  viewLayouts.v_Width = GameInfo->gi_Width;
+  viewLayouts.v_Height = GameInfo->gi_Height;
+  viewLayouts.v_Left = 0;
+  viewLayouts.v_Top = 0;
+  roomLayout = &viewLayouts.v_Layouts[0];
+
+  roomLayout->vl_Width = 320;
+  roomLayout->vl_Height = 128;
+  roomLayout->vl_BitMapWidth = 960;
+  roomLayout->vl_BitmapHeight = 128;
+  roomLayout->vl_Horizontal = 0;
+  roomLayout->vl_Vertical = 0;
+  roomLayout->vl_Depth = 4;
+
+  ViewInitialise();
+
+  ViewOpen(&viewLayouts);
+  ViewLoadColours32(0, &DefaultPalette.pt_Data);
+  ViewShow();
+
+  Delay(3 * 50);
+
+  ViewHide();
+  ViewClose();
+
+#endif
   CloseArchives();
 
   ArenaClose(ArenaRoom);
