@@ -44,6 +44,7 @@
 #define MAX_ROOM_ENTITIES      20
 #define MAX_ENTITY_NAME_LENGTH 29
 #define MAX_VIEW_LAYOUTS       2
+#define MAX_INPUT_EVENT_SIZE   32
 
 /**
     Typename consistency
@@ -62,6 +63,10 @@
 
 #ifndef EXPORT
 #define EXPORT
+#endif
+
+#ifndef EXTERN
+#define EXTERN extern
 #endif
 
 /**
@@ -167,6 +172,22 @@ struct VIEW_LAYOUTS
 #define CT_PALETTE        MAKE_NODE_ID('P','A','L','4')
 #define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
 #define CT_ENTITY         MAKE_NODE_ID('E','N','T','Y')
+
+#define IET_KEYDOWN    1
+#define IET_KEYUP      2
+#define IET_SELECTDOWN 3
+#define IET_SELECTUP   4
+#define IET_MENUDOWN   5
+#define IET_MENUUP     6
+#define IET_CURSOR       7
+
+struct INPUTEVENT
+{
+  UWORD             ie_Type;
+  UWORD             ie_Code;
+  WORD              ie_CursX;
+  WORD              ie_CursY;
+};
 
 struct ASSET
 {

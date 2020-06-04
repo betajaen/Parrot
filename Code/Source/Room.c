@@ -28,11 +28,10 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Arena.h>
 #include <Parrot/Asset.h>
-#include <Parrot/Screen.h>
 #include <Parrot/String.h>
-#include <Parrot/Events.h>
 #include <Parrot/Requester.h>
 #include <Parrot/View.h>
+#include <Parrot/Input.h>
 
 #include <proto/dos.h>
 
@@ -170,7 +169,6 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   BOOL exitRoom;
   WORD scrollDir;
   struct UNPACKED_ROOM room;
-  UWORD evt;
   UWORD mostLeftEdge;
   WORD screenUpdate;
   UWORD cursor;
@@ -179,6 +177,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   struct EXIT* exit;
   WORD rmMouseX, rmMouseY;
   WORD camRight;
+  struct INPUTEVENT evt;
 
   exitRoom = FALSE;
   scrollDir = 0;
@@ -188,7 +187,9 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   Busy();
 
   /* Get Screen Info */
-  ScreenGetWidthHeight(screen, &screenW, &screenH);
+  screenW = 320;
+  screenH = 128;
+ // ScreenGetWidthHeight(screen, &screenW, &screenH);
 
   /* Load Room Asset and Backdrops */
   InitStackVar(struct UNPACKED_ROOM, room);
@@ -218,86 +219,142 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
   NotBusy();
 
-  evt = 0;
+  
+  //ViewBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
+  //ViewSwapBuffers(screen);
 
-  while (exitRoom == FALSE)
+  while (exitRoom == FALSE && InEvtForceQuit == FALSE)
   {
-    
-    if ((evt & WE_KEY) != 0)
+
+    while (PopEvent(&evt))
     {
-      switch (EvtKey)
+      switch (evt.ie_Type)
       {
-        case KC_ESC:
+      case IET_KEYUP:
+      {
+        if (evt.ie_Code == KC_ESC)
         {
           exitRoom = TRUE;
           entrance->en_Room = 0;
         }
-        break;
-        case KC_F1:
-        {
-          if (room.ur_Exits[0] != NULL)
-          {
-            exitRoom = TRUE;
-            entrance->en_Room = GetRoomFromExit(room.ur_Exits[0]);
-            entrance->en_Exit = room.ur_Exits[0]->ex_Target;
-          }
-          else
-          {
-            TraceF("There are no exits in this room to go through!");
-          }
-        }
-        break;
-        case KC_LEFT:
-        {
-          scrollDir = -10;
-        }
-        break;
-        case KC_RIGHT:
-        {
-          scrollDir = +10;
-        }
-        break;
+      }
+      break;
       }
     }
-    
-    if ((evt & WE_CURSOR) != 0)
-    {
-      rmMouseX = EvtMouseX + room.ur_CamX;
-      rmMouseY = EvtMouseY + room.ur_CamY;
-    }
 
-    if ((evt & WE_SELECT) != 0)
+#if 0
+    switch (InEvtKey)
     {
-      for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+      case KC_ESC:
       {
-
-        exit = room.ur_Exits[ii];
-
-        if (NULL == exit)
-          break;
-
-        if (PointInside(&exit->ex_HitBox, rmMouseX, rmMouseY))
+        exitRoom = TRUE;
+        entrance->en_Room = 0;
+      }
+      break;
+      case KC_F1:
+      {
+        if (room.ur_Exits[0] != NULL)
         {
           exitRoom = TRUE;
-          entrance->en_Room = GetRoomFromExit(exit);
-          entrance->en_Exit = exit->ex_Target;
-          break;
+          entrance->en_Room = GetRoomFromExit(room.ur_Exits[0]);
+          entrance->en_Exit = room.ur_Exits[0]->ex_Target;
+        }
+        else
+        {
+          TraceF("There are no exits in this room to go through!");
         }
       }
+      break;
+      case KC_LEFT:
+      {
+        scrollDir = -10;
+      }
+      break;
+      case KC_RIGHT:
+      {
+        scrollDir = +10;
+      }
+      break;
     }
 
-    if (EvtMouseX < 10)
-    {
-      scrollDir = -1;
-    }
-    else if (EvtMouseX > gameInfo->gi_Width - 10)
-    {
-      scrollDir = +1;
-    }
-    else
-    {
-      scrollDir = 0;
-    }
+    InEvtKey = 0;
+#endif
+
+    // if ((evt & WE_KEY) != 0)
+    // {
+    //   switch (EvtKey)
+    //   {
+    //     case KC_ESC:
+    //     {
+    //       exitRoom = TRUE;
+    //       entrance->en_Room = 0;
+    //     }
+    //     break;
+    //     case KC_F1:
+    //     {
+    //       if (room.ur_Exits[0] != NULL)
+    //       {
+    //         exitRoom = TRUE;
+    //         entrance->en_Room = GetRoomFromExit(room.ur_Exits[0]);
+    //         entrance->en_Exit = room.ur_Exits[0]->ex_Target;
+    //       }
+    //       else
+    //       {
+    //         TraceF("There are no exits in this room to go through!");
+    //       }
+    //     }
+    //     break;
+    //     case KC_LEFT:
+    //     {
+    //       scrollDir = -10;
+    //     }
+    //     break;
+    //     case KC_RIGHT:
+    //     {
+    //       scrollDir = +10;
+    //     }
+    //     break;
+    //   }
+    // }
+    // 
+    // if ((evt & WE_CURSOR) != 0)
+    // {
+    //   rmMouseX = EvtMouseX + room.ur_CamX;
+    //   rmMouseY = EvtMouseY + room.ur_CamY;
+    // }
+    // 
+    // if ((evt & WE_SELECT) != 0)
+    // {
+    //   for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+    //   {
+    // 
+    //     exit = room.ur_Exits[ii];
+    // 
+    //     if (NULL == exit)
+    //       break;
+    // 
+    //     if (PointInside(&exit->ex_HitBox, rmMouseX, rmMouseY))
+    //     {
+    //       exitRoom = TRUE;
+    //       entrance->en_Room = GetRoomFromExit(exit);
+    //       entrance->en_Exit = exit->ex_Target;
+    //       break;
+    //     }
+    //   }
+    // }
+
+    // if (EvtMouseX < 10)
+    // {
+    //   scrollDir = -1;
+    // }
+    // else if (EvtMouseX > gameInfo->gi_Width - 10)
+    // {
+    //   scrollDir = +1;
+    // }
+    // else
+    // {
+    //   scrollDir = 0;
+    // }
 
 
     if (scrollDir < 0 && room.ur_CamX >= 0)
@@ -335,7 +392,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
     {
       
       /* Show first backdrop on screen */
-      ViewBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, room.ur_CamX, room.ur_CamY, screenW, room.ur_Backdrops[0]->im_Height);
+      ViewBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
 
       //ScreenRpSetAPen(screen, 15);
       //for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
@@ -368,8 +425,11 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       scrollDir = 0;
     }
 
+  }
 
-    evt = WaitForEvents(0);
+  if (InEvtForceQuit == TRUE)
+  {
+    entrance->en_Room = 0;
   }
 
   /* Unload */

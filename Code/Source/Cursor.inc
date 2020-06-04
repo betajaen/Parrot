@@ -25,6 +25,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+UWORD __chip Cursor0[] = {
+  0x0000,0x0000,
+  0x0000,0x0000,
+  0x0000,0x0000
+};
+
 UWORD __chip Cursor1[] = {
   0x0000,0x0000,
   0x7000,0x0   ,

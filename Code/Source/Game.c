@@ -29,11 +29,11 @@
 #include <Parrot/Archive.h>
 #include <Parrot/Arena.h>
 #include <Parrot/Requester.h>
-#include <Parrot/Screen.h>
 #include <Parrot/Asset.h>
 #include <Parrot/Room.h>
 #include <Parrot/String.h>
 #include <Parrot/View.h>
+#include <Parrot/Input.h>
 
 #include "Asset.h"
 
@@ -45,24 +45,6 @@ struct GAME_INFO* GameInfo;
 struct PALETTE_TABLE* GamePalette;
 struct PALETTE_TABLE* GameCursorPalette;
 struct UNPACKED_ROOM  GameRoom;
-
-STATIC struct PALETTE_TABLE DefaultPalette =
-{
-  0,0,
-  {
-    3 << 16 | 0,
-    0X33333333, 0X33333333,  0X33333333,
-    0X88888888, 0X88888888,  0X88888888,
-    0XFFFFFFFF, 0XFFFFFFFF,  0XFFFFFFFF,
-    
-    3 << 16 | 17,
-    0,0,0,
-    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
-    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
-
-    0
-  }
-};
 
 STATIC VOID Load(STRPTR path)
 {
@@ -107,33 +89,6 @@ STATIC VOID Load(STRPTR path)
   }
 
   ViewLoadColours32(0, &GamePalette->pt_Data);
-
-  /* Load and Use Start Cursor Palette */
-
-  if (0 == GameInfo->gi_StartCursorPalette)
-  {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting Cursor Palette was None"
-      PARROT_ERR_INT("GAME_INFO::gi_StartCursorPalette"),
-      GameInfo->gi_StartCursorPalette
-    );
-  }
-
-  GameCursorPalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_UNKNOWN, CT_PALETTE, GameInfo->gi_StartCursorPalette, CHUNK_FLAG_ARCH_AGA);
-
-  if (NULL == GamePalette)
-  {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting Cursor Palette Table was not found"
-      PARROT_ERR_INT("GAME_INFO::gi_StartCursorPalette"),
-      (ULONG)GameInfo->gi_StartCursorPalette
-    );
-  }
-
-  ViewLoadColours32(0, &GamePalette->pt_Data);
-
 
   ArenaRollback(ArenaChapter);
   ArenaRollback(ArenaRoom);
@@ -220,23 +175,26 @@ EXPORT VOID GameStart(STRPTR path)
   ViewInitialise();
 
   ViewOpen(&viewLayouts);
-  ViewLoadColours32(0, &DefaultPalette.pt_Data[0]);
   ViewShow();
 
   Load(path);
 
   ArenaRollback(ArenaChapter);
 
+  InputInitialise();
+
   entrance.en_Room = GameInfo->gi_StartRoom;
   entrance.en_Exit = 0;
 
-  while (entrance.en_Room != 0)
+  while (entrance.en_Room != 0 && InEvtForceQuit == FALSE)
   {
     ArenaRollback(ArenaRoom);
 
     /* Start First Room */
     PlayRoom(0, &entrance, GameInfo);
   }
+
+  InputExit();
 
   ViewHide();
   ViewClose();

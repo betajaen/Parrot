@@ -33,7 +33,7 @@ CFLAGS  = -lamiga -nostdlib -IInclude
 
 # PARROT
 
-PARROT_OBJ = main.o arena.o string.o requester.o screen.o game.o room.o image.o asset.o events.o entity.o view.o
+PARROT_OBJ = main.o arena.o string.o requester.o game.o room.o image.o asset.o entity.o view.o input.o
 CONVERTER_MANIAC_OBJ =maniac_conv_main.o string.o
 
 parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
@@ -48,9 +48,6 @@ string.o: Source/String.c
 
 requester.o: Source/Requester.c
 	$(CC) $(CFLAGS) -c Source/Requester.c -o requester.o
-
-screen.o: Source/Screen.c
-	$(CC) $(CFLAGS) -c Source/Screen.c -o screen.o
 
 game.o: Source/Game.c
 	$(CC) $(CFLAGS) -c Source/Game.c -o game.o
@@ -67,14 +64,14 @@ image.o: Source/Image.c
 asset.o: Source/Asset.c
 	$(CC) $(CFLAGS) -c Source/Asset.c -o asset.o
 
-events.o: Source/Events.c
-	$(CC) $(CFLAGS) -c Source/Events.c -o events.o
-
 entity.o: Source/Entity.c
 	$(CC) $(CFLAGS) -c Source/Entity.c -o entity.o
-	
+
 view.o: Source/View.c
 	$(CC) $(CFLAGS) -c Source/View.c -o view.o
+
+input.o: Source/Input.c
+	$(CC) $(CFLAGS) -c Source/Input.c -o input.o
 
 # MANIAC
 

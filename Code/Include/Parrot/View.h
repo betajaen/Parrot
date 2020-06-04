@@ -44,3 +44,11 @@ EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table);
 EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen);
 
 EXPORT VOID ViewRectFill(UWORD vp, WORD x0, WORD y0, WORD x1, WORD y1);
+
+EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
+
+EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table);
+
+EXPORT VOID Busy();
+
+EXPORT VOID NotBusy();

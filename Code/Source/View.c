@@ -31,6 +31,7 @@
 #include <Parrot/View.h>
 
 #include <proto/exec.h>
+#include <proto/intuition.h>
 
 #include <hardware/dmabits.h>
 #include <hardware/custom.h>
@@ -45,6 +46,7 @@
 #include <graphics/text.h>
 #include <graphics/gfxbase.h>
 
+
 #include <clib/graphics_protos.h>
 
 extern struct GfxBase* GfxBase;
@@ -57,21 +59,21 @@ extern struct GfxBase* GfxBase;
 
 struct VIEWPORT
 {
-  struct ViewPort  v_ViewPort;
-  struct RasInfo   v_RasInfo;
-  struct RastPort  v_RastPort;
-  struct BitMap*   v_Bitmap;
-  struct ColorMap* v_ColorMap;
-  UWORD            v_Offset;
-  UWORD            v_ReadOffset;
-  UWORD            v_WriteOffset;
-  UWORD            v_Width;
-  UWORD            v_Height;
-  UWORD            v_BitMapWidth;
-  UWORD            v_BitmapHeight;
-  WORD             v_Horizontal;
-  WORD             v_Vertical;
-  UWORD            v_Depth;
+  struct ViewPort     v_ViewPort;
+  struct RasInfo      v_RasInfo;
+  struct RastPort     v_RastPort;
+  struct BitMap*      v_Bitmap;
+  struct ColorMap*    v_ColorMap;
+  UWORD               v_Offset;
+  UWORD               v_ReadOffset;
+  UWORD               v_WriteOffset;
+  UWORD               v_Width;
+  UWORD               v_Height;
+  UWORD               v_BitMapWidth;
+  UWORD               v_BitmapHeight;
+  WORD                v_Horizontal;
+  WORD                v_Vertical;
+  UWORD               v_Depth;
 };
 
 struct View*         IntuitionView;
@@ -81,6 +83,20 @@ UWORD                ScreenWidth;
 UWORD                ScreenHeight;
 UWORD                NumViewPorts;
 UWORD                IsShown;
+
+struct SimpleSprite CursorSimpleSprite;
+
+#include "Cursor.inc"
+
+STATIC ULONG DefaultPalette[] =
+{
+    3 << 16 | 17,
+    0,0,0,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
+
+    0
+};
 
 EXPORT VOID ViewInitialise()
 {
@@ -186,6 +202,7 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
 
   View.Modes = 0 | SPRITES;
   MrgCop(&View);
+
 }
 
 EXPORT VOID ViewClose()
@@ -228,17 +245,32 @@ EXPORT VOID ViewClose()
 
 EXPORT VOID ViewShow()
 {
+
   if (IsShown)
   {
     return;
   }
   
   IsShown = TRUE;
+  CloseWorkBench();
   IntuitionView = GfxBase->ActiView;
   WaitTOF();
   LoadView(&View);
   WaitTOF();
   WaitTOF();
+
+  LoadRGB32(&ViewPorts[0].v_ViewPort, &DefaultPalette[0]);
+
+  FreeSprite(0);
+  WORD sprite_num = GetSprite(&CursorSimpleSprite, 0);
+  
+  CursorSimpleSprite.x = 0;
+  CursorSimpleSprite.y = 0;
+  CursorSimpleSprite.height = 5;
+
+  ChangeSprite(NULL, &CursorSimpleSprite, (APTR) &Cursor1);
+  MoveSprite(NULL, &CursorSimpleSprite, 0, 0);
+
 }
 
 EXPORT VOID ViewHide()
@@ -248,11 +280,15 @@ EXPORT VOID ViewHide()
     return;
   }
 
+  FreeSprite(CursorSimpleSprite.num);
+
   IsShown = FALSE;
   WaitTOF();
   LoadView(IntuitionView);
   WaitTOF();
   WaitTOF();
+
+  OpenWorkBench();
 }
 
 EXPORT BOOL ViewIsPal()
@@ -323,4 +359,18 @@ EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD
   rp = &ViewPorts[id].v_RastPort;
   
   BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy + offset, sw, sh, 0xC0);
+}
+
+EXPORT VOID Busy()
+{
+
+}
+
+EXPORT VOID NotBusy()
+{
+
+}
+
+EXPORT VOID ScreenSetCursor(UWORD s, UWORD c)
+{
 }
