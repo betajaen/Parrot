@@ -140,10 +140,10 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
       {
         MouseY = 0;
       }
-      else if (MouseY >= 128)
-      {
-        MouseY = 127;
-      }
+      // else if (MouseY >= 128)
+      // {
+      //   MouseY = 127;
+      // }
 
       MoveSprite(NULL, &CursorSimpleSprite, MouseX-7, MouseY-7);
 

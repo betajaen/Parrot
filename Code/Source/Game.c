@@ -105,6 +105,7 @@ EXPORT VOID GameStart(STRPTR path)
   struct ENTRANCE entrance;
   struct VIEW_LAYOUTS viewLayouts;
   struct VIEW_LAYOUT* roomLayout;
+  struct VIEW_LAYOUT* verbLayout;
 
   UBYTE ii;
 
@@ -157,12 +158,13 @@ EXPORT VOID GameStart(STRPTR path)
   ScreenClose(0);
 #else
 
-  viewLayouts.v_NumLayouts = 1;
+  viewLayouts.v_NumLayouts = 2;
   viewLayouts.v_Width = GameInfo->gi_Width;
   viewLayouts.v_Height = GameInfo->gi_Height;
   viewLayouts.v_Left = 0;
   viewLayouts.v_Top = 0;
   roomLayout = &viewLayouts.v_Layouts[0];
+  verbLayout = &viewLayouts.v_Layouts[1];
 
   roomLayout->vl_Width = 320;
   roomLayout->vl_Height = 128;
@@ -171,6 +173,14 @@ EXPORT VOID GameStart(STRPTR path)
   roomLayout->vl_Horizontal = 0;
   roomLayout->vl_Vertical = 0;
   roomLayout->vl_Depth = 4;
+
+  verbLayout->vl_Width = 320;
+  verbLayout->vl_Height = 70;
+  verbLayout->vl_BitMapWidth = 320;
+  verbLayout->vl_BitmapHeight = 70;
+  verbLayout->vl_Horizontal = 0;
+  verbLayout->vl_Vertical = 130;
+  verbLayout->vl_Depth = 2;
 
   ViewInitialise();
 

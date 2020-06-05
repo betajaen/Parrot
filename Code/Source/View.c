@@ -169,7 +169,7 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
   struct VIEW_LAYOUT* vl;
   struct ViewPort* avp;
   struct RastPort* rp;
-  UWORD ii, jj;
+  UWORD ii, jj, numColours;
 
   if (layouts->v_NumLayouts > MAX_VIEW_LAYOUTS)
   {
@@ -231,8 +231,15 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
     avp->DWidth = vl->vl_Width;
     avp->DHeight = vl->vl_Height;
     avp->Modes = 0 | SPRITES;
+    avp->DyOffset = vp->v_Vertical;
 
-    vp->v_ColorMap = GetColorMap(32);
+    numColours = 1 << vl->vl_Depth;
+    if (numColours < 32)
+    {
+      numColours = 32;
+    }
+
+    vp->v_ColorMap = GetColorMap(numColours);
     avp->ColorMap = vp->v_ColorMap;
 
     if (lastVp != NULL)
@@ -312,22 +319,28 @@ EXPORT VOID ViewShow()
   WaitTOF();
   WaitTOF();
 
-  vp = &ViewPorts[0].v_ViewPort;
-
 
   FreeSprite(0);
-  WORD sprite_num = GetSprite(&CursorSimpleSprite, 0);
-  
+  spriteNum = GetSprite(&CursorSimpleSprite, 0);
+
   CursorSimpleSprite.x = 0;
   CursorSimpleSprite.y = 0;
   CursorSimpleSprite.height = Cursors[0].Height;
 
-  UWORD color_reg = 16 + ((spriteNum & 0x06) << 1);
-
-  LoadRGB32(vp, &DefaultPalette);
-
-  ChangeSprite(NULL, &CursorSimpleSprite, (APTR) &Cursors[0].Data);
+  ChangeSprite(NULL, &CursorSimpleSprite, (APTR)&Cursors[0].Data);
   MoveSprite(NULL, &CursorSimpleSprite, 0, 0);
+
+  colourRegister = 16 + ((spriteNum & 0x06) << 1);
+
+  for (ii = 0; ii < NumViewPorts; ii++)
+  {
+    vp = &ViewPorts[ii].v_ViewPort;
+    SetRGB4(vp, 0, 0, 0, 0);
+    SetRGB4(vp, 1, 15, 15, 15);
+    SetRGB4(vp, 2, 10, 10, 10);
+    SetRGB4(vp, 3,  5,  5,  5);
+    LoadRGB32(vp, &DefaultPalette);
+  }
 
 }
 
@@ -399,6 +412,8 @@ EXPORT VOID ViewRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
   WORD offset;
 
   offset = vp->v_WriteOffset;
+
+  
 
   RectFill(
     &vp->v_RastPort,
