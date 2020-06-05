@@ -44,12 +44,16 @@
 
 #include <Parrot/Private/SDI_interrupt.h>
 
-extern struct SimpleSprite CursorSimpleSprite;
 struct INPUTEVENT Inputs[MAX_INPUT_EVENT_SIZE] = { 0 };
 UWORD InputWrite, InputRead;
 
-STATIC WORD MouseX = 0;
-STATIC WORD MouseY = 0;
+EXTERN struct SimpleSprite CursorSprite;
+EXTERN WORD CursorOffsetX;
+EXTERN WORD CursorOffsetY;
+EXTERN WORD CursorX;
+EXTERN WORD CursorY;
+EXTERN WORD CursorXLimit;
+EXTERN WORD CursorYLimit;
 
 #define SemAcquireInputRw()
 #define SemReleaseInputRw() 
@@ -124,33 +128,33 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
     }
     else if (ie->ie_Class == IECLASS_RAWMOUSE)
     {
-      MouseX += ie->ie_X;
-      MouseY += ie->ie_Y;
+      CursorX += ie->ie_X;
+      CursorY += ie->ie_Y;
 
-      if (MouseX < 0)
+      if (CursorX < 0)
       {
-        MouseX = 0;
+        CursorX = 0;
       }
-      else if (MouseX >= 320)
+      else if (CursorX > CursorXLimit)
       {
-        MouseX = 319;
+        CursorX = CursorXLimit;
       }
 
-      if (MouseY < 0)
+      if (CursorY < 0)
       {
-        MouseY = 0;
+        CursorY = 0;
       }
-      // else if (MouseY >= 128)
-      // {
-      //   MouseY = 127;
-      // }
+      else if (CursorY > CursorYLimit)
+      {
+        CursorY = CursorYLimit;
+      }
 
-      MoveSprite(NULL, &CursorSimpleSprite, MouseX-7, MouseY-7);
+      MoveSprite(NULL, &CursorSprite, CursorX + CursorOffsetX, CursorY + CursorOffsetY);
 
       evt.ie_Type = IET_CURSOR;
       evt.ie_Code = 0;
-      evt.ie_CursX = MouseX;
-      evt.ie_CursY = MouseY;
+      evt.ie_CursX = CursorX;
+      evt.ie_CursY = CursorY;
       PushEvent(&evt);
     }
 
@@ -174,8 +178,8 @@ EXPORT VOID InputInitialise()
   InEvtKey = 0;
   InputRead = 0;
   InputWrite = 0;
-  MouseX = 0;
-  MouseY = 0;
+  CursorX = 0;
+  CursorY = 0;
 
   KeyMsgPort = CreateMsgPort();
   KeyIOReq = (struct IOStdReq*) CreateExtIO(KeyMsgPort, sizeof(struct IOStdReq));

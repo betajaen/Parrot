@@ -52,3 +52,15 @@ EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table);
 EXPORT VOID Busy();
 
 EXPORT VOID NotBusy();
+
+EXPORT UWORD CursorInitialise();
+
+EXPORT VOID CursorShutdown();
+
+EXPORT VOID CursorSetType(UWORD cursor);
+
+EXPORT UWORD CursorGetType();
+
+EXPORT VOID CursorSetPos(WORD x, WORD y);
+
+EXPORT VOID CursorGetPos(WORD* x, WORD* y);

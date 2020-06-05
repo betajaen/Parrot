@@ -90,59 +90,12 @@ UWORD                ScreenHeight;
 UWORD                NumViewPorts;
 UWORD                IsShown;
 
-struct SimpleSprite CursorSimpleSprite;
-
 STATIC ULONG DefaultPalette[] =
 {
     2 << 16 | 17,
     0,0,0,
     0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
     0
-};
-
-CHIP struct CURSOR_IMAGE Cursors[] = {
-  {
-    -7,-7,15,
-    {
-        0x0000,0x0000,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0   ,0x0   ,
-        0xf83e,0x0   ,
-        0x8822,0x701c,
-        0xf83e,0x0   ,
-        0x0   ,0x0   ,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0000,0x0000
-    }
-  },
-  {
-    -7, -7, 15,
-    {
-      0x0000,0x0000,
-      0xfff0,0x0   ,
-      0x9058,0x6fa0,
-      0x9148,0x6eb0,
-      0x9148,0x6eb0,
-      0x9048,0x6fb0,
-      0x9fc8,0x6030,
-      0x8008,0x7ff0,
-      0x9fc8,0x6030,
-      0xa028,0x5fd0,
-      0xafa8,0x5050,
-      0xa028,0x5fd0,
-      0xa028,0x5fd0,
-      0xfff8,0x0   ,
-      0x0000,0x0000
-    }
-  }
 };
 
 EXPORT VOID ViewInitialise()
@@ -321,15 +274,7 @@ EXPORT VOID ViewShow()
 
 
   FreeSprite(0);
-  spriteNum = GetSprite(&CursorSimpleSprite, 0);
-
-  CursorSimpleSprite.x = 0;
-  CursorSimpleSprite.y = 0;
-  CursorSimpleSprite.height = Cursors[0].Height;
-
-  ChangeSprite(NULL, &CursorSimpleSprite, (APTR)&Cursors[0].Data);
-  MoveSprite(NULL, &CursorSimpleSprite, 0, 0);
-
+  spriteNum = CursorInitialise();
   colourRegister = 16 + ((spriteNum & 0x06) << 1);
 
   for (ii = 0; ii < NumViewPorts; ii++)
@@ -351,7 +296,7 @@ EXPORT VOID ViewHide()
     return;
   }
 
-  FreeSprite(CursorSimpleSprite.num);
+  CursorShutdown();
 
   IsShown = FALSE;
   WaitTOF();
@@ -432,18 +377,4 @@ EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD
   rp = &ViewPorts[id].v_RastPort;
   
   BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy + offset, sw, sh, 0xC0);
-}
-
-EXPORT VOID Busy()
-{
-
-}
-
-EXPORT VOID NotBusy()
-{
-
-}
-
-EXPORT VOID ScreenSetCursor(UWORD s, UWORD c)
-{
 }
