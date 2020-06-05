@@ -32,7 +32,7 @@
 #include <Parrot/Asset.h>
 #include <Parrot/Room.h>
 #include <Parrot/String.h>
-#include <Parrot/View.h>
+#include <Parrot/Graphics.h>
 #include <Parrot/Input.h>
 
 #include "Asset.h"

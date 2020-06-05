@@ -30,7 +30,7 @@
 #include <Parrot/Asset.h>
 #include <Parrot/String.h>
 #include <Parrot/Requester.h>
-#include <Parrot/View.h>
+#include <Parrot/Graphics.h>
 #include <Parrot/Input.h>
 
 #include <proto/dos.h>

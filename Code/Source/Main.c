@@ -27,7 +27,7 @@
 
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
-#include <Parrot/View.h>
+#include <Parrot/Graphics.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>

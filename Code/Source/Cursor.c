@@ -1,5 +1,5 @@
 /**
-    $Id: View.c, 1.2 2020/05/29 17:01:00, betajaen Exp $
+    $Id: Cursor.c, 1.2 2020/06/05 20:47:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -28,7 +28,7 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
-#include <Parrot/View.h>
+#include <Parrot/Graphics.h>
 
 #include <proto/exec.h>
 #include <proto/intuition.h>

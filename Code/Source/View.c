@@ -28,7 +28,7 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
-#include <Parrot/View.h>
+#include <Parrot/Graphics.h>
 
 #include <proto/exec.h>
 #include <proto/intuition.h>

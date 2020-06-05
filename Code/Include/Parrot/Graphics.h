@@ -1,5 +1,5 @@
 /**
-    $Id: View.h 1.2 2020/05/29 17:02:00, betajaen Exp $
+    $Id: Graphics.h 1.2 2020/05/29 17:02:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
