@@ -371,23 +371,6 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
     }
 
 
-    if (scrollDir < 0 && cursor != CURSOR_W)
-    {
-      cursor = CURSOR_W;
-      ScreenSetCursor(screen, cursor);
-    }
-    else if (scrollDir > 0 && cursor != CURSOR_E)
-    {
-      cursor = CURSOR_E;
-      ScreenSetCursor(screen, cursor);
-    }
-
-    if (scrollDir == 0 && cursor != CURSOR_SELECT)
-    {
-      cursor = CURSOR_SELECT;
-      ScreenSetCursor(screen, cursor);
-    }
-
     if (TRUE == screenUpdate)
     {
       

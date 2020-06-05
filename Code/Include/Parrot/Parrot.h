@@ -134,34 +134,8 @@ struct VIEW_LAYOUTS
 };
 
 #define CURSOR_NONE   0
-#define CURSOR_POINT  1
+#define CURSOR_SELECT 1
 #define CURSOR_BUSY   2
-#define CURSOR_SELECT 3
-#define CURSOR_NW     4
-#define CURSOR_N      5
-#define CURSOR_NE     6
-#define CURSOR_E      7
-#define CURSOR_SE     8
-#define CURSOR_S      9
-#define CURSOR_SW     10
-#define CURSOR_W      11
-#define CURSOR_ANY    12
-#define CURSOR_MOUSE  13
-#define CURSOR_LMB    14
-#define CURSOR_RMB    15
-#define CURSOR_USE    16
-#define CURSOR_TALK   17
-#define CURSOR_TAKE   18
-#define CURSOR_GIVE   19
-#define CURSOR_DROP   20
-#define CURSOR_READ   21
-#define CURSOR_LOOK   22
-#define CURSOR_PULL   23
-#define CURSOR_PUSH   24
-#define CURSOR_OPEN   25
-#define CURSOR_CLOSE  26
-#define CURSOR_LOCK   27
-#define CURSOR_UNLOCK 28
 
 #define ARCHIVE_GLOBAL  0
 #define ARCHIVE_UNKNOWN 65535

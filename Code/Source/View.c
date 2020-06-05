@@ -56,6 +56,12 @@ extern struct GfxBase* GfxBase;
 #define ARCH_AGA     2
 #define ARCH_RTG     3
 
+struct CURSOR_IMAGE
+{
+  WORD  OffsetX, OffsetY;
+  UWORD Height;
+  UWORD Data[2 * 24];
+};
 
 struct VIEWPORT
 {
@@ -86,14 +92,57 @@ UWORD                IsShown;
 
 struct SimpleSprite CursorSimpleSprite;
 
-#include "Cursor.inc"
-
 STATIC ULONG DefaultPalette[] =
 {
     2 << 16 | 17,
     0,0,0,
     0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
     0
+};
+
+CHIP struct CURSOR_IMAGE Cursors[] = {
+  {
+    -7,-7,15,
+    {
+        0x0000,0x0000,
+        0x380 ,0x0   ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x380 ,0x0   ,
+        0x0   ,0x0   ,
+        0xf83e,0x0   ,
+        0x8822,0x701c,
+        0xf83e,0x0   ,
+        0x0   ,0x0   ,
+        0x380 ,0x0   ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x380 ,0x0   ,
+        0x0000,0x0000
+    }
+  },
+  {
+    -7, -7, 15,
+    {
+      0x0000,0x0000,
+      0xfff0,0x0   ,
+      0x9058,0x6fa0,
+      0x9148,0x6eb0,
+      0x9148,0x6eb0,
+      0x9048,0x6fb0,
+      0x9fc8,0x6030,
+      0x8008,0x7ff0,
+      0x9fc8,0x6030,
+      0xa028,0x5fd0,
+      0xafa8,0x5050,
+      0xa028,0x5fd0,
+      0xa028,0x5fd0,
+      0xfff8,0x0   ,
+      0x0000,0x0000
+    }
+  }
 };
 
 EXPORT VOID ViewInitialise()
@@ -271,13 +320,13 @@ EXPORT VOID ViewShow()
   
   CursorSimpleSprite.x = 0;
   CursorSimpleSprite.y = 0;
-  CursorSimpleSprite.height = 15;
+  CursorSimpleSprite.height = Cursors[0].Height;
 
   UWORD color_reg = 16 + ((spriteNum & 0x06) << 1);
 
   LoadRGB32(vp, &DefaultPalette);
 
-  ChangeSprite(NULL, &CursorSimpleSprite, (APTR) &Cursor3);
+  ChangeSprite(NULL, &CursorSimpleSprite, (APTR) &Cursors[0].Data);
   MoveSprite(NULL, &CursorSimpleSprite, 0, 0);
 
 }
