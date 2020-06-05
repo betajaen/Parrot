@@ -90,11 +90,9 @@ struct SimpleSprite CursorSimpleSprite;
 
 STATIC ULONG DefaultPalette[] =
 {
-    3 << 16 | 17,
+    2 << 16 | 17,
     0,0,0,
     0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
-    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
-
     0
 };
 
@@ -107,6 +105,7 @@ EXPORT VOID ViewInitialise()
   IntuitionView = NULL;
 
   InitView(&View);
+
 }
 
 EXPORT VOID ViewExitNow()
@@ -182,6 +181,7 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
     avp->RasInfo->BitMap = vp->v_Bitmap;
     avp->DWidth = vl->vl_Width;
     avp->DHeight = vl->vl_Height;
+    avp->Modes = 0 | SPRITES;
 
     vp->v_ColorMap = GetColorMap(32);
     avp->ColorMap = vp->v_ColorMap;
@@ -241,10 +241,13 @@ EXPORT VOID ViewClose()
     FreeCprList(View.SHFCprList);
   }
   NumViewPorts = 0;
+
 }
 
 EXPORT VOID ViewShow()
 {
+  UWORD ii, spriteNum, colourRegister;
+  struct ViewPort* vp;
 
   if (IsShown)
   {
@@ -253,22 +256,28 @@ EXPORT VOID ViewShow()
   
   IsShown = TRUE;
   CloseWorkBench();
+
   IntuitionView = GfxBase->ActiView;
   WaitTOF();
   LoadView(&View);
   WaitTOF();
   WaitTOF();
 
-  LoadRGB32(&ViewPorts[0].v_ViewPort, &DefaultPalette[0]);
+  vp = &ViewPorts[0].v_ViewPort;
+
 
   FreeSprite(0);
   WORD sprite_num = GetSprite(&CursorSimpleSprite, 0);
   
   CursorSimpleSprite.x = 0;
   CursorSimpleSprite.y = 0;
-  CursorSimpleSprite.height = 5;
+  CursorSimpleSprite.height = 15;
 
-  ChangeSprite(NULL, &CursorSimpleSprite, (APTR) &Cursor1);
+  UWORD color_reg = 16 + ((spriteNum & 0x06) << 1);
+
+  LoadRGB32(vp, &DefaultPalette);
+
+  ChangeSprite(NULL, &CursorSimpleSprite, (APTR) &Cursor3);
   MoveSprite(NULL, &CursorSimpleSprite, 0, 0);
 
 }
