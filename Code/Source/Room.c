@@ -375,7 +375,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
     {
       
       /* Show first backdrop on screen */
-      ViewBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
+      GfxBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
 
       //ScreenRpSetAPen(screen, 15);
       //for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
@@ -400,7 +400,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       //
       //}
 
-      ViewSwapBuffers(screen);
+      GfxSubmitFrame(screen);
 
       //ScreenSwapBuffers(screen);
 

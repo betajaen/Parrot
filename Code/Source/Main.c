@@ -153,8 +153,8 @@ VOID ExitNow()
 {
 
   ExitArenaNow();
-  ViewHide();
-  ViewClose();
+  GfxHide();
+  GfxClose();
 
   //ExitScreenNow();
 

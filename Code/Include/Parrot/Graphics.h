@@ -25,29 +25,27 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-EXPORT VOID ViewInitialise();
+EXPORT VOID GfxInitialise();
 
-EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* view);
+EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* view);
 
-EXPORT VOID ViewClose();
+EXPORT VOID GfxClose();
 
-EXPORT VOID ViewShow();
+EXPORT VOID GfxShow();
 
-EXPORT VOID ViewHide();
+EXPORT VOID GfxHide();
 
-EXPORT BOOL ViewIsPal();
+EXPORT BOOL GfxIsPal();
 
-EXPORT VOID ViewSwapBuffers(UWORD id);
+EXPORT VOID GfxSubmitFrame(UWORD id);
 
-EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table);
+EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen);
 
-EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen);
+EXPORT VOID GfxRectFill(UWORD vp, WORD x0, WORD y0, WORD x1, WORD y1);
 
-EXPORT VOID ViewRectFill(UWORD vp, WORD x0, WORD y0, WORD x1, WORD y1);
+EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
 
-EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
-
-EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table);
+EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table);
 
 EXPORT VOID Busy();
 

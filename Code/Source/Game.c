@@ -88,7 +88,7 @@ STATIC VOID Load(STRPTR path)
     );
   }
 
-  ViewLoadColours32(0, &GamePalette->pt_Data);
+  GfxLoadColours32(0, (ULONG*) &GamePalette->pt_Data[0]);
 
   ArenaRollback(ArenaChapter);
   ArenaRollback(ArenaRoom);
@@ -182,10 +182,10 @@ EXPORT VOID GameStart(STRPTR path)
   verbLayout->vl_Vertical = 130;
   verbLayout->vl_Depth = 2;
 
-  ViewInitialise();
+  GfxInitialise();
 
-  ViewOpen(&viewLayouts);
-  ViewShow();
+  GfxOpen(&viewLayouts);
+  GfxShow();
 
   Load(path);
 
@@ -206,8 +206,8 @@ EXPORT VOID GameStart(STRPTR path)
 
   InputExit();
 
-  ViewHide();
-  ViewClose();
+  GfxHide();
+  GfxClose();
 
 #endif
   CloseArchives();

@@ -92,13 +92,18 @@ UWORD                IsShown;
 
 STATIC ULONG DefaultPalette[] =
 {
+    4 << 16 | 0,
+    0,0,0,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
+    0X55555555, 0X55555555, 0X55555555,
     2 << 16 | 17,
     0,0,0,
     0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
     0
 };
 
-EXPORT VOID ViewInitialise()
+EXPORT VOID GfxInitialise()
 {
   NumViewPorts = 0;
   IsShown = FALSE;
@@ -112,11 +117,11 @@ EXPORT VOID ViewInitialise()
 
 EXPORT VOID ViewExitNow()
 {
-  ViewHide();
-  ViewClose();
+  GfxHide();
+  GfxClose();
 }
 
-EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
+EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* layouts)
 {
   struct VIEWPORT* vp, *lastVp;
   struct VIEW_LAYOUT* vl;
@@ -214,7 +219,7 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
 
 }
 
-EXPORT VOID ViewClose()
+EXPORT VOID GfxClose()
 {
   struct VIEWPORT* vp;
   UWORD ii;
@@ -253,7 +258,7 @@ EXPORT VOID ViewClose()
 
 }
 
-EXPORT VOID ViewShow()
+EXPORT VOID GfxShow()
 {
   UWORD ii, spriteNum, colourRegister;
   struct ViewPort* vp;
@@ -280,16 +285,12 @@ EXPORT VOID ViewShow()
   for (ii = 0; ii < NumViewPorts; ii++)
   {
     vp = &ViewPorts[ii].v_ViewPort;
-    SetRGB4(vp, 0, 0, 0, 0);
-    SetRGB4(vp, 1, 15, 15, 15);
-    SetRGB4(vp, 2, 10, 10, 10);
-    SetRGB4(vp, 3,  5,  5,  5);
-    LoadRGB32(vp, &DefaultPalette);
+    LoadRGB32(vp, (CONST ULONG*) &DefaultPalette[0]);
   }
 
 }
 
-EXPORT VOID ViewHide()
+EXPORT VOID GfxHide()
 {
   if (IsShown == FALSE)
   {
@@ -307,18 +308,18 @@ EXPORT VOID ViewHide()
   OpenWorkBench();
 }
 
-EXPORT BOOL ViewIsPal()
+EXPORT BOOL GfxIsPal()
 {
   return (GfxBase->DisplayFlags & PAL) == PAL;
 }
 
 
-EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table)
+EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table)
 {
-  LoadRGB32(&ViewPorts[vp].v_ViewPort, table);
+  LoadRGB32(&ViewPorts[vp].v_ViewPort, (CONST ULONG*) table);
 }
 
-EXPORT VOID ViewSwapBuffers(UWORD id)
+EXPORT VOID GfxSubmitFrame(UWORD id)
 {
   struct VIEWPORT* vp;
   
@@ -341,7 +342,7 @@ EXPORT VOID ViewSwapBuffers(UWORD id)
   WaitTOF();
 }
 
-EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen)
+EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
 {
   SetAPen(
     &ViewPorts[vp].v_RastPort,
@@ -349,7 +350,7 @@ EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen)
   );
 }
 
-EXPORT VOID ViewRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
+EXPORT VOID GfxRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
 {
   struct VIEWPORT* vp; 
   vp = &ViewPorts[id];
@@ -367,7 +368,7 @@ EXPORT VOID ViewRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
   );
 }
 
-EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
+EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
 {
   struct RastPort* rp;
   WORD offset;
