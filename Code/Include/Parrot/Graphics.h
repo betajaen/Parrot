@@ -55,6 +55,8 @@ EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table);
 
 EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y);
 
+EXPORT WORD GfxTextLength(UWORD vp, STRPTR text, WORD textLength);
+
 EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength);
 
 EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLength);

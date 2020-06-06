@@ -327,6 +327,11 @@ EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y)
   Move(&vpp->v_RastPort, x, offset + y);
 }
 
+EXPORT WORD GfxTextLength(UWORD vp, STRPTR text, WORD textLength)
+{
+  return TextLength(&ViewPorts[vp].v_RastPort, text, textLength);
+}
+
 EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength)
 {
   Text(&ViewPorts[vp].v_RastPort, text, textLength);
@@ -353,7 +358,6 @@ EXPORT VOID GfxSubmit(UWORD id)
   vp->v_RasInfo.RyOffset = vp->v_ReadOffset + vp->v_ScrollY;
 
   ScrollVPort(&vp->v_ViewPort);
-  // WaitTOF();
 }
 
 EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)

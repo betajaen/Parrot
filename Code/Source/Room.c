@@ -335,19 +335,28 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
     if (TRUE == updateCaption)
     {
-      GfxMove(1, 10, 10);
-
       if (hasCaption)
       {
+        WORD len;
+        GfxSetAPen(1, 0);
+        GfxSetBPen(1, 1);
+        GfxRectFill(1, 0, 0, 319, 11);
+
+        len = GfxTextLength(1, captionText, captionLength);
+        len >>= 1;
+
         GfxSetAPen(1, 1);
         GfxSetBPen(1, 0);
+        GfxMove(1, 160 - len, 10);
         GfxText(1, captionText, captionLength);
       }
       else
       {
+        GfxMove(1, 1, 4);
+
         GfxSetAPen(1, 0);
         GfxSetBPen(1, 1);
-        GfxRectFill(1, 10, 1, 100, 20);
+        GfxRectFill(1, 0, 0, 319, 11);
       }
 
       updateCaption = FALSE;
