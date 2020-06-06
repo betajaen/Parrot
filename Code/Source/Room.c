@@ -35,6 +35,9 @@
 
 #include <proto/dos.h>
 
+EXTERN WORD CursorX;
+EXTERN WORD CursorY;
+
 EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 {
   UBYTE ii;
@@ -178,6 +181,12 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   WORD rmMouseX, rmMouseY;
   WORD camRight;
   struct INPUTEVENT evt;
+  BOOL updateCaption;
+  BOOL hasCaption;
+  CHAR* captionText;
+  WORD captionLength;
+  struct EXIT* captionExit;
+  CHAR mouseCoords[360];
 
   exitRoom = FALSE;
   scrollDir = 0;
@@ -219,26 +228,61 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
   NotBusy();
 
-  
-  //ViewBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
-  //ViewSwapBuffers(screen);
+  updateCaption = FALSE;
+  hasCaption = FALSE;
+  captionExit = NULL;
 
   while (exitRoom == FALSE && InEvtForceQuit == FALSE)
   {
-
     while (PopEvent(&evt))
     {
       switch (evt.ie_Type)
       {
-      case IET_KEYUP:
-      {
-        if (evt.ie_Code == KC_ESC)
+        case IET_KEYUP:
         {
-          exitRoom = TRUE;
-          entrance->en_Room = 0;
+          if (evt.ie_Code == KC_ESC)
+          {
+            exitRoom = TRUE;
+            entrance->en_Room = 0;
+          }
         }
-      }
-      break;
+        break;
+        case IET_CURSOR:
+        {
+          struct EXIT* newExit;
+          newExit = NULL;
+
+          for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+          {
+            exit = room.ur_Exits[ii];
+          
+            if (NULL != exit && PointInside(&exit->ex_HitBox, evt.ie_CursX, evt.ie_CursY))
+            {
+              newExit = exit;
+
+              if (captionExit != exit)
+              {
+                updateCaption = TRUE;
+                hasCaption = TRUE;
+                captionText = &exit->ex_Name[0];
+                captionLength = StrLength(captionText);
+
+                captionExit = exit;
+              }
+
+              break;
+            }
+          }
+
+          if (newExit == NULL && captionExit != NULL)
+          {
+            updateCaption = TRUE;
+            hasCaption = FALSE;
+            captionExit = NULL;
+          }
+
+        }
+        break;
       }
     }
 
@@ -370,6 +414,29 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       screenUpdate = TRUE;
     }
 
+    if (TRUE == updateCaption)
+    {
+      GfxMove(1, 10, 10);
+
+      if (hasCaption)
+      {
+        GfxSetAPen(1, 1);
+        GfxSetBPen(1, 0);
+        GfxText(1, captionText, captionLength);
+      }
+      else
+      {
+        GfxSetAPen(1, 0);
+        GfxSetBPen(1, 1);
+        GfxRectFill(1, 10, 1, 100, 20);
+      }
+
+      updateCaption = FALSE;
+      hasCaption = FALSE;
+
+      GfxSubmit(1);
+    }
+
 
     if (TRUE == screenUpdate)
     {
@@ -377,30 +444,20 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       /* Show first backdrop on screen */
       GfxBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
 
-      //ScreenRpSetAPen(screen, 15);
-      //for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
-      //{
-      //
-      //  exit = room.ur_Exits[ii];
-      //
-      //  if (NULL == exit)
-      //    break;
-      //
-      //  struct RECT localRect;
-      //  localRect.rt_Left = exit->ex_HitBox.rt_Left - room.ur_CamX;
-      //  localRect.rt_Top = exit->ex_HitBox.rt_Top - room.ur_CamY;
-      //  localRect.rt_Right = exit->ex_HitBox.rt_Right - room.ur_CamX;
-      //  localRect.rt_Bottom = exit->ex_HitBox.rt_Bottom - room.ur_CamY;
-      //
-      //  if (localRect.rt_Left >= 0 && localRect.rt_Right < gameInfo->gi_Width)
-      //  {
-      //    ScreenRpDrawBox(screen, &localRect);
-      //  }
-      //
-      //
-      //}
 
-      GfxSubmitFrame(screen);
+      for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+      {
+        
+        exit = room.ur_Exits[ii];
+        
+        if (NULL == exit)
+          break;
+        
+        GfxDrawHitBox(screen, &exit->ex_HitBox, &exit->ex_Name[0], StrLen(exit->ex_Name));
+        
+      }
+
+      GfxSubmit(screen);
 
       //ScreenSwapBuffers(screen);
 

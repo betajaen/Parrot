@@ -319,7 +319,24 @@ EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table)
   LoadRGB32(&ViewPorts[vp].v_ViewPort, (CONST ULONG*) table);
 }
 
-EXPORT VOID GfxSubmitFrame(UWORD id)
+EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y)
+{
+  struct VIEWPORT* vpp;
+  WORD offset;
+
+  vpp = &ViewPorts[vp];
+
+  offset = vpp->v_WriteOffset;
+
+  Move(&vpp->v_RastPort, x, offset + y);
+}
+
+EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength)
+{
+  Text(&ViewPorts[vp].v_RastPort, text, textLength);
+}
+
+EXPORT VOID GfxSubmit(UWORD id)
 {
   struct VIEWPORT* vp;
   
@@ -339,12 +356,20 @@ EXPORT VOID GfxSubmitFrame(UWORD id)
   vp->v_RasInfo.RyOffset = vp->v_ReadOffset;
 
   ScrollVPort(&vp->v_ViewPort);
-  WaitTOF();
+  // WaitTOF();
 }
 
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
 {
   SetAPen(
+    &ViewPorts[vp].v_RastPort,
+    pen
+  );
+}
+
+EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen)
+{
+  SetBPen(
     &ViewPorts[vp].v_RastPort,
     pen
   );
@@ -358,8 +383,6 @@ EXPORT VOID GfxRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
   WORD offset;
 
   offset = vp->v_WriteOffset;
-
-  
 
   RectFill(
     &vp->v_RastPort,
@@ -378,4 +401,26 @@ EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD 
   rp = &ViewPorts[id].v_RastPort;
   
   BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy + offset, sw, sh, 0xC0);
+}
+
+
+EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLength)
+{
+  struct RastPort* rp;
+  WORD offset;
+
+  offset = ViewPorts[id].v_WriteOffset;
+  rp = &ViewPorts[id].v_RastPort;
+
+  SetAPen(rp, 1);
+  SetBPen(rp, 2);
+
+  Move(rp, rect->rt_Left, rect->rt_Top + offset);
+  Draw(rp, rect->rt_Right, rect->rt_Top + offset);
+  Draw(rp, rect->rt_Right, rect->rt_Bottom + offset);
+  Draw(rp, rect->rt_Left, rect->rt_Bottom + offset);
+  Draw(rp, rect->rt_Left, rect->rt_Top + offset);
+
+  Move(rp, rect->rt_Left, rect->rt_Top + offset);
+  Text(rp, name, nameLength);
 }

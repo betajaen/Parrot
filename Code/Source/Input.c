@@ -73,12 +73,10 @@ BOOL PopEvent(struct INPUTEVENT* ie)
     ie->ie_CursX = popped->ie_CursX;
     ie->ie_CursY = popped->ie_CursY;
     rc = TRUE;
-    // Alert(0x1234);
+
+    InputRead = (InputRead + 1) & (MAX_INPUT_EVENT_SIZE - 1);
   }
 
-  SemAcquireInputRw();
-  InputRead = (InputRead + 1) & (MAX_INPUT_EVENT_SIZE-1);
-  SemReleaseInputRw();
 
   return rc;
 }
@@ -87,23 +85,24 @@ VOID PushEvent(struct INPUTEVENT* ie)
 {
   struct INPUTEVENT* pushed;
 
-  if (InputWrite != InputRead)
-  {
-    pushed = &Inputs[InputRead];
-    pushed->ie_Type = ie->ie_Type;
-    pushed->ie_Code = ie->ie_Code;
-    pushed->ie_CursX = ie->ie_CursX;
-    pushed->ie_CursY = ie->ie_CursY;
-  }
+  pushed = &Inputs[InputWrite];
+  pushed->ie_Type = ie->ie_Type;
+  pushed->ie_Code = ie->ie_Code;
+  pushed->ie_CursX = ie->ie_CursX;
+  pushed->ie_CursY = ie->ie_CursY;
 
-  SemAcquireInputRw();
   InputWrite = (InputWrite + 1) & (MAX_INPUT_EVENT_SIZE - 1);
-  SemReleaseInputRw();
 }
 
 HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 {
   struct INPUTEVENT evt;
+  BOOL hasMouseUpdate;
+  WORD mouseX, mouseY;
+
+  hasMouseUpdate = FALSE;
+  mouseX = CursorX;
+  mouseY = CursorY;
 
   while (ie != NULL)
   {
@@ -128,37 +127,42 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
     }
     else if (ie->ie_Class == IECLASS_RAWMOUSE)
     {
-      CursorX += ie->ie_X;
-      CursorY += ie->ie_Y;
-
-      if (CursorX < 0)
+      mouseX += ie->ie_X;
+      mouseY += ie->ie_Y;
+      if (mouseX < 0)
       {
-        CursorX = 0;
+        mouseX = 0;
       }
-      else if (CursorX > CursorXLimit)
+      else if (mouseX > CursorXLimit)
       {
-        CursorX = CursorXLimit;
+        mouseX = CursorXLimit;
       }
-
-      if (CursorY < 0)
+      
+      if (mouseY < 0)
       {
-        CursorY = 0;
+        mouseY = 0;
       }
-      else if (CursorY > CursorYLimit)
+      else if (mouseY > CursorYLimit)
       {
-        CursorY = CursorYLimit;
+        mouseY = CursorYLimit;
       }
-
-      MoveSprite(NULL, &CursorSprite, CursorX + CursorOffsetX, CursorY + CursorOffsetY);
-
-      evt.ie_Type = IET_CURSOR;
-      evt.ie_Code = 0;
-      evt.ie_CursX = CursorX;
-      evt.ie_CursY = CursorY;
-      PushEvent(&evt);
     }
 
     ie = ie->ie_NextEvent;
+  }
+
+  if ((CursorX != mouseX) || (CursorY != mouseY))
+  {
+    CursorX = mouseX;
+    CursorY = mouseY;
+
+    MoveSprite(NULL, &CursorSprite, CursorX + CursorOffsetX, CursorY + CursorOffsetY);
+
+    evt.ie_Type = IET_CURSOR;
+    evt.ie_Code = 0;
+    evt.ie_CursX = CursorX;
+    evt.ie_CursY = CursorY;
+    PushEvent(&evt);
   }
 
   return 0;
@@ -177,7 +181,7 @@ EXPORT VOID InputInitialise()
   InEvtForceQuit = FALSE;
   InEvtKey = 0;
   InputRead = 0;
-  InputWrite = 0;
+  InputWrite = 1;
   CursorX = 0;
   CursorY = 0;
 

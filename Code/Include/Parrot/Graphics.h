@@ -37,15 +37,23 @@ EXPORT VOID GfxHide();
 
 EXPORT BOOL GfxIsPal();
 
-EXPORT VOID GfxSubmitFrame(UWORD id);
+EXPORT VOID GfxSubmit(UWORD id);
 
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen);
+
+EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen);
 
 EXPORT VOID GfxRectFill(UWORD vp, WORD x0, WORD y0, WORD x1, WORD y1);
 
 EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
 
 EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table);
+
+EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y);
+
+EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength);
+
+EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLength);
 
 EXPORT VOID Busy();
 

@@ -193,7 +193,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   InputInitialise();
 
-  entrance.en_Room = GameInfo->gi_StartRoom;
+  entrance.en_Room = 3; // GameInfo->gi_StartRoom;
   entrance.en_Exit = 0;
 
   while (entrance.en_Room != 0 && InEvtForceQuit == FALSE)
