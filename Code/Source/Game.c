@@ -29,11 +29,11 @@
 #include <Parrot/Archive.h>
 #include <Parrot/Arena.h>
 #include <Parrot/Requester.h>
-#include <Parrot/Screen.h>
 #include <Parrot/Asset.h>
 #include <Parrot/Room.h>
 #include <Parrot/String.h>
-#include <Parrot/View.h>
+#include <Parrot/Graphics.h>
+#include <Parrot/Input.h>
 
 #include "Asset.h"
 
@@ -45,24 +45,6 @@ struct GAME_INFO* GameInfo;
 struct PALETTE_TABLE* GamePalette;
 struct PALETTE_TABLE* GameCursorPalette;
 struct UNPACKED_ROOM  GameRoom;
-
-STATIC struct PALETTE_TABLE DefaultPalette =
-{
-  0,0,
-  {
-    3 << 16 | 0,
-    0X33333333, 0X33333333,  0X33333333,
-    0X88888888, 0X88888888,  0X88888888,
-    0XFFFFFFFF, 0XFFFFFFFF,  0XFFFFFFFF,
-    
-    3 << 16 | 17,
-    0,0,0,
-    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
-    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
-
-    0
-  }
-};
 
 STATIC VOID Load(STRPTR path)
 {
@@ -106,34 +88,7 @@ STATIC VOID Load(STRPTR path)
     );
   }
 
-  ViewLoadColours32(0, &GamePalette->pt_Data);
-
-  /* Load and Use Start Cursor Palette */
-
-  if (0 == GameInfo->gi_StartCursorPalette)
-  {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting Cursor Palette was None"
-      PARROT_ERR_INT("GAME_INFO::gi_StartCursorPalette"),
-      GameInfo->gi_StartCursorPalette
-    );
-  }
-
-  GameCursorPalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_UNKNOWN, CT_PALETTE, GameInfo->gi_StartCursorPalette, CHUNK_FLAG_ARCH_AGA);
-
-  if (NULL == GamePalette)
-  {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting Cursor Palette Table was not found"
-      PARROT_ERR_INT("GAME_INFO::gi_StartCursorPalette"),
-      (ULONG)GameInfo->gi_StartCursorPalette
-    );
-  }
-
-  ViewLoadColours32(0, &GamePalette->pt_Data);
-
+  GfxLoadColours32(0, (ULONG*) &GamePalette->pt_Data[0]);
 
   ArenaRollback(ArenaChapter);
   ArenaRollback(ArenaRoom);
@@ -150,6 +105,7 @@ EXPORT VOID GameStart(STRPTR path)
   struct ENTRANCE entrance;
   struct VIEW_LAYOUTS viewLayouts;
   struct VIEW_LAYOUT* roomLayout;
+  struct VIEW_LAYOUT* verbLayout;
 
   UBYTE ii;
 
@@ -202,12 +158,13 @@ EXPORT VOID GameStart(STRPTR path)
   ScreenClose(0);
 #else
 
-  viewLayouts.v_NumLayouts = 1;
+  viewLayouts.v_NumLayouts = 2;
   viewLayouts.v_Width = GameInfo->gi_Width;
   viewLayouts.v_Height = GameInfo->gi_Height;
   viewLayouts.v_Left = 0;
   viewLayouts.v_Top = 0;
   roomLayout = &viewLayouts.v_Layouts[0];
+  verbLayout = &viewLayouts.v_Layouts[1];
 
   roomLayout->vl_Width = 320;
   roomLayout->vl_Height = 128;
@@ -217,20 +174,29 @@ EXPORT VOID GameStart(STRPTR path)
   roomLayout->vl_Vertical = 0;
   roomLayout->vl_Depth = 4;
 
-  ViewInitialise();
+  verbLayout->vl_Width = 320;
+  verbLayout->vl_Height = 70;
+  verbLayout->vl_BitMapWidth = 320;
+  verbLayout->vl_BitmapHeight = 70;
+  verbLayout->vl_Horizontal = 0;
+  verbLayout->vl_Vertical = 130;
+  verbLayout->vl_Depth = 2;
 
-  ViewOpen(&viewLayouts);
-  ViewLoadColours32(0, &DefaultPalette.pt_Data[0]);
-  ViewShow();
+  GfxInitialise();
+
+  GfxOpen(&viewLayouts);
+  GfxShow();
 
   Load(path);
 
   ArenaRollback(ArenaChapter);
 
-  entrance.en_Room = GameInfo->gi_StartRoom;
+  InputInitialise();
+
+  entrance.en_Room = 3; // GameInfo->gi_StartRoom;
   entrance.en_Exit = 0;
 
-  while (entrance.en_Room != 0)
+  while (entrance.en_Room != 0 && InEvtForceQuit == FALSE)
   {
     ArenaRollback(ArenaRoom);
 
@@ -238,8 +204,10 @@ EXPORT VOID GameStart(STRPTR path)
     PlayRoom(0, &entrance, GameInfo);
   }
 
-  ViewHide();
-  ViewClose();
+  InputExit();
+
+  GfxHide();
+  GfxClose();
 
 #endif
   CloseArchives();

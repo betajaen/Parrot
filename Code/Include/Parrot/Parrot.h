@@ -44,6 +44,7 @@
 #define MAX_ROOM_ENTITIES      20
 #define MAX_ENTITY_NAME_LENGTH 29
 #define MAX_VIEW_LAYOUTS       2
+#define MAX_INPUT_EVENT_SIZE   32
 
 /**
     Typename consistency
@@ -62,6 +63,10 @@
 
 #ifndef EXPORT
 #define EXPORT
+#endif
+
+#ifndef EXTERN
+#define EXTERN extern
 #endif
 
 /**
@@ -129,34 +134,8 @@ struct VIEW_LAYOUTS
 };
 
 #define CURSOR_NONE   0
-#define CURSOR_POINT  1
+#define CURSOR_SELECT 1
 #define CURSOR_BUSY   2
-#define CURSOR_SELECT 3
-#define CURSOR_NW     4
-#define CURSOR_N      5
-#define CURSOR_NE     6
-#define CURSOR_E      7
-#define CURSOR_SE     8
-#define CURSOR_S      9
-#define CURSOR_SW     10
-#define CURSOR_W      11
-#define CURSOR_ANY    12
-#define CURSOR_MOUSE  13
-#define CURSOR_LMB    14
-#define CURSOR_RMB    15
-#define CURSOR_USE    16
-#define CURSOR_TALK   17
-#define CURSOR_TAKE   18
-#define CURSOR_GIVE   19
-#define CURSOR_DROP   20
-#define CURSOR_READ   21
-#define CURSOR_LOOK   22
-#define CURSOR_PULL   23
-#define CURSOR_PUSH   24
-#define CURSOR_OPEN   25
-#define CURSOR_CLOSE  26
-#define CURSOR_LOCK   27
-#define CURSOR_UNLOCK 28
 
 #define ARCHIVE_GLOBAL  0
 #define ARCHIVE_UNKNOWN 65535
@@ -167,6 +146,24 @@ struct VIEW_LAYOUTS
 #define CT_PALETTE        MAKE_NODE_ID('P','A','L','4')
 #define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
 #define CT_ENTITY         MAKE_NODE_ID('E','N','T','Y')
+
+#define IET_KEYDOWN    1
+#define IET_KEYUP      2
+#define IET_SELECTDOWN 3
+#define IET_SELECTUP   4
+#define IET_SELECT     5
+#define IET_MENUDOWN   6
+#define IET_MENUUP     7
+#define IET_MENU       8
+#define IET_CURSOR     9
+
+struct INPUTEVENT
+{
+  UWORD             ie_Type;
+  UWORD             ie_Code;
+  WORD              ie_CursX;
+  WORD              ie_CursY;
+};
 
 struct ASSET
 {

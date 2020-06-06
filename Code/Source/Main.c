@@ -27,6 +27,7 @@
 
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
+#include <Parrot/Graphics.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
@@ -152,7 +153,11 @@ VOID ExitNow()
 {
 
   ExitArenaNow();
-  ExitScreenNow();
+  GfxHide();
+  GfxClose();
+
+  //ExitScreenNow();
+
 
   if (NULL != wbMsg)
   {

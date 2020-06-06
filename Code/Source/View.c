@@ -28,9 +28,10 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
-#include <Parrot/View.h>
+#include <Parrot/Graphics.h>
 
 #include <proto/exec.h>
+#include <proto/intuition.h>
 
 #include <hardware/dmabits.h>
 #include <hardware/custom.h>
@@ -45,6 +46,7 @@
 #include <graphics/text.h>
 #include <graphics/gfxbase.h>
 
+
 #include <clib/graphics_protos.h>
 
 extern struct GfxBase* GfxBase;
@@ -54,24 +56,32 @@ extern struct GfxBase* GfxBase;
 #define ARCH_AGA     2
 #define ARCH_RTG     3
 
+struct CURSOR_IMAGE
+{
+  WORD  OffsetX, OffsetY;
+  UWORD Height;
+  UWORD Data[2 * 24];
+};
 
 struct VIEWPORT
 {
-  struct ViewPort  v_ViewPort;
-  struct RasInfo   v_RasInfo;
-  struct RastPort  v_RastPort;
-  struct BitMap*   v_Bitmap;
-  struct ColorMap* v_ColorMap;
-  UWORD            v_Offset;
-  UWORD            v_ReadOffset;
-  UWORD            v_WriteOffset;
-  UWORD            v_Width;
-  UWORD            v_Height;
-  UWORD            v_BitMapWidth;
-  UWORD            v_BitmapHeight;
-  WORD             v_Horizontal;
-  WORD             v_Vertical;
-  UWORD            v_Depth;
+  struct ViewPort     v_ViewPort;
+  struct RasInfo      v_RasInfo;
+  struct RastPort     v_RastPort;
+  struct BitMap*      v_Bitmap;
+  struct ColorMap*    v_ColorMap;
+  UWORD               v_Offset;
+  UWORD               v_ReadOffset;
+  UWORD               v_WriteOffset;
+  UWORD               v_Width;
+  UWORD               v_Height;
+  UWORD               v_BitMapWidth;
+  UWORD               v_BitmapHeight;
+  WORD                v_Horizontal;
+  WORD                v_Vertical;
+  UWORD               v_Depth;
+  WORD                v_ScrollX;
+  WORD                v_ScrollY;
 };
 
 struct View*         IntuitionView;
@@ -82,7 +92,20 @@ UWORD                ScreenHeight;
 UWORD                NumViewPorts;
 UWORD                IsShown;
 
-EXPORT VOID ViewInitialise()
+STATIC ULONG DefaultPalette[] =
+{
+    4 << 16 | 0,
+    0,0,0,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
+    0X55555555, 0X55555555, 0X55555555,
+    2 << 16 | 17,
+    0,0,0,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0
+};
+
+EXPORT VOID GfxInitialise()
 {
   NumViewPorts = 0;
   IsShown = FALSE;
@@ -95,17 +118,17 @@ EXPORT VOID ViewInitialise()
 
 EXPORT VOID ViewExitNow()
 {
-  ViewHide();
-  ViewClose();
+  GfxHide();
+  GfxClose();
 }
 
-EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
+EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* layouts)
 {
   struct VIEWPORT* vp, *lastVp;
   struct VIEW_LAYOUT* vl;
   struct ViewPort* avp;
   struct RastPort* rp;
-  UWORD ii, jj;
+  UWORD ii, jj, numColours;
 
   if (layouts->v_NumLayouts > MAX_VIEW_LAYOUTS)
   {
@@ -139,6 +162,8 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
     vp->v_Horizontal = vl->vl_Horizontal;
     vp->v_Vertical = vl->vl_Vertical;
     vp->v_Depth = vl->vl_Depth;
+    vp->v_ScrollX = 0;
+    vp->v_ScrollY = 0;
     
     vp->v_Bitmap = AllocBitMap(
       vp->v_BitMapWidth, 
@@ -148,13 +173,6 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
 
     InitRastPort(&vp->v_RastPort);
     vp->v_RastPort.BitMap = vp->v_Bitmap;
-
-    SetAPen(&vp->v_RastPort, 1);
-    RectFill(
-      &vp->v_RastPort,
-      0, 0,
-      4, vp->v_Offset-1
-    );
 
     avp = &vp->v_ViewPort;
     InitVPort(avp);
@@ -166,8 +184,16 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
     avp->RasInfo->BitMap = vp->v_Bitmap;
     avp->DWidth = vl->vl_Width;
     avp->DHeight = vl->vl_Height;
+    avp->Modes = 0 | SPRITES;
+    avp->DyOffset = vp->v_Vertical;
 
-    vp->v_ColorMap = GetColorMap(32);
+    numColours = 1 << vl->vl_Depth;
+    if (numColours < 32)
+    {
+      numColours = 32;
+    }
+
+    vp->v_ColorMap = GetColorMap(numColours);
     avp->ColorMap = vp->v_ColorMap;
 
     if (lastVp != NULL)
@@ -186,9 +212,10 @@ EXPORT VOID ViewOpen(struct VIEW_LAYOUTS* layouts)
 
   View.Modes = 0 | SPRITES;
   MrgCop(&View);
+
 }
 
-EXPORT VOID ViewClose()
+EXPORT VOID GfxClose()
 {
   struct VIEWPORT* vp;
   UWORD ii;
@@ -224,49 +251,88 @@ EXPORT VOID ViewClose()
     FreeCprList(View.SHFCprList);
   }
   NumViewPorts = 0;
+
 }
 
-EXPORT VOID ViewShow()
+EXPORT VOID GfxShow()
 {
+  UWORD ii, spriteNum, colourRegister;
+  struct ViewPort* vp;
+
   if (IsShown)
   {
     return;
   }
   
   IsShown = TRUE;
+  CloseWorkBench();
+
   IntuitionView = GfxBase->ActiView;
   WaitTOF();
   LoadView(&View);
   WaitTOF();
   WaitTOF();
+
+
+  FreeSprite(0);
+  spriteNum = CursorInitialise();
+  colourRegister = 16 + ((spriteNum & 0x06) << 1);
+
+  for (ii = 0; ii < NumViewPorts; ii++)
+  {
+    vp = &ViewPorts[ii].v_ViewPort;
+    LoadRGB32(vp, (CONST ULONG*) &DefaultPalette[0]);
+  }
+
 }
 
-EXPORT VOID ViewHide()
+EXPORT VOID GfxHide()
 {
   if (IsShown == FALSE)
   {
     return;
   }
 
+  CursorShutdown();
+
   IsShown = FALSE;
   WaitTOF();
   LoadView(IntuitionView);
   WaitTOF();
   WaitTOF();
+
+  OpenWorkBench();
 }
 
-EXPORT BOOL ViewIsPal()
+EXPORT BOOL GfxIsPal()
 {
   return (GfxBase->DisplayFlags & PAL) == PAL;
 }
 
 
-EXPORT VOID ViewLoadColours32(UWORD vp, ULONG* table)
+EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table)
 {
-  LoadRGB32(&ViewPorts[vp].v_ViewPort, table);
+  LoadRGB32(&ViewPorts[vp].v_ViewPort, (CONST ULONG*) table);
 }
 
-EXPORT VOID ViewSwapBuffers(UWORD id)
+EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y)
+{
+  struct VIEWPORT* vpp;
+  WORD offset;
+
+  vpp = &ViewPorts[vp];
+
+  offset = vpp->v_WriteOffset;
+
+  Move(&vpp->v_RastPort, x, offset + y);
+}
+
+EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength)
+{
+  Text(&ViewPorts[vp].v_RastPort, text, textLength);
+}
+
+EXPORT VOID GfxSubmit(UWORD id)
 {
   struct VIEWPORT* vp;
   
@@ -283,13 +349,28 @@ EXPORT VOID ViewSwapBuffers(UWORD id)
     vp->v_WriteOffset = vp->v_Offset;
   }
 
-  vp->v_RasInfo.RyOffset = vp->v_ReadOffset;
+  vp->v_RasInfo.RxOffset = vp->v_ScrollX;
+  vp->v_RasInfo.RyOffset = vp->v_ReadOffset + vp->v_ScrollY;
 
   ScrollVPort(&vp->v_ViewPort);
-  WaitTOF();
+  // WaitTOF();
 }
 
-EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen)
+EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)
+{
+  struct VIEWPORT* vp;
+  vp = &ViewPorts[id];
+
+  vp->v_ScrollX = x;
+  vp->v_ScrollY = y;
+
+  vp->v_RasInfo.RxOffset = vp->v_ScrollX;
+  vp->v_RasInfo.RyOffset = vp->v_ReadOffset + vp->v_ScrollY;
+
+  ScrollVPort(&vp->v_ViewPort);
+}
+
+EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
 {
   SetAPen(
     &ViewPorts[vp].v_RastPort,
@@ -297,7 +378,15 @@ EXPORT VOID ViewSetAPen(UWORD vp, UWORD pen)
   );
 }
 
-EXPORT VOID ViewRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
+EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen)
+{
+  SetBPen(
+    &ViewPorts[vp].v_RastPort,
+    pen
+  );
+}
+
+EXPORT VOID GfxRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
 {
   struct VIEWPORT* vp; 
   vp = &ViewPorts[id];
@@ -313,7 +402,7 @@ EXPORT VOID ViewRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
   );
 }
 
-EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
+EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
 {
   struct RastPort* rp;
   WORD offset;
@@ -323,4 +412,93 @@ EXPORT VOID ViewBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD
   rp = &ViewPorts[id].v_RastPort;
   
   BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy + offset, sw, sh, 0xC0);
+}
+
+
+EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLength)
+{
+  struct VIEWPORT* vp;
+  struct RastPort* rp;
+  WORD offset;
+  LONG x0, y0, x1, y1, t;
+
+  vp = &ViewPorts[id];
+  offset = vp->v_WriteOffset;
+  rp = &vp->v_RastPort;
+
+  x0 = rect->rt_Left;
+  y0 = rect->rt_Top;
+  x1 = rect->rt_Right;
+  y1 = rect->rt_Bottom;
+
+  if (x0 < 0)
+  {
+    x0 = 0;
+  }
+  else if (x0 >= vp->v_BitMapWidth)
+  {
+    x0 = vp->v_BitMapWidth - 1;
+  }
+
+  if (x1 < 0)
+  {
+    x1 = 0;
+  }
+  else if (x1 >= vp->v_BitMapWidth)
+  {
+    x1 = vp->v_BitMapWidth - 1;
+  }
+
+  if (y0 < 0)
+  {
+    y0 = 0;
+  }
+  else if (y0 >= vp->v_BitmapHeight)
+  {
+    y0 = vp->v_BitmapHeight - 1;
+  }
+
+  if (y1 < 0)
+  {
+    y1 = 0;
+  }
+  else if (y1 >= vp->v_BitmapHeight)
+  {
+    y1 = vp->v_BitmapHeight - 1;
+  }
+
+  if (x0 > x1)
+  {
+    t = x0;
+    x0 = x1;
+    x1 = t;
+  }
+
+  if (y0 > y1)
+  {
+    t = y0;
+    y0 = y1;
+    y1 = t;
+  }
+
+  y0 += offset;
+  y1 += offset;
+
+  SetAPen(rp, 1);
+  SetBPen(rp, 2);
+
+  Move(rp, x0, y0);
+  Draw(rp, x1, y0);
+  Draw(rp, x1, y1);
+  Draw(rp, x0, y1);
+  Draw(rp, x0, y0);
+
+  x0 = x0 + x1;
+  x0 >>= 1;
+
+  y0 = y0 + y1;
+  y0 >>= 1;
+
+  Move(rp, x0, y0);
+  Text(rp, name, nameLength);
 }

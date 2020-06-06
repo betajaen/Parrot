@@ -1,5 +1,5 @@
 /**
-    $Id: Events.c, 1.2 2020/05/24 12:50:00, betajaen Exp $
+    $Id: Input.h 1.2 2020/05/31 13:00:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,63 +25,21 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <Parrot/Parrot.h>
-#include <Parrot/Screen.h>
-#include <Parrot/Requester.h>
-#include <Parrot/Events.h>
+#define INEVT_CURSOR 1
+#define INEVT_KEY    2
 
-#include <proto/exec.h>
-#include <proto/intuition.h>
+EXTERN UWORD InEvtForceQuit;
+EXTERN UWORD InEvtKey;
+EXTERN WORD  InMouseX;
+EXTERN WORD  InMouseY;
 
-UWORD EvtKey;
-WORD EvtMouseX;
-WORD EvtMouseY;
+EXTERN BYTE  KeyState[];
 
-UWORD WaitForEvents(UWORD screen)
-{
-  struct Window* win;
-  struct IntuiMessage* imsg;
-  UWORD  rc;
+EXPORT VOID InputInitialise();
 
-  EvtKey = 0;
-  rc = 0;
-  win = GetScreenWindow(screen);
-  /* Wait(1L << win->UserPort->mp_SigBit); */
+EXPORT VOID InputExit();
 
-  while (imsg = (struct IntuiMessage*)GetMsg(win->UserPort))
-  {
-    switch (imsg->Class)
-    {
-      case IDCMP_RAWKEY:
-      {
-        rc |= WE_KEY;
-        EvtKey = imsg->Code;
-      }
-      break;
-      case IDCMP_MOUSEMOVE:
-      {
-        rc |= WE_CURSOR;
-        EvtMouseX = imsg->MouseX;
-        EvtMouseY = imsg->MouseY;
-      }
-      break;
-      case IDCMP_MOUSEBUTTONS:
-      {
-        if (imsg->Code == SELECTUP)
-        {
-          rc |= WE_SELECT;
-        }
-        else if (imsg->Code == MENUUP)
-        {
-          rc |= WE_MENU;
-        }
-      }
-      break;
-    }
+EXPORT BOOL PopEvent(struct INPUTEVENT* ie);
 
-
-    ReplyMsg((struct Message*) imsg);
-  }
-  
-  return rc;
-}
+#define KC_ESC     0x45
+#define KC_LSHIFT  0x60
