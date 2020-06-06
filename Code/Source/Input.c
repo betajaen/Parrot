@@ -47,6 +47,11 @@
 struct INPUTEVENT Inputs[MAX_INPUT_EVENT_SIZE] = { 0 };
 UWORD InputWrite, InputRead;
 
+UWORD CursorSelect[2], CursorMenu[2];
+
+BYTE  KeyState[256] = { 0 };
+
+
 EXTERN struct SimpleSprite CursorSprite;
 EXTERN WORD CursorOffsetX;
 EXTERN WORD CursorOffsetY;
@@ -98,7 +103,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 {
   struct INPUTEVENT evt;
   BOOL hasMouseUpdate;
-  WORD mouseX, mouseY;
+  WORD mouseX, mouseY, selectDown, selectUp, menuDown, menuUp;
 
   hasMouseUpdate = FALSE;
   mouseX = CursorX;
@@ -115,6 +120,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
         evt.ie_CursX = 0;
         evt.ie_CursY = 0;
         PushEvent(&evt);
+        KeyState[evt.ie_Code] = 0;
       }
       else
       {
@@ -123,12 +129,15 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
         evt.ie_CursX = 0;
         evt.ie_CursY = 0;
         PushEvent(&evt);
+
+        KeyState[evt.ie_Code] = 1;
       }
     }
     else if (ie->ie_Class == IECLASS_RAWMOUSE)
     {
       mouseX += ie->ie_X;
       mouseY += ie->ie_Y;
+      
       if (mouseX < 0)
       {
         mouseX = 0;
@@ -146,6 +155,30 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
       {
         mouseY = CursorYLimit;
       }
+
+      if (ie->ie_Code != IECODE_NOBUTTON)
+      {
+        if (ie->ie_Code == IECODE_LBUTTON)
+        {
+          selectDown = TRUE;
+        }
+
+        if (ie->ie_Code == (IECODE_LBUTTON | IECODE_UP_PREFIX))
+        {
+          selectUp = TRUE;
+        }
+
+        if (ie->ie_Code == IECODE_RBUTTON)
+        {
+          menuDown = TRUE;
+        }
+
+        if (ie->ie_Code == (IECODE_RBUTTON | IECODE_UP_PREFIX))
+        {
+          menuUp = TRUE;
+        }
+      }
+      
     }
 
     ie = ie->ie_NextEvent;
@@ -163,6 +196,73 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
     evt.ie_CursX = CursorX;
     evt.ie_CursY = CursorY;
     PushEvent(&evt);
+  }
+
+  if (selectDown == TRUE)
+  {
+    evt.ie_Type = IET_SELECTDOWN;
+    evt.ie_Code = 0;
+    evt.ie_CursX = CursorX;
+    evt.ie_CursY = CursorY;
+    PushEvent(&evt);
+
+    CursorSelect[0] = CursorSelect[1];
+    CursorSelect[1] = TRUE;
+  }
+
+  if (selectUp == TRUE)
+  {
+    evt.ie_Type = IET_SELECTUP;
+    evt.ie_Code = 0;
+    evt.ie_CursX = CursorX;
+    evt.ie_CursY = CursorY;
+    PushEvent(&evt);
+
+    CursorSelect[0] = CursorSelect[1];
+    CursorSelect[1] = FALSE;
+
+    if (CursorSelect[0] == TRUE)
+    {
+      evt.ie_Type = IET_SELECT;
+      evt.ie_Code = 0;
+      evt.ie_CursX = CursorX;
+      evt.ie_CursY = CursorY;
+      PushEvent(&evt);
+    }
+  }
+
+
+  if (menuDown == TRUE)
+  {
+    evt.ie_Type = IET_MENUDOWN;
+    evt.ie_Code = 0;
+    evt.ie_CursX = CursorX;
+    evt.ie_CursY = CursorY;
+    PushEvent(&evt);
+
+    CursorMenu[0] = CursorMenu[1];
+    CursorMenu[1] = TRUE;
+  }
+
+  if (menuUp == TRUE)
+  {
+    evt.ie_Type = IET_MENUUP;
+    evt.ie_Code = 0;
+    evt.ie_CursX = CursorX;
+    evt.ie_CursY = CursorY;
+    PushEvent(&evt);
+
+    CursorMenu[0] = CursorMenu[1];
+    CursorMenu[1] = FALSE;
+
+    if (CursorMenu[0] == TRUE)
+    {
+      evt.ie_Type = IET_MENU;
+      evt.ie_Code = 0;
+      evt.ie_CursX = CursorX;
+      evt.ie_CursY = CursorY;
+      PushEvent(&evt);
+    }
   }
 
   return 0;

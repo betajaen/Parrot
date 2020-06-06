@@ -151,9 +151,11 @@ struct VIEW_LAYOUTS
 #define IET_KEYUP      2
 #define IET_SELECTDOWN 3
 #define IET_SELECTUP   4
-#define IET_MENUDOWN   5
-#define IET_MENUUP     6
-#define IET_CURSOR       7
+#define IET_SELECT     5
+#define IET_MENUDOWN   6
+#define IET_MENUUP     7
+#define IET_MENU       8
+#define IET_CURSOR     9
 
 struct INPUTEVENT
 {

@@ -174,10 +174,10 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   struct UNPACKED_ROOM room;
   UWORD mostLeftEdge;
   WORD screenUpdate;
+  WORD scrollUpdate;
   UWORD cursor;
   UWORD ii;
   struct ENTITY* ent;
-  struct EXIT* exit;
   WORD rmMouseX, rmMouseY;
   WORD camRight;
   struct INPUTEVENT evt;
@@ -188,10 +188,14 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   struct EXIT* captionExit;
   CHAR mouseCoords[360];
 
+  struct EXIT* exit;
+  struct EXIT* newExit;
+
   exitRoom = FALSE;
   scrollDir = 0;
   cursor = CURSOR_BUSY;
   screenUpdate = TRUE;
+  scrollUpdate = FALSE;
 
   Busy();
 
@@ -232,6 +236,11 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   hasCaption = FALSE;
   captionExit = NULL;
 
+  GfxSetAPen(1, 0);
+  GfxSetBPen(1, 1);
+  GfxRectFill(1, 0, 0, 319, 69);
+  GfxSubmit(1);
+
   while (exitRoom == FALSE && InEvtForceQuit == FALSE)
   {
     while (PopEvent(&evt))
@@ -249,14 +258,16 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
         break;
         case IET_CURSOR:
         {
-          struct EXIT* newExit;
           newExit = NULL;
+
+          rmMouseX = room.ur_CamX + CursorX;
+          rmMouseY = room.ur_CamY + CursorY;
 
           for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
           {
             exit = room.ur_Exits[ii];
           
-            if (NULL != exit && PointInside(&exit->ex_HitBox, evt.ie_CursX, evt.ie_CursY))
+            if (NULL != exit && PointInside(&exit->ex_HitBox, rmMouseX, rmMouseY))
             {
               newExit = exit;
 
@@ -283,135 +294,30 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
         }
         break;
-      }
-    }
-
-#if 0
-    switch (InEvtKey)
-    {
-      case KC_ESC:
-      {
-        exitRoom = TRUE;
-        entrance->en_Room = 0;
-      }
-      break;
-      case KC_F1:
-      {
-        if (room.ur_Exits[0] != NULL)
+        case IET_SELECT:
         {
-          exitRoom = TRUE;
-          entrance->en_Room = GetRoomFromExit(room.ur_Exits[0]);
-          entrance->en_Exit = room.ur_Exits[0]->ex_Target;
+          if (captionExit != NULL)
+          {
+            exitRoom = TRUE;
+            entrance->en_Room = GetRoomFromExit(captionExit);
+            entrance->en_Exit = captionExit->ex_Target;
+          }
         }
-        else
+        break;
+        case IET_MENUDOWN:
         {
-          TraceF("There are no exits in this room to go through!");
+
+          room.ur_CamX = CursorX;
+          scrollUpdate = TRUE;
         }
+        break;
       }
-      break;
-      case KC_LEFT:
-      {
-        scrollDir = -10;
-      }
-      break;
-      case KC_RIGHT:
-      {
-        scrollDir = +10;
-      }
-      break;
     }
 
-    InEvtKey = 0;
-#endif
-
-    // if ((evt & WE_KEY) != 0)
-    // {
-    //   switch (EvtKey)
-    //   {
-    //     case KC_ESC:
-    //     {
-    //       exitRoom = TRUE;
-    //       entrance->en_Room = 0;
-    //     }
-    //     break;
-    //     case KC_F1:
-    //     {
-    //       if (room.ur_Exits[0] != NULL)
-    //       {
-    //         exitRoom = TRUE;
-    //         entrance->en_Room = GetRoomFromExit(room.ur_Exits[0]);
-    //         entrance->en_Exit = room.ur_Exits[0]->ex_Target;
-    //       }
-    //       else
-    //       {
-    //         TraceF("There are no exits in this room to go through!");
-    //       }
-    //     }
-    //     break;
-    //     case KC_LEFT:
-    //     {
-    //       scrollDir = -10;
-    //     }
-    //     break;
-    //     case KC_RIGHT:
-    //     {
-    //       scrollDir = +10;
-    //     }
-    //     break;
-    //   }
-    // }
-    // 
-    // if ((evt & WE_CURSOR) != 0)
-    // {
-    //   rmMouseX = EvtMouseX + room.ur_CamX;
-    //   rmMouseY = EvtMouseY + room.ur_CamY;
-    // }
-    // 
-    // if ((evt & WE_SELECT) != 0)
-    // {
-    //   for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
-    //   {
-    // 
-    //     exit = room.ur_Exits[ii];
-    // 
-    //     if (NULL == exit)
-    //       break;
-    // 
-    //     if (PointInside(&exit->ex_HitBox, rmMouseX, rmMouseY))
-    //     {
-    //       exitRoom = TRUE;
-    //       entrance->en_Room = GetRoomFromExit(exit);
-    //       entrance->en_Exit = exit->ex_Target;
-    //       break;
-    //     }
-    //   }
-    // }
-
-    // if (EvtMouseX < 10)
-    // {
-    //   scrollDir = -1;
-    // }
-    // else if (EvtMouseX > gameInfo->gi_Width - 10)
-    // {
-    //   scrollDir = +1;
-    // }
-    // else
-    // {
-    //   scrollDir = 0;
-    // }
-
-
-    if (scrollDir < 0 && room.ur_CamX >= 0)
+    if (KeyState[KC_LSHIFT])
     {
-      room.ur_CamX -= 1;
-      camRight = room.ur_CamX + gameInfo->gi_Width;
-      screenUpdate = TRUE;
-    }
-    else if (scrollDir > 0 && room.ur_CamX <= mostLeftEdge)
-    {
-      room.ur_CamX += 1;
-      camRight = room.ur_CamX + gameInfo->gi_Width;
-      screenUpdate = TRUE;
+      room.ur_CamX = CursorX;
+      scrollUpdate = TRUE;
     }
 
     if (TRUE == updateCaption)
@@ -437,6 +343,11 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       GfxSubmit(1);
     }
 
+    if (TRUE == scrollUpdate)
+    {
+      GfxSetScrollOffset(0, room.ur_CamX, 0);
+      scrollUpdate = FALSE;
+    }
 
     if (TRUE == screenUpdate)
     {

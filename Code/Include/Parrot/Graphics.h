@@ -37,6 +37,8 @@ EXPORT VOID GfxHide();
 
 EXPORT BOOL GfxIsPal();
 
+EXPORT VOID GfxSetScrollOffset(UWORD vp, WORD x, WORD y);
+
 EXPORT VOID GfxSubmit(UWORD id);
 
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen);

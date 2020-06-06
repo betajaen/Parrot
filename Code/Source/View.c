@@ -80,6 +80,8 @@ struct VIEWPORT
   WORD                v_Horizontal;
   WORD                v_Vertical;
   UWORD               v_Depth;
+  WORD                v_ScrollX;
+  WORD                v_ScrollY;
 };
 
 struct View*         IntuitionView;
@@ -112,7 +114,6 @@ EXPORT VOID GfxInitialise()
   IntuitionView = NULL;
 
   InitView(&View);
-
 }
 
 EXPORT VOID ViewExitNow()
@@ -161,6 +162,8 @@ EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* layouts)
     vp->v_Horizontal = vl->vl_Horizontal;
     vp->v_Vertical = vl->vl_Vertical;
     vp->v_Depth = vl->vl_Depth;
+    vp->v_ScrollX = 0;
+    vp->v_ScrollY = 0;
     
     vp->v_Bitmap = AllocBitMap(
       vp->v_BitMapWidth, 
@@ -170,13 +173,6 @@ EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* layouts)
 
     InitRastPort(&vp->v_RastPort);
     vp->v_RastPort.BitMap = vp->v_Bitmap;
-
-    SetAPen(&vp->v_RastPort, 1);
-    RectFill(
-      &vp->v_RastPort,
-      0, 0,
-      4, vp->v_Offset-1
-    );
 
     avp = &vp->v_ViewPort;
     InitVPort(avp);
@@ -353,10 +349,25 @@ EXPORT VOID GfxSubmit(UWORD id)
     vp->v_WriteOffset = vp->v_Offset;
   }
 
-  vp->v_RasInfo.RyOffset = vp->v_ReadOffset;
+  vp->v_RasInfo.RxOffset = vp->v_ScrollX;
+  vp->v_RasInfo.RyOffset = vp->v_ReadOffset + vp->v_ScrollY;
 
   ScrollVPort(&vp->v_ViewPort);
   // WaitTOF();
+}
+
+EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)
+{
+  struct VIEWPORT* vp;
+  vp = &ViewPorts[id];
+
+  vp->v_ScrollX = x;
+  vp->v_ScrollY = y;
+
+  vp->v_RasInfo.RxOffset = vp->v_ScrollX;
+  vp->v_RasInfo.RyOffset = vp->v_ReadOffset + vp->v_ScrollY;
+
+  ScrollVPort(&vp->v_ViewPort);
 }
 
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
@@ -406,21 +417,88 @@ EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD 
 
 EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLength)
 {
+  struct VIEWPORT* vp;
   struct RastPort* rp;
   WORD offset;
+  LONG x0, y0, x1, y1, t;
 
-  offset = ViewPorts[id].v_WriteOffset;
-  rp = &ViewPorts[id].v_RastPort;
+  vp = &ViewPorts[id];
+  offset = vp->v_WriteOffset;
+  rp = &vp->v_RastPort;
+
+  x0 = rect->rt_Left;
+  y0 = rect->rt_Top;
+  x1 = rect->rt_Right;
+  y1 = rect->rt_Bottom;
+
+  if (x0 < 0)
+  {
+    x0 = 0;
+  }
+  else if (x0 >= vp->v_BitMapWidth)
+  {
+    x0 = vp->v_BitMapWidth - 1;
+  }
+
+  if (x1 < 0)
+  {
+    x1 = 0;
+  }
+  else if (x1 >= vp->v_BitMapWidth)
+  {
+    x1 = vp->v_BitMapWidth - 1;
+  }
+
+  if (y0 < 0)
+  {
+    y0 = 0;
+  }
+  else if (y0 >= vp->v_BitmapHeight)
+  {
+    y0 = vp->v_BitmapHeight - 1;
+  }
+
+  if (y1 < 0)
+  {
+    y1 = 0;
+  }
+  else if (y1 >= vp->v_BitmapHeight)
+  {
+    y1 = vp->v_BitmapHeight - 1;
+  }
+
+  if (x0 > x1)
+  {
+    t = x0;
+    x0 = x1;
+    x1 = t;
+  }
+
+  if (y0 > y1)
+  {
+    t = y0;
+    y0 = y1;
+    y1 = t;
+  }
+
+  y0 += offset;
+  y1 += offset;
 
   SetAPen(rp, 1);
   SetBPen(rp, 2);
 
-  Move(rp, rect->rt_Left, rect->rt_Top + offset);
-  Draw(rp, rect->rt_Right, rect->rt_Top + offset);
-  Draw(rp, rect->rt_Right, rect->rt_Bottom + offset);
-  Draw(rp, rect->rt_Left, rect->rt_Bottom + offset);
-  Draw(rp, rect->rt_Left, rect->rt_Top + offset);
+  Move(rp, x0, y0);
+  Draw(rp, x1, y0);
+  Draw(rp, x1, y1);
+  Draw(rp, x0, y1);
+  Draw(rp, x0, y0);
 
-  Move(rp, rect->rt_Left, rect->rt_Top + offset);
+  x0 = x0 + x1;
+  x0 >>= 1;
+
+  y0 = y0 + y1;
+  y0 >>= 1;
+
+  Move(rp, x0, y0);
   Text(rp, name, nameLength);
 }

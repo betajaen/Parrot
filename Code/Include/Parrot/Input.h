@@ -33,10 +33,13 @@ EXTERN UWORD InEvtKey;
 EXTERN WORD  InMouseX;
 EXTERN WORD  InMouseY;
 
+EXTERN BYTE  KeyState[];
+
 EXPORT VOID InputInitialise();
 
 EXPORT VOID InputExit();
 
 EXPORT BOOL PopEvent(struct INPUTEVENT* ie);
 
-#define KC_ESC 0x45
+#define KC_ESC     0x45
+#define KC_LSHIFT  0x60
