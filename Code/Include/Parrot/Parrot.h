@@ -285,6 +285,21 @@ struct IMAGE
 
 /*
 
+  Verbs
+
+*/
+
+#define VERB_NONE 0
+#define VERB_WALK 1
+
+struct VERBS
+{
+  UWORD  vb_Allowed;
+  UWORD  vb_Selected;
+};
+
+/*
+
       Room
 
 */
@@ -346,15 +361,23 @@ struct ROOM
   UWORD               rm_Entities[MAX_ROOM_ENTITIES];
 };
 
+#define UFLG_SCENE    1
+#define UFLG_SCROLL   2
+#define UFLG_CAPTION  4
+#define UFLG_ALL      (1 | 2 | 4)
+
 struct UNPACKED_ROOM
 {
   struct ROOM*        ur_Room;
   struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
-  struct EXIT* ur_Exits[MAX_ROOM_EXITS];
+  struct EXIT*        ur_Exits[MAX_ROOM_EXITS];
+  struct VERBS        ur_Verbs;
   UWORD               ur_Id;
   ULONG               ur_Unpacked;
   WORD                ur_CamX;
   WORD                ur_CamY;
+  struct EXIT*        ur_HoverExit;
+  UWORD               ur_UpdateFlags;
 };
 
 struct ENTRANCE
@@ -368,5 +391,6 @@ struct ENTRANCE
 #define UNPACK_ROOM_ENTITIES   4
 
 #define UNPACK_ROOM_ALL        (UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES)
+
 
 #endif

@@ -32,8 +32,10 @@
 #include <Parrot/Requester.h>
 #include <Parrot/Graphics.h>
 #include <Parrot/Input.h>
+#include <Parrot/Game.h>
 
 #include <proto/dos.h>
+#include <proto/graphics.h>
 
 EXTERN WORD CursorX;
 EXTERN WORD CursorY;
@@ -168,45 +170,30 @@ STATIC BOOL PointInside(struct RECT* rect, WORD x, WORD y)
 
 VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInfo)
 {
+  struct UNPACKED_ROOM room;
+  struct INPUTEVENT evt;
   UWORD screenW, screenH;
   BOOL exitRoom;
-  WORD scrollDir;
-  struct UNPACKED_ROOM room;
   UWORD mostLeftEdge;
-  WORD screenUpdate;
-  WORD scrollUpdate;
-  UWORD cursor;
   UWORD ii;
-  struct ENTITY* ent;
   WORD rmMouseX, rmMouseY;
-  WORD camRight;
-  struct INPUTEVENT evt;
   BOOL updateCaption;
   BOOL hasCaption;
-  CHAR* captionText;
-  WORD captionLength;
-  struct EXIT* captionExit;
-  CHAR mouseCoords[360] = { 0 };
-
-  struct EXIT* exit;
-  struct EXIT* newExit;
 
   exitRoom = FALSE;
-  scrollDir = 0;
-  cursor = CURSOR_BUSY;
-  screenUpdate = TRUE;
-  scrollUpdate = FALSE;
 
   Busy();
 
   /* Get Screen Info */
   screenW = 320;
   screenH = 128;
- // ScreenGetWidthHeight(screen, &screenW, &screenH);
 
   /* Load Room Asset and Backdrops */
   InitStackVar(struct UNPACKED_ROOM, room);
 
+  room.ur_UpdateFlags = UFLG_ALL;
+  room.ur_Verbs.vb_Allowed = VERB_NONE | VERB_WALK;
+  room.ur_Verbs.vb_Selected = VERB_NONE;
   room.ur_Id = entrance->en_Room;
 
   UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
@@ -220,6 +207,8 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
   if (entrance->en_Exit != 0 && room.ur_Room->rm_Width > gameInfo->gi_Width)
   {
+    struct EXIT* exit;
+
     exit = FindExit(&room, entrance->en_Exit);
     room.ur_CamX = exit->ex_HitBox.rt_Left;
     room.ur_CamY = 0;
@@ -229,18 +218,16 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
     else if (room.ur_CamX < 0)
       room.ur_CamX = 0;
 
-
+    room.ur_UpdateFlags |= UFLG_SCROLL;
   }
   
-  scrollUpdate = TRUE;
-
   NotBusy();
-
-  updateCaption = FALSE;
-  hasCaption = FALSE;
-  captionExit = NULL;
-
+  GfxClear(0);
   GfxClear(1);
+
+  GfxSubmit(0);
+  GfxSubmit(1);
+  WaitTOF();
 
   while (exitRoom == FALSE && InEvtForceQuit == FALSE)
   {
@@ -259,8 +246,10 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
         break;
         case IET_CURSOR:
         {
-          newExit = NULL;
+          struct EXIT* exit;
+          BOOL didFind;
 
+          didFind = FALSE;
           rmMouseX = room.ur_CamX + CursorX;
           rmMouseY = room.ur_CamY + CursorY;
 
@@ -270,47 +259,32 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
           
             if (NULL != exit && PointInside(&exit->ex_HitBox, rmMouseX, rmMouseY))
             {
-              newExit = exit;
+              didFind = TRUE;
 
-              if (captionExit != exit)
+              if (room.ur_HoverExit != exit)
               {
-                updateCaption = TRUE;
-                hasCaption = TRUE;
-
-                if (exit->ex_Name[0] == 0)
-                {
-                  captionText = "Exit";
-                  captionLength = 4;
-                }
-                else
-                {
-                  captionText = &exit->ex_Name[0];
-                  captionLength = StrLength(captionText);
-                }
-
-                captionExit = exit;
+                room.ur_HoverExit = exit;
+                room.ur_UpdateFlags |= UFLG_CAPTION;
+                break;
               }
-
-              break;
             }
           }
 
-          if (newExit == NULL && captionExit != NULL)
+          if (didFind == FALSE && room.ur_HoverExit != NULL)
           {
-            updateCaption = TRUE;
-            hasCaption = FALSE;
-            captionExit = NULL;
+            room.ur_HoverExit = NULL;
+            room.ur_UpdateFlags |= UFLG_CAPTION;
           }
 
         }
         break;
         case IET_SELECT:
         {
-          if (captionExit != NULL)
+          if (room.ur_HoverExit != NULL)
           {
             exitRoom = TRUE;
-            entrance->en_Room = GetRoomFromExit(captionExit);
-            entrance->en_Exit = captionExit->ex_Target;
+            entrance->en_Room = GetRoomFromExit(room.ur_HoverExit);
+            entrance->en_Exit = room.ur_HoverExit->ex_Target;
           }
         }
         break;
@@ -330,53 +304,27 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
         room.ur_CamX = mostLeftEdge;
       }
 
-      scrollUpdate = TRUE;
+      room.ur_UpdateFlags |= UFLG_SCROLL;
     }
 
-    if (TRUE == updateCaption)
+    if ((room.ur_UpdateFlags & UFLG_CAPTION) != 0)
     {
-      if (hasCaption)
-      {
-        WORD len;
-        GfxSetAPen(1, 0);
-        GfxSetBPen(1, 1);
-        GfxRectFill(1, 0, 0, 319, 11);
-
-        len = GfxTextLength(1, captionText, captionLength);
-        len >>= 1;
-
-        GfxSetAPen(1, 1);
-        GfxSetBPen(1, 0);
-        GfxMove(1, 160 - len, 10);
-        GfxText(1, captionText, captionLength);
-      }
-      else
-      {
-        GfxMove(1, 1, 4);
-
-        GfxSetAPen(1, 0);
-        GfxSetBPen(1, 1);
-        GfxRectFill(1, 0, 0, 319, 11);
-      }
-
-      updateCaption = FALSE;
-      hasCaption = FALSE;
-
-      GfxSubmit(1);
+      PlayCaption(&room);
     }
 
-    if (TRUE == scrollUpdate)
+    if ((room.ur_UpdateFlags & UFLG_SCROLL) != 0)
     {
       GfxSetScrollOffset(0, room.ur_CamX, 0);
-      scrollUpdate = FALSE;
+      room.ur_UpdateFlags &= ~UFLG_SCROLL;
     }
 
-    if (TRUE == screenUpdate)
+    if ((room.ur_UpdateFlags & UFLG_SCENE) != 0)
     {
-      
-      /* Show first backdrop on screen */
-      GfxBlitBitmap(screen, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
+      struct EXIT* exit;
 
+      room.ur_UpdateFlags &= ~UFLG_SCENE;
+
+      GfxBlitBitmap(0, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
 
       for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
       {
@@ -386,16 +334,11 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
         if (NULL == exit)
           break;
         
-        GfxDrawHitBox(screen, &exit->ex_HitBox, &exit->ex_Name[0], StrLen(exit->ex_Name));
+        GfxDrawHitBox(0, &exit->ex_HitBox, &exit->ex_Name[0], StrLen(exit->ex_Name));
         
       }
 
-      GfxSubmit(screen);
-
-      //ScreenSwapBuffers(screen);
-
-      screenUpdate = FALSE;
-      scrollDir = 0;
+      GfxSubmit(0);
     }
 
   }
@@ -408,4 +351,3 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   /* Unload */
   PackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
 }
-
