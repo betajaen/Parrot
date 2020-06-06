@@ -41,6 +41,8 @@ EXPORT VOID GfxSetScrollOffset(UWORD vp, WORD x, WORD y);
 
 EXPORT VOID GfxSubmit(UWORD id);
 
+EXPORT VOID GfxClear(UWORD id);
+
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen);
 
 EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen);

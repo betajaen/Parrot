@@ -186,7 +186,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   CHAR* captionText;
   WORD captionLength;
   struct EXIT* captionExit;
-  CHAR mouseCoords[360];
+  CHAR mouseCoords[360] = { 0 };
 
   struct EXIT* exit;
   struct EXIT* newExit;
@@ -218,17 +218,21 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
     mostLeftEdge -= 1;
   }
 
-  if (entrance->en_Exit != 0)
+  if (entrance->en_Exit != 0 && room.ur_Room->rm_Width > gameInfo->gi_Width)
   {
     exit = FindExit(&room, entrance->en_Exit);
     room.ur_CamX = exit->ex_HitBox.rt_Left;
     room.ur_CamY = 0;
 
-    if (room.ur_CamX >= mostLeftEdge)
+    if (room.ur_CamX > mostLeftEdge)
       room.ur_CamX = mostLeftEdge;
     else if (room.ur_CamX < 0)
       room.ur_CamX = 0;
+
+
   }
+  
+  scrollUpdate = TRUE;
 
   NotBusy();
 
@@ -236,10 +240,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   hasCaption = FALSE;
   captionExit = NULL;
 
-  GfxSetAPen(1, 0);
-  GfxSetBPen(1, 1);
-  GfxRectFill(1, 0, 0, 319, 69);
-  GfxSubmit(1);
+  GfxClear(1);
 
   while (exitRoom == FALSE && InEvtForceQuit == FALSE)
   {
@@ -275,8 +276,17 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
               {
                 updateCaption = TRUE;
                 hasCaption = TRUE;
-                captionText = &exit->ex_Name[0];
-                captionLength = StrLength(captionText);
+
+                if (exit->ex_Name[0] == 0)
+                {
+                  captionText = "Exit";
+                  captionLength = 4;
+                }
+                else
+                {
+                  captionText = &exit->ex_Name[0];
+                  captionLength = StrLength(captionText);
+                }
 
                 captionExit = exit;
               }
@@ -304,19 +314,22 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
           }
         }
         break;
-        case IET_MENUDOWN:
-        {
-
-          room.ur_CamX = CursorX;
-          scrollUpdate = TRUE;
-        }
-        break;
       }
     }
 
-    if (KeyState[KC_LSHIFT])
+    if (IsMenuDown())
     {
-      room.ur_CamX = CursorX;
+      room.ur_CamX = CursorX << 2;
+
+      if (room.ur_CamX < 0)
+      {
+        room.ur_CamX = 0;
+      }
+      else if (room.ur_CamX > mostLeftEdge)
+      {
+        room.ur_CamX = mostLeftEdge;
+      }
+
       scrollUpdate = TRUE;
     }
 

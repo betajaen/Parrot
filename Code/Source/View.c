@@ -370,6 +370,22 @@ EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)
   ScrollVPort(&vp->v_ViewPort);
 }
 
+EXPORT VOID GfxClear(UWORD id)
+{
+  struct VIEWPORT* vp;
+  vp = &ViewPorts[id];
+
+  SetAPen(&vp->v_RastPort, 0);
+  SetBPen(&vp->v_RastPort, 0);
+
+  RectFill(
+    &vp->v_RastPort,
+    0,0,
+    vp->v_BitMapWidth-1,
+    (vp->v_BitmapHeight*2)-1
+  );
+}
+
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
 {
   SetAPen(
