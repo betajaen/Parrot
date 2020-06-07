@@ -44,4 +44,5 @@ EXPORT BOOL PopEvent(struct INPUTEVENT* ie);
 EXPORT BOOL IsMenuDown();
 
 #define KC_ESC     0x45
+#define KC_F1      0x50
 #define KC_LSHIFT  0x60

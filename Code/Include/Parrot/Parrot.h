@@ -365,7 +365,7 @@ struct ROOM
 #define UFLG_SCENE    2
 #define UFLG_SCROLL   4
 #define UFLG_CAPTION  8
-#define UFLG_ALL      (1 | 2 | 4 | 8)
+#define UFLG_ALL      (2 | 4 | 8)
 
 struct UNPACKED_ROOM
 {

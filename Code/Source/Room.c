@@ -244,6 +244,24 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
             exitRoom = TRUE;
             entrance->en_Room = 0;
           }
+          else if (evt.ie_Code == KC_F1)
+          {
+            GfxClear(0);
+            GfxClear(1);
+
+            GfxSubmit(0);
+            GfxSubmit(1);
+            WaitTOF();
+
+            if ((room.ur_UpdateFlags & UFLG_DEBUG) != 0)
+            {
+              room.ur_UpdateFlags = UFLG_ALL;
+            }
+            else
+            {
+              room.ur_UpdateFlags = UFLG_ALL | UFLG_DEBUG;
+            }
+          }
         }
         break;
         case IET_CURSOR:
