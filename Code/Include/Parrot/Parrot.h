@@ -361,10 +361,11 @@ struct ROOM
   UWORD               rm_Entities[MAX_ROOM_ENTITIES];
 };
 
-#define UFLG_SCENE    1
-#define UFLG_SCROLL   2
-#define UFLG_CAPTION  4
-#define UFLG_ALL      (1 | 2 | 4)
+#define UFLG_DEBUG    1
+#define UFLG_SCENE    2
+#define UFLG_SCROLL   4
+#define UFLG_CAPTION  8
+#define UFLG_ALL      (1 | 2 | 4 | 8)
 
 struct UNPACKED_ROOM
 {

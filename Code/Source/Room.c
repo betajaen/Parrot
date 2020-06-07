@@ -40,6 +40,8 @@
 EXTERN WORD CursorX;
 EXTERN WORD CursorY;
 
+STATIC VOID PlayRoomDebug(struct UNPACKED_ROOM* room);
+
 EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 {
   UBYTE ii;
@@ -253,7 +255,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
           rmMouseX = room.ur_CamX + CursorX;
           rmMouseY = room.ur_CamY + CursorY;
 
-          for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+          for (UWORD ii = 0; ii < MAX_ROOM_EXITS; ii++)
           {
             exit = room.ur_Exits[ii];
           
@@ -307,6 +309,11 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       room.ur_UpdateFlags |= UFLG_SCROLL;
     }
 
+    if ((room.ur_UpdateFlags & (UFLG_SCENE | UFLG_DEBUG)) != 0)
+    {
+      PlayRoomDebug(&room);
+    }
+
     if ((room.ur_UpdateFlags & UFLG_CAPTION) != 0)
     {
       PlayCaption(&room);
@@ -318,6 +325,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       room.ur_UpdateFlags &= ~UFLG_SCROLL;
     }
 
+
     if ((room.ur_UpdateFlags & UFLG_SCENE) != 0)
     {
       struct EXIT* exit;
@@ -325,17 +333,21 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       room.ur_UpdateFlags &= ~UFLG_SCENE;
 
       GfxBlitBitmap(0, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
-
-      for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
       {
-        
-        exit = room.ur_Exits[ii];
-        
-        if (NULL == exit)
-          break;
-        
-        GfxDrawHitBox(0, &exit->ex_HitBox, &exit->ex_Name[0], StrLen(exit->ex_Name));
-        
+        if ((room.ur_UpdateFlags & UFLG_DEBUG) != 0)
+        {
+          for (UWORD ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
+          {
+
+            exit = room.ur_Exits[ii];
+
+            if (NULL == exit)
+              break;
+
+            GfxDrawHitBox(0, &exit->ex_HitBox, &exit->ex_Name[0], StrLen(exit->ex_Name));
+
+          }
+        }
       }
 
       GfxSubmit(0);
@@ -350,4 +362,23 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
   /* Unload */
   PackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
+}
+
+
+STATIC VOID PlayRoomDebug(struct UNPACKED_ROOM* room)
+{
+  UWORD numExits;
+  UWORD ii;
+  UWORD strLen;
+  CHAR  debugText[40];
+  
+  for (ii = 0, numExits = 0; ii < MAX_ROOM_EXITS; ii++)
+  {
+    if (room->ur_Exits[ii] != NULL)
+      numExits++;
+  }
+  
+  strLen = StrFormat(debugText, sizeof(debugText), "Rm %ld Ex %ld", (ULONG)room->ur_Id, (ULONG)numExits)-1;
+  GfxMove(1, 0, 50);
+  GfxText(1, debugText, strLen);
 }
