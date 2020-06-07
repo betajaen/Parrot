@@ -43,11 +43,11 @@ VOID PlayExit(struct UNPACKED_ROOM* room, struct VERBS* verbs, struct EXIT* exit
 
     if (exit->ex_Name[0] == 0)
     {
-      CaptionTextLength = StrCopy(CaptionText, sizeof(CaptionText), "Walk To Exit");
+      CaptionTextLength = StrCopy(CaptionText, sizeof(CaptionText), "Walk to exit");
     }
     else
     {
-      CaptionTextLength = StrFormat(CaptionText, sizeof(CaptionText), "Walk To %s", exit->ex_Name)-1;
+      CaptionTextLength = StrFormat(CaptionText, sizeof(CaptionText), "Walk to %s", exit->ex_Name)-1;
     }
   }
   
@@ -67,6 +67,42 @@ VOID PlayExit(struct UNPACKED_ROOM* room, struct VERBS* verbs, struct EXIT* exit
   }
 }
 
+VOID PlayActivator(struct UNPACKED_ROOM* room, struct VERBS* verbs, struct ENTITY* exit)
+{
+
+  WORD pxlen;
+  CaptionTextLength = 0;
+
+  if (verbs->vb_Selected == VERB_NONE || verbs->vb_Selected == VERB_WALK)
+  {
+
+    if (exit->en_Name[0] == 0)
+    {
+      CaptionTextLength = StrCopy(CaptionText, sizeof(CaptionText), "Walk");
+    }
+    else
+    {
+      CaptionTextLength = StrFormat(CaptionText, sizeof(CaptionText), "Walk to %s", exit->en_Name) - 1;
+    }
+  }
+
+  GfxSetAPen(1, 0);
+  GfxSetBPen(1, 1);
+  GfxRectFill(1, 0, 0, 319, 11);
+
+  if (CaptionTextLength)
+  {
+    pxlen = GfxTextLength(1, CaptionText, CaptionTextLength);
+    pxlen >>= 1;
+
+    GfxSetAPen(1, 1);
+    GfxSetBPen(1, 0);
+    GfxMove(1, 160 - pxlen, 10);
+    GfxText(1, CaptionText, CaptionTextLength);
+  }
+}
+
+
 
 VOID PlayCaption(struct UNPACKED_ROOM* room)
 {
@@ -75,9 +111,16 @@ VOID PlayCaption(struct UNPACKED_ROOM* room)
 
   room->ur_UpdateFlags &= ~UFLG_CAPTION;
 
-  if (room->ur_HoverExit != NULL)
+  if (room->ur_HoverEntity != NULL)
   {
-    PlayExit(room, &room->ur_Verbs, room->ur_HoverExit);
+    if (room->ur_HoverEntity->en_Type == ET_EXIT)
+    {
+      PlayExit(room, &room->ur_Verbs, (struct EXIT*) room->ur_HoverEntity);
+    }
+    else if (room->ur_HoverEntity->en_Type == ET_ACTIVATOR)
+    {
+      PlayActivator(room, &room->ur_Verbs, (struct ENTITY*) room->ur_HoverEntity);
+    }
   }
   else
   {

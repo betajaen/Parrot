@@ -329,7 +329,8 @@ struct POINT
   WORD pt_Top;
 };
 
-#define ET_EXIT MAKE_ENTITY_ID('E','X')
+#define ET_EXIT       MAKE_ENTITY_ID('E','X')
+#define ET_ACTIVATOR  MAKE_ENTITY_ID('A','C')
 
 #define ETF_IS_NAMED  (1 << 0)
 #define ETF_IS_LOCKED (1 << 14)
@@ -372,12 +373,13 @@ struct UNPACKED_ROOM
   struct ROOM*        ur_Room;
   struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
   struct EXIT*        ur_Exits[MAX_ROOM_EXITS];
+  struct ENTITIES*    ur_Entities[MAX_ROOM_ENTITIES];
   struct VERBS        ur_Verbs;
   UWORD               ur_Id;
   ULONG               ur_Unpacked;
   WORD                ur_CamX;
   WORD                ur_CamY;
-  struct EXIT*        ur_HoverExit;
+  struct ENTITY*      ur_HoverEntity;
   UWORD               ur_UpdateFlags;
 };
 
