@@ -329,3 +329,8 @@ EXPORT VOID InputExit()
     DeleteMsgPort(KeyMsgPort);
   }
 }
+
+EXPORT BOOL IsMenuDown()
+{
+  return CursorMenu[1] == TRUE;
+}

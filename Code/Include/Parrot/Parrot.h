@@ -285,6 +285,21 @@ struct IMAGE
 
 /*
 
+  Verbs
+
+*/
+
+#define VERB_NONE 0
+#define VERB_WALK 1
+
+struct VERBS
+{
+  UWORD  vb_Allowed;
+  UWORD  vb_Selected;
+};
+
+/*
+
       Room
 
 */
@@ -314,7 +329,8 @@ struct POINT
   WORD pt_Top;
 };
 
-#define ET_EXIT MAKE_ENTITY_ID('E','X')
+#define ET_EXIT       MAKE_ENTITY_ID('E','X')
+#define ET_ACTIVATOR  MAKE_ENTITY_ID('A','C')
 
 #define ETF_IS_NAMED  (1 << 0)
 #define ETF_IS_LOCKED (1 << 14)
@@ -346,15 +362,25 @@ struct ROOM
   UWORD               rm_Entities[MAX_ROOM_ENTITIES];
 };
 
+#define UFLG_DEBUG    1
+#define UFLG_SCENE    2
+#define UFLG_SCROLL   4
+#define UFLG_CAPTION  8
+#define UFLG_ALL      (2 | 4 | 8)
+
 struct UNPACKED_ROOM
 {
   struct ROOM*        ur_Room;
   struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
-  struct EXIT* ur_Exits[MAX_ROOM_EXITS];
+  struct EXIT*        ur_Exits[MAX_ROOM_EXITS];
+  struct ENTITIES*    ur_Entities[MAX_ROOM_ENTITIES];
+  struct VERBS        ur_Verbs;
   UWORD               ur_Id;
   ULONG               ur_Unpacked;
   WORD                ur_CamX;
   WORD                ur_CamY;
+  struct ENTITY*      ur_HoverEntity;
+  UWORD               ur_UpdateFlags;
 };
 
 struct ENTRANCE
@@ -368,5 +394,6 @@ struct ENTRANCE
 #define UNPACK_ROOM_ENTITIES   4
 
 #define UNPACK_ROOM_ALL        (UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES)
+
 
 #endif

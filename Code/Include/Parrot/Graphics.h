@@ -41,6 +41,8 @@ EXPORT VOID GfxSetScrollOffset(UWORD vp, WORD x, WORD y);
 
 EXPORT VOID GfxSubmit(UWORD id);
 
+EXPORT VOID GfxClear(UWORD id);
+
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen);
 
 EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen);
@@ -52,6 +54,8 @@ EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD 
 EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table);
 
 EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y);
+
+EXPORT WORD GfxTextLength(UWORD vp, STRPTR text, WORD textLength);
 
 EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength);
 

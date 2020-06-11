@@ -1,5 +1,5 @@
 /**
-    $Id: Input.h 1.2 2020/05/31 13:00:00, betajaen Exp $
+    $Id: Game.h 1.2 2020/06/06 17:47:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,24 +25,4 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#define INEVT_CURSOR 1
-#define INEVT_KEY    2
-
-EXTERN UWORD InEvtForceQuit;
-EXTERN UWORD InEvtKey;
-EXTERN WORD  InMouseX;
-EXTERN WORD  InMouseY;
-
-EXTERN BYTE  KeyState[];
-
-EXPORT VOID InputInitialise();
-
-EXPORT VOID InputExit();
-
-EXPORT BOOL PopEvent(struct INPUTEVENT* ie);
-
-EXPORT BOOL IsMenuDown();
-
-#define KC_ESC     0x45
-#define KC_F1      0x50
-#define KC_LSHIFT  0x60
+VOID PlayCaption(struct UNPACKED_ROOM* room);
