@@ -37,8 +37,8 @@ PARROT_OBJ = main.o arena.o string.o requester.o game.o room.o image.o asset.o e
 CONVERTER_MANIAC_OBJ =maniac_conv_main.o string.o
 
 parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
-	$(CC) +aos68km $(CFLAGS) Source/minstart.o $(PARROT_OBJ) -o ../Parrot/Parrot
-	$(CC) +aos68km $(CFLAGS) $(CONVERTER_MANIAC_OBJ) -o ../Parrot/Tools/ConvertManiac
+	$(CC) +aos68km $(CFLAGS) Source/minstart.o $(PARROT_OBJ) -o ../Releases/Latest/Parrot
+	$(CC) +aos68km $(CFLAGS) $(CONVERTER_MANIAC_OBJ) -o ../Releases/Latest/Tools/ConvertManiac
 
 main.o: Source/Main.c
 	$(CC) $(CFLAGS) -c Source/Main.c -o main.o
@@ -87,5 +87,6 @@ maniac_conv_main.o: Tools/ConvertManiac/Main.c
 .PHONY: clean
 
 clean:
-	rm ../Parrot/Parrot
+	rm ../Releases/Latest/Parrot
+	rm ../Releases/Latest/Tools/ConvertManiac
 	rm $(objects)

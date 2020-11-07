@@ -3,10 +3,12 @@ pushd ..
 pushd ..
 del *.o
 pushd ..
-pushd Parrot
+pushd Releases
+pushd Latest
 del Parrot
-pushd Games
-del *.library
+pushd Tools
+del ConvertManiac
+popd
 popd
 popd
 popd
