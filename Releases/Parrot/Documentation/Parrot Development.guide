@@ -1,0 +1,134 @@
+@DATABASE
+@TOC TOC
+
+@NODE MAIN "Parrot Development Guide"
+@{b}@{u}Parrot Development Guide@{uu}@{ub}
+
+Version: 0.1 for Parrot 1.2
+Parts:
+@{"Opcodes" LINK OPCODES}
+@ENDNODE
+
+@NODE TOC "Table of Contents"
+@{b}@{u}Table of Contents@{uu}@{ub}
+
+@{b}E@{ub}
+
+  @{"Entity Vars" LINK ENTITYVARS}
+@{b}O@{ub}
+
+  @{"Opcodes" LINK OPCODES}
+@{b}P@{ub}
+
+  @{"Parrot Development Guide" LINK MAIN}
+@{b}S@{ub}
+
+  @{"Script Vars" LINK SCRIPTVARS}
+  @{"Suffixes" LINK TYPENOTATION}
+@{b}V@{ub}
+
+  @{"VM" LINK VM}
+@ENDNODE
+
+@NODE ENTITYVARS "Entity Vars"
+@{b}@{u}Entity Vars@{uu}@{ub}
+
+@ENDNODE
+
+@NODE OPCODES "Opcodes"
+@{u}Id@{uu} @{u}Len@{uu}  @{u}Name@{uu}       @{u}Arguments@{uu}                  @{u}Description@{uu}
+0  2    stop                                  Stop Script
+1  2    rem        user.b                     Remark (Ignored)
+2  2    pushb      val.b                      push byte onto stack
+3  4    pushw      pad.x, val.w               push word onto stack
+4  6    pushl      pad.x, val.l               push long onto stack
+5  2    pushs      where.b                    push stack[-where] onto stack
+6  2    pop        where.b                    pop stack[-where] and shift
+7  Reserved
+8  2    j          addr.sb                    pc <- pc + addr * 2
+9  2    jz         addr.sb                    pc <- pc + addr * 2
+                                              if stack[0] = 0
+                                              and pop stack
+A  2    jnz        addr.sb                    pc <- pc + addr * 2
+                                              if stack[0] <> 0
+                                              and pop stack twice
+B  2    je         addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] = stack[0]
+                                              and pop stack twice
+C  2    jne        addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] <> stack[0]
+                                              and pop stack twice
+D  2    jg         addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] > stack[0]
+                                              and pop stack twice
+E  2    jge        addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] >= stack[0]
+                                              and pop stack twice
+F  2    jl         addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] < stack[0]
+                                              and pop stack twice
+10 2    jle        addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] <= stack[0]
+                                              and pop stack twice
+11 2    load       var.lb                     push vars[var] onto stack
+12 2    save       var.lb                     vars[var] = stack[0]
+                                              and pop stack
+13 2    gload      var.b                      push globals[var] onto stack
+14 2    gsave      var.b                      globals[var] = stack[0]
+                                              and pop stack
+15 Reserved
+16 Reserved
+17 Reserved
+18 Reserved
+19 Reserved
+2A 2    add                                   t <- stack[-1] + stack[0]
+                                              pop stack twice
+                                              push t
+                                              Stack: -1 = lhs.l
+                                              Stack:  0 = rhs.l
+2B 2    addq       rhs.sb                     t <- stack[0] + rhs
+                                              pop stack
+                                              push t
+                                              Stack: 0 = left.l
+2C 2    sub                                   t <- stack[-1] - stack[0]
+                                              pop stack twice
+                                              push t
+                                              Stack: -1 = lhs.l
+                                              Stack:  0 = rhs.l
+2D 2    subq       rhs.sb                     t <- stack[-1] - val
+                                              pop stack
+                                              push t
+                                              Stack: 0 = left.l
+40 2    audio                                 play stack[0] (as SFX Asset)
+                                              pop stack
+                                              Stack: 0 = sfx.a
+80 2    print                                 print stack[0] (as Dialogue)
+                                              at y stack[-1] * 8
+                                              pop stack twice
+                                              Stack: -1 = y.b
+                                              Stack:  0 = text.d
+@ENDNODE
+
+@NODE SCRIPTVARS "Script Vars"
+@{b}@{u}Script Vars@{uu}@{ub}
+
+Foreach script being ran, there are 16 reserved variables for general use by the virtual machine. Each variable is a signed 16-bit integer (WORD).
+@ENDNODE
+
+@NODE TYPENOTATION "Suffixes"
+@{b}@{u}Type Notation@{uu}@{ub}
+
+@{b}@{u}Names@{uu}@{ub}
+
+Byte8 bit unsigned integerCharacter, Char8 bit unsigned integer representing a single text ASCII character.Word, Short16 bit signed integerUWord, UShort16 bit unsigned integerLong, Int32 bit signed integerULong, UInt32 bit unsigned integerAPtr32 bit untyped pointerAsset Type4 byte non-null terminating string indicating the type of asset data. Usually expressed as as a ulong.Asset Id2 byte identifier. used with asset type and arch flags to identify an asset.Chunk Header4 byte struct containing the id of an asset, and specific loading flagsAsset Header8 byte struct containing the Asset Type and Chunk headerLanguage Id4 byte identifier where bits 16-24 represent the Room ID, and the lower 16-bits represents the language text id. Language text may be used for dialogue, textual form of events, verb construction or user interface labels. Bits 24-32 arent used.
+@{b}@{u}Suffixes@{uu}@{ub}
+
+.bByte.sbSigned Byte.wWord.lLong.lbLower nibble of a byte.hbHigher nibble of a byte.spSigned pointer offset to Script Program Counter. Value is always multiplied by 2 when used..aTypeless/arch-less asset id - 2 bytes.rAsset Header.x1 byte Padding Unused.dLanguage Id
+@ENDNODE
+
+@NODE VM "VM"
+Stack based virtual machine. Each stack variable is 4 bytes (LONG).
+There are 16 variables and 256 global variables.
+
+variables may belong to the object or room running with the script.
+@ENDNODE

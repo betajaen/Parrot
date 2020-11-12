@@ -1,0 +1,73 @@
+Opcodes
+
+@{u}Id@{uu} @{u}Len@{uu}  @{u}Name@{uu}       @{u}Arguments@{uu}                  @{u}Description@{uu}
+0  2    stop                                  Stop Script
+1  2    rem        user.b                     Remark (Ignored)
+2  2    pushb      val.b                      push byte onto stack
+3  4    pushw      pad.x, val.w               push word onto stack
+4  6    pushl      pad.x, val.l               push long onto stack
+5  2    pushs      where.b                    push stack[-where] onto stack
+6  2    pop        where.b                    pop stack[-where] and shift
+7  Reserved
+8  2    j          addr.sb                    pc <- pc + addr * 2
+9  2    jz         addr.sb                    pc <- pc + addr * 2
+                                              if stack[0] = 0
+                                              and pop stack
+A  2    jnz        addr.sb                    pc <- pc + addr * 2
+                                              if stack[0] <> 0
+                                              and pop stack twice
+B  2    je         addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] = stack[0]
+                                              and pop stack twice
+C  2    jne        addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] <> stack[0]
+                                              and pop stack twice
+D  2    jg         addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] > stack[0]
+                                              and pop stack twice
+E  2    jge        addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] >= stack[0]
+                                              and pop stack twice
+F  2    jl         addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] < stack[0]
+                                              and pop stack twice
+10 2    jle        addr.sb                    pc <- pc + addr * 2
+                                              if stack[-1] <= stack[0]
+                                              and pop stack twice
+11 2    load       var.lb                     push vars[var] onto stack
+12 2    save       var.lb                     vars[var] = stack[0]
+                                              and pop stack
+13 2    gload      var.b                      push globals[var] onto stack
+14 2    gsave      var.b                      globals[var] = stack[0]
+                                              and pop stack
+15 Reserved
+16 Reserved
+17 Reserved
+18 Reserved
+19 Reserved
+2A 2    add                                   t <- stack[-1] + stack[0]
+                                              pop stack twice
+                                              push t
+                                              Stack: -1 = lhs.l
+                                              Stack:  0 = rhs.l
+2B 2    addq       rhs.sb                     t <- stack[0] + rhs
+                                              pop stack
+                                              push t
+                                              Stack: 0 = left.l
+2C 2    sub                                   t <- stack[-1] - stack[0]
+                                              pop stack twice
+                                              push t
+                                              Stack: -1 = lhs.l
+                                              Stack:  0 = rhs.l
+2D 2    subq       rhs.sb                     t <- stack[-1] - val
+                                              pop stack
+                                              push t
+                                              Stack: 0 = left.l
+40 2    audio                                 play stack[0] (as SFX Asset)
+                                              pop stack
+                                              Stack: 0 = sfx.a
+80 2    print                                 print stack[0] (as Dialogue)
+                                              at y stack[-1] * 8
+                                              pop stack twice
+                                              Stack: -1 = y.b
+                                              Stack:  0 = text.d
