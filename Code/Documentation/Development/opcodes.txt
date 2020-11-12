@@ -7,7 +7,7 @@ Opcodes
 3  4    pushw      pad.x, val.w               push word onto stack
 4  6    pushl      pad.x, val.l               push long onto stack
 5  2    pushs      where.b                    push stack[-where] onto stack
-6  2    pop        where.b                    pop stack[-where] and shift
+6  2    pop                                   pop stack. value is discarded
 7  Reserved
 8  2    j          addr.sb                    pc <- pc + addr * 2
 9  2    jz         addr.sb                    pc <- pc + addr * 2
@@ -63,6 +63,9 @@ F  2    jl         addr.sb                    pc <- pc + addr * 2
                                               pop stack
                                               push t
                                               Stack: 0 = left.l
+20 2    room                                  load room[0] (as Room)
+                                              pop stack
+                                              Stack: 0 = room.a
 40 2    audio                                 play stack[0] (as SFX Asset)
                                               pop stack
                                               Stack: 0 = sfx.a

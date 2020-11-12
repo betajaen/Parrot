@@ -99,6 +99,9 @@ F  2    jl         addr.sb                    pc <- pc + addr * 2
                                               pop stack
                                               push t
                                               Stack: 0 = left.l
+20 2    room                                  load room[0] (as Room)
+                                              pop stack
+                                              Stack: 0 = room.a
 40 2    audio                                 play stack[0] (as SFX Asset)
                                               pop stack
                                               Stack: 0 = sfx.a

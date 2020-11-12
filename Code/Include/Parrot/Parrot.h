@@ -48,6 +48,7 @@
 #define MAX_SCRIPT_GLOBALS     64
 #define MAX_ROOM_SCRIPTS       8
 #define MAX_VIRTUAL_MACHINES   8
+#define MAX_VM_STACK_SIZE      32
 
 /**
     Typename consistency
@@ -422,6 +423,8 @@ struct VIRTUAL_MACHINE
   UWORD            vm_PC;
   struct SCRIPT*   vm_Script;
   UWORD            vm_Timer;
+  UWORD            vm_StackHead;
+  UWORD            vm_Stack[MAX_VM_STACK_SIZE];
 };
 
 #define VM_STATE_FREE  0
