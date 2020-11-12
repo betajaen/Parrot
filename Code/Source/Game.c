@@ -34,6 +34,7 @@
 #include <Parrot/String.h>
 #include <Parrot/Graphics.h>
 #include <Parrot/Input.h>
+#include <Parrot/Script.h>
 
 #include "Asset.h"
 
@@ -141,6 +142,9 @@ EXPORT VOID GameStart(STRPTR path)
 
   CloseArchive(0);
 
+  ScriptInitialise();
+
+
 #if 0
 
   screenInfo.si_Width = GameInfo->gi_Width;
@@ -210,6 +214,9 @@ EXPORT VOID GameStart(STRPTR path)
   GfxClose();
 
 #endif
+  
+  ScriptShutdown();
+
   CloseArchives();
 
   ArenaClose(ArenaRoom);

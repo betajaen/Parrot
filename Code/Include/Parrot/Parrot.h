@@ -45,6 +45,9 @@
 #define MAX_ENTITY_NAME_LENGTH 29
 #define MAX_VIEW_LAYOUTS       2
 #define MAX_INPUT_EVENT_SIZE   32
+#define MAX_SCRIPT_GLOBALS     64
+#define MAX_ROOM_SCRIPTS       8
+#define MAX_VIRTUAL_MACHINES   8
 
 /**
     Typename consistency
@@ -360,6 +363,7 @@ struct ROOM
   UWORD               rm_Backdrops[MAX_ROOM_BACKDROPS];
   UWORD               rm_Exits[MAX_ROOM_EXITS];
   UWORD               rm_Entities[MAX_ROOM_ENTITIES];
+  UWORD               rm_Scripts[MAX_ROOM_SCRIPTS];
 };
 
 #define UFLG_DEBUG    1
@@ -374,6 +378,7 @@ struct UNPACKED_ROOM
   struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
   struct EXIT*        ur_Exits[MAX_ROOM_EXITS];
   struct ENTITIES*    ur_Entities[MAX_ROOM_ENTITIES];
+  struct SCRIPT*      ur_Scripts[MAX_ROOM_SCRIPTS];
   struct VERBS        ur_Verbs;
   UWORD               ur_Id;
   ULONG               ur_Unpacked;
@@ -395,5 +400,33 @@ struct ENTRANCE
 
 #define UNPACK_ROOM_ALL        (UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES)
 
+/*
+      Script
+*/
+
+struct SCRIPT
+{
+  UWORD  sc_Type;
+  UWORD  sc_Flags;
+  ULONG  sc_Length;
+};
+
+#define SCRIPT_TYPE_ROOM   1
+#define SCRIPT_TYPE_ENTITY 2
+#define SCRIPT_TYPE_ACTOR  3
+#define SCRIPT_TYPE_UI     4
+
+struct VIRTUAL_MACHINE
+{
+  UWORD            vm_State;
+  UWORD            vm_PC;
+  struct SCRIPT*   vm_Script;
+  UWORD            vm_Timer;
+};
+
+#define VM_STATE_FREE  0
+#define VM_STATE_TIMER 1
+#define VM_STATE_RUN   2
+#define VM_STATE_STOP  3
 
 #endif
