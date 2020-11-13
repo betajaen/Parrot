@@ -78,6 +78,7 @@ STATIC VOID ExportPalette(UWORD id);
 STATIC VOID ExportCursorPalette(UWORD id);
 STATIC VOID ExportRoom(UWORD id, UWORD backdrop);
 STATIC VOID ExportBackdrop(UWORD id, UWORD palette);
+STATIC VOID ExportStartDefaultScript(UWORD startRoom);
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h);
 STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h);
 STATIC UWORD ReadUWORDBE();
@@ -168,12 +169,13 @@ INT main()
 
   ExportPalette(1);
   ExportCursorPalette(2);
+  ExportStartDefaultScript(1);
   ExportTable(&PaletteTable, 1, 0);
   ExportTable(&RoomTable, 2, 1);
   ExportTable(&ImageTable, 3, 2);
   ExportTable(&EntityTable, 4, 3);
   
-  ExportGame(1, &TableRefs[0], 1, 2, 1, 0);
+  ExportGame(1, &TableRefs[0], 1, 2, 1, 1);
 
   CloseParrotIff();
 
@@ -1047,6 +1049,38 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot
     ref->tr_ClassType = table->ot_ClassType;
   }
 
+}
+
+STATIC VOID ExportStartDefaultScript(UWORD startRoom)
+{
+  BYTE data[sizeof(struct SCRIPT) + 8];
+  struct SCRIPT* script;
+  struct CHUNK_HEADER hdr;
+
+  hdr.ch_Id = 1;
+  hdr.ch_Id = CHUNK_FLAG_ARCH_ANY;
+
+  script = (struct SCRIPT*)&data;
+
+  script->sc_Flags = 0;
+  script->sc_Length = 8;
+  script->sc_Type = SCRIPT_TYPE_SCENE;
+
+  data[sizeof(struct SCRIPT) + 0] = 0x3;  /* pushw */
+  data[sizeof(struct SCRIPT) + 1] = 0;
+  data[sizeof(struct SCRIPT) + 2] = (startRoom >> 8) & 0xFF;   /* Start Room */
+  data[sizeof(struct SCRIPT) + 3] = startRoom & 0xFF;
+
+  data[sizeof(struct SCRIPT) + 4] = 0x20;  /* room */
+  data[sizeof(struct SCRIPT) + 5] = 0;
+
+  data[sizeof(struct SCRIPT) + 6] = 0;  /* stop */
+  data[sizeof(struct SCRIPT) + 7] = 0;
+
+  PushChunk(DstIff, ID_SQWK, CT_SCRIPT, sizeof(struct CHUNK_HEADER) + sizeof(data));
+  WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
+  WriteChunkBytes(DstIff, &data[0], sizeof(data));
+  PopChunk(DstIff);
 }
 
 STATIC VOID ResolveLookupTables()

@@ -150,6 +150,7 @@ struct VIEW_LAYOUTS
 #define CT_PALETTE        MAKE_NODE_ID('P','A','L','4')
 #define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
 #define CT_ENTITY         MAKE_NODE_ID('E','N','T','Y')
+#define CT_SCRIPT         MAKE_NODE_ID('S','C','P','T')
 
 #define IET_KEYDOWN    1
 #define IET_KEYUP      2
@@ -417,6 +418,7 @@ struct SCRIPT
 #define SCRIPT_TYPE_ENTITY 2
 #define SCRIPT_TYPE_ACTOR  3
 #define SCRIPT_TYPE_UI     4
+#define SCRIPT_TYPE_SCENE  5
 
 struct VIRTUAL_MACHINE
 {
