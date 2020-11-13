@@ -45,21 +45,21 @@ F  2    jl         addr.sb                    pc <- pc + addr * 2
 17 Reserved
 18 Reserved
 19 Reserved
-2A 2    add                                   t <- stack[-1] + stack[0]
+1A 2    add                                   t <- stack[-1] + stack[0]
                                               pop stack twice
                                               push t
                                               Stack: -1 = lhs.l
                                               Stack:  0 = rhs.l
-2B 2    addq       rhs.sb                     t <- stack[0] + rhs
+1B 2    addq       rhs.sb                     t <- stack[0] + rhs
                                               pop stack
                                               push t
                                               Stack: 0 = left.l
-2C 2    sub                                   t <- stack[-1] - stack[0]
+1C 2    sub                                   t <- stack[-1] - stack[0]
                                               pop stack twice
                                               push t
                                               Stack: -1 = lhs.l
                                               Stack:  0 = rhs.l
-2D 2    subq       rhs.sb                     t <- stack[-1] - val
+1D 2    subq       rhs.sb                     t <- stack[-1] - val
                                               pop stack
                                               push t
                                               Stack: 0 = left.l

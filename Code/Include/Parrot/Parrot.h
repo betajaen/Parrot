@@ -425,6 +425,7 @@ struct VIRTUAL_MACHINE
   struct SCRIPT*   vm_Script;
   UWORD            vm_Timer;
   UWORD            vm_StackHead;
+  UBYTE*           vm_Instructions;
   UWORD            vm_Stack[MAX_VM_STACK_SIZE];
 };
 

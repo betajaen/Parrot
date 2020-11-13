@@ -172,8 +172,8 @@ INT main()
   ExportTable(&RoomTable, 2, 1);
   ExportTable(&ImageTable, 3, 2);
   ExportTable(&EntityTable, 4, 3);
-
-  ExportGame(1, &TableRefs[0], 1, 2, 1);
+  
+  ExportGame(1, &TableRefs[0], 1, 2, 1, 0);
 
   CloseParrotIff();
 

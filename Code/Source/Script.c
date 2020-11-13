@@ -32,6 +32,8 @@
 STATIC LONG Globals[MAX_SCRIPT_GLOBALS];
 STATIC struct VIRTUAL_MACHINE VirtualMachine[MAX_VIRTUAL_MACHINES];
 
+STATIC VOID TickVirtualMachine(struct VIRTUAL_MACHINE* vm);
+
 #define VM_PARAM_B(VM, WHERE) 0
 #define VM_PARAM_W(VM, WHERE) 0
 #define VM_PARAM_L(VM, WHERE) 0
@@ -65,6 +67,44 @@ VOID ScriptInitialise()
 
 VOID ScriptShutdown()
 {
+}
+
+VOID RunScript(struct SCRIPT* script)
+{
+  struct VIRTUAL_MACHINE* vm;
+  UWORD ii;
+
+  for (ii = 0; ii < MAX_VIRTUAL_MACHINES; ii++)
+  {
+    vm = &VirtualMachine[ii];
+
+    if (vm->vm_State == VM_STATE_FREE)
+    {
+      vm->vm_PC = 0;
+      vm->vm_Script = script;
+      vm->vm_StackHead = 0;
+      vm->vm_State = VM_STATE_RUN;
+      vm->vm_Timer = 0;
+      vm->vm_Instructions = ((UBYTE*) (script)) + sizeof(struct SCRIPT);
+    }
+  }
+}
+
+VOID TickVirtualMachines()
+{
+  struct VIRTUAL_MACHINE* vm;
+  UWORD ii;
+
+  for (ii = 0; ii < MAX_VIRTUAL_MACHINES; ii++)
+  {
+    vm = &VirtualMachine[ii];
+
+    if (vm->vm_State != VM_STATE_FREE)
+    {
+      TickVirtualMachine(vm);
+    }
+
+  }
 }
 
 /*
@@ -285,7 +325,7 @@ STATIC INLINE VOID OpPushStack(struct VIRTUAL_MACHINE* vm)
    Pop Stack value from the stack and discard value.
    2 => 6, 0
 */
-STATIC INLINE VOID OpPopStack(struct VIRTUAL_MACHINE* vm)
+STATIC INLINE VOID OpPop(struct VIRTUAL_MACHINE* vm)
 {
   if (vm->vm_StackHead == 0)
   {
@@ -374,7 +414,7 @@ STATIC INLINE VOID OpJump(struct VIRTUAL_MACHINE* vm)
    Add
    lhs <- stack[-1]
    rhs <- stack[0]
-   2 => 2A, 0
+   2 => 1A, 0
 */
 STATIC INLINE VOID OpAdd(struct VIRTUAL_MACHINE* vm)
 {
@@ -392,7 +432,7 @@ STATIC INLINE VOID OpAdd(struct VIRTUAL_MACHINE* vm)
    AddQuick
    lhs <- stack[0]
    rhs <- val
-   2 => 2B, val
+   2 => 1B, val
 */
 STATIC INLINE VOID OpAddQuick(struct VIRTUAL_MACHINE* vm)
 {
@@ -410,7 +450,7 @@ STATIC INLINE VOID OpAddQuick(struct VIRTUAL_MACHINE* vm)
    Sub
    lhs <- stack[-1]
    rhs <- stack[0]
-   2 => 2C, 0
+   2 => 1C, 0
 */
 STATIC INLINE VOID OpSub(struct VIRTUAL_MACHINE* vm)
 {
@@ -428,7 +468,7 @@ STATIC INLINE VOID OpSub(struct VIRTUAL_MACHINE* vm)
    SubQuick
    lhs <- stack[0]
    rhs <- val
-   2 => 2D, val
+   2 => 1D, val
 */
 STATIC INLINE VOID OpSubQuick(struct VIRTUAL_MACHINE* vm)
 {
@@ -447,3 +487,48 @@ STATIC INLINE VOID OpSubQuick(struct VIRTUAL_MACHINE* vm)
 /* @UNIMPLEMENTED OpAudio */
 
 /* @UNIMPLEMENTED OpPrint */
+
+
+STATIC VOID TickVirtualMachine(struct VIRTUAL_MACHINE* vm)
+{
+  UBYTE opcode;
+
+  opcode = vm->vm_Instructions[vm->vm_PC];
+
+  switch (opcode)
+  {
+    case 0x0: OpStop(vm); break;
+    case 0x1: OpRem(vm); break;
+    case 0x2: OpPushByte(vm); break;
+    case 0x3: OpPushWord(vm); break;
+    case 0x4: OpPushLong(vm); break;
+    case 0x5: OpPushStack(vm); break;
+    case 0x6: OpPop(vm); break;
+    /* 0x7 - Reserved */
+    case 0x8: OpJump(vm); break;
+    /* 0x9 - jz */
+    /* 0xA - jnz */
+    /* 0xB - je */
+    /* 0xC - jne */
+    /* 0xD - jg */
+    /* 0xE - jge */
+    /* 0xF - jl */
+    /* 0x10 - jle */
+    /* 0x11 - load */
+    /* 0x12 - save */
+    /* 0x13 - gload */
+    /* 0x14 - gsave */
+    /* 0x15 - Reserved */
+    /* 0x16 - Reserved */
+    /* 0x17 - Reserved */
+    /* 0x18 - Reserved */
+    /* 0x19 - Reserved */
+    case 0x1A: OpAdd(vm); break;
+    case 0x1B: OpAddQuick(vm); break;
+    case 0x1C: OpSub(vm); break;
+    case 0x1D: OpSubQuick(vm); break;
+    /* 0x20 - Room */
+    /* 0x40 - Audio */
+    /* 0x80 - Print */
+  }
+}

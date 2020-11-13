@@ -29,4 +29,6 @@ EXPORT VOID ScriptInitialise();
 
 EXPORT VOID ScriptShutdown();
 
+EXPORT VOID RunScript(struct SCRIPT* script);
 
+EXPORT VOID TickVirtualMachines();
