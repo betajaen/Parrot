@@ -72,7 +72,7 @@ STATIC VOID MemClear(APTR pMem, ULONG size);
 
 STATIC VOID OpenParrotIff(UWORD id);
 STATIC VOID CloseParrotIff();
-STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD mainPalette, UWORD cursorPalette, UWORD startRoom);
+STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD mainPalette, UWORD cursorPalette, UWORD startRoom, UWORD startScript);
 STATIC VOID ExportRooms();
 STATIC VOID ExportPalette(UWORD id);
 STATIC VOID ExportCursorPalette(UWORD id);
@@ -452,7 +452,7 @@ STATIC VOID ExportCursorPalette(UWORD id)
   AddToTable(&PaletteTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct PALETTE_TABLE));
 }
 
-STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD startPalette, UWORD startCursorPalette, UWORD startRoom)
+STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD startPalette, UWORD startCursorPalette, UWORD startRoom, UWORD startScript)
 {
   struct CHUNK_HEADER hdr;
   struct GAME_INFO info;
@@ -476,6 +476,7 @@ STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD startPal
   info.gi_StartPalette = startPalette;
   info.gi_StartCursorPalette = startCursorPalette;
   info.gi_StartRoom = startRoom;
+  info.gi_StartScript = startScript;
 
   while (tables->tr_ChunkHeaderId != 0 && tableCount < 16)
   {

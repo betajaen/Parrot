@@ -231,6 +231,7 @@ struct GAME_INFO
   UWORD                     gi_StartPalette;
   UWORD                     gi_StartCursorPalette;
   UWORD                     gi_StartRoom;
+  UWORD                     gi_StartScript;
 };
 
 /*

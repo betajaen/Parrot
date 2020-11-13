@@ -65,8 +65,84 @@ VOID ScriptInitialise()
 
 VOID ScriptShutdown()
 {
-
 }
+
+/*
+
+    Internal Stack Functions
+
+*/
+
+STATIC INLINE VOID StackPushW(struct VIRTUAL_MACHINE* vm, WORD value)
+{
+
+  if (vm->vm_StackHead == MAX_VM_STACK_SIZE)
+  {
+    PARROT_ERR(
+      "VM Is out of Stack Space!\n"
+      "Reason: Tried to push a byte on stack, and ran out of space"
+      PARROT_ERR_STR("Function")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("PC"),
+      "StackPushW",
+      (ULONG)GET_ASSET_ID(vm->vm_Script),
+      (ULONG)vm->vm_PC
+    );
+  }
+
+  vm->vm_Stack[vm->vm_StackHead] = value;
+  ++vm->vm_StackHead;
+}
+
+STATIC INLINE VOID StackPushL(struct VIRTUAL_MACHINE* vm, LONG value)
+{
+
+  if (vm->vm_StackHead == MAX_VM_STACK_SIZE)
+  {
+    PARROT_ERR(
+      "VM Is out of Stack Space!\n"
+      "Reason: Tried to push a byte on stack, and ran out of space"
+      PARROT_ERR_STR("Function")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("PC"),
+      "StackPushW",
+      (ULONG)GET_ASSET_ID(vm->vm_Script),
+      (ULONG)vm->vm_PC
+    );
+  }
+
+  vm->vm_Stack[vm->vm_StackHead] = value;
+  ++vm->vm_StackHead;
+}
+
+STATIC INLINE LONG StackPopL(struct VIRTUAL_MACHINE* vm)
+{
+  LONG value;
+
+  if (vm->vm_StackHead == 0)
+  {
+    PARROT_ERR(
+      "VM stack underflow!\n"
+      "Reason: Tried to pop from the stack when it is empty!"
+      PARROT_ERR_STR("Opcode")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("PC"),
+      "pop",
+      (ULONG)GET_ASSET_ID(vm->vm_Script),
+      (ULONG)vm->vm_PC
+    );
+  }
+
+  value = vm->vm_Stack[vm->vm_StackHead];
+  --vm->vm_StackHead;
+  return value;
+}
+
+/*
+
+    Opcodes
+
+*/
 
 /* stop
    Stop Script
@@ -137,7 +213,7 @@ STATIC INLINE VOID OpPushWord(struct VIRTUAL_MACHINE* vm)
     );
   }
 
-  value = VM_PARAM_W(2);
+  value = VM_PARAM_W(vm, 2);
 
   vm->vm_Stack[vm->vm_StackHead] = value;
   ++vm->vm_StackHead;
@@ -148,7 +224,7 @@ STATIC INLINE VOID OpPushWord(struct VIRTUAL_MACHINE* vm)
    Push Long onto Stack
    6 => 4, 0, value.l[3], value.[2], value.w[2], value.w[0]
 */
-STATIC INLINE VOID OpPushWord(struct VIRTUAL_MACHINE* vm)
+STATIC INLINE VOID OpPushLong(struct VIRTUAL_MACHINE* vm)
 {
   LONG value;
 
@@ -166,7 +242,7 @@ STATIC INLINE VOID OpPushWord(struct VIRTUAL_MACHINE* vm)
     );
   }
 
-  value = VM_PARAM_W(2);
+  value = VM_PARAM_W(vm, 2);
 
   vm->vm_Stack[vm->vm_StackHead] = value;
   ++vm->vm_StackHead;
@@ -182,7 +258,7 @@ STATIC INLINE VOID OpPushStack(struct VIRTUAL_MACHINE* vm)
   BYTE where;
   WORD loc;
 
-  where = VM_PARAM_B(1);
+  where = VM_PARAM_B(vm, 1);
 
   loc = vm->vm_StackHead - (WORD) where;
 
@@ -272,3 +348,102 @@ STATIC INLINE VOID OpJump(struct VIRTUAL_MACHINE* vm)
   vm->vm_PC = newPc;
 }
 
+/* @UNIMPLEMENTED OpJumpZero */
+
+/* @UNIMPLEMENTED OpJumpNotZero */
+
+/* @UNIMPLEMENTED OpJumpEqual */
+
+/* @UNIMPLEMENTED OpJumpNotEqual */
+
+/* @UNIMPLEMENTED OpJumpGreater */
+
+/* @UNIMPLEMENTED OpJumpGreaterEqual */
+
+/* @UNIMPLEMENTED OpJumpLess */
+
+/* @UNIMPLEMENTED OpLoad */
+
+/* @UNIMPLEMENTED OpSave */
+
+/* @UNIMPLEMENTED OpGlobalLoad */
+
+/* @UNIMPLEMENTED OpGlobalSave */
+
+/* add
+   Add
+   lhs <- stack[-1]
+   rhs <- stack[0]
+   2 => 2A, 0
+*/
+STATIC INLINE VOID OpAdd(struct VIRTUAL_MACHINE* vm)
+{
+  LONG lhs, rhs, result;
+
+  rhs = StackPopL(vm);
+  lhs = StackPopL(vm);
+
+  result = lhs + rhs;
+
+  StackPushL(vm, result);
+}
+
+/* addq
+   AddQuick
+   lhs <- stack[0]
+   rhs <- val
+   2 => 2B, val
+*/
+STATIC INLINE VOID OpAddQuick(struct VIRTUAL_MACHINE* vm)
+{
+  LONG lhs, rhs, result;
+
+  lhs = StackPopL(vm);
+  rhs = VM_PARAM_B(vm, 1);
+
+  result = lhs + rhs;
+
+  StackPushL(vm, result);
+}
+
+/* sub
+   Sub
+   lhs <- stack[-1]
+   rhs <- stack[0]
+   2 => 2C, 0
+*/
+STATIC INLINE VOID OpSub(struct VIRTUAL_MACHINE* vm)
+{
+  LONG lhs, rhs, result;
+
+  rhs = StackPopL(vm);
+  lhs = StackPopL(vm);
+
+  result = lhs - rhs;
+
+  StackPushL(vm, result);
+}
+
+/* subq
+   SubQuick
+   lhs <- stack[0]
+   rhs <- val
+   2 => 2D, val
+*/
+STATIC INLINE VOID OpSubQuick(struct VIRTUAL_MACHINE* vm)
+{
+  LONG lhs, rhs, result;
+
+  lhs = StackPopL(vm);
+  rhs = VM_PARAM_B(vm, 1);
+
+  result = lhs - rhs;
+
+  StackPushL(vm, result);
+}
+
+/* @UNIMPLEMENTED OpRoom */
+
+/* @UNIMPLEMENTED OpAudio */
+
+/* @UNIMPLEMENTED OpPrint */
