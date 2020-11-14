@@ -3,20 +3,20 @@ Parrot Development Guide
 
 ## Squawk
 
-[Introduction](squawk)
-[Layout](squawklayout)
+[Introduction](SQUAWK)
+[Layout](SQUAWKLAYOUT)
 
 ## Assets
 
-[Game Info](ct_gameinfo)
-[Asset Table](ct_table)
-[Asset Table Item](ct_table)
+[Game Info](CT_GAMEINFO)
+[Asset Table](CT_TABLE)
+[Asset Table Item](CT_TABLE)
 
 ## Scripting
 
-[Virtual Machine](vm)
-[Opcodes](opcodes)
+[Virtual Machine](VM)
+[Opcodes](OPCODES)
 
 ## Notation
 
-[Type Notation](typenotation)
+[Type Notation](TYPENOTATION)
