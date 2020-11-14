@@ -1,7 +1,7 @@
-VM
-
+Virtual Machine
+# VM
 
 Stack based virtual machine. Each stack variable is 4 bytes (LONG).
 There are 16 variables and 256 global variables.
 
-variables may belong to the object or room running with the script.
+Variables may belong to the object or room running with the script.

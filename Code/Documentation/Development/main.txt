@@ -1,0 +1,22 @@
+Parrot Development Guide
+# Parrot Development Guide
+
+## Squawk
+
+[Introduction](squawk)
+[Layout](squawklayout)
+
+## Assets
+
+[Game Info](ct_gameinfo)
+[Asset Table](ct_table)
+[Asset Table Item](ct_table)
+
+## Scripting
+
+[Virtual Machine](vm)
+[Opcodes](opcodes)
+
+## Notation
+
+[Type Notation](typenotation)

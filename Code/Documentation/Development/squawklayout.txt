@@ -1,0 +1,69 @@
+Squawk File Layout
+# Squawk File Layout
+
+## File Revision
+
+Design Version
+    2.0
+
+Code Version
+    1.0
+
+## General IFF Layout
+
+    FORM      SQWK
+      TABL    Tables
+        CHDR  OBJECT_TABLE
+        CHDR  OBJECT_TABLE
+        CHDR  OBJECT_TABLE
+        CHDR  ...
+      ROOM    Rooms
+        CHDR  ROOM
+      SCPT    Scripts
+        CHDR  SCRIPT
+        CHDR  SCRIPT
+      ...
+
+### The Chunk Header
+
+CHDR or CHUNK_HEADER, is a 4 byte structure that fits in the IFF FourCC
+Type, as its numerically based the contents are likely not printable.
+
+    struct CHUNK_HEADER
+    {
+      UWORD ch_Id;
+      UWORD ch_Flags
+    };
+
+    Byte 0  -> Upper byte of ch_Id
+    Byte 1  -> Lower byte of ch_Id
+    Byte 2  -> Upper byte of ch_Flags
+    Byte 3  -> Lower byte of ch_Flags
+
+#### Chunk Id
+
+The Chunk Id is a UWORD start starts from 1 to 65535.
+
+#### Chunk Flags
+
+ch_Flags are populated by the CHUNK_FLAGS enum, these can be the
+following values:
+
+Bit 0:  Asset is for the ECS Arch
+Bit 1:  Asset is for the AGA Arch
+Bit 2:  Asset is for the RTS Arch
+Bit 13: Asset may be larger than the Chunk Type specifies, this may be
+        due to a sub-type like Entities, or it has dynamic data - such
+        as a Script.
+Bit 14: Asset has some extra data appended at the end of the asset 
+        which requires a special function to load and unload the data.
+        This is specified by the CHUNK_FACTORY of that type. Not to be
+        confused with Bit 13.
+Bit 15: This asset should be ignored and not loaded.
+
+Note:
+
+Bits 0,1,2 May be OR'd together to represent that the asset can be
+           loaded regardless of architecture, and this is recommended
+           practise for assets that are not backdrops, images or audio
+           data.

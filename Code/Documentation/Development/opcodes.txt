@@ -1,6 +1,7 @@
-Opcodes
+Virtual Machine Opcodes
+# Opcodes
 
-@{u}Id@{uu} @{u}Len@{uu}  @{u}Name@{uu}       @{u}Arguments@{uu}                  @{u}Description@{uu}
+_Id_ _Len_  _Name_       _Arguments_                  _Description_
 0  2    stop                                  Stop Script
 1  2    rem        user.b                     Remark (Ignored)
 2  2    pushb      val.b                      push byte onto stack

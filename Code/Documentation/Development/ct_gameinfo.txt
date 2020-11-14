@@ -1,0 +1,128 @@
+Game Info Asset
+# Game Info Asset (GAME_INFO)
+
+Design Version
+  1.0
+Code Version
+  1.0
+
+Game Information Table
+
+## C Version
+
+  struct GAME_INFO
+  {
+    ULONG                     gi_GameId;
+    ULONG                     gi_GameVersion;
+    CHAR                      gi_Title[64];
+    CHAR                      gi_ShortTitle[16];
+    CHAR                      gi_Author[128];
+    CHAR                      gi_Release[128];
+    UWORD                     gi_Width;
+    UWORD                     gi_Height;
+    UWORD                     gi_Depth;
+    UWORD                     gi_RoomCount;
+    struct OBJECT_TABLE_REF   gi_StartTables[16];
+    UWORD                     gi_StartPalette;
+    UWORD                     gi_StartCursorPalette;
+    UWORD                     gi_StartRoom;
+    UWORD                     gi_StartScript;
+  };
+
+## gi_GameId (ULONG)
+
+FourCC id of the Game
+
+example:
+  PRRT
+
+## gi_GameVersion (ULONG)
+
+Numerical version of the game.
+
+example:
+  0x100
+
+## gi_Title (CHAR[64])
+
+English title of the Game
+
+example:
+  "Adventures of Parrot"
+
+## gi_ShortTitle (CHAR[16])
+
+English short-hand title of the Game
+
+example:
+  "Parrot"
+
+## gi_Author (CHAR[128])
+
+Full legal text of the Author and/or Publisher of the Game
+
+example:
+  "An Adventure Game Company And Associates"
+
+## gi_Release (CHAR[128])
+
+Release information, including version number and/or Language
+
+example: "Adventures of Parrot 1.0, English"
+
+## gi_Width (UWORD)
+
+Number of pixels that represent the width of the display
+
+example:
+  320
+
+## gi_Height (UWORD)
+
+Number of pixels that represent the height of the display
+
+example:
+  200
+
+## gi_Depth (UWORD)
+
+Maximum Bitplane depth used by the display
+
+example:
+  4
+
+## gi_RoomCount (UWORD)
+
+Number of Rooms used in this game
+
+example:
+  24
+
+## gi_StartTables (UWORD)
+
+UNDOCUMENTATED
+
+## gi_StartPalette (UWORD)
+
+Palette Asset ID for the initial Display Palette
+
+example:
+  1
+
+## gi_StartCursorPalette (UWORD)
+
+Palette Asset ID for the initial Cursor Palette
+
+example:
+  1
+
+## gi_StartRoom (UWORD)
+
+UNDOCUMENTATED
+
+## gi_StartScript (UWORD)
+
+Script Asset ID for the first script to be executed when the game has initialised
+
+example:
+  1
