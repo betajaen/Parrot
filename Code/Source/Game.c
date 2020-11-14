@@ -197,6 +197,9 @@ EXPORT VOID GameStart(STRPTR path)
 
   InputInitialise();
 
+#if 0
+  RunScript(1);
+#else
   entrance.en_Room = 3; // GameInfo->gi_StartRoom;
   entrance.en_Exit = 0;
 
@@ -207,6 +210,7 @@ EXPORT VOID GameStart(STRPTR path)
     /* Start First Room */
     PlayRoom(0, &entrance, GameInfo);
   }
+#endif
 
   InputExit();
 

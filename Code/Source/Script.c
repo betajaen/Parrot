@@ -28,6 +28,8 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
+#include <Parrot/Asset.h>
+#include <Parrot/Arena.h>
 
 STATIC LONG Globals[MAX_SCRIPT_GLOBALS];
 STATIC struct VIRTUAL_MACHINE VirtualMachine[MAX_VIRTUAL_MACHINES];
@@ -69,7 +71,7 @@ VOID ScriptShutdown()
 {
 }
 
-VOID RunScript(struct SCRIPT* script)
+STATIC VOID StartScript(struct SCRIPT* script)
 {
   struct VIRTUAL_MACHINE* vm;
   UWORD ii;
@@ -90,6 +92,17 @@ VOID RunScript(struct SCRIPT* script)
   }
 }
 
+VOID RunScript(UWORD id)
+{
+  struct SCRIPT* script;
+  UWORD archive;
+
+  archive = FindAssetArchive(id, CT_SCRIPT, CHUNK_FLAG_ARCH_ANY);
+  script = LoadAssetT(struct SCRIPT, ArenaChapter, archive, CT_SCRIPT, id, CHUNK_FLAG_ARCH_ANY);
+
+  StartScript(script);
+}
+
 VOID TickVirtualMachines()
 {
   struct VIRTUAL_MACHINE* vm;
@@ -103,7 +116,17 @@ VOID TickVirtualMachines()
     {
       TickVirtualMachine(vm);
     }
-
+    else
+    {
+      /*
+        Free the script after it has ran.
+       */
+      if (vm->vm_Script != NULL)
+      {
+        UnloadAsset(ArenaChapter, vm->vm_Script);
+        vm->vm_Script = NULL;
+      }
+    }
   }
 }
 

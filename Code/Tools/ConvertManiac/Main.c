@@ -35,7 +35,7 @@
 
 #include <Asset.h>
 
-struct ExecBase* SysBase;
+// struct ExecBase* SysBase;
 struct DosLibrary* DOSBase;
 struct Library* IFFParseBase;
 struct IntuitionBase* IntuitionBase;
@@ -101,6 +101,7 @@ STATIC struct OBJECT_TABLE RoomTable;
 STATIC struct OBJECT_TABLE ImageTable;
 STATIC struct OBJECT_TABLE PaletteTable;
 STATIC struct OBJECT_TABLE EntityTable;
+STATIC struct OBJECT_TABLE ScriptTable;
 
 INT main()
 {
@@ -154,12 +155,15 @@ INT main()
   MemClear((APTR)&RoomTable, sizeof(RoomTable));
   MemClear((APTR)&ImageTable, sizeof(ImageTable));
   MemClear((APTR)&PaletteTable, sizeof(PaletteTable));
+  MemClear((APTR)&ScriptTable, sizeof(ScriptTable));
 
   InitTable(&RoomTable, CT_ROOM);
   InitTable(&ImageTable, CT_IMAGE);
   InitTable(&PaletteTable, CT_PALETTE);
   InitTable(&EntityTable, CT_ENTITY);
-
+#if 0
+  InitTable(&ScriptTable, CT_SCRIPT);
+#endif
   ResolveLookupTables();
 
   ExportRooms();
@@ -174,7 +178,10 @@ INT main()
   ExportTable(&RoomTable, 2, 1);
   ExportTable(&ImageTable, 3, 2);
   ExportTable(&EntityTable, 4, 3);
-  
+#if 0
+  ExportTable(&ScriptTable, 5, 4);
+#endif
+
   ExportGame(1, &TableRefs[0], 1, 2, 1, 1);
 
   CloseParrotIff();
@@ -312,6 +319,7 @@ STATIC VOID CloseParrotIff()
 }
 
 #include "Tables.h"
+#include "ScriptWriter.h"
 
 STATIC VOID ExportPalette(UWORD id)
 {
@@ -791,6 +799,30 @@ STATIC VOID ExportRooms()
 
 }
 
+STATIC VOID ExportScript(UWORD archive, UWORD id, UWORD scriptType, UWORD scriptFlags)
+{
+#if 0
+
+  struct SCRIPT script;
+  struct CHUNK_HEADER hdr;
+
+  hdr.ch_Id = id;
+  hdr.ch_Id = CHUNK_FLAG_ARCH_ANY;
+
+  script.sc_Type = scriptType;
+  script.sc_Flags = scriptFlags;
+  script.sc_Length = ScriptSize;
+
+  PushChunk(DstIff, ID_SQWK, CT_SCRIPT, sizeof(struct CHUNK_HEADER) + sizeof(struct SCRIPT) + ScriptSize);
+  WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
+  WriteChunkBytes(DstIff, &script, sizeof(struct SCRIPT));
+  WriteChunkBytes(DstIff, &ScriptData[0], ScriptSize);
+  PopChunk(DstIff);
+
+  AddToTable(&ScriptTable, id, archive, hdr.ch_Flags, sizeof(struct SCRIPT) + ScriptSize);
+#endif
+}
+
 STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
 {
   UWORD x, y;
@@ -1053,34 +1085,11 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot
 
 STATIC VOID ExportStartDefaultScript(UWORD startRoom)
 {
-  BYTE data[sizeof(struct SCRIPT) + 8];
-  struct SCRIPT* script;
-  struct CHUNK_HEADER hdr;
+  ScriptBegin();
+  ScriptOpPushWord(startRoom);
+  ScriptEnd();
 
-  hdr.ch_Id = 1;
-  hdr.ch_Id = CHUNK_FLAG_ARCH_ANY;
-
-  script = (struct SCRIPT*)&data;
-
-  script->sc_Flags = 0;
-  script->sc_Length = 8;
-  script->sc_Type = SCRIPT_TYPE_SCENE;
-
-  data[sizeof(struct SCRIPT) + 0] = 0x3;  /* pushw */
-  data[sizeof(struct SCRIPT) + 1] = 0;
-  data[sizeof(struct SCRIPT) + 2] = (startRoom >> 8) & 0xFF;   /* Start Room */
-  data[sizeof(struct SCRIPT) + 3] = startRoom & 0xFF;
-
-  data[sizeof(struct SCRIPT) + 4] = 0x20;  /* room */
-  data[sizeof(struct SCRIPT) + 5] = 0;
-
-  data[sizeof(struct SCRIPT) + 6] = 0;  /* stop */
-  data[sizeof(struct SCRIPT) + 7] = 0;
-
-  PushChunk(DstIff, ID_SQWK, CT_SCRIPT, sizeof(struct CHUNK_HEADER) + sizeof(data));
-  WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
-  WriteChunkBytes(DstIff, &data[0], sizeof(data));
-  PopChunk(DstIff);
+  ExportScript(0, 1, SCRIPT_TYPE_SCENE, 0);
 }
 
 STATIC VOID ResolveLookupTables()
