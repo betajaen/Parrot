@@ -118,7 +118,7 @@ EXPORT VOID GameStart(STRPTR path)
   ArenaChapter = NULL;
   ArenaRoom = NULL;
 
-  InitStackVar(struct UNPACKED_ROOM, uroom);
+  InitStackVar(uroom);
 
   ArenaGame = ArenaOpen(16384, MEMF_CLEAR);
   ArenaChapter = ArenaOpen(131072, MEMF_CLEAR);

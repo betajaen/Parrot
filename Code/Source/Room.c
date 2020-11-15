@@ -218,7 +218,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   screenH = 128;
 
   /* Load Room Asset and Backdrops */
-  InitStackVar(struct UNPACKED_ROOM, room);
+  InitStackVar(room);
 
   room.ur_UpdateFlags = UFLG_ALL;
   room.ur_Verbs.vb_Allowed = VERB_NONE | VERB_WALK;
