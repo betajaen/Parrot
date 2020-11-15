@@ -44,3 +44,5 @@ VOID CloseSquawkFile(IffPtr squawk);
 VOID StartAssetList(IffPtr squawk, ULONG classType);
 VOID EndAssetList(IffPtr squawk);
 VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags);
+
+VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter);

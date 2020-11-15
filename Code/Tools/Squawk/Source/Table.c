@@ -1,5 +1,5 @@
 /**
-    $Id: Main.c, 1.0, 2020/05/13 07:16:00, betajaen Exp $
+    $Id: Tables.c, 1.0, 2020/05/13 07:16:00, betajaen Exp $
 
     Maniac Game Converter for Parrot
     ================================
@@ -25,33 +25,20 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <exec/types.h>
 #include <Squawk/Squawk.h>
-#include "Maniac.h"
+#include <Parrot/Asset.h>
 
-STATIC IffPtr master;
-
-VOID ExportGameInfo(IffPtr master);
-VOID ExportPalettes(IffPtr master);
-VOID ExportLfl(UWORD lflNum);
-
-VOID ConverterMain()
+VOID InitTables()
 {
-  UWORD roomNum;
+  
+}
 
-  master = OpenSquawkFile(0);
+VOID ExportTables(IffPtr master)
+{
+  
+}
 
-  ExportGameInfo(master);
-  ExportPalettes(master);
-
-  for (roomNum = 1; roomNum < MM_NUM_ROOMS; roomNum++)
-  {
-    ExportLfl(roomNum);
-  }
-
-
-  CloseSquawkFile(master);
-  master = NULL;
-
-  Requester("OK", "Converted");
+VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter)
+{
+  
 }
