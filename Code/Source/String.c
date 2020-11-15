@@ -209,3 +209,27 @@ VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value)
     *pDst++ = value;
   }
 }
+
+ULONG UWordToId(UWORD r)
+{
+  ULONG s = 0x41;
+
+  s += (r & 0xF);
+  s <<= 8;
+  r >>= 4;
+
+  s += 0x41;
+  s += (r & 0xF);
+  s <<= 8;
+  r >>= 4;
+
+  s += 0x41;
+  s += (r & 0xF);
+  s <<= 8;
+  r >>= 4;
+
+  s += 0x41;
+  s += (r & 0xF);
+
+  return s;
+}
