@@ -41,6 +41,8 @@ BOOL StrEndsWith(CONST CHAR* test, CHAR value);
 
 VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value);
 
-#define InitStackVar(T, X) FillMem((UBYTE*) &X, sizeof(T), 0);
+#define InitStackVar(X) FillMem((UBYTE*) &X, sizeof(X), 0);
 
 CHAR* StrDuplicate(CONST CHAR* pSrc);
+
+ULONG UWordToId(UWORD value);
