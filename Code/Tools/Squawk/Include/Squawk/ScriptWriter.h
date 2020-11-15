@@ -25,8 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <exec/types.h>
-#include <Parrot/Requester.h>
+#include <Squawk/Squawk.h>
 
 #define MAX_SCRIPT_WRITER_SIZE 256
 

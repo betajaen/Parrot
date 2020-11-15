@@ -26,4 +26,10 @@
 */
 
 #include <exec/types.h>
+#include <Squawk/Squawk.h>
 
+
+VOID ConverterMain()
+{
+  Requester("OK", "Edna says hello");
+}

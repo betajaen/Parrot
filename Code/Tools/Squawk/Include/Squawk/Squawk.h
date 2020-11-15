@@ -26,4 +26,11 @@
 */
 
 #include <exec/types.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/intuition.h>
+#include <proto/iffparse.h>
+#include <libraries/iffparse.h>
+
+#include <Parrot/Requester.h>
 

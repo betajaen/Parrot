@@ -25,14 +25,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <exec/types.h>
-#include <proto/exec.h>
-#include <proto/dos.h>
-#include <proto/intuition.h>
-#include <proto/iffparse.h>
-#include <libraries/iffparse.h>
-
-#include <Parrot/Requester.h>
 #include <Squawk/Squawk.h>
 
 // struct ExecBase* SysBase;
@@ -58,6 +50,8 @@ struct Message* wbMsg;
 ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
 ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
 extern VOID exit();
+
+VOID ConverterMain();
 
 INT main()
 {
@@ -100,7 +94,7 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  Requester("OK", "Squawk!!");
+  ConverterMain();
 
 
 CLEAN_EXIT:
