@@ -36,7 +36,7 @@
 #include <Parrot/Input.h>
 #include <Parrot/Script.h>
 
-#include "Asset.h"
+#include <Parrot/Asset.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>

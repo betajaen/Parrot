@@ -1,8 +1,8 @@
 /**
-    $Id: Asset.h 1.2 2020/05/17 16:49:00, betajaen Exp $
+    $Id: Squawk.h, 1.2, 2020/11/15 06:48:00, betajaen Exp $
 
-    Parrot - Point and Click Adventure Game Player
-    ==============================================
+    Squawk Header for Parrot Exporters
+    ==================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -25,14 +25,5 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
-#define ID_MNIC MAKE_NODE_ID('M','N','C','M')
+#include <exec/types.h>
 
-APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWORD assetId, UWORD arch);
-
-void UnloadAsset(struct ARENA* arena, APTR asset);
-
-#define LoadAssetT(T, ARENA, ARCHIVE, TYPE, ID, ARCH) \
-  ( (T*) LoadAsset(ARENA, ARCHIVE, TYPE, ID, ARCH) )
-
-UWORD FindAssetArchive(UWORD assetId, ULONG classType, ULONG arch);

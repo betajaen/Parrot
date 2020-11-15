@@ -1,8 +1,8 @@
 /**
-    $Id: Asset.h, 1.0, 2020/05/13 19:11:00, betajaen Exp $
+    $Id: Main.c, 1.0, 2020/05/13 07:16:00, betajaen Exp $
 
-    Game Converter for Parrot
-    =========================
+    Maniac Game Converter for Parrot
+    ================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -25,12 +25,5 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PARROT_ASSET_H
-#define PARROT_ASSET_H
+#include <exec/types.h>
 
-#include <Parrot/Parrot.h>
-
-#define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
-#define ID_MNIC MAKE_NODE_ID('M','N','C','M')
-
-#endif

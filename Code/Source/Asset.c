@@ -30,8 +30,7 @@
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
 #include <Parrot/Archive.h>
-
-#include "Asset.h"
+#include <Parrot/Asset.h>
 
 #include <proto/exec.h>
 

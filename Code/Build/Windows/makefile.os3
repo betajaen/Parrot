@@ -29,12 +29,13 @@
 
 CC      = vc
 CPU     = 68020
-CFLAGS  = -lamiga -nostdlib -IInclude
+CFLAGS  = -lamiga -nostdlib -IInclude -ITools/Squawk/Include
 
 # PARROT
 
 PARROT_OBJ = main.o arena.o string.o requester.o game.o room.o image.o asset.o entity.o view.o input.o cursor.o verbs.o script.o
-CONVERTER_MANIAC_OBJ =maniac_conv_main.o string.o Source/minstart.o
+SQUAWK_OBJ = squawk_main.o string.o requester.o Source/minstart.o
+CONVERTER_MANIAC_OBJ = $(SQUAWK_OBJ) maniac_main.o 
 
 parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
 	$(CC) +aos68km $(CFLAGS) Source/minstart.o $(PARROT_OBJ) -o ../Releases/Parrot/Parrot
@@ -82,10 +83,15 @@ verbs.o: Source/Verbs.c
 script.o: Source/Script.c
 	$(CC) $(CFLAGS) -c Source/Script.c -o script.o
 
+# SQUAWK
+
+squawk_main.o: Tools/Squawk/Source/main.c
+	$(CC) $(CFLAGS) -c Tools/Squawk/Source/Main.c -o squawk_main.o
+
 # MANIAC
 
-maniac_conv_main.o: Tools/ConvertManiac/Main.c
-	$(CC) $(CFLAGS) -c Tools/ConvertManiac/Main.c -o maniac_conv_main.o -ISource
+maniac_main.o: Tools/ConvertManiac/Maniac.c
+	$(CC) $(CFLAGS) -c Tools/ConvertManiac/Maniac.c -o maniac_main.o
 
 .PHONY: clean
 
