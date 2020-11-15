@@ -34,8 +34,8 @@ CFLAGS  = -lamiga -nostdlib -IInclude -ITools/Squawk/Include
 # PARROT
 
 PARROT_OBJ = main.o arena.o string.o requester.o game.o room.o image.o asset.o entity.o view.o input.o cursor.o verbs.o script.o
-SQUAWK_OBJ = squawk_main.o string.o requester.o Source/minstart.o
-CONVERTER_MANIAC_OBJ = $(SQUAWK_OBJ) maniac_main.o 
+SQUAWK_OBJ = squawk_main.o squawk_iff.o string.o requester.o Source/minstart.o
+CONVERTER_MANIAC_OBJ = $(SQUAWK_OBJ) maniac_main.o maniac_meta.o
 
 parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
 	$(CC) +aos68km $(CFLAGS) Source/minstart.o $(PARROT_OBJ) -o ../Releases/Parrot/Parrot
@@ -88,10 +88,16 @@ script.o: Source/Script.c
 squawk_main.o: Tools/Squawk/Source/main.c
 	$(CC) $(CFLAGS) -c Tools/Squawk/Source/Main.c -o squawk_main.o
 
+squawk_iff.o: Tools/Squawk/Source/Iff.c
+	$(CC) $(CFLAGS) -c Tools/Squawk/Source/Iff.c -o squawk_iff.o
+
 # MANIAC
 
 maniac_main.o: Tools/ConvertManiac/Maniac.c
 	$(CC) $(CFLAGS) -c Tools/ConvertManiac/Maniac.c -o maniac_main.o
+
+maniac_meta.o: Tools/ConvertManiac/Meta.c
+	$(CC) $(CFLAGS) -c Tools/ConvertManiac/Meta.c -o maniac_meta.o
 
 .PHONY: clean
 

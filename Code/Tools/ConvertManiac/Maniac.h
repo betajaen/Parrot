@@ -1,8 +1,8 @@
 /**
-    $Id: Squawk.h, 1.2, 2020/11/15 06:48:00, betajaen Exp $
+    $Id: Maniac.h, 1.2, 2020/05/15 08:39:00, betajaen Exp $
 
-    Squawk Header for Parrot Exporters
-    ==================================
+    Maniac Game Converter for Parrot
+    ================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -25,22 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <exec/types.h>
-#include <proto/exec.h>
-#include <proto/dos.h>
-#include <proto/intuition.h>
-#include <proto/iffparse.h>
-#include <libraries/iffparse.h>
-
-#include <Parrot/Parrot.h>
-#include <Parrot/Requester.h>
-#include <Parrot/String.h>
-
-typedef struct IFFHandle* IffPtr;
-
-IffPtr OpenSquawkFile(UWORD id);
-VOID CloseSquawkFile(IffPtr squawk);
-
-VOID StartAssetList(IffPtr squawk, ULONG classType);
-VOID EndAssetList(IffPtr squawk);
-VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags);
+#define MM_META_ID MAKE_ID('M','A','N','C')
+#define MM_META_TITLE "Maniac Mansion"
+#define MM_META_SHORT_TITLE "Maniac Mansion"
+#define MM_META_AUTHOR "Lucasfilm Games LLC"
+#define MM_META_RELEASE "Commodore Amiga"
+#define MM_NUM_ROOMS 54

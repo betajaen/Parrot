@@ -52,3 +52,6 @@ VOID ErrorF(CONST_STRPTR pFmt, ...);
 
 #define PARROT_ERR_STR(NAME) \
   "\n " NAME " = %s"
+
+#define PARROT_ERR0(MESSAGE) \
+  ErrorF(MESSAGE);

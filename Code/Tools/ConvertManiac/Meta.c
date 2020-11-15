@@ -1,8 +1,8 @@
 /**
-    $Id: Squawk.h, 1.2, 2020/11/15 06:48:00, betajaen Exp $
+    $Id: Metadata.c, 1.0, 2020/05/13 07:16:00, betajaen Exp $
 
-    Squawk Header for Parrot Exporters
-    ==================================
+    Maniac Game Converter for Parrot
+    ================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -26,21 +26,30 @@
 */
 
 #include <exec/types.h>
-#include <proto/exec.h>
-#include <proto/dos.h>
-#include <proto/intuition.h>
-#include <proto/iffparse.h>
-#include <libraries/iffparse.h>
+#include <Squawk/Squawk.h>
+#include "Maniac.h"
 
-#include <Parrot/Parrot.h>
-#include <Parrot/Requester.h>
-#include <Parrot/String.h>
+VOID ExportGameInfo(IffPtr master)
+{
+  struct GAME_INFO gi;
+  
+  InitStackVar(struct GAME_INFO, gi);
 
-typedef struct IFFHandle* IffPtr;
+  StrCopy(&gi.gi_Title[0], sizeof(gi.gi_Title), MM_META_TITLE );
+  StrCopy(&gi.gi_ShortTitle[0], sizeof(gi.gi_ShortTitle), MM_META_SHORT_TITLE);
+  StrCopy(&gi.gi_Author[0], sizeof(gi.gi_Author), MM_META_AUTHOR);
+  StrCopy(&gi.gi_Release[0], sizeof(gi.gi_Release), MM_META_RELEASE);
 
-IffPtr OpenSquawkFile(UWORD id);
-VOID CloseSquawkFile(IffPtr squawk);
+  gi.gi_Width = 320;
+  gi.gi_Height = 200;
+  gi.gi_Depth = 4;
+  gi.gi_RoomCount = MM_NUM_ROOMS;
+  gi.gi_StartPalette = 1;
+  gi.gi_StartCursorPalette = 1;
+  gi.gi_StartRoom = 1;
+  gi.gi_StartScript = 1;
 
-VOID StartAssetList(IffPtr squawk, ULONG classType);
-VOID EndAssetList(IffPtr squawk);
-VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags);
+  StartAssetList(master, CT_GAME_INFO);
+  SaveAssetQuick(master, (APTR)&gi, sizeof(gi), CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
+  EndAssetList(master);
+}

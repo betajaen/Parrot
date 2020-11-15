@@ -28,8 +28,18 @@
 #include <exec/types.h>
 #include <Squawk/Squawk.h>
 
+STATIC IffPtr master;
+
+VOID ExportGameInfo(IffPtr master);
 
 VOID ConverterMain()
 {
-  Requester("OK", "Edna says hello");
+  master = OpenSquawkFile(0);
+
+  ExportGameInfo(master);
+
+  CloseSquawkFile(master);
+  master = NULL;
+
+  Requester("OK", "Converted");
 }
