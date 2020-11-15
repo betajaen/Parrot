@@ -14,27 +14,27 @@ Code Version
 LIST      SQWK
   FORM    TABL
     SLUG  Asset Table
-      Chunk Header
+      Asset Header
       Table Data
     SLUG  Asset Table
-      Chunk Header
+      Asset Header
       Table Data
     SLUG  Asset Table
-      Chunk Header
+      Asset Header
       Table Data
   FORM    ROOM
     SLUG  Room
-      Chunk Header
+      Asset Header
       Room Data
     SLUG  Room
-      Chunk Header
+      Asset Header
       Room Data
   FORM    SCRIPT
     SLUG  SCRIPT
-      Chunk Header
+      Asset Header
       Script Data
     SLUG  SCRIPT
-      Chunk Header
+      Asset Header
       Script Data
   ...
 
@@ -81,26 +81,26 @@ the parent chunk, then it provides a quick and easy way of
 iteration without inspecting or knowing how the asset data is 
 stored.
 
-### Chunk Header
+### Asset Header
 
-Chunk Data is a four byte table placed after the IFF Chunk Header
-but before any of the Asset Data.
+The Asset Header is a four byte table placed after the IFF Chunk
+Header but before any of the Asset Data.
 
-  struct CHUNK_HEADER
+  struct ASSET_HEADER
   {
-    UWORD ch_Id;
-    UWORD ch_Flags;
+    UWORD ah_Id;
+    UWORD ah_AssetFlags;
   };
 
-#### Chunk Id
+#### Asset Id
 
 The Id is a UWORD start starts from 1 to 65535. This is a repeat
 of the Slug in the Chunk Type, but in its original form.
 
-#### Chunk Flags
+#### Asset Flags
 
-ch_Flags are populated by the CHUNK_FLAGS enum, these can be the
-following values:
+ah_AssetFlags are populated by the CHUNK_FLAGS enum, these can be 
+the following values:
 
 Bit 0:  Asset is for the ECS Arch
 Bit 1:  Asset is for the AGA Arch
@@ -123,7 +123,7 @@ Bits 0,1,2 May be OR'd together to represent that the asset can be
 
 ### Asset Data
 
-The Data is stored after the Chunk Header. These may be:
+The Data is stored after the Asset Header. These may be:
 
 - [Game Info](ct_gameinfo)
 - [Table](ct_table)

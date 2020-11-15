@@ -418,27 +418,27 @@ Code Version
 LIST      SQWK
   FORM    TABL
     SLUG  Asset Table
-      Chunk Header
+      Asset Header
       Table Data
     SLUG  Asset Table
-      Chunk Header
+      Asset Header
       Table Data
     SLUG  Asset Table
-      Chunk Header
+      Asset Header
       Table Data
   FORM    ROOM
     SLUG  Room
-      Chunk Header
+      Asset Header
       Room Data
     SLUG  Room
-      Chunk Header
+      Asset Header
       Room Data
   FORM    SCRIPT
     SLUG  SCRIPT
-      Chunk Header
+      Asset Header
       Script Data
     SLUG  SCRIPT
-      Chunk Header
+      Asset Header
       Script Data
   ...
 
@@ -489,29 +489,29 @@ iteration without inspecting or knowing how the asset data is
 stored.
 
 
-@{FG None}@{BG None}@{u}Chunk Header@{uu}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}Asset Header@{uu}@{BG Background}@{FG Text}
 
-Chunk Data is a four byte table placed after the IFF Chunk Header
-but before any of the Asset Data.
+The Asset Header is a four byte table placed after the IFF Chunk
+Header but before any of the Asset Data.
 
 
-@{FG Text}@{BG None}  struct CHUNK_HEADER@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  struct ASSET_HEADER@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD ch_Id;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD ch_Flags;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UWORD ah_Id;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UWORD ah_AssetFlags;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
-@{FG None}@{BG None}Chunk Id@{BG Background}@{FG Text}
+@{FG None}@{BG None}Asset Id@{BG Background}@{FG Text}
 
 
 The Id is a UWORD start starts from 1 to 65535. This is a repeat
-of the IFF Chunk ID, but in its original form.
+of the Slug in the Chunk Type, but in its original form.
 
 
-@{FG None}@{BG None}Chunk Flags@{BG Background}@{FG Text}
+@{FG None}@{BG None}Asset Flags@{BG Background}@{FG Text}
 
-ch_Flags are populated by the CHUNK_FLAGS enum, these can be the
-following values:
+ah_AssetFlags are populated by the CHUNK_FLAGS enum, these can be 
+the following values:
 
 Bit 0:  Asset is for the ECS Arch
 Bit 1:  Asset is for the AGA Arch
@@ -535,7 +535,7 @@ Bits 0,1,2 May be OR'd together to represent that the asset can be
 
 @{FG None}@{BG None}@{u}Asset Data@{uu}@{BG Background}@{FG Text}
 
-The Data is stored after the Chunk Header. These may be:
+The Data is stored after the Asset Header. These may be:
 
 - @{"Game Info" LINK ct_gameinfo}
 - @{"Table" LINK ct_table}

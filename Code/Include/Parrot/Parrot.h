@@ -188,13 +188,13 @@ struct ASSET_REF
 #define IS_REF_LOADED(REF) (NULL != (REF).ar_Ptr)
 
 /*
-  A chunk header is a 4-byte header after the IFF chunk containing the 16-bit ID
-  and 16-bit chunk flags.
+  An asset header is a 4-byte header after the IFF chunk header containing 
+  the 16-bit ID and 16-bit chunk flags.
 */
-struct CHUNK_HEADER
+struct ASSET_HEADER
 {
-  UWORD ch_Id;
-  UWORD ch_Flags;
+  UWORD ah_Id;
+  UWORD ah_AssetFlags;
 };
 
 #define CHUNK_FLAG_ARCH_ECS       (1 << 0)

@@ -111,17 +111,17 @@ VOID EndAssetList(IffPtr iff)
 
 VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags)
 {
-  struct CHUNK_HEADER hdr;
+  struct ASSET_HEADER hdr;
   LONG err;
   char strtype[5];
   
-  hdr.ch_Id = id;
-  hdr.ch_Flags = chunkHeaderflags;
+  hdr.ah_Id = id;
+  hdr.ah_AssetFlags = chunkHeaderflags;
 
-  PushChunk(iff, ID_SQWK, UWordToId(id), sizeof(struct CHUNK_HEADER) + dataLength);
-  err = WriteChunkBytes(iff, &hdr, sizeof(struct CHUNK_HEADER));
+  PushChunk(iff, ID_SQWK, UWordToId(id), sizeof(struct ASSET_HEADER) + dataLength);
+  err = WriteChunkBytes(iff, &hdr, sizeof(struct ASSET_HEADER));
 
-  if (err != sizeof(struct CHUNK_HEADER))
+  if (err != sizeof(struct ASSET_HEADER))
   {
     PARROT_ERR(
       "Unable serialise assets.\n"

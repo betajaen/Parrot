@@ -248,7 +248,7 @@ EXPORT VOID CloseArchives()
 EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeType, UWORD chunkId, UWORD chunkArch, UWORD expectedSize, ASSET_CTOR, struct ARENA* arena)
 {
   struct ContextNode* node;
-  struct CHUNK_HEADER chunkHeader;
+  struct ASSET_HEADER assetHeader;
   struct ASSET* asset;
   APTR obj;
   LONG err;
@@ -290,16 +290,16 @@ EXPORT struct ASSET* ReadAssetFromArchive(struct ARCHIVE* archive, ULONG nodeTyp
     if (node->cn_ID == nodeType)
     {
 
-      if (Ctor != NULL || expectedSize == 0 || (node->cn_Size - sizeof(struct CHUNK_HEADER)) == expectedSize)
+      if (Ctor != NULL || expectedSize == 0 || (node->cn_Size - sizeof(struct ASSET_HEADER)) == expectedSize)
       {
-        ReadChunkBytes(archive->pa_Iff, &chunkHeader, sizeof(struct CHUNK_HEADER));
+        ReadChunkBytes(archive->pa_Iff, &assetHeader, sizeof(struct ASSET_HEADER));
 
-        if (chunkHeader.ch_Id != chunkId)
+        if (assetHeader.ah_Id != chunkId)
         {
           continue;
         }
 
-        if ((chunkHeader.ch_Flags & chunkArch) == 0)
+        if ((assetHeader.ah_AssetFlags & chunkArch) == 0)
         {
           continue;
         }
@@ -550,7 +550,7 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
   struct OBJECT_TABLE* table;
   struct ASSET_FACTORY* assetFactory;
   struct ContextNode* node;
-  struct CHUNK_HEADER chunkHeader;
+  struct ASSET_HEADER chunkHeader;
   LONG err;
   CHAR idtype[5];
   UWORD ii;
@@ -658,9 +658,9 @@ EXPORT VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref)
     {
       if ((node->cn_Size - sizeof(chunkHeader)) == sizeof(struct OBJECT_TABLE))
       {
-        ReadChunkBytes(archive->pa_Iff, &chunkHeader, sizeof(struct CHUNK_HEADER));
+        ReadChunkBytes(archive->pa_Iff, &chunkHeader, sizeof(struct ASSET_HEADER));
 
-        if (chunkHeader.ch_Id != ref->tr_ChunkHeaderId)
+        if (chunkHeader.ah_Id != ref->tr_ChunkHeaderId)
         {
           continue;
         }
