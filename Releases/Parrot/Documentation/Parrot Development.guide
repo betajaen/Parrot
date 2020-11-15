@@ -2,30 +2,31 @@
 @TOC TOC
 
 @NODE MAIN "Parrot Development Guide"
-@{FG None}@{BG None}@{b}@{u}@{i}Parrot Development Guide@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+@{JCENTER}@{b}@{u}Parrot Development Guide@{uu}@{ub}
+@{JLEFT}
 
-
-@{FG None}@{BG None}@{u}@{i}Squawk@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}Squawk@{uu}@{ub}
 
 @{"Introduction" LINK SQUAWK}
 @{"Layout" LINK SQUAWKLAYOUT}
 
 
-@{FG None}@{BG None}@{u}@{i}Assets@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}Assets@{uu}@{ub}
 
 @{"Game Info" LINK CT_GAMEINFO}
 @{"Asset Table" LINK CT_TABLE}
 @{"Asset Table Item" LINK CT_TABLE}
 
 
-@{FG None}@{BG None}@{u}@{i}Scripting@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}Scripting@{uu}@{ub}
 
 @{"Virtual Machine" LINK VM}
 @{"Opcodes" LINK OPCODES}
 
 
-@{FG None}@{BG None}@{u}@{i}Notation@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}Reference@{uu}@{ub}
 
+@{"Terminology" LINK TERMINOLOGY}
 @{"Type Notation" LINK TYPENOTATION}
 
 @ENDNODE
@@ -46,6 +47,7 @@
 @{b}T@{ub}
 
   @{"Table Asset" LINK CT_TABLE}
+  @{"Terminology" LINK TERMINOLOGY}
   @{"Type Notation" LINK TYPENOTATION}
 @{b}V@{ub}
 
@@ -54,8 +56,8 @@
 @ENDNODE
 
 @NODE CT_GAMEINFO "Game Info Asset"
-@{FG None}@{BG None}@{b}@{u}@{i}Game Info Asset (GAME_INFO)@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
-
+@{JCENTER}@{b}@{u}Game Info Asset (GAME_INFO)@{uu}@{ub}
+@{JLEFT}
 Design Version
   1.0
 Code Version
@@ -64,29 +66,29 @@ Code Version
 Game Information Table
 
 
-@{FG None}@{BG None}@{u}@{i}C Version@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}C Version@{uu}@{ub}
 
 
-@{FG Text}@{BG None}  struct GAME_INFO@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG                     gi_GameId;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG                     gi_GameVersion;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_Title[64];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_ShortTitle[16];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_Author[128];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_Release[128];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_Width;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_Height;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_Depth;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_RoomCount;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    struct OBJECT_TABLE_REF   gi_StartTables[16];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartPalette;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartCursorPalette;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartRoom;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartScript;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+  struct GAME_INFO
+  {
+    ULONG                     gi_GameId;
+    ULONG                     gi_GameVersion;
+    CHAR                      gi_Title[64];
+    CHAR                      gi_ShortTitle[16];
+    CHAR                      gi_Author[128];
+    CHAR                      gi_Release[128];
+    UWORD                     gi_Width;
+    UWORD                     gi_Height;
+    UWORD                     gi_Depth;
+    UWORD                     gi_RoomCount;
+    struct OBJECT_TABLE_REF   gi_StartTables[16];
+    UWORD                     gi_StartPalette;
+    UWORD                     gi_StartCursorPalette;
+    UWORD                     gi_StartRoom;
+    UWORD                     gi_StartScript;
+  };
 
-@{FG None}@{BG None}@{u}@{i}gi_GameId (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_GameId (ULONG)@{uu}@{ub}
 
 
 FourCC id of the Game
@@ -95,7 +97,7 @@ example:
   PRRT
 
 
-@{FG None}@{BG None}@{u}@{i}gi_GameVersion (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_GameVersion (ULONG)@{uu}@{ub}
 
 Numerical version of the game.
 
@@ -103,7 +105,7 @@ example:
   0x100
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Title (CHAR[64])@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_Title (CHAR[64])@{uu}@{ub}
 
 English title of the Game
 
@@ -111,7 +113,7 @@ example:
   "Adventures of Parrot"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_ShortTitle (CHAR[16])@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_ShortTitle (CHAR[16])@{uu}@{ub}
 
 English short-hand title of the Game
 
@@ -119,7 +121,7 @@ example:
   "Parrot"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Author (CHAR[128])@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_Author (CHAR[128])@{uu}@{ub}
 
 Full legal text of the Author and/or Publisher of the Game
 
@@ -127,14 +129,14 @@ example:
   "An Adventure Game Company And Associates"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Release (CHAR[128])@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_Release (CHAR[128])@{uu}@{ub}
 
 Release information, including version number and/or Language
 
 example: "Adventures of Parrot 1.0, English"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Width (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_Width (UWORD)@{uu}@{ub}
 
 Number of pixels that represent the width of the display
 
@@ -142,7 +144,7 @@ example:
   320
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Height (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_Height (UWORD)@{uu}@{ub}
 
 Number of pixels that represent the height of the display
 
@@ -150,7 +152,7 @@ example:
   200
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Depth (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_Depth (UWORD)@{uu}@{ub}
 
 Maximum Bitplane depth used by the display
 
@@ -158,7 +160,7 @@ example:
   4
 
 
-@{FG None}@{BG None}@{u}@{i}gi_RoomCount (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_RoomCount (UWORD)@{uu}@{ub}
 
 Number of Rooms used in this game
 
@@ -166,12 +168,12 @@ example:
   24
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartTables (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_StartTables (UWORD)@{uu}@{ub}
 
 UNDOCUMENTATED
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartPalette (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_StartPalette (UWORD)@{uu}@{ub}
 
 Palette Asset ID for the initial Display Palette
 
@@ -179,7 +181,7 @@ example:
   1
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartCursorPalette (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_StartCursorPalette (UWORD)@{uu}@{ub}
 
 Palette Asset ID for the initial Cursor Palette
 
@@ -187,12 +189,12 @@ example:
   1
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartRoom (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_StartRoom (UWORD)@{uu}@{ub}
 
 UNDOCUMENTATED
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartScript (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}gi_StartScript (UWORD)@{uu}@{ub}
 
 Script Asset ID for the first script to be executed when the game has initialised
 
@@ -202,8 +204,8 @@ example:
 @ENDNODE
 
 @NODE CT_TABLE "Table Asset"
-@{FG None}@{BG None}@{b}@{u}@{i}Table Asset (ASSET_TABLE)@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
-
+@{JCENTER}@{b}@{u}Table Asset (ASSET_TABLE)@{uu}@{ub}
+@{JLEFT}
 Design Version
   2.0
 Code Version
@@ -212,29 +214,29 @@ Code Version
 Asset Lookup Table
 
 
-@{FG None}@{BG None}@{u}@{i}C Version@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}C Version@{uu}@{ub}
 
 
-@{FG Text}@{BG None}  struct ASSET_TABLE@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG   at_Type;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Chapter;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Count;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Lowest;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Highest;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    +       ITEMS@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+  struct ASSET_TABLE
+  {
+    ULONG   at_Type;
+    UWORD   at_Chapter;
+    UWORD   at_Count;
+    UWORD   at_Lowest;
+    UWORD   at_Highest;
+    +       ITEMS
+  };
 
-@{FG Text}@{BG None}  struct ASSET_TABLE_ITEM@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   ti_Id;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   ti_Archive;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+  struct ASSET_TABLE_ITEM
+  {
+    UWORD   ti_Id;
+    UWORD   ti_Archive;
+  };
 
-@{FG None}@{BG None}@{u}@{i}Fields@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}Fields@{uu}@{ub}
 
 
-@{FG None}@{BG None}@{u}at_Type@{uu}@{BG Background}@{FG Text}
+@{u}at_Type@{uu}
 
 
 FourCC type of the Asset
@@ -243,7 +245,7 @@ example:
   'R', 'O', 'O', 'M'
 
 
-@{FG None}@{BG None}@{u}at_Chapter@{uu}@{BG Background}@{FG Text}
+@{u}at_Chapter@{uu}
 
 The Chapter that these Assets should be used in or 0 for always loaded.
 
@@ -251,7 +253,7 @@ example:
   1
 
 
-@{FG None}@{BG None}@{u}at_Count@{uu}@{BG Background}@{FG Text}
+@{u}at_Count@{uu}
 
 Number of Assets in this table
 
@@ -259,7 +261,7 @@ example:
   10
 
 
-@{FG None}@{BG None}@{u}at_Lowest@{uu}@{BG Background}@{FG Text}
+@{u}at_Lowest@{uu}
 
 The Lowest Id number in this table
 
@@ -267,13 +269,13 @@ example:
   1
 
 
-@{FG None}@{BG None}@{u}at_Highest@{uu}@{BG Background}@{FG Text}
+@{u}at_Highest@{uu}
 
 example:
   10
 
 
-@{FG None}@{BG None}@{u}DATA@{uu}@{BG Background}@{FG Text}
+@{u}DATA@{uu}
 
 An array of ASSET_TABLE_ITEMS which are immediately after the ASSET_TABLE
 in memory or disk. 
@@ -296,11 +298,11 @@ example:
 @ENDNODE
 
 @NODE OPCODES "Virtual Machine Opcodes"
-@{FG None}@{BG None}@{b}@{u}@{i}Opcodes@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
-
+@{JCENTER}@{b}@{u}Opcodes@{uu}@{ub}
+@{JLEFT}
 @{u}Id@{uu} @{u}Len@{uu}  @{u}Name@{uu}       @{u}Arguments@{uu}                  @{u}Description@{uu}
 0  2    stop                                  Stop Script
-1  2    rem        user.b                     Remark (Ignored}
+1  2    rem        user.b                     Remark (Ignored)
 2  2    pushb      val.b                      push byte onto stack
 3  4    pushw      pad.x, val.w               push word onto stack
 4  6    pushl      pad.x, val.l               push long onto stack
@@ -361,13 +363,13 @@ F  2    jl         addr.sb                    pc <- pc + addr @{b} 2@{ub}
                                               pop stack
                                               push t
                                               Stack: 0 = left.l
-20 2    room                                  load room[0] (as Room}
+20 2    room                                  load room[0] (as Room)
                                               pop stack
                                               Stack: 0 = room.a
-40 2    audio                                 play stack[0] (as SFX Asset}
+40 2    audio                                 play stack[0] (as SFX Asset)
                                               pop stack
                                               Stack: 0 = sfx.a
-80 2    print                                 print stack[0] (as Dialogue}
+80 2    print                                 print stack[0] (as Dialogue)
                                               at y stack[-1] @{b} 8@{ub}
                                               pop stack twice
                                               Stack: -1 = y.b
@@ -376,8 +378,8 @@ F  2    jl         addr.sb                    pc <- pc + addr @{b} 2@{ub}
 @ENDNODE
 
 @NODE SQUAWK "Squawk"
-@{FG None}@{BG None}@{b}@{u}@{i}Squawk@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
-
+@{JCENTER}@{b}@{u}Squawk@{uu}@{ub}
+@{JLEFT}
 Squawk files are Amiga IFF files that contain Game data. Usually there
 are a number of Squark files that make up a Game.
 
@@ -399,10 +401,10 @@ Squawk files are also referred to as Archives within the C code.
 @ENDNODE
 
 @NODE SQUAWKLAYOUT "Squawk File Layout"
-@{FG None}@{BG None}@{b}@{u}@{i}Squawk File Layout@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+@{JCENTER}@{b}@{u}Squawk File Layout@{uu}@{ub}
+@{JLEFT}
 
-
-@{FG None}@{BG None}@{u}@{i}File Revision@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}File Revision@{uu}@{ub}
 
 Design Version
     2.0
@@ -411,39 +413,222 @@ Code Version
     1.0
 
 
-@{FG None}@{BG None}@{u}@{i}General IFF Layout@{uu}@{ui}@{BG Background}@{FG Text}
+@{b}@{u}General IFF Layout@{uu}@{ub}
 
 
-@{FG Text}@{BG None}    FORM      SQWK@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      TABL    Tables@{BG Background}@{FG Text}
-@{FG Text}@{BG None}        CHDR  OBJECT_TABLE@{BG Background}@{FG Text}
-@{FG Text}@{BG None}        CHDR  OBJECT_TABLE@{BG Background}@{FG Text}
-@{FG Text}@{BG None}        CHDR  OBJECT_TABLE@{BG Background}@{FG Text}
-@{FG Text}@{BG None}        CHDR  ...@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      ROOM    Rooms@{BG Background}@{FG Text}
-@{FG Text}@{BG None}        CHDR  ROOM@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      SCPT    Scripts@{BG Background}@{FG Text}
-@{FG Text}@{BG None}        CHDR  SCRIPT@{BG Background}@{FG Text}
-@{FG Text}@{BG None}        CHDR  SCRIPT@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      ...@{BG Background}@{FG Text}
+    FORM      SQWK
+      TABL    Tables
+        CHDR  OBJECT_TABLE
+        CHDR  OBJECT_TABLE
+        CHDR  OBJECT_TABLE
+        CHDR  ...
+      ROOM    Rooms
+        CHDR  ROOM
+      SCPT    Scripts
+        CHDR  SCRIPT
+        CHDR  SCRIPT
+      ...
 
-@{FG None}@{BG None}@{u}The Chunk Header@{uu}@{BG Background}@{FG Text}
+@{u}The Chunk Header@{uu}
 
 
 CHDR or CHUNK_HEADER, is a 4 byte structure that fits in the IFF FourCC
 Type, as its numerically based the contents are likely not printable.
 
 
-@{FG Text}@{BG None}    struct CHUNK_HEADER@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      UWORD ch_Id;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      UWORD ch_Flags@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    };@{BG Background}@{FG Text}
+    struct CHUNK_HEADER
+    {
+      UWORD ch_Id;
+      UWORD ch_Flags
+    };
 
-@{FG Text}@{BG None}    Byte 0  -> Upper byte of ch_Id@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    Byte 1  -> Lower byte of ch_Id@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    Byte 2  -> Upper byte of ch_Flags@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    Byte 3  -> Lower byte of ch_Flags@{BG Background}@{FG Text}
+    Byte 0  -> Upper byte of ch_Id
+    Byte 1  -> Lower byte of ch_Id
+    Byte 2  -> Upper byte of ch_Flags
+    Byte 3  -> Lower byte of ch_Flags
+
+@{u}Chunk Id@{uu}
+
+
+The Chunk Id is a UWORD start starts from 1 to 65535.
+
+
+@{u}Chunk Flags@{uu}
+
+ch_Flags are populated by the CHUNK_FLAGS enum, these can be the
+following values:
+
+Bit 0:  Asset is for the ECS Arch
+Bit 1:  Asset is for the AGA Arch
+Bit 2:  Asset is for the RTS Arch
+Bit 13: Asset may be larger than the Chunk Type specifies, this may be
+        due to a sub-type like Entities, or it has dynamic data - such
+        as a Script.
+Bit 14: Asset has some extra data appended at the end of the asset 
+        which requires a special function to load and unload the data.
+        This is specified by the CHUNK_FACTORY of that type. Not to be
+        confused with Bit 13.
+Bit 15: This asset should be ignored and not loaded.
+
+Note:
+
+Bits 0,1,2 May be OR'd together to represent that the asset can be
+           loaded regardless of architecture, and this is recommended
+           practise for assets that are not backdrops, images or audio
+           data.
+
+@ENDNODE
+
+@NODE TERMINOLOGY "Terminology"
+@{JCENTER}@{b}@{u}Terminology@{uu}@{ub}
+@{JLEFT}
+
+@{b}@{u}A@{uu}@{ub}
+
+
+@{u}Actor@{uu}
+
+A Person, Robot, Electronic Device or otherwise movable or immovable 
+interactive character that is part of the story.
+
+See @{"Actor (Asset)" LINK CT_ACTOR}, Asset
+
+
+@{u}Asset@{uu}
+
+A saved resource, such as GameInfo, Tables, Room, Actors, Backdrops.
+
+See Actor, Backdrop,
+
+
+@{b}@{u}B@{uu}@{ub}
+
+
+@{u}Backdrop@{uu}
+
+A image that is shown last during a Room. It is non-interactive,
+and can be bigger than the display size.
+
+
+@{b}@{u}C@{uu}@{ub}
+
+
+@{b}@{u}Chapter@{uu}@{ub}
+
+A collection of assets; rooms, scripts, actors, images, sounds, etc.
+which make up a fragment of an entire story. The only exception is
+the global chapter "0" where assets are always available and shared
+between other chapters.
+
+Chapters are numbered from 0 to 255.
+
+
+@{b}@{u}G@{uu}@{ub}
+
+
+@{u}Game Info@{uu}
+
+A asset containing the initialisation and meta data about a Game.
+
+See @{"GameInfo (Asset)" LINK CT_GAMEINFO}, Asset
+
+@ENDNODE
+
+@NODE TYPENOTATION "Type Notation"
+@{JCENTER}@{b}@{u}Type Notation@{uu}@{ub}
+@{JLEFT}
+
+@{b}@{u}Names@{uu}@{ub}
+
+Byte
+  8 bit unsigned integer
+Character, Char
+  8 bit unsigned integer representing a single text ASCII character.
+Word, Short
+  16 bit signed integer
+UWord, UShort
+  16 bit unsigned integer
+Long, Int
+  32 bit signed integer
+ULong, UInt
+  32 bit unsigned integer
+APtr
+  32 bit untyped pointer
+Asset Type
+  4 byte non-null terminating string indicating the type of asset 
+  data. Usually expressed as as a ulong.
+Asset Id
+  2 byte identifier. used with asset type and arch flags to 
+  identify an asset.
+Chunk Header
+  4 byte struct containing the id of an asset, and specific 
+  loading flags
+Asset Header
+  8 byte struct containing the Asset Type and Chunk header
+Language Id
+  4 byte identifier where bits 16-24 represent the Room ID, and 
+  the lower 16-bits represents the language text id. Language text 
+  may be used for dialogue, textual form of events, verb construction
+  or user interface labels. Bits 24-32 arent used.
+
+
+@{b}@{u}Suffixes@{uu}@{ub}
+
+.b
+  Byte
+.sb
+  Signed Byte
+.w
+  Word
+.l
+  Long
+.lb
+  Lower nibble of a byte
+.hb
+  Higher nibble of a byte
+.sp
+  Signed pointer offset to Script Program Counter. Value is always 
+  multiplied by 2 when used.
+.a
+  Typeless/arch-less asset id - 2 bytes
+.r
+  Asset Header
+.x
+  1 byte Padding Unused
+.d
+  Language Id
+
+@ENDNODE
+
+@NODE VM "Virtual Machine"
+@{JCENTER}@{b}@{u}VM@{uu}@{ub}
+@{JLEFT}
+Stack based virtual machine. Each stack variable is 4 bytes (LONG).
+There are 16 variables and 256 global variables.
+
+Variables may belong to the object or room running with the script.
+
+@ENDNODE
+ss asset id - 2 bytes
+.r
+  Asset Header
+.x
+  1 byte Padding Unused
+.d
+  Language Id
+
+@ENDNODE
+
+@NODE VM "Virtual Machine"
+@{JCENTER}@{FG Shine}@{BG Text}@{b}@{u}VM@{uu}@{ub}@{BG Background}@{FG Text}
+@{JLEFT}
+Stack based virtual machine. Each stack variable is 4 bytes (LONG).
+There are 16 variables and 256 global variables.
+
+Variables may belong to the object or room running with the script.
+
+@ENDNODE
+ext}
 
 @{FG None}@{BG None}Chunk Id@{BG Background}@{FG Text}
 
@@ -474,6 +659,61 @@ Bits 0,1,2 May be OR'd together to represent that the asset can be
            loaded regardless of architecture, and this is recommended
            practise for assets that are not backdrops, images or audio
            data.
+
+@ENDNODE
+
+@NODE TERMINOLOGY "Terminology"
+@{FG None}@{BG None}@{b}@{u}@{i}Terminology@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG None}@{BG None}@{u}@{i}A@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG None}@{BG None}@{u}Actor@{uu}@{BG Background}@{FG Text}
+
+A Person, Robot, Electronic Device or otherwise movable or immovable 
+interactive character that is part of the story.
+
+See @{"Actor (Asset)" LINK CT_ACTOR}, Asset
+
+
+@{FG None}@{BG None}@{u}Asset@{uu}@{BG Background}@{FG Text}
+
+A saved resource, such as GameInfo, Tables, Room, Actors, Backdrops.
+
+See Actor, Backdrop,
+
+
+@{FG None}@{BG None}@{u}@{i}B@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG None}@{BG None}@{u}Backdrop@{uu}@{BG Background}@{FG Text}
+
+A image that is shown last during a Room. It is non-interactive,
+and can be bigger than the display size.
+
+
+@{FG None}@{BG None}@{u}@{i}C@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG None}@{BG None}@{u}@{i}Chapter@{uu}@{ui}@{BG Background}@{FG Text}
+
+A collection of assets; rooms, scripts, actors, images, sounds, etc.
+which make up a fragment of an entire story. The only exception is
+the global chapter "0" where assets are always available and shared
+between other chapters.
+
+Chapters are numbered from 0 to 255.
+
+
+@{FG None}@{BG None}@{u}@{i}G@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG None}@{BG None}@{u}Game Info@{uu}@{BG Background}@{FG Text}
+
+A asset containing the initialisation and meta data about a Game.
+
+See @{"GameInfo (Asset)" LINK CT_GAMEINFO}, Asset
 
 @ENDNODE
 
@@ -546,24 +786,9 @@ Language Id
 @NODE VM "Virtual Machine"
 @{FG None}@{BG None}@{b}@{u}@{i}VM@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
 
-Stack based virtual machine. Each stack variable is 4 bytes (LONG}.
+Stack based virtual machine. Each stack variable is 4 bytes (LONG).
 There are 16 variables and 256 global variables.
 
 Variables may belong to the object or room running with the script.
 
 @ENDNODE
- with the script.
-
-@ENDNODE
- room running with the script.
-
-@ENDNODE
-variables.
-
-Variables may belong to the object or room running with the script.
-
-@ENDNODE
- with the script.
-
-@ENDNODE
-E

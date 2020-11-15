@@ -17,6 +17,7 @@ Parrot Development Guide
 [Virtual Machine](VM)
 [Opcodes](OPCODES)
 
-## Notation
+## Reference
 
+[Terminology](TERMINOLOGY)
 [Type Notation](TYPENOTATION)
