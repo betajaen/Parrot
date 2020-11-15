@@ -261,6 +261,25 @@ struct OBJECT_TABLE
 };
 
 /*
+    Asset Table
+*/
+
+struct ASSET_TABLE
+{
+  ULONG  at_AssetType;
+  UWORD  at_Chapter;
+  UWORD  at_Count;
+  UWORD  at_Lowest;
+  UWORD  at_Highest;
+};
+
+struct ASSET_TABLE_ITEM
+{
+  UWORD  ti_Id;
+  UWORD  ti_Archive;
+};
+
+/*
     Palette Table
 
     Upto 16 Colours

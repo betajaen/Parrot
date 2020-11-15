@@ -12,7 +12,7 @@ Asset Lookup Table
 
   struct ASSET_TABLE
   {
-    ULONG   at_Type;
+    ULONG   at_AssetType;
     UWORD   at_Chapter;
     UWORD   at_Count;
     UWORD   at_Lowest;
