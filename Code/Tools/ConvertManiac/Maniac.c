@@ -31,12 +31,14 @@
 STATIC IffPtr master;
 
 VOID ExportGameInfo(IffPtr master);
+VOID ExportPalettes(IffPtr master);
 
 VOID ConverterMain()
 {
   master = OpenSquawkFile(0);
 
   ExportGameInfo(master);
+  ExportPalettes(master);
 
   CloseSquawkFile(master);
   master = NULL;

@@ -11,38 +11,91 @@ Code Version
 
 ## General IFF Layout
 
-    FORM      SQWK
-      TABL    Tables
-        CHDR  OBJECT_TABLE
-        CHDR  OBJECT_TABLE
-        CHDR  OBJECT_TABLE
-        CHDR  ...
-      ROOM    Rooms
-        CHDR  ROOM
-      SCPT    Scripts
-        CHDR  SCRIPT
-        CHDR  SCRIPT
-      ...
+LIST      SQWK
+  FORM    TABL
+    SLUG  Asset Table
+      Chunk Header
+      Table Data
+    SLUG  Asset Table
+      Chunk Header
+      Table Data
+    SLUG  Asset Table
+      Chunk Header
+      Table Data
+  FORM    ROOM
+    SLUG  Room
+      Chunk Header
+      Room Data
+    SLUG  Room
+      Chunk Header
+      Room Data
+  FORM    SCRIPT
+    SLUG  SCRIPT
+      Chunk Header
+      Script Data
+    SLUG  SCRIPT
+      Chunk Header
+      Script Data
+  ...
 
-### The Chunk Header
+### Slugs
 
-CHDR or CHUNK_HEADER, is a 4 byte structure that fits in the IFF FourCC
-Type, as its numerically based the contents are likely not printable.
+A slug is the asset ID encoded as a 4-byte word via the UWordToId
+function, and placed within the IFF Chunk Type:-
 
-    struct CHUNK_HEADER
-    {
-      UWORD ch_Id;
-      UWORD ch_Flags
-    };
+    ULONG   Chunk Type
+    ULONG   Length
 
-    Byte 0  -> Upper byte of ch_Id
-    Byte 1  -> Lower byte of ch_Id
-    Byte 2  -> Upper byte of ch_Flags
-    Byte 3  -> Lower byte of ch_Flags
+It takes each nibble of the UWORD and places for each byte in the
+integer in little-endian order. Each byte is then added by a constant
+of 0x41 to make the number compatible with FourCC. 
+
+    ULONG s;
+    
+    s = 0x41;
+    s += (r & 0xF);
+    s <<= 8;
+    r >>= 4;
+
+    s += 0x41;
+    s += (r & 0xF);
+    s <<= 8;
+    r >>= 4;
+
+    s += 0x41;
+    s += (r & 0xF);
+    s <<= 8;
+    r >>= 4;
+
+    s += 0x41;
+    s += (r & 0xF);
+
+    return s;
+
+A ID with 0, is written as AAAA, an ID with 1 is BAAA, and so on.
+
+Although this is against the intentions of the IFF specification, 
+it does not give an alternate method for searching through chunks 
+without inspecting the data. As the type of data is held within 
+the parent chunk, then it provides a quick and easy way of 
+iteration without inspecting or knowing how the asset data is 
+stored.
+
+### Chunk Header
+
+Chunk Data is a four byte table placed after the IFF Chunk Header
+but before any of the Asset Data.
+
+  struct CHUNK_HEADER
+  {
+    UWORD ch_Id;
+    UWORD ch_Flags;
+  };
 
 #### Chunk Id
 
-The Chunk Id is a UWORD start starts from 1 to 65535.
+The Id is a UWORD start starts from 1 to 65535. This is a repeat
+of the Slug in the Chunk Type, but in its original form.
 
 #### Chunk Flags
 
@@ -67,3 +120,10 @@ Bits 0,1,2 May be OR'd together to represent that the asset can be
            loaded regardless of architecture, and this is recommended
            practise for assets that are not backdrops, images or audio
            data.
+
+### Asset Data
+
+The Data is stored after the Chunk Header. These may be:
+
+- [Game Info](ct_gameinfo)
+- [Table](ct_table)

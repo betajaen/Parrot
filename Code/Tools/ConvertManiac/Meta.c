@@ -33,7 +33,7 @@ VOID ExportGameInfo(IffPtr master)
 {
   struct GAME_INFO gi;
   
-  InitStackVar(struct GAME_INFO, gi);
+  InitStackVar(gi);
 
   StrCopy(&gi.gi_Title[0], sizeof(gi.gi_Title), MM_META_TITLE );
   StrCopy(&gi.gi_ShortTitle[0], sizeof(gi.gi_ShortTitle), MM_META_SHORT_TITLE);
@@ -45,11 +45,144 @@ VOID ExportGameInfo(IffPtr master)
   gi.gi_Depth = 4;
   gi.gi_RoomCount = MM_NUM_ROOMS;
   gi.gi_StartPalette = 1;
-  gi.gi_StartCursorPalette = 1;
+  gi.gi_StartCursorPalette = 2;
   gi.gi_StartRoom = 1;
   gi.gi_StartScript = 1;
 
   StartAssetList(master, CT_GAME_INFO);
   SaveAssetQuick(master, (APTR)&gi, sizeof(gi), CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
   EndAssetList(master);
+}
+
+STATIC VOID ExportGamePalette(IffPtr master, UWORD id)
+{
+  struct PALETTE_TABLE pal;
+  ULONG* pData;
+
+  InitStackVar(pal);
+
+  pData = (ULONG*)&pal.pt_Data[0];
+
+  *pData++ = (16l << 16) | 0;
+
+  /* Black */
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
+
+  /* Blue */
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+
+  /* Green */
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
+
+  /* Cyan */
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
+
+  /* Red */
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
+  *pData++ = 0x00000000;
+
+  /* Magenta */
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x00000000;
+  *pData++ = 0xAAAAAAAA;
+
+  /* Brown */
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0x55555555;
+  *pData++ = 0x00000000;
+
+  /* Light Gray */
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
+  *pData++ = 0xAAAAAAAA;
+
+  /* Dark Gray */
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
+
+  /* Bright Blue */
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+
+  /* Bright Green */
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+
+  /* Bright Cyan */
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+
+  /* Bright Red */
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+  *pData++ = 0x55555555;
+
+  /* Bright Magenta */
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+  *pData++ = 0xFFFFFFFF;
+
+  /* Bright Yellow */
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0x55555555;
+
+  /* Bright White */
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+
+  /* Terminator */
+  *pData = 0;
+
+  pal.pt_Begin = 0;
+  pal.pt_End = 15;
+
+
+  SaveAssetQuick(master, (APTR)&pal, sizeof(pal), CT_PALETTE, id, CHUNK_FLAG_ARCH_ANY);
+}
+
+STATIC VOID ExportCursorPalette(IffPtr iff, UWORD id)
+{
+  struct PALETTE_TABLE  pal;
+  ULONG* pData;
+
+  InitStackVar(pal)
+
+  pData = (ULONG*)&pal.pt_Data[0];
+
+  *pData++ = (1l << 16) | 18;
+
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+  *pData++ = 0xFFFFFFFF;
+
+  *pData = 0;
+
+  pal.pt_Begin = 17;
+  pal.pt_End = 18;
+
+  SaveAssetQuick(iff, (APTR)&pal, sizeof(pal), CT_PALETTE, id, CHUNK_FLAG_ARCH_ANY);
+}
+
+
+VOID ExportPalettes(IffPtr iff)
+{
+  StartAssetList(iff, CT_PALETTE);
+  ExportGamePalette(iff, 1);
+  ExportCursorPalette(iff, 2);
+  EndAssetList(iff);
 }

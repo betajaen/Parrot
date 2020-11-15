@@ -35,6 +35,7 @@ struct IFFHandle* SquawkIff;
 IffPtr OpenSquawkFile(UWORD id)
 {
   IffPtr iff;
+  LONG err;
   CHAR path[1 + sizeof(SAVE_PATH) + 6];
 
   StrFormat(path, sizeof(path), SAVE_PATH, (ULONG)id);
@@ -45,16 +46,18 @@ IffPtr OpenSquawkFile(UWORD id)
   InitIFFasDOS(iff);
   OpenIFF(iff, IFFF_WRITE);
 
-  PushChunk(iff, ID_SQWK, ID_FORM, IFFSIZE_UNKNOWN);
+  err = PushChunk(iff, ID_SQWK, ID_LIST, IFFSIZE_UNKNOWN);
 
   return iff;
 }
 
 VOID CloseSquawkFile(IffPtr iff)
 {
+  LONG err;
+
   if (NULL != iff)
   {
-    PopChunk(iff); /* ID_FORM */
+    err = PopChunk(iff); /* ID_LIST */
 
     CloseIFF(iff);
     Close(iff->iff_Stream);
@@ -72,37 +75,36 @@ VOID CloseSquawkFile(IffPtr iff)
 VOID StartAssetList(IffPtr iff, ULONG classType)
 {
   char strtype[5];
+  LONG err;
 
-  if (NULL != iff)
-  {
-    PushChunk(iff, ID_SQWK, classType, IFFSIZE_UNKNOWN);
+  err = PushChunk(iff, classType, ID_FORM, IFFSIZE_UNKNOWN);
 
-    PopChunk(iff);
-  }
-  else
+  if (err != 0)
   {
     PARROT_ERR(
-      "Unable start serialising assets.\n"
-      "Reason: Iff pointer is null"
-      PARROT_ERR_STR("Type"),
-      IDtoStr(classType, strtype)
+      "Unable serialise assets.\n"
+      "Reason: Asset list could not be started"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Err"),
+      IDtoStr(classType, strtype),
+      err
     );
   }
 }
 
 VOID EndAssetList(IffPtr iff)
 {
-  char strtype[5];
+  LONG err;
 
-  if (NULL != iff)
+  err = PopChunk(iff);
+
+  if (err != 0)
   {
-    PopChunk(iff);
-  }
-  else
-  {
-    PARROT_ERR0(
-      "Unable stop serialising assets.\n"
-      "Reason: Iff pointer is null"
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Asset list could not be ended"
+      PARROT_ERR_INT("Err"),
+      err
     );
   }
 }
@@ -110,12 +112,40 @@ VOID EndAssetList(IffPtr iff)
 VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags)
 {
   struct CHUNK_HEADER hdr;
+  LONG err;
+  char strtype[5];
   
   hdr.ch_Id = id;
   hdr.ch_Flags = chunkHeaderflags;
 
-  PushChunk(iff, ID_SQWK, classType, sizeof(struct CHUNK_HEADER) + dataLength);
-  WriteChunkBytes(iff, &hdr, sizeof(struct CHUNK_HEADER));
-  WriteChunkBytes(iff, data, dataLength);
+  PushChunk(iff, ID_SQWK, UWordToId(id), sizeof(struct CHUNK_HEADER) + dataLength);
+  err = WriteChunkBytes(iff, &hdr, sizeof(struct CHUNK_HEADER));
+
+  if (err != sizeof(struct CHUNK_HEADER))
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Header was not written"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Id"),
+      IDtoStr(classType, strtype),
+      id
+    );
+  }
+
+  err = WriteChunkBytes(iff, data, dataLength);
+
+  if (err != dataLength)
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Data was not written"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Id"),
+      IDtoStr(classType, strtype),
+      id
+    );
+  }
+
   PopChunk(iff);
 }
