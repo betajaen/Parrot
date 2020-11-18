@@ -28,9 +28,50 @@
 #include <Squawk/Squawk.h>
 #include <Parrot/Asset.h>
 
-VOID InitTables()
+STATIC CHAR strtype[5];
+
+STATIC UWORD NextArchiveId;
+STATIC UWORD NextRoomId;
+STATIC UWORD NextEntityId;
+STATIC UWORD NextImageId;
+STATIC UWORD NextScriptId;
+
+VOID StartTables()
 {
-  
+  NextRoomId = 1;
+  NextEntityId = 1;
+  NextImageId = 1;
+  NextScriptId = 1;
+  NextArchiveId = 1;
+}
+
+VOID EndTables()
+{
+}
+
+UWORD GenerateArchiveId()
+{
+  return NextArchiveId++;
+}
+
+UWORD GenerateAssetId(ULONG classType)
+{
+  switch (classType)
+  {
+    case CT_ROOM:  return NextRoomId++;
+    case CT_ENTITY: return NextEntityId++;
+    case CT_IMAGE: return NextImageId++;
+    case CT_SCRIPT: return NextScriptId++;
+  }
+
+  PARROT_ERR(
+    "Unable to allocate Asset ID\n"
+    "Reason: Unsupported type"
+    PARROT_ERR_STR("Type"),
+    IDtoStr(classType, strtype)
+  );
+
+  return 0;
 }
 
 VOID ExportTables(IffPtr master)

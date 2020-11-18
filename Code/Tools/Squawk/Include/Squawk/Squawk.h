@@ -44,5 +44,18 @@ VOID CloseSquawkFile(IffPtr squawk);
 VOID StartAssetList(IffPtr squawk, ULONG classType);
 VOID EndAssetList(IffPtr squawk);
 VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags);
+VOID SaveAssetWithData(IffPtr iff, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags);
 
+UWORD GenerateAssetId(ULONG classType);
+UWORD GenerateArchiveId();
 VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter);
+
+
+#define GrowMem(VAL, NEED, CAPACITY) \
+    if (NEED > CAPACITY)\
+    {\
+        if (NULL != VAL)\
+          FreeMem(VAL, CAPACITY);\
+        VAL = AllocMem(NEED, 0);\
+        CAPACITY = NEED; \
+    }

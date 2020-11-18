@@ -28,25 +28,84 @@
 #include <Squawk/Squawk.h>
 #include <Parrot/Asset.h>
 
-struct IFFHandle* SquawkIff;
-
 #define SAVE_PATH "PROGDIR:%ld.Parrot"
 
 IffPtr OpenSquawkFile(UWORD id)
 {
   IffPtr iff;
   LONG err;
+  BPTR file;
   CHAR path[1 + sizeof(SAVE_PATH) + 6];
 
   StrFormat(path, sizeof(path), SAVE_PATH, (ULONG)id);
 
   iff = AllocIFF();
-  iff->iff_Stream = Open(path, MODE_NEWFILE);
+
+  if (iff == NULL)
+  {
+    PARROT_ERR(
+      "Unable open squawk file for writing.\n"
+      "Reason: (1) IFF pointer could not be allocated"
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_STR("Path"),
+      id,
+      path
+    );
+  }
+
+  file = Open(path, MODE_NEWFILE);
+
+  if (file == 0)
+  {
+    PARROT_ERR(
+      "Unable open squawk file for writing.\n"
+      "Reason: (2) File was not opened for writing"
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_PTR("Ptr")
+      PARROT_ERR_STR("Path")
+      PARROT_ERR_INT("IoErr"),
+      id,
+      file,
+      path,
+      IoErr()
+    );
+  }
+
+  iff->iff_Stream = file;
 
   InitIFFasDOS(iff);
-  OpenIFF(iff, IFFF_WRITE);
 
-  err = PushChunk(iff, ID_SQWK, ID_LIST, IFFSIZE_UNKNOWN);
+  err = OpenIFF(iff, IFFF_WRITE);
+
+  if (err != 0)
+  {
+    PARROT_ERR(
+      "Unable open squawk file for writing.\n"
+      "Reason: (3) Could not Open IFF DOS File"
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_INT("Err")
+      PARROT_ERR_STR("Path"),
+      id,
+      err,
+      path
+    );
+  }
+
+  err = PushChunk(iff, MAKE_ID('I', 'L', 'B', 'M'), ID_LIST, IFFSIZE_UNKNOWN);
+  
+  if (err != 0)
+  {
+    PARROT_ERR(
+      "Unable open squawk file for writing.\n"
+      "Reason: (4) Opening chunk could not be written"
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_INT("Err")
+      PARROT_ERR_STR("Path"),
+      id,
+      err,
+      path
+    );
+  }
 
   return iff;
 }
@@ -58,6 +117,16 @@ VOID CloseSquawkFile(IffPtr iff)
   if (NULL != iff)
   {
     err = PopChunk(iff); /* ID_LIST */
+
+    if (err != 0)
+    {
+      PARROT_ERR(
+        "Unable close squawk file for writing.\n"
+        "Reason: (5) Closing chunk could not be finalised"
+        PARROT_ERR_INT("Err"),
+        err
+      );
+    }
 
     CloseIFF(iff);
     Close(iff->iff_Stream);
@@ -147,5 +216,89 @@ VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UW
     );
   }
 
-  PopChunk(iff);
+  err = PopChunk(iff);
+
+  if (err != 0)
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Data chunk was not popped"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_INT("Err"),
+      IDtoStr(classType, strtype),
+      id,
+      (LONG) err
+    );
+  }
+}
+
+
+VOID SaveAssetWithData(IffPtr iff, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags)
+{
+  struct ASSET_HEADER hdr;
+  LONG err;
+  char strtype[5];
+
+  hdr.ah_Id = id;
+  hdr.ah_AssetFlags = chunkHeaderflags | CHUNK_FLAG_HAS_DATA;
+
+  PushChunk(iff, ID_SQWK, UWordToId(id), sizeof(struct ASSET_HEADER) + dataLength + data2Length);
+  err = WriteChunkBytes(iff, &hdr, sizeof(struct ASSET_HEADER));
+
+  if (err != sizeof(struct ASSET_HEADER))
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Header was not written"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Id"),
+      IDtoStr(classType, strtype),
+      id
+    );
+  }
+
+  err = WriteChunkBytes(iff, data, dataLength);
+
+  if (err != dataLength)
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Data (1) was not written"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Id"),
+      IDtoStr(classType, strtype),
+      id
+    );
+  }
+
+  err = WriteChunkBytes(iff, data2, data2Length);
+
+  if (err != data2Length)
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Data (2) was not written"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Id"),
+      IDtoStr(classType, strtype),
+      id
+    );
+  }
+
+  err = PopChunk(iff);
+
+  if (err != 0)
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Data and Data2 chunks was not popped"
+      PARROT_ERR_STR("Type")
+      PARROT_ERR_INT("Id")
+      PARROT_ERR_INT("Err"),
+      IDtoStr(classType, strtype),
+      id,
+      (LONG)err
+    );
+  }
 }

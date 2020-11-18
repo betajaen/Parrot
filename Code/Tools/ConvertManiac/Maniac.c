@@ -34,6 +34,8 @@ STATIC IffPtr master;
 VOID ExportGameInfo(IffPtr master);
 VOID ExportPalettes(IffPtr master);
 VOID ExportLfl(UWORD lflNum);
+VOID StartLfl();
+VOID EndLfl();
 
 VOID ConverterMain()
 {
@@ -44,10 +46,12 @@ VOID ConverterMain()
   ExportGameInfo(master);
   ExportPalettes(master);
 
+  StartLfl();
   for (roomNum = 1; roomNum < MM_NUM_ROOMS; roomNum++)
   {
     ExportLfl(roomNum);
   }
+  EndLfl();
 
 
   CloseSquawkFile(master);

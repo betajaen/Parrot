@@ -52,6 +52,8 @@ ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
 extern VOID exit();
 
 VOID ConverterMain();
+VOID StartTables();
+VOID EndTables();
 
 INT main()
 {
@@ -94,7 +96,9 @@ INT main()
     goto CLEAN_EXIT;
   }
 
+  StartTables();
   ConverterMain();
+  EndTables();
 
 
 CLEAN_EXIT:
