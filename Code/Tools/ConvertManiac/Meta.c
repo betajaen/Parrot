@@ -182,7 +182,7 @@ STATIC VOID ExportCursorPalette(IffPtr iff, UWORD id)
 VOID ExportPalettes(IffPtr iff)
 {
   StartAssetList(iff, CT_PALETTE);
-  ExportGamePalette(iff, 1);
-  ExportCursorPalette(iff, 2);
+  ExportGamePalette(iff, MM_PALETTE_ID);
+  ExportCursorPalette(iff, MM_PALETTE_ID + 1);
   EndAssetList(iff);
 }
