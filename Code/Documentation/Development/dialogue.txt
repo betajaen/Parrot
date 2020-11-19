@@ -1,0 +1,40 @@
+Dialogue
+# Dialogue
+
+Dialogue refers to usually anything written down, such as the following:
+
+- Dialogue between two or more Actors in a scene
+- Dialogue between an actor to the player
+- Narration dialogue to the player
+- Written action events
+- User Interface
+- Program Help Text
+
+Dialogue is stored in tables of strings [String Table](CT_STRING_TABLE), it
+is referenced by a 4 byte Id, which is in two parts.
+
+  struct DIALOGUE_TEXT
+  {
+    UWORD   dt_Table;
+    UBYTE   dt_Pad;
+    UBYTE   dt_Item;
+  };
+
+  Dialogue Text may be referred to as a Big-Endian ULONG or as a 
+  C DIALOGUE_TEXT structure.
+
+It is recommended that common Dialogue is stored in the master archive;
+0.parrot. Where as chapter or room dialogue stored in other dedicated
+archives.
+
+It should be noted, that individual pieces of dialogue cannot be sourced
+from Disk, as it will bring in all of that Dialogue stored in that 
+STRING_TABLE at once. So it is recommended to stored Dialogue together
+based on story or location to reduce disk and memory usage.
+
+Dialogue Ids are language neutral, as each STRING_TABLE has a ISO-639-1
+code in them, so the Dialogue ID for one piece of text is the same
+regardless of the language translation
+
+It should be noted that a string may only have 255 characters, so in
+some circumstances some of that string may have to be cut in length.

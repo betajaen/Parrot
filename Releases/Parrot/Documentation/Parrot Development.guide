@@ -16,6 +16,8 @@
 @{"Game Info" LINK CT_GAMEINFO}
 @{"Asset Table" LINK CT_TABLE}
 @{"Asset Table Item" LINK CT_TABLE}
+@{"String Table" LINK CT_STRING_TABLE}
+@{"Dialogue" LINK DIALOGUE}
 
 
 @{FG None}@{BG None}@{u}@{i}Scripting@{uu}@{ui}@{BG Background}@{FG Text}
@@ -34,6 +36,9 @@
 @NODE TOC "Table of Contents"
 @{b}@{u}Table of Contents@{uu}@{ub}
 
+@{b}D@{ub}
+
+  @{"Dialogue" LINK DIALOGUE}
 @{b}G@{ub}
 
   @{"Game Info Asset" LINK CT_GAMEINFO}
@@ -44,6 +49,7 @@
 
   @{"Squawk" LINK SQUAWK}
   @{"Squawk File Layout" LINK SQUAWKLAYOUT}
+  @{"String Table Asset" LINK CT_STRING_TABLE}
 @{b}T@{ub}
 
   @{"Table Asset" LINK CT_TABLE}
@@ -203,6 +209,83 @@ example:
 
 @ENDNODE
 
+@NODE CT_STRING_TABLE "String Table Asset"
+@{FG None}@{BG None}@{b}@{u}@{i}Strings Asset (STRING_TABLE)@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+
+Design Version
+  1.0
+Code Version
+  1.0
+
+Asset Lookup Table
+
+
+@{FG None}@{BG None}@{u}@{i}C Version@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG Text}@{BG None}  struct STRING_TABLE@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    CHAR           st_Language[2];@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UBYTE          st_Padding;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UBYTE          st_Count;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UWORD          st_Offsets[256];@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    +              STRINGS; Upto 66,048 bytes@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Fields@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG None}@{BG None}@{u}st_Language@{uu}@{BG Background}@{FG Text}
+
+
+Two character ISO 639-1 language code.
+
+XX is reserved for non-spoke dialogue; such as action text.
+
+
+@{FG None}@{BG None}@{u}st_Count@{uu}@{BG Background}@{FG Text}
+
+Number of strings + 1 stored in this table. (Upto 256}
+
+
+@{FG None}@{BG None}@{u}st_Offsets@{uu}@{BG Background}@{FG Text}
+
+Offset of where the string starts from when the STRING_TABLE ends.
+
+
+@{FG None}@{BG None}@{u}@{i}Strings@{uu}@{ui}@{BG Background}@{FG Text}
+
+Strings are null-terminated strings, with length, null terminators and an
+optional pad byte.
+
+For example, for the string "DON'T BE A TUNA HEAD!"
+
+
+
+@{FG Text}@{BG None}  15 44 4F 4E 27 54 20 42 45 20 41 20 54 55 4E 41 20 48 45 41 44 21 00 00@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  .  D  O  N  '  T     B  E     A     T  U  N  A     H  E  A  D  !  .  .@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  .                                                                 .  .@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  ._ Length of 21 characters (not including null and pad)           .  .@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}                                                    Null terminator_.  .@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}                                                                       .@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}                                                             Pad byte _.@{BG Background}@{FG Text}
+
+For alignment purposes a total string content, including length and null
+terminator must be divisible by 2. If it is not then an extra pad byte is
+appended after the null terminator. This is not included in the length.
+
+A length byte is placed at the begining of the string, from 1 to 255.
+
+A null terminator is placed at the end of the string but before the pad.
+
+@ENDNODE
+
 @NODE CT_TABLE "Table Asset"
 @{FG None}@{BG None}@{b}@{u}@{i}Table Asset (ASSET_TABLE)@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
 
@@ -219,7 +302,7 @@ Asset Lookup Table
 
 @{FG Text}@{BG None}  struct ASSET_TABLE@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG   at_Type;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    ULONG   at_AssetType;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD   at_Chapter;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD   at_Count;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD   at_Lowest;@{BG Background}@{FG Text}
@@ -294,6 +377,50 @@ example:
   { 8, 3 }
   { 9, 3 }
   { 10, 4 }
+
+@ENDNODE
+
+@NODE DIALOGUE "Dialogue"
+@{FG None}@{BG None}@{b}@{u}@{i}Dialogue@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+
+Dialogue refers to usually anything written down, such as the following:
+
+- Dialogue between two or more Actors in a scene
+- Dialogue between an actor to the player
+- Narration dialogue to the player
+- Written action events
+- User Interface
+- Program Help Text
+
+Dialogue is stored in tables of strings @{"String Table" LINK CT_STRING_TABLE}, it
+is referenced by a 4 byte Id, which is in two parts.
+
+
+@{FG Text}@{BG None}  struct DIALOGUE_TEXT@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UWORD   dt_Table;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UBYTE   dt_Pad;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UBYTE   dt_Item;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  Dialogue Text may be referred to as a Big-Endian ULONG or as a @{BG Background}@{FG Text}
+@{FG Text}@{BG None}  C DIALOGUE_TEXT structure.@{BG Background}@{FG Text}
+
+It is recommended that common Dialogue is stored in the master archive;
+0.parrot. Where as chapter or room dialogue stored in other dedicated
+archives.
+
+It should be noted, that individual pieces of dialogue cannot be sourced
+from Disk, as it will bring in all of that Dialogue stored in that 
+STRING_TABLE at once. So it is recommended to stored Dialogue together
+based on story or location to reduce disk and memory usage.
+
+Dialogue Ids are language neutral, as each STRING_TABLE has a ISO-639-1
+code in them, so the Dialogue ID for one piece of text is the same
+regardless of the language translation
+
+It should be noted that a string may only have 255 characters, so in
+some circumstances some of that string may have to be cut in length.
 
 @ENDNODE
 
@@ -670,5 +797,8 @@ Stack based virtual machine. Each stack variable is 4 bytes (LONG}.
 There are 16 variables and 256 global variables.
 
 Variables may belong to the object or room running with the script.
+
+@ENDNODE
+pt.
 
 @ENDNODE

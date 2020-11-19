@@ -1,0 +1,59 @@
+String Table Asset
+# Strings Asset (STRING_TABLE)
+
+Design Version
+  1.0
+Code Version
+  1.0
+
+Asset Lookup Table
+
+## C Version
+
+  struct STRING_TABLE
+  {
+    CHAR           st_Language[2];
+    UBYTE          st_Padding;
+    UBYTE          st_Count;
+    UWORD          st_Offsets[256];
+    +              STRINGS; Upto 66,048 bytes
+  };
+
+## Fields
+
+### st_Language
+
+Two character ISO 639-1 language code.
+
+XX is reserved for non-spoke dialogue; such as action text.
+
+### st_Count
+
+Number of strings + 1 stored in this table. (Upto 256)
+
+### st_Offsets
+
+Offset of where the string starts from when the STRING_TABLE ends.
+
+## Strings
+
+Strings are null-terminated strings, with length, null terminators and an
+optional pad byte.
+
+For example, for the string "DON'T BE A TUNA HEAD!"
+
+  15 44 4F 4E 27 54 20 42 45 20 41 20 54 55 4E 41 20 48 45 41 44 21 00 00
+  .  D  O  N  '  T     B  E     A     T  U  N  A     H  E  A  D  !  .  .
+  .                                                                 .  .
+  ._ Length of 21 characters (not including null and pad)           .  .
+                                                    Null terminator_.  .
+                                                                       .
+                                                             Pad byte _.
+
+For alignment purposes a total string content, including length and null
+terminator must be divisible by 2. If it is not then an extra pad byte is
+appended after the null terminator. This is not included in the length.
+
+A length byte is placed at the begining of the string, from 1 to 255.
+
+A null terminator is placed at the end of the string but before the pad.

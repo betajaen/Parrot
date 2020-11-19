@@ -11,6 +11,8 @@ Parrot Development Guide
 [Game Info](CT_GAMEINFO)
 [Asset Table](CT_TABLE)
 [Asset Table Item](CT_TABLE)
+[String Table](CT_STRING_TABLE)
+[Dialogue](DIALOGUE)
 
 ## Scripting
 
