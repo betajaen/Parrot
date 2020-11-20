@@ -13,15 +13,17 @@ Dialogue refers to usually anything written down, such as the following:
 Dialogue is stored in tables of strings [String Table](CT_STRING_TABLE), it
 is referenced by a 4 byte Id, which is in two parts.
 
-  struct DIALOGUE_TEXT
+  struct DIALOGUE_REF
   {
-    UWORD   dt_Table;
-    UBYTE   dt_Pad;
+    UWORD   dt_Magic;
+    UBYTE   dt_Table;
     UBYTE   dt_Item;
   };
 
   Dialogue Text may be referred to as a Big-Endian ULONG or as a 
-  C DIALOGUE_TEXT structure.
+  C DIALOGUE_REF structure.
+
+## As a Reference
 
 It is recommended that common Dialogue is stored in the master archive;
 0.parrot. Where as chapter or room dialogue stored in other dedicated
@@ -38,3 +40,42 @@ regardless of the language translation
 
 It should be noted that a string may only have 255 characters, so in
 some circumstances some of that string may have to be cut in length.
+
+## As a Pointer
+
+At run-time when a Room, Entity or other type of object that has a
+Dialogue Id. Once a table has been loaded, the Dialogue Id may be
+turned into a pointer.
+
+  union DIALOGUE_TEXT
+  {
+    struct DIALOGUE_REF dt_Ref;
+    CHAR*               dt_Str;
+  };
+
+## Tables
+
+There can be upto 256 tables of dialogue, consquently a total of 
+65,536 lines of dialogue possible.
+
+This may be expanded on in future versions of Parrot by reserving
+some of the lower bits of dt_Magic to increase the maximum table
+count.
+
+## Magic
+
+The two magic bytes are the upper-byte of the Table and Item words
+these are compile-time constants.
+
+  dt_Magic = 0x00FC   (As of Parrot 1.2)
+
+These constants are are specially chosen to map the DIALOGUE string
+pointer to an reserved address range, reserved by the Amiga 
+Kickstart.
+
+  00FC0000
+  00FCFFFF            (As of Parrot 1.2)
+
+Knowing that the first two bytes of start with dt_Magic it can be 
+converted into a pointer with a lookup of the table and string offset 
+address.

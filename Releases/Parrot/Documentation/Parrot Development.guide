@@ -396,15 +396,18 @@ Dialogue is stored in tables of strings @{"String Table" LINK CT_STRING_TABLE}, 
 is referenced by a 4 byte Id, which is in two parts.
 
 
-@{FG Text}@{BG None}  struct DIALOGUE_TEXT@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  struct DIALOGUE_REF@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   dt_Table;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UBYTE   dt_Pad;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UWORD   dt_Magic;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UBYTE   dt_Table;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UBYTE   dt_Item;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG Text}@{BG None}  Dialogue Text may be referred to as a Big-Endian ULONG or as a @{BG Background}@{FG Text}
-@{FG Text}@{BG None}  C DIALOGUE_TEXT structure.@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  C DIALOGUE_REF structure.@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}As a Reference@{uu}@{ui}@{BG Background}@{FG Text}
+
 
 It is recommended that common Dialogue is stored in the master archive;
 0.parrot. Where as chapter or room dialogue stored in other dedicated
@@ -421,6 +424,51 @@ regardless of the language translation
 
 It should be noted that a string may only have 255 characters, so in
 some circumstances some of that string may have to be cut in length.
+
+
+@{FG None}@{BG None}@{u}@{i}As a Pointer@{uu}@{ui}@{BG Background}@{FG Text}
+
+At run-time when a Room, Entity or other type of object that has a
+Dialogue Id. Once a table has been loaded, the Dialogue Id may be
+turned into a pointer.
+
+
+@{FG Text}@{BG None}  union DIALOGUE_TEXT@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    struct DIALOGUE_REF dt_Ref;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    CHAR*               dt_Str;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Tables@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+There can be upto 256 tables of dialogue, consquently a total of 
+65,536 lines of dialogue possible.
+
+This may be expanded on in future versions of Parrot by reserving
+some of the lower bits of dt_Magic to increase the maximum table
+count.
+
+
+@{FG None}@{BG None}@{u}@{i}Magic@{uu}@{ui}@{BG Background}@{FG Text}
+
+The two magic bytes are the upper-byte of the Table and Item words
+these are compile-time constants.
+
+
+@{FG Text}@{BG None}  dt_Magic = 0x00FC   (As of Parrot 1.2)@{BG Background}@{FG Text}
+
+These constants are are specially chosen to map the DIALOGUE string
+pointer to an reserved address range, reserved by the Amiga 
+Kickstart.
+
+
+@{FG Text}@{BG None}  00FC0000@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  00FCFFFF            (As of Parrot 1.2)@{BG Background}@{FG Text}
+
+Knowing that the first two bytes of start with dt_Magic it can be 
+converted into a pointer with a lookup of the table and string offset 
+address.
 
 @ENDNODE
 
@@ -797,8 +845,5 @@ Stack based virtual machine. Each stack variable is 4 bytes (LONG}.
 There are 16 variables and 256 global variables.
 
 Variables may belong to the object or room running with the script.
-
-@ENDNODE
-pt.
 
 @ENDNODE
