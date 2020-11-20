@@ -28,6 +28,7 @@
 
 @{FG None}@{BG None}@{u}@{i}Reference@{uu}@{ui}@{BG Background}@{FG Text}
 
+@{"Versions" LINK VERSION}
 @{"Terminology" LINK TERMINOLOGY}
 @{"Type Notation" LINK TYPENOTATION}
 
@@ -45,6 +46,7 @@
 @{b}P@{ub}
 
   @{"Parrot Development Guide" LINK MAIN}
+  @{"Parrot Version" LINK VERSION}
 @{b}S@{ub}
 
   @{"Squawk" LINK SQUAWK}
@@ -77,6 +79,8 @@ Game Information Table
 
 @{FG Text}@{BG None}  struct GAME_INFO@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    struct GAME_VERSION       gi_Version;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    ULONG                     gi_FeatureSet;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    ULONG                     gi_GameId;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    ULONG                     gi_GameVersion;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    CHAR                      gi_Title[64];@{BG Background}@{FG Text}
@@ -94,8 +98,23 @@ Game Information Table
 @{FG Text}@{BG None}    UWORD                     gi_StartScript;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
-@{FG None}@{BG None}@{u}@{i}gi_GameId (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_ParrotVersion (struct GAME_VERSION)@{uu}@{ui}@{BG Background}@{FG Text}
 
+
+The version of Parrot which was used to create the Game Asset files.
+
+example:
+  1, 2, 199
+
+
+@{FG None}@{BG None}@{u}@{i}gi_FeatureSet (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
+
+A bit-field containg special features required by Parrot to run.
+
+RESERVED FOR FUTURE USE
+
+
+@{FG None}@{BG None}@{u}@{i}gi_GameId (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
 
 FourCC id of the Game
 
@@ -232,11 +251,20 @@ Asset Lookup Table
 @{FG Text}@{BG None}    +              STRINGS; Upto 66,048 bytes@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
+@{FG None}@{BG None}@{u}@{i}Asset Id@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+Due to the @{"Dialogue Ref" LINK DIALOGUE} only reserving 1 byte for a the
+table Id. The maximum number of STRING Tables is 255. Where 0 is
+reserved for None.
+
+In future versions Parrot this may increase to 512.
+
+
 @{FG None}@{BG None}@{u}@{i}Fields@{uu}@{ui}@{BG Background}@{FG Text}
 
 
 @{FG None}@{BG None}@{u}st_Language@{uu}@{BG Background}@{FG Text}
-
 
 Two character ISO 639-1 language code.
 
@@ -835,6 +863,91 @@ Language Id
   1 byte Padding Unused
 .d
   Language Id
+
+@ENDNODE
+
+@NODE VERSION "Parrot Version"
+@{FG None}@{BG None}@{b}@{u}@{i}Parrot Version@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+
+Parrot uses the sematic versioning system where a given 
+version number is written as:
+
+
+@{FG Text}@{BG None}  GAME.FEATURE.BUILD@{BG Background}@{FG Text}
+
+
+GAME versions correspond to which minimum Game Parrot
+supports, these are:-
+
+
+@{FG Text}@{BG None}   1. Maniac Mansion (1987)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   2. Zak McKracken and the Alien Mindbenders (1988)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   3. Indiana Jones and the Last Crusade (1989)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   4. Loom (1990)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   5. The Secret of Monkey Island (1990)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   6. Monkey Island 2: LeChuck's Revenge (1991)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   7. Indiana Jones and the Fate of Atlantis (1992)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   8. Day of the Tentacle (1993)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   9. Sam & Max Hit the Road (1993)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  10. Full Throttle (1995)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  11. The Dig (1995)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  12. The Curse of Monkey Island (1997)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      MS Windows Version - LucasArts@{BG Background}@{FG Text}
+
+Files saved via older GAME versions are expected 
+to be incompatible with newer GAME versions.
+
+
+@{FG Text}@{BG None}  i.e.  Parrot files saved with version 3.9.3 are@{BG Background}@{FG Text}
+@{FG Text}@{BG None}        likely not to work with with Parrot 2.0.1@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}        However; Parrot 3.9.3, can play Maniac Mansion,@{BG Background}@{FG Text}
+@{FG Text}@{BG None}        Zak McKracken and the Alien MindBenders and@{BG Background}@{FG Text}
+@{FG Text}@{BG None}        Indiana Jones and the Last Crusade.@{BG Background}@{FG Text}
+
+FEATURE versions are incremented when a feature of
+that Game has been totally completed. This is expected
+to have backwards compatbile manner.
+
+BUILD versions are incremented when a commit has been
+pushed to the Git and Github repository. Although a 
+1:1 parity is not expected. BUILD versions are stored
+as a two byte integer, and can roll over if the number
+of commits reaches 65,535.
+
+
+@{FG None}@{BG None}@{u}@{i}C Implementation@{uu}@{ui}@{BG Background}@{FG Text}
+
+Internally a GAME_VERSION union is used which is represents
+a version number as a C Struct or a ULONG (in Big Endian}
+
+
+@{FG Text}@{BG None}  struct GAME_VERSION_STRUCT@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UBYTE  gv_Game;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UBYTE  gv_Feature;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UWROD  gv_Build;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  union GAME_VERSION@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    struct GAME_VERSION_STRUCT gv_Version;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    ULONG gv_Num;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+
+To determine if a a Version is older or newer, the gv_Num field
+can be compared with <, > or == operators.
 
 @ENDNODE
 

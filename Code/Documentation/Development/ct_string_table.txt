@@ -19,6 +19,14 @@ Asset Lookup Table
     +              STRINGS; Upto 66,048 bytes
   };
 
+## Asset Id
+
+Due to the [Dialogue Ref](DIALOGUE) only reserving 1 byte for a the
+table Id. The maximum number of STRING Tables is 255. Where 0 is
+reserved for None.
+
+In future versions Parrot this may increase to 512.
+
 ## Fields
 
 ### st_Language

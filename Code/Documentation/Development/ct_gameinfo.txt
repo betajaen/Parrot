@@ -12,6 +12,8 @@ Game Information Table
 
   struct GAME_INFO
   {
+    struct GAME_VERSION       gi_Version;
+    ULONG                     gi_FeatureSet;
     ULONG                     gi_GameId;
     ULONG                     gi_GameVersion;
     CHAR                      gi_Title[64];
@@ -28,6 +30,19 @@ Game Information Table
     UWORD                     gi_StartRoom;
     UWORD                     gi_StartScript;
   };
+
+## gi_ParrotVersion (struct GAME_VERSION)
+
+The version of Parrot which was used to create the Game Asset files.
+
+example:
+  1, 2, 199
+
+## gi_FeatureSet (ULONG)
+
+A bit-field containg special features required by Parrot to run.
+
+RESERVED FOR FUTURE USE
 
 ## gi_GameId (ULONG)
 
