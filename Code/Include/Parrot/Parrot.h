@@ -88,10 +88,27 @@
     list.mlh_TailPred      = (struct MinNode*) &list.mlh_Head;
 
 #define MAKE_NODE_ID(a,b,c,d)	\
-	((ULONG) (a)<<24 | (ULONG) (b)<<16 | (ULONG) (c)<<8 | (ULONG) (d))
+    ((ULONG) (a)<<24 | (ULONG) (b)<<16 | (ULONG) (c)<<8 | (ULONG) (d))
 
 #define MAKE_ENTITY_ID(a,b)	\
-	((USHORT) (a)<<8 | (USHORT) (b))
+    ((USHORT) (a)<<8 | (USHORT) (b))
+
+/*
+    Version
+*/
+
+struct VERSION_PARTS_INFO
+{
+  UBYTE gv_Game;
+  UBYTE gv_Feature;
+  UBYTE gv_Build;
+};
+
+union VERSION_INFO
+{
+  struct VERSION_PARTS_INFO gv_Version;
+  ULONG gv_Num;
+};
 
 /**
     SDL Banned Functions

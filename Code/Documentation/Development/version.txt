@@ -57,19 +57,17 @@ of commits reaches 65,535.
 
 ## C Implementation
 
-Internally a GAME_VERSION union is used which is represents
+Internally a VERSION_INFO union is used which is represents
 a version number as a C Struct or a ULONG (in Big Endian)
 
-  struct GAME_VERSION_STRUCT
+  union VERSION_INFO
   {
-    UBYTE  gv_Game;
-    UBYTE  gv_Feature;
-    UWROD  gv_Build;
-  };
-
-  union GAME_VERSION
-  {
-    struct GAME_VERSION_STRUCT gv_Version;
+    struct
+    {
+      UBYTE gv_Game;
+      UBYTE gv_Feature;
+      UBYTE gv_Build;
+    } gv_Version;
     ULONG gv_Num;
   };
 
