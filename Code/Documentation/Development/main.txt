@@ -24,3 +24,4 @@ Parrot Development Guide
 [Versions](VERSION)
 [Terminology](TERMINOLOGY)
 [Type Notation](TYPENOTATION)
+[Coding Style](CODINGSTYLE)

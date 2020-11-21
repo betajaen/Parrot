@@ -31,12 +31,16 @@
 @{"Versions" LINK VERSION}
 @{"Terminology" LINK TERMINOLOGY}
 @{"Type Notation" LINK TYPENOTATION}
+@{"Coding Style" LINK CODINGSTYLE}
 
 @ENDNODE
 
 @NODE TOC "Table of Contents"
 @{b}@{u}Table of Contents@{uu}@{ub}
 
+@{b}C@{ub}
+
+  @{"Coding Style" LINK CODINGSTYLE}
 @{b}D@{ub}
 
   @{"Dialogue" LINK DIALOGUE}
@@ -61,6 +65,167 @@
 
   @{"Virtual Machine" LINK VM}
   @{"Virtual Machine Opcodes" LINK OPCODES}
+@ENDNODE
+
+@NODE CODINGSTYLE "Coding Style"
+@{FG None}@{BG None}@{b}@{u}@{i}Coding Style@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+
+Parrot is written in C and is compiled by the VBCC compiler.
+
+
+@{FG None}@{BG None}@{u}@{i}Braces@{uu}@{ui}@{BG Background}@{FG Text}
+
+Seperate lines
+
+
+@{FG Text}@{BG None}  if (x == 2)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    /* Action */@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  }@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Comments@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+@{FG Text}@{BG None}  /* Always this */@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  // Never this@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Structs@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+Structures are always referred to "struct Name" never
+"Name" through a typedef.
+
+Fields of the structure taken on a prefix of the name
+of the structure.
+
+
+@{FG Text}@{BG None}  struct Lever@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    ULONG lv_Strength;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    ULONG lv_Length;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    BOOL  lv_IsDown;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Functions@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+Although there is no strict rule with this;
+
+Functions that deal with utilities or extending C code, it should 
+use the SubjectAction naming
+
+
+@{FG Text}@{BG None}  StrLength@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  GfxText@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  ScriptsInitialise@{BG Background}@{FG Text}
+
+Anything that is more to do with gameplay then:
+
+
+@{FG Text}@{BG None}  PlayRoom@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  LoadAsset@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  NewObject@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Naming@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+Functions and Classes are always in TitleCase
+
+
+@{FG Text}@{BG None}  PlayRoom@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  struct Room;@{BG Background}@{FG Text}
+
+Parameters are always in camelCase
+
+
+@{FG Text}@{BG None}  roomNum@{BG Background}@{FG Text}
+
+Fields always start with lowercase prefix
+then TitleCase
+
+
+@{FG Text}@{BG None}  rm_Width@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Enums@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+Enumerations should be defined as pre-processor Macros as 
+UPPER_UNDERSCORE case.
+
+
+@{FG Text}@{BG None}  #define ETF_IS_NAMED  (1 << 0)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  #define ETF_IS_LOCKED (1 << 14)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  #define ETF_IS_OPEN   (1 << 15)@{BG Background}@{FG Text}
+
+Where the first word is an abbreviation of the subject and
+the following words are the name.
+
+They should be placed near the first use of them in a 
+structure or function.
+
+
+@{FG None}@{BG None}@{u}@{i}Includes and Headers@{uu}@{ui}@{BG Background}@{FG Text}
+
+With Parrot.h being the exception
+
+Headers should not include other headers, including Parrot.h
+
+Headers should only contain
+
+
+@{FG Text}@{BG None}  Function Prototypes@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  Struct Prototypes@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  Enums@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  IFF or Node IDs@{BG Background}@{FG Text}
+
+Public structures should be placed in Parrot.h
+
+As Headers are only used .c files, Headers do not need #ifndef
+#define #endif Guards.
+
+When using Parrot includes must be in the form of
+
+
+@{FG Text}@{BG None}  #include <Parrot/Xyz.h>@{BG Background}@{FG Text}
+
+When using Amiga OS includes they must be in the form of
+
+
+@{FG Text}@{BG None}  #include <exec/types.h>@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Types@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+Parrot uses the types from <exec/types.h> as its POD types.
+
+These are:-
+
+
+@{FG Text}@{BG None}  UBYTE   Unsigned  8-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  BYTE    Signed    8-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  UWORD   Unsigned  16-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  WORD    Signed    16-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  ULONG   Unsigned  32-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  LONG    Signed    32-bit Integer@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  VOID    void@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  APTR    void*@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  BOOL    Boolean@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  STRPTR  char*@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Other Macros@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+Other Macros should be used as well:
+
+
+@{FG Text}@{BG None}  EXTERN instead of extern@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  CONST  instead of const@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  STATIC instead of static@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  VOID   instead of void@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  These are defined in <exec/types.h> and <parrot/Parrot.h>@{BG Background}@{FG Text}
 @ENDNODE
 
 @NODE CT_GAMEINFO "Game Info Asset"
@@ -929,20 +1094,18 @@ of commits reaches 65,535.
 
 @{FG None}@{BG None}@{u}@{i}C Implementation@{uu}@{ui}@{BG Background}@{FG Text}
 
-Internally a GAME_VERSION union is used which is represents
+Internally a VERSION_INFO union is used which is represents
 a version number as a C Struct or a ULONG (in Big Endian}
 
 
-@{FG Text}@{BG None}  struct GAME_VERSION_STRUCT@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  union VERSION_INFO@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UBYTE  gv_Game;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UBYTE  gv_Feature;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWROD  gv_Build;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  };@{BG Background}@{FG Text}
-
-@{FG Text}@{BG None}  union GAME_VERSION@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    struct GAME_VERSION_STRUCT gv_Version;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    struct@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    {@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      UBYTE gv_Game;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      UBYTE gv_Feature;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      UBYTE gv_Build;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    } gv_Version;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    ULONG gv_Num;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
