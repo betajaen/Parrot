@@ -16,10 +16,10 @@ Game Information Table
     ULONG                     gi_FeatureSet;
     ULONG                     gi_GameId;
     ULONG                     gi_GameVersion;
-    CHAR                      gi_Title[64];
-    CHAR                      gi_ShortTitle[16];
-    CHAR                      gi_Author[128];
-    CHAR                      gi_Release[128];
+    union DIALOGUE            gi_Title;
+    union DIALOGUE            gi_ShortTitle;
+    union DIALOGUE            gi_Author;
+    union DIALOGUE            gi_Release;
     UWORD                     gi_Width;
     UWORD                     gi_Height;
     UWORD                     gi_Depth;

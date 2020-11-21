@@ -32,13 +32,16 @@
 VOID ExportGameInfo(IffPtr master)
 {
   struct GAME_INFO gi;
+  UWORD language;
   
   InitStackVar(gi);
 
-  StrCopy(&gi.gi_Title[0], sizeof(gi.gi_Title), MM_META_TITLE );
-  StrCopy(&gi.gi_ShortTitle[0], sizeof(gi.gi_ShortTitle), MM_META_SHORT_TITLE);
-  StrCopy(&gi.gi_Author[0], sizeof(gi.gi_Author), MM_META_AUTHOR);
-  StrCopy(&gi.gi_Release[0], sizeof(gi.gi_Release), MM_META_RELEASE);
+  language = LANG_ENGLISH;
+
+  gi.gi_Title = PushDialogue(language, literal_strlen(MM_META_TITLE), MM_META_TITLE);
+  gi.gi_ShortTitle = PushDialogue(language, literal_strlen(MM_META_SHORT_TITLE), MM_META_SHORT_TITLE);
+  gi.gi_Author = PushDialogue(language, literal_strlen(MM_META_AUTHOR), MM_META_AUTHOR);
+  gi.gi_Release = PushDialogue(language, literal_strlen(MM_META_RELEASE), MM_META_RELEASE);
 
   gi.gi_Width = 320;
   gi.gi_Height = 200;

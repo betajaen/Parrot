@@ -49,7 +49,7 @@ VOID SaveAssetWithData(IffPtr iff, APTR data, ULONG dataLength, APTR data2, ULON
 UWORD GenerateAssetId(ULONG classType);
 UWORD GenerateArchiveId();
 VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter);
-
+ULONG PushDialogue(UWORD language, UBYTE textLength, STRPTR text);
 
 #define GrowMem(VAL, NEED, CAPACITY) \
     if (NEED > CAPACITY)\

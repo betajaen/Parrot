@@ -49,7 +49,8 @@ turned into a pointer.
 
   union DIALOGUE_TEXT
   {
-    struct DIALOGUE_REF dt_Ref;
+    struct DIALOGUE_REF dt_Parts;
+    ULONG               dt_AssetId;
     CHAR*               dt_Str;
   };
 

@@ -36,15 +36,23 @@ VOID ExportPalettes(IffPtr master);
 VOID ExportLfl(UWORD lflNum);
 VOID StartLfl();
 VOID EndLfl();
+VOID StartDialogue();
+VOID EndDialogue();
+VOID ExportDialogue(IffPtr master);
 
 VOID ConverterMain()
 {
   UWORD roomNum;
+  CHAR language[2] = { 'e', 'n' };
+
+  StartDialogue();
 
   master = OpenSquawkFile(0);
 
   ExportGameInfo(master);
   ExportPalettes(master);
+
+  // PushDialogue(LANG_ENGLISH, 6, "Parrot");
 
   StartLfl();
   for (roomNum = 1; roomNum < MM_NUM_ROOMS; roomNum++)
@@ -53,9 +61,12 @@ VOID ConverterMain()
   }
   EndLfl();
 
+  ExportDialogue(master);
+
 
   CloseSquawkFile(master);
   master = NULL;
 
+  EndDialogue();
   Requester("OK", "Converted");
 }

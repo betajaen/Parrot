@@ -93,6 +93,9 @@
 #define MAKE_ENTITY_ID(a,b)	\
     ((USHORT) (a)<<8 | (USHORT) (b))
 
+#define MAKE_LANGUAGE_CODE(a,b)	\
+    ((USHORT) (a)<<8 | (USHORT) (b))
+
 /*
     Version
 */
@@ -110,6 +113,25 @@ union VERSION_INFO
   ULONG gv_Num;
 };
 
+/*
+  Dialogue
+*/
+
+#define DIALOGUE_MAGIC 0x00FC
+
+typedef ULONG DIALOGUE;
+
+union DIALOGUE_TEXT
+{
+  struct DIALOGUE_PARTS
+  {
+    UWORD   dp_Magic;
+    UBYTE   dp_Table;
+    UBYTE   dp_Item;
+  } dt_Parts;
+  DIALOGUE  dt_AssetId;
+};
+
 /**
     SDL Banned Functions
 */
@@ -120,6 +142,7 @@ union VERSION_INFO
 #define strlen      __unsafe_strlen   /* Use StrLength  */
 #define strtok      __unsafe_strtok   /* DO NOT USE     */
 
+#define literal_strlen(TEXT) (sizeof(TEXT)-1)
 
 #define SIF_IS_PUBLIC   1
 #define SIF_IS_HIRES    2
@@ -168,6 +191,7 @@ struct VIEW_LAYOUTS
 #define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
 #define CT_ENTITY         MAKE_NODE_ID('E','N','T','Y')
 #define CT_SCRIPT         MAKE_NODE_ID('S','C','P','T')
+#define CT_STRING_TABLE   MAKE_NODE_ID('S','T','R','T')
 
 #define IET_KEYDOWN    1
 #define IET_KEYUP      2
@@ -237,10 +261,10 @@ struct GAME_INFO
 {
   ULONG                     gi_GameId;
   ULONG                     gi_GameVersion;
-  CHAR                      gi_Title[64];
-  CHAR                      gi_ShortTitle[16];
-  CHAR                      gi_Author[128];
-  CHAR                      gi_Release[128];
+  DIALOGUE                  gi_Title;
+  DIALOGUE                  gi_ShortTitle;
+  DIALOGUE                  gi_Author;
+  DIALOGUE                  gi_Release;
   UWORD                     gi_Width;
   UWORD                     gi_Height;
   UWORD                     gi_Depth;
@@ -295,6 +319,25 @@ struct ASSET_TABLE_ITEM
   UWORD  ti_Id;
   UWORD  ti_Archive;
 };
+
+/*
+  
+  String Tables
+  
+*/
+
+struct STRING_TABLE
+{
+  UWORD   st_Language;
+  UWORD   st_Offsets[256];
+  CHAR    st_Text[];
+};
+
+#define LANG_ENGLISH  MAKE_LANGUAGE_CODE('e','n')
+#define LANG_FRENCH   MAKE_LANGUAGE_CODE('f','r')
+#define LANG_ITALIAN  MAKE_LANGUAGE_CODE('i','t')
+#define LANG_GERMAN   MAKE_LANGUAGE_CODE('d','e')
+#define LANG_SPANISH  MAKE_LANGUAGE_CODE('e','s')
 
 /*
     Palette Table
