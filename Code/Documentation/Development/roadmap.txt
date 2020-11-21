@@ -1,0 +1,45 @@
+Roadmap
+# Roadmap
+
+Parrot is intended to be developed in the following order.
+
+Now
+
+   1.0.0 Maniac Mansion (1987)
+         CBM Amiga Version - Lucasfilms Games
+
+   1.1.0 Data conversion
+         Background loading
+         Entity Loading
+
+   1.2.0 Large Asset Support and Design
+   1.3.0 Script Decompiling and Exit auto-identification.
+   1.4.0 Verb Support
+   1.5.0 Actors
+   1.6.0 Scripting re-visited
+   1.7.0 TBD
+
+Future
+
+   2.0.0 Zak McKracken and the Alien Mindbenders (1988)
+         CBM Amiga Version - Lucasfilms Games
+   3.0.0 Indiana Jones and the Last Crusade (1989)
+         CBM Amiga Version - Lucasfilms Games
+   4.0.0 Loom (1990)
+         CBM Amiga Version - Lucasfilms Games
+   5.0.0 The Secret of Monkey Island (1990)
+         CBM Amiga Version - Lucasfilms Games
+   6.0.0 Monkey Island 2: LeChuck's Revenge (1991)
+         CBM Amiga Version - Lucasfilms Games
+   7.0.0 Indiana Jones and the Fate of Atlantis (1992)
+         CBM Amiga Version - Lucasfilms Games
+   8.0.0 Day of the Tentacle (1993)
+         PC DOS Version - LucasArts
+   9.0.0 Sam & Max Hit the Road (1993)
+         PC DOS Version - LucasArts
+  10.0.0 Full Throttle (1995)
+         PC DOS Version - LucasArts
+  11.0.9 The Dig (1995)
+         PC DOS Version - LucasArts
+  12.0.9 The Curse of Monkey Island (1997)
+         MS Windows Version - LucasArts

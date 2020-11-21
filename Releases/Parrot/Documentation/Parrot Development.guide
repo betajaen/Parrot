@@ -51,6 +51,9 @@
 
   @{"Parrot Development Guide" LINK MAIN}
   @{"Parrot Version" LINK VERSION}
+@{b}R@{ub}
+
+  @{"Roadmap" LINK ROADMAP}
 @{b}S@{ub}
 
   @{"Squawk" LINK SQUAWK}
@@ -248,10 +251,10 @@ Game Information Table
 @{FG Text}@{BG None}    ULONG                     gi_FeatureSet;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    ULONG                     gi_GameId;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    ULONG                     gi_GameVersion;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_Title[64];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_ShortTitle[16];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_Author[128];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR                      gi_Release[128];@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    union DIALOGUE            gi_Title;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    union DIALOGUE            gi_ShortTitle;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    union DIALOGUE            gi_Author;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    union DIALOGUE            gi_Release;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD                     gi_Width;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD                     gi_Height;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD                     gi_Depth;@{BG Background}@{FG Text}
@@ -409,11 +412,9 @@ Asset Lookup Table
 
 @{FG Text}@{BG None}  struct STRING_TABLE@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR           st_Language[2];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UBYTE          st_Padding;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UBYTE          st_Count;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    UWORD          st_Language;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD          st_Offsets[256];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    +              STRINGS; Upto 66,048 bytes@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    CHAR           st_Text[] /* Upto 66,048 bytes */@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}Asset Id@{uu}@{ui}@{BG Background}@{FG Text}
@@ -431,7 +432,7 @@ In future versions Parrot this may increase to 512.
 
 @{FG None}@{BG None}@{u}st_Language@{uu}@{BG Background}@{FG Text}
 
-Two character ISO 639-1 language code.
+Two character ISO 639-1 language code represented as a UWORD
 
 XX is reserved for non-spoke dialogue; such as action text.
 
@@ -628,7 +629,8 @@ turned into a pointer.
 
 @{FG Text}@{BG None}  union DIALOGUE_TEXT@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    struct DIALOGUE_REF dt_Ref;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    struct DIALOGUE_REF dt_Parts;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    ULONG               dt_AssetId;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    CHAR*               dt_Str;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
@@ -743,6 +745,55 @@ F  2    jl         addr.sb                    pc <- pc + addr @{b} 2@{ub}
                                               Stack: -1 = y.b
                                               Stack:  0 = text.d
 
+@ENDNODE
+
+@NODE ROADMAP "Roadmap"
+@{FG None}@{BG None}@{b}@{u}@{i}Roadmap@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+
+Parrot is intended to be developed in the following order.
+
+Now
+
+
+@{FG Text}@{BG None}   1.0.0 Maniac Mansion (1987)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}   1.1.0 Data conversion@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         Background loading@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         Entity Loading@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}   1.2.0 Large Asset Support and Design@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   1.3.0 Script Decompiling and Exit auto-identification.@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   1.4.0 Verb Support@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   1.5.0 Actors@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   1.6.0 Scripting re-visited@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   1.7.0 TBD@{BG Background}@{FG Text}
+
+Future
+
+
+@{FG Text}@{BG None}   2.0.0 Zak McKracken and the Alien Mindbenders (1988)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   3.0.0 Indiana Jones and the Last Crusade (1989)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   4.0.0 Loom (1990)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   5.0.0 The Secret of Monkey Island (1990)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   6.0.0 Monkey Island 2: LeChuck's Revenge (1991)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   7.0.0 Indiana Jones and the Fate of Atlantis (1992)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         CBM Amiga Version - Lucasfilms Games@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   8.0.0 Day of the Tentacle (1993)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}   9.0.0 Sam & Max Hit the Road (1993)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  10.0.0 Full Throttle (1995)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  11.0.9 The Dig (1995)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         PC DOS Version - LucasArts@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  12.0.9 The Curse of Monkey Island (1997)@{BG Background}@{FG Text}
+@{FG Text}@{BG None}         MS Windows Version - LucasArts@{BG Background}@{FG Text}
 @ENDNODE
 
 @NODE SQUAWK "Squawk"
