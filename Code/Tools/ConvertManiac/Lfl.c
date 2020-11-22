@@ -117,10 +117,9 @@ STATIC ULONG ReadLflNameStringToDialogue(ULONG offset)
   if (len == 0)
     return 0;
 
-  /* RequesterF("OK", "Offset = %ld, Len = %ld, Char 0 = %ld Str = %s", (ULONG) offset, (ULONG)len, text[0], &text[0]); */
-
   return PushDialogue(LANG_ENGLISH, len, &text[0]);
 }
+
 VOID StartLfl()
 {
   LflData = NULL;
@@ -213,8 +212,6 @@ STATIC VOID ReadLflObject(struct NEW_ANY_ENTITY* entity, ULONG dataOffset, ULONG
 
   if (nameOff > 0xE && nameOff < size)
   {
-  //  RequesterF("OK", "NameOff = %ld", (ULONG)nameOff);
-
     nameOff += dataOffset;
     entity->en_Name = ReadLflNameStringToDialogue(nameOff);
   }
@@ -222,7 +219,6 @@ STATIC VOID ReadLflObject(struct NEW_ANY_ENTITY* entity, ULONG dataOffset, ULONG
   {
     entity->en_Name = 0;
   }
-
 
 }
 
@@ -235,7 +231,7 @@ STATIC VOID ExportEntity(UWORD id, ULONG dataOffset, ULONG graphicsOffset)
 
   entity.en_Type = ET_ANY;
   entity.en_Size = sizeof(struct NEW_ANY_ENTITY);
-
+  
   SaveAssetQuick(Archive, &entity, entity.en_Size, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
   AddToTable(CT_ENTITY, id, ArchiveId, MM_CHAPTER);
 }

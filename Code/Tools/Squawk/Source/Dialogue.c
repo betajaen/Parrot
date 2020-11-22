@@ -71,8 +71,6 @@ STATIC struct WRITE_STRING_TABLE*  NewTable(UWORD language)
 
   StringTables[id] = tbl;
 
-  RequesterF("OK", "New Table = %ld", (ULONG)id);
-
   return tbl;
 }
 
