@@ -37,6 +37,7 @@ struct WRITE_STRING_TABLE
   UWORD st_Id;
   UWORD st_Count;
   ULONG st_Write;
+  ULONG st_Hashes[256];
   struct STRING_TABLE st_Table;
 };
 
@@ -65,10 +66,12 @@ STATIC struct WRITE_STRING_TABLE*  NewTable(UWORD language)
 
   tbl = AllocMem(sizeof(struct WRITE_STRING_TABLE) + MAX_TABLE_SIZE, MEMF_CLEAR);
 
-  tbl->st_Id = id;
+  tbl->st_Id = 1 + id;
   tbl->st_Table.st_Language = language;
 
   StringTables[id] = tbl;
+
+  RequesterF("OK", "New Table = %ld", (ULONG)id);
 
   return tbl;
 }
@@ -115,6 +118,9 @@ struct WRITE_STRING_TABLE* GetOrAddTable(UWORD language, ULONG estimatedNeedSize
       continue;
 
     if (tbl->st_Table.st_Language != language)
+      continue;
+
+    if (tbl->st_Count == MAX_STRINGS_PER_TABLE)
       continue;
 
     writeEnd = tbl->st_Write + estimatedNeedSize;
@@ -166,7 +172,38 @@ VOID ExportDialogue(IffPtr iff)
   }
 }
 
-ULONG PushDialogue(UWORD language, UBYTE textLength, STRPTR text)
+STATIC ULONG FindDialogue(UWORD language, ULONG hash)
+{
+  UWORD ii, jj, count;
+  struct WRITE_STRING_TABLE* tbl;
+  union DIALOGUE_TEXT dialogue;
+
+  for (ii = 0; ii < MAX_TABLES; ii++)
+  {
+    tbl = StringTables[ii];
+
+    if (tbl != NULL)
+    {
+      count = tbl->st_Count;
+
+      for (jj = 0; jj < count; jj++)
+      {
+        if (tbl->st_Hashes[jj] == hash)
+        {
+          dialogue.dt_Parts.dp_Magic = DIALOGUE_MAGIC;
+          dialogue.dt_Parts.dp_Table = tbl->st_Id;
+          dialogue.dt_Parts.dp_Item = jj;
+
+          return dialogue.dt_AssetId;
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
+STATIC ULONG WriteDialogue(UWORD language, UBYTE textLength, STRPTR text, ULONG hash)
 {
   struct WRITE_STRING_TABLE* tbl;
   ULONG writeEnd;
@@ -199,9 +236,26 @@ ULONG PushDialogue(UWORD language, UBYTE textLength, STRPTR text)
   dialogue.dt_Parts.dp_Item = tbl->st_Count;
 
   tbl->st_Table.st_Offsets[tbl->st_Count] = tbl->st_Write;
+  tbl->st_Hashes[tbl->st_Count] = hash;
   tbl->st_Write = writeEnd;
   tbl->st_Count++;
 
   return dialogue.dt_AssetId;
 }
 
+
+ULONG PushDialogue(UWORD language, UBYTE textLength, STRPTR text)
+{
+  ULONG hash, assetId;
+
+  if (textLength == 0)
+    return 0;
+
+  hash = StrHash(textLength, text);
+  assetId = FindDialogue(language, hash);
+
+  if (assetId != 0)
+    return assetId;
+
+  return WriteDialogue(language, textLength, text, hash);
+}

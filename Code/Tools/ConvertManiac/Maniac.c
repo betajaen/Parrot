@@ -52,8 +52,6 @@ VOID ConverterMain()
   ExportGameInfo(master);
   ExportPalettes(master);
 
-  // PushDialogue(LANG_ENGLISH, 6, "Parrot");
-
   StartLfl();
   for (roomNum = 1; roomNum < MM_NUM_ROOMS; roomNum++)
   {

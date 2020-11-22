@@ -35,6 +35,8 @@ ULONG StrLen(CONST CHAR* pSrc);
 
 ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
 
+ULONG StrHash(UBYTE length, STRPTR text);
+
 BOOL StrStartsWith(CONST CHAR* pTest, CHAR value);
 
 BOOL StrEndsWith(CONST CHAR* test, CHAR value);
@@ -46,3 +48,4 @@ VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value);
 CHAR* StrDuplicate(CONST CHAR* pSrc);
 
 ULONG UWordToId(UWORD value);
+

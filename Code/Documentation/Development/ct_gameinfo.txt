@@ -16,10 +16,10 @@ Game Information Table
     ULONG                     gi_FeatureSet;
     ULONG                     gi_GameId;
     ULONG                     gi_GameVersion;
-    union DIALOGUE            gi_Title;
-    union DIALOGUE            gi_ShortTitle;
-    union DIALOGUE            gi_Author;
-    union DIALOGUE            gi_Release;
+    DIALOGUE                  gi_Title;
+    DIALOGUE                  gi_ShortTitle;
+    DIALOGUE                  gi_Author;
+    DIALOGUE                  gi_Release;
     UWORD                     gi_Width;
     UWORD                     gi_Height;
     UWORD                     gi_Depth;
@@ -58,28 +58,28 @@ Numerical version of the game.
 example:
   0x100
 
-## gi_Title (CHAR[64])
+## gi_Title (DIALOGUE)
 
 English title of the Game
 
 example:
   "Adventures of Parrot"
 
-## gi_ShortTitle (CHAR[16])
+## gi_ShortTitle (DIALOGUE)
 
 English short-hand title of the Game
 
 example:
   "Parrot"
 
-## gi_Author (CHAR[128])
+## gi_Author (DIALOGUE)
 
 Full legal text of the Author and/or Publisher of the Game
 
 example:
   "An Adventure Game Company And Associates"
 
-## gi_Release (CHAR[128])
+## gi_Release (DIALOGUE)
 
 Release information, including version number and/or Language
 

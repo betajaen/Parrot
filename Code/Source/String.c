@@ -233,3 +233,27 @@ ULONG UWordToId(UWORD r)
 
   return s;
 }
+
+ULONG StrHash(UBYTE length, STRPTR text)
+{
+  /* Jenkins One at a time hash */
+
+  ULONG hash;
+
+  hash = 0;
+
+  while (length)
+  {
+    hash += *text;
+    length--;
+    text++;
+    hash += hash << 10;
+    hash ^= hash >> 6;
+  }
+
+  hash += hash << 3;
+  hash ^= hash >> 11;
+  hash += hash << 15;
+
+  return hash;
+}

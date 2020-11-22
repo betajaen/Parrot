@@ -47,6 +47,8 @@
 #define MAX_INPUT_EVENT_SIZE   32
 #define MAX_SCRIPT_GLOBALS     64
 #define MAX_ROOM_SCRIPTS       8
+#define MAX_ENTITY_SCRIPTS     4
+#define MAX_ENTITY_IMAGES      4
 #define MAX_VIRTUAL_MACHINES   8
 #define MAX_VM_STACK_SIZE      32
 
@@ -414,12 +416,36 @@ struct POINT
   WORD pt_Top;
 };
 
+#define ET_ANY        MAKE_ENTITY_ID('A','N')
 #define ET_EXIT       MAKE_ENTITY_ID('E','X')
 #define ET_ACTIVATOR  MAKE_ENTITY_ID('A','C')
 
 #define ETF_IS_NAMED  (1 << 0)
 #define ETF_IS_LOCKED (1 << 14)
 #define ETF_IS_OPEN   (1 << 15)
+
+#define STRUCT_ENTITY_COMMON \
+  UWORD                en_Size;\
+  UWORD                en_Type;\
+  struct RECT          en_HitBox;\
+  UWORD                en_Flags;\
+  UWORD                en_Context;\
+  DIALOGUE             en_Name;\
+  UWORD                en_Images[MAX_ENTITY_IMAGES];\
+  UWORD                en_Scripts[MAX_ENTITY_SCRIPTS]
+
+struct NEW_ANY_ENTITY
+{
+  STRUCT_ENTITY_COMMON;
+  LONG                 en_Params[];
+};
+
+struct NEW_EXIT_ENTITY
+{
+  STRUCT_ENTITY_COMMON;
+  LONG                 ex_Target;
+};
+
 
 struct ENTITY
 {

@@ -32,6 +32,14 @@
 #define MAX_PATH   256
 #define MM_CHAPTER 1
 
+#define MM_LFL_OBJOFF_SIZE    0x0
+#define MM_LFL_OBJOFF_NUM     0x2
+#define MM_LFL_OBJOFF_X       0x7
+#define MM_LFL_OBJOFF_Y       0x8
+#define MM_LFL_OBJOFF_WIDTH   0x9
+#define MM_LFL_OBJOFF_HEIGHT  0xD
+#define MM_LFL_OBJOFF_NAME    0xE
+
 STATIC BYTE*  LflData;
 STATIC ULONG  LflLength;
 STATIC ULONG  LflCapacity;
@@ -51,6 +59,8 @@ STATIC ULONG  ChunkyCapacity;
 
 STATIC UWORD* PlanarData;
 STATIC ULONG  PlanarCapacity;
+
+STATIC UWORD  NextEntityId;
 
 STATIC VOID OpenLflFile(STRPTR lflPath, UWORD lflNum);
 STATIC VOID CloseLflFile();
@@ -81,6 +91,36 @@ STATIC UWORD ReadUWordLE(ULONG offset)
   return r;
 }
 
+STATIC ULONG ReadLflNameStringToDialogue(ULONG offset)
+{
+  UWORD len;
+  UBYTE ch;
+  CHAR text[255];
+
+  for (len = 0; len < 255; len++)
+  {
+    ch = ReadByte(offset++);
+
+    /* Break at null or @ */
+    if (ch == 0 || ch == '@')
+      break;
+
+    /* Only use strings with printable characters. */
+    if (ch < 32 || ch > 127)
+      return 0;
+
+    text[len] = ch;
+  }
+
+  text[len] = 0;
+
+  if (len == 0)
+    return 0;
+
+  /* RequesterF("OK", "Offset = %ld, Len = %ld, Char 0 = %ld Str = %s", (ULONG) offset, (ULONG)len, text[0], &text[0]); */
+
+  return PushDialogue(LANG_ENGLISH, len, &text[0]);
+}
 VOID StartLfl()
 {
   LflData = NULL;
@@ -89,6 +129,7 @@ VOID StartLfl()
   ChunkyCapacity = 0;
   PlanarData = NULL;
   PlanarCapacity = 0;
+  NextEntityId = 1;
 }
 
 VOID EndLfl()
@@ -152,9 +193,74 @@ STATIC VOID ExportRoom()
   EndAssetList(Archive);
 }
 
+
+STATIC VOID ReadLflObject(struct NEW_ANY_ENTITY* entity, ULONG dataOffset, ULONG graphicsOffset)
+{
+  ULONG nameOff, size;
+
+  size = ReadUWordLE(dataOffset + MM_LFL_OBJOFF_SIZE);
+  entity->en_Context = ReadUWordLE(dataOffset + MM_LFL_OBJOFF_NUM);
+
+  entity->en_HitBox.rt_Left = ReadByte(dataOffset + MM_LFL_OBJOFF_X) << 3;
+  entity->en_HitBox.rt_Top = (ReadByte(dataOffset + MM_LFL_OBJOFF_Y) & 0xF) << 3;
+  entity->en_HitBox.rt_Right = ReadByte(dataOffset + MM_LFL_OBJOFF_WIDTH) << 3;
+  entity->en_HitBox.rt_Bottom = ReadByte(dataOffset + MM_LFL_OBJOFF_HEIGHT) & 0xF8;
+
+  entity->en_HitBox.rt_Right += entity->en_HitBox.rt_Left;
+  entity->en_HitBox.rt_Bottom += entity->en_HitBox.rt_Top;
+
+  nameOff = ReadByte(dataOffset + MM_LFL_OBJOFF_NAME);
+
+  if (nameOff > 0xE && nameOff < size)
+  {
+  //  RequesterF("OK", "NameOff = %ld", (ULONG)nameOff);
+
+    nameOff += dataOffset;
+    entity->en_Name = ReadLflNameStringToDialogue(nameOff);
+  }
+  else
+  {
+    entity->en_Name = 0;
+  }
+
+
+}
+
+STATIC VOID ExportEntity(UWORD id, ULONG dataOffset, ULONG graphicsOffset)
+{
+  struct NEW_ANY_ENTITY entity;
+  InitStackVar(entity);
+
+  ReadLflObject(&entity, dataOffset, graphicsOffset);
+
+  entity.en_Type = ET_ANY;
+  entity.en_Size = sizeof(struct NEW_ANY_ENTITY);
+
+  SaveAssetQuick(Archive, &entity, entity.en_Size, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
+  AddToTable(CT_ENTITY, id, ArchiveId, MM_CHAPTER);
+}
+
 STATIC VOID ExportEntities()
 {
-  /* UNIMPLEMENTED */
+  UWORD ii;
+  ULONG dataIdx, graphicsIdx, dataOffset, graphicsOffset;
+
+  dataIdx = ObjectOffset;
+  graphicsIdx = GraphicsOffset;
+
+  StartAssetList(Archive, CT_ENTITY);
+  for (ii = 0; ii < NumObjects; ii++)
+  {
+    dataOffset = ReadUWordLE(dataIdx);
+    graphicsOffset = ReadUWordLE(graphicsIdx);
+
+    ExportEntity(NextEntityId, dataOffset, graphicsOffset);
+    NextEntityId++;
+
+    dataIdx += 2;
+    graphicsIdx += 2;
+  }
+  EndAssetList(Archive);
 }
 
 STATIC VOID ExportImageBackdrop(UWORD id)
@@ -275,8 +381,8 @@ STATIC VOID ReadRoomData()
 
   NumObjects = ReadByte(20);
 
-  ObjectOffset = 28;
-  GraphicsOffset = 28 + (NumObjects * 2);
+  GraphicsOffset = 28;
+  ObjectOffset = 28 + (NumObjects * 2);
 }
 
 STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, UWORD w, UWORD h)
