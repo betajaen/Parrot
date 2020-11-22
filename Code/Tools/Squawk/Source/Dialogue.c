@@ -160,7 +160,7 @@ VOID ExportDialogue(IffPtr iff)
         &tbl->st_Table.st_Text[0],
         tbl->st_Write,
         CT_STRING_TABLE,
-        ii,
+        tbl->st_Id,
         CHUNK_FLAG_ARCH_ANY
       );
     }
