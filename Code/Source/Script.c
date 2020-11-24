@@ -97,9 +97,10 @@ VOID RunScript(UWORD id)
   struct SCRIPT* script;
   UWORD archive;
 
+#if 0
   archive = FindAssetArchive(id, CT_SCRIPT, CHUNK_FLAG_ARCH_ANY);
   script = LoadAssetT(struct SCRIPT, ArenaChapter, archive, CT_SCRIPT, id, CHUNK_FLAG_ARCH_ANY);
-
+#endif
   StartScript(script);
 }
 
@@ -123,7 +124,9 @@ VOID TickVirtualMachines()
        */
       if (vm->vm_Script != NULL)
       {
+#if 0
         UnloadAsset(ArenaChapter, vm->vm_Script);
+#endif
         vm->vm_Script = NULL;
       }
     }

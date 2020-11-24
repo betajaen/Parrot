@@ -31,25 +31,34 @@
 
 STATIC IffPtr master;
 
+extern struct GAME_INFO GameInfo;
+extern UWORD GameLanguage;
+
+VOID ExportTables(IffPtr master);
+VOID ReadGameInfo();
 VOID ExportGameInfo(IffPtr master);
 VOID ExportPalettes(IffPtr master);
 VOID ExportLfl(UWORD lflNum);
+VOID StartTables();
+VOID EndTables();
 VOID StartLfl();
 VOID EndLfl();
 VOID StartDialogue();
 VOID EndDialogue();
 VOID ExportDialogue(IffPtr master);
+UWORD GetNumTables();
 
 VOID ConverterMain()
 {
   UWORD roomNum;
   CHAR language[2] = { 'e', 'n' };
 
+  StartTables();
   StartDialogue();
 
   master = OpenSquawkFile(0);
 
-  ExportGameInfo(master);
+  ReadGameInfo();
   ExportPalettes(master);
 
   StartLfl();
@@ -60,11 +69,16 @@ VOID ConverterMain()
   EndLfl();
 
   ExportDialogue(master);
+  ExportTables(master);
 
+  GameInfo.gi_NumAssetTables = GetNumTables();
+
+  ExportGameInfo(master);
 
   CloseSquawkFile(master);
   master = NULL;
 
   EndDialogue();
+  EndTables();
   Requester("OK", "Converted");
 }

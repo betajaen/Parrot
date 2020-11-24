@@ -37,6 +37,7 @@
 #include <Parrot/Script.h>
 
 #include <Parrot/Asset.h>
+#include <Parrot/Squawk.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
@@ -57,11 +58,13 @@ STATIC VOID Load(STRPTR path)
 
   /* Load all Start Object Tables */
 
+#if 0
+
   for (ii = 0; ii < 16; ii++)
   {
     if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
       break;
-
+  
     LoadObjectTable(&GameInfo->gi_StartTables[ii]);
   }
 
@@ -90,6 +93,8 @@ STATIC VOID Load(STRPTR path)
   }
 
   GfxLoadColours32(0, (ULONG*) &GamePalette->pt_Data[0]);
+
+#endif
 
   ArenaRollback(ArenaChapter);
   ArenaRollback(ArenaRoom);
@@ -124,6 +129,25 @@ EXPORT VOID GameStart(STRPTR path)
   ArenaChapter = ArenaOpen(131072, MEMF_CLEAR);
   ArenaRoom = ArenaOpen(131072, MEMF_CLEAR);
 
+#if 1
+
+  /*
+    Load the first and only 1 of a GameInfo
+    As the ID may not necessarily be 1.
+  */
+  if (1 != GetAllAssetsFromArchive(CT_GAME_INFO, 0, ArenaGame, GameInfo, 1))
+  {
+    PARROT_ERR0(
+      "Could not start Game!\n"
+      "Reason: (1) GAME_INFO structure was not found in the first archive"
+    );
+  }
+
+  LoadAssetTables(0, GameInfo->gi_NumAssetTables);
+
+
+
+#else
   InitialiseArchives(path);
 
   GameArchive = OpenArchive(0);
@@ -141,6 +165,7 @@ EXPORT VOID GameStart(STRPTR path)
   }
 
   CloseArchive(0);
+#endif
 
   ScriptInitialise();
 
@@ -221,7 +246,9 @@ EXPORT VOID GameStart(STRPTR path)
   
   ScriptShutdown();
 
+#if 0
   CloseArchives();
+#endif
 
   ArenaClose(ArenaRoom);
   ArenaClose(ArenaChapter);

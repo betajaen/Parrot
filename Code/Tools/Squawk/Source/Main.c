@@ -96,9 +96,7 @@ INT main()
     goto CLEAN_EXIT;
   }
 
-  StartTables();
   ConverterMain();
-  EndTables();
 
 
 CLEAN_EXIT:

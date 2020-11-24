@@ -29,31 +29,29 @@
 #include <Squawk/Squawk.h>
 #include "Maniac.h"
 
+struct GAME_INFO GameInfo;
+
+VOID ReadGameInfo()
+{
+  GameInfo.gi_Title = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_TITLE), MM_META_TITLE);
+  GameInfo.gi_ShortTitle = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_SHORT_TITLE), MM_META_SHORT_TITLE);
+  GameInfo.gi_Author = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_AUTHOR), MM_META_AUTHOR);
+  GameInfo.gi_Release = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_RELEASE), MM_META_RELEASE);
+
+  GameInfo.gi_Width = 320;
+  GameInfo.gi_Height = 200;
+  GameInfo.gi_Depth = 4;
+  GameInfo.gi_StartPalette = 0;
+  GameInfo.gi_StartCursorPalette = 0;
+  GameInfo.gi_StartScript = 0;
+  GameInfo.gi_NumAssetTables = 0;
+
+}
+
 VOID ExportGameInfo(IffPtr master)
 {
-  struct GAME_INFO gi;
-  UWORD language;
-  
-  InitStackVar(gi);
-
-  language = LANG_ENGLISH;
-
-  gi.gi_Title = PushDialogue(language, literal_strlen(MM_META_TITLE), MM_META_TITLE);
-  gi.gi_ShortTitle = PushDialogue(language, literal_strlen(MM_META_SHORT_TITLE), MM_META_SHORT_TITLE);
-  gi.gi_Author = PushDialogue(language, literal_strlen(MM_META_AUTHOR), MM_META_AUTHOR);
-  gi.gi_Release = PushDialogue(language, literal_strlen(MM_META_RELEASE), MM_META_RELEASE);
-
-  gi.gi_Width = 320;
-  gi.gi_Height = 200;
-  gi.gi_Depth = 4;
-  gi.gi_RoomCount = MM_NUM_ROOMS;
-  gi.gi_StartPalette = 1;
-  gi.gi_StartCursorPalette = 2;
-  gi.gi_StartRoom = 1;
-  gi.gi_StartScript = 1;
-
   StartAssetList(master, CT_GAME_INFO);
-  SaveAssetQuick(master, (APTR)&gi, sizeof(gi), CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
+  SaveAssetQuick(master, (APTR)&GameInfo, sizeof(GameInfo), CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
   EndAssetList(master);
 }
 
@@ -188,4 +186,7 @@ VOID ExportPalettes(IffPtr iff)
   ExportGamePalette(iff, MM_PALETTE_ID);
   ExportCursorPalette(iff, MM_PALETTE_ID + 1);
   EndAssetList(iff);
+
+  GameInfo.gi_StartPalette = MM_PALETTE_ID;
+  GameInfo.gi_StartCursorPalette = MM_PALETTE_ID + 1;
 }

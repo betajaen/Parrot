@@ -28,6 +28,9 @@
 #include <Squawk/Squawk.h>
 #include <Parrot/Asset.h>
 
+#define MAX_TABLES 16
+#define NEW_TABLE_CAPACITY 1024
+
 STATIC CHAR strtype[5];
 
 STATIC UWORD NextArchiveId;
@@ -36,17 +39,156 @@ STATIC UWORD NextEntityId;
 STATIC UWORD NextImageId;
 STATIC UWORD NextScriptId;
 
+struct WRITE_ASSET_TABLE
+{
+  ULONG at_Capacity;
+  struct ASSET_TABLE at_Table;
+};
+
+STATIC struct WRITE_ASSET_TABLE    Table[MAX_TABLES];
+STATIC struct ASSET_TABLE_ENTRY*   TableData[MAX_TABLES];
+STATIC char strtype[5];
+
+STATIC VOID NewTable(UWORD idx, ULONG classType, UWORD chapter)
+{
+  struct WRITE_ASSET_TABLE* tbl;
+  struct ASSET_TABLE_ENTRY* ent;
+
+  tbl = &Table[idx];
+
+  tbl->at_Capacity = NEW_TABLE_CAPACITY;
+  tbl->at_Table.at_AssetType = classType;
+  tbl->at_Table.at_Count = 0;
+  tbl->at_Table.at_Highest = 0;
+  tbl->at_Table.at_Lowest = 65535;
+  tbl->at_Table.at_Chapter = chapter;
+
+  ent = TableData[idx];
+
+  TableData[idx] = AllocMem(tbl->at_Capacity * sizeof(struct ASSET_TABLE_ENTRY), MEMF_CLEAR);
+}
+
+STATIC VOID GrowTable(UWORD idx)
+{
+  struct WRITE_ASSET_TABLE* tbl;
+  struct ASSET_TABLE_ENTRY* ent, *newEnt, *dst;
+  ULONG newCapacity, capacity, ii;
+
+  tbl = &Table[idx];
+
+  capacity = tbl->at_Capacity;
+  newCapacity = capacity * 2;
+
+  ent = TableData[idx];
+  newEnt = AllocMem(newCapacity * sizeof(struct ASSET_TABLE_ENTRY), MEMF_CLEAR);
+
+  for (ii = 0; ii < capacity; ii++)
+  {
+    newEnt[ii] = ent[ii];
+  }
+
+  FreeMem(ent, capacity * sizeof(struct ASSET_TABLE_ENTRY));
+
+  TableData[idx] = newEnt;
+  tbl->at_Capacity = newCapacity;
+}
+
+STATIC ULONG GetOrAddTableIdx(ULONG classType, UWORD chapter)
+{
+  UWORD ii;
+  struct WRITE_ASSET_TABLE* tbl;
+
+  for (ii = 0; ii < MAX_TABLES;ii++)
+  {
+    tbl = &Table[ii];
+
+    if (tbl->at_Capacity == 0)
+      continue;
+
+    if (tbl->at_Table.at_AssetType != classType)
+      continue;
+
+    if (tbl->at_Table.at_Chapter != chapter)
+      continue;
+
+    if (tbl->at_Table.at_Count == tbl->at_Capacity)
+    {
+      GrowTable(ii);
+    }
+
+    return ii;
+  }
+
+  for (ii = 0; ii < MAX_TABLES; ii++)
+  {
+    tbl = &Table[ii];
+
+    if (tbl->at_Capacity != 0)
+      continue;
+
+    NewTable(ii, classType, chapter);
+    return ii;
+  }
+
+  PARROT_ERR(
+    "Unable to save table data.\n"
+    "Reason: (1) All tables are full"
+    PARROT_ERR_STR("Class Type")
+    PARROT_ERR_INT("Chapter"),
+    IDtoStr(classType, strtype),
+    (ULONG) chapter
+  );
+}
+
 VOID StartTables()
 {
+  struct WRITE_ASSET_TABLE* tbl;
+  UWORD ii;
+
   NextRoomId = 1;
   NextEntityId = 1;
   NextImageId = 1;
   NextScriptId = 1;
   NextArchiveId = 1;
+
+  for (ii = 0; ii < MAX_TABLES; ii++)
+  {
+    tbl = &Table[ii];
+
+    tbl->at_Capacity = 0;
+    tbl->at_Table.at_AssetType = 0;
+    tbl->at_Table.at_Chapter = 0;
+    tbl->at_Table.at_Count = 0;
+    tbl->at_Table.at_Highest = 0;
+    tbl->at_Table.at_Lowest = 0;
+
+    TableData[ii] = NULL;
+  }
 }
 
 VOID EndTables()
 {
+  UWORD ii;
+  struct WRITE_ASSET_TABLE* tbl;
+
+  for (ii = 0; ii < MAX_TABLES; ii++)
+  {
+    tbl = &Table[ii];
+
+    if (tbl->at_Capacity == 0)
+      continue;
+
+    FreeMem(TableData[ii], tbl->at_Table.at_Count * sizeof(struct ASSET_TABLE_ENTRY));
+
+    TableData[ii] = NULL;
+
+    tbl->at_Capacity = 0;
+    tbl->at_Table.at_AssetType = 0;
+    tbl->at_Table.at_Chapter = 0;
+    tbl->at_Table.at_Count = 0;
+    tbl->at_Table.at_Highest = 0;
+    tbl->at_Table.at_Lowest = 0;
+  }
 }
 
 UWORD GenerateArchiveId()
@@ -76,10 +218,74 @@ UWORD GenerateAssetId(ULONG classType)
 
 VOID ExportTables(IffPtr master)
 {
-  
+  UWORD ii;
+  struct WRITE_ASSET_TABLE* tbl;
+
+  StartAssetList(master, CT_TABLE);
+
+  for (ii = 0; ii < MAX_TABLES; ii++)
+  {
+    tbl = &Table[ii];
+
+    if (tbl == NULL)
+      continue;
+
+    SaveAssetWithData(master,
+      &tbl->at_Table,
+      sizeof(struct ASSET_TABLE),
+      TableData[ii],
+      tbl->at_Table.at_Count * sizeof(struct ASSET_TABLE_ENTRY),
+      CT_TABLE,
+      1 + ii,
+      CHUNK_FLAG_ARCH_ANY
+    );
+  }
+
+  EndAssetList(master);
 }
 
 VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter)
 {
-  
+  UWORD tableIdx;
+  struct WRITE_ASSET_TABLE* tbl;
+  struct ASSET_TABLE_ENTRY* ent;
+
+  tableIdx = GetOrAddTableIdx(classType, chapter);
+
+  tbl = &Table[tableIdx];
+  ent = &TableData[tableIdx][tbl->at_Table.at_Count];
+
+  ent->ti_Archive = archive;
+  ent->ti_Id = id;
+
+  if (id > tbl->at_Table.at_Highest)
+  {
+    tbl->at_Table.at_Highest = id;
+  }
+
+  if (id < tbl->at_Table.at_Lowest)
+  {
+    tbl->at_Table.at_Lowest = id;
+  }
+
+  ++tbl->at_Table.at_Count;
+}
+
+UWORD GetNumTables()
+{
+  UWORD ii;
+  struct WRITE_ASSET_TABLE* tbl;
+  UWORD count = 0;
+
+  for (ii = 0; ii < MAX_TABLES; ii++)
+  {
+    tbl = &Table[ii];
+
+    if (tbl == NULL)
+      continue;
+
+    ++count;
+  }
+
+  return count;
 }

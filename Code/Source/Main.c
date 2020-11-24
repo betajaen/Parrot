@@ -47,6 +47,8 @@ struct Message*       wbMsg;
 
 EXPORT VOID GameStart(STRPTR name);
 
+UWORD GcCounter;
+
 INT main()
 {
   struct Process* process;

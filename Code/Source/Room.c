@@ -49,7 +49,9 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 
   if ((unpack & UNPACK_ROOM_ASSET) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ASSET) == 0)
   {
+#if 0
     room->ur_Room = LoadAssetT(struct ROOM, ArenaChapter, room->ur_Id, CT_ROOM, room->ur_Id, CHUNK_FLAG_ARCH_ANY);
+#endif
 
     room->ur_Unpacked |= UNPACK_ROOM_ASSET;
   }
@@ -62,7 +64,9 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 
       if (0 != id && NULL == room->ur_Backdrops[ii])
       {
+#if 0
         room->ur_Backdrops[ii] = LoadAsset(ArenaRoom, room->ur_Id, CT_IMAGE, id, CHUNK_FLAG_ARCH_ANY);
+#endif
       }
     }
 
@@ -80,7 +84,9 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 
       if (NULL == room->ur_Exits[ii])
       {
+#if 0
         room->ur_Exits[ii] = LoadAsset(ArenaRoom, room->ur_Id, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
+#endif
       }
 
     }
@@ -94,7 +100,9 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 
       if (NULL == room->ur_Entities[ii])
       {
+#if 0
         room->ur_Entities[ii] = LoadAsset(ArenaRoom, room->ur_Id, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
+#endif
       }
     }
 
@@ -119,7 +127,9 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 
       if (NULL != room->ur_Entities[ii])
       {
+#if 0
         UnloadAsset(ArenaRoom, room->ur_Entities[ii]);
+#endif
         room->ur_Entities[ii] = NULL;
       }
     }
@@ -133,7 +143,9 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 
       if (NULL != room->ur_Exits[ii])
       {
+#if 0
         UnloadAsset(ArenaRoom, room->ur_Exits[ii]);
+#endif
         room->ur_Exits[ii] = NULL;
       }
     }
@@ -149,7 +161,9 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 
       if (0 != backdrop && NULL != room->ur_Backdrops[ii])
       {
+#if 0
         UnloadAsset(ArenaRoom, room->ur_Backdrops[ii]);
+#endif
         room->ur_Backdrops[ii] = NULL;
       }
     }
@@ -159,7 +173,9 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 
   if ((pack & UNPACK_ROOM_ASSET) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ASSET) != 0)
   {
+#if 0
     UnloadAsset(ArenaChapter, room->ur_Room);
+#endif
     room->ur_Room = NULL;
     room->ur_Unpacked &= ~UNPACK_ROOM_ASSET;
   }
@@ -168,7 +184,9 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 STATIC UWORD GetRoomFromExit(struct EXIT* exit)
 {
   UWORD archive;
+#if 0
   archive = FindAssetArchive(exit->ex_Target, CT_ENTITY, CHUNK_FLAG_ARCH_ANY);
+#endif
 
   return archive;
 }

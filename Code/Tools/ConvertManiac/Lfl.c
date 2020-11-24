@@ -60,8 +60,6 @@ STATIC ULONG  ChunkyCapacity;
 STATIC UWORD* PlanarData;
 STATIC ULONG  PlanarCapacity;
 
-STATIC UWORD  NextEntityId;
-
 STATIC VOID OpenLflFile(STRPTR lflPath, UWORD lflNum);
 STATIC VOID CloseLflFile();
 STATIC VOID ExportRoom();
@@ -128,7 +126,6 @@ VOID StartLfl()
   ChunkyCapacity = 0;
   PlanarData = NULL;
   PlanarCapacity = 0;
-  NextEntityId = 1;
 }
 
 VOID EndLfl()
@@ -250,8 +247,7 @@ STATIC VOID ExportEntities()
     dataOffset = ReadUWordLE(dataIdx);
     graphicsOffset = ReadUWordLE(graphicsIdx);
 
-    ExportEntity(NextEntityId, dataOffset, graphicsOffset);
-    NextEntityId++;
+    ExportEntity(GenerateAssetId(CT_ENTITY), dataOffset, graphicsOffset);
 
     dataIdx += 2;
     graphicsIdx += 2;

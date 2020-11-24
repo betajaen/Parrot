@@ -38,19 +38,7 @@
 #error "Unsupported Arch"
 #endif
 
-#define MAX_SCREENS            2
-#define MAX_ROOM_BACKDROPS     2
-#define MAX_ROOM_EXITS         10
-#define MAX_ROOM_ENTITIES      20
-#define MAX_ENTITY_NAME_LENGTH 29
-#define MAX_VIEW_LAYOUTS       2
-#define MAX_INPUT_EVENT_SIZE   32
-#define MAX_SCRIPT_GLOBALS     64
-#define MAX_ROOM_SCRIPTS       8
-#define MAX_ENTITY_SCRIPTS     4
-#define MAX_ENTITY_IMAGES      4
-#define MAX_VIRTUAL_MACHINES   8
-#define MAX_VM_STACK_SIZE      32
+#include <Parrot/Config.h>
 
 /**
     Typename consistency
@@ -186,6 +174,7 @@ struct VIEW_LAYOUTS
 #define ARCHIVE_GLOBAL  0
 #define ARCHIVE_UNKNOWN 65535
 
+#define CT_COUNT          8
 #define CT_GAME_INFO      MAKE_NODE_ID('G','A','M','E')
 #define CT_ROOM           MAKE_NODE_ID('R','O','O','M')
 #define CT_IMAGE          MAKE_NODE_ID('I','M','G','E')
@@ -216,6 +205,8 @@ struct INPUTEVENT
 struct ASSET
 {
   ULONG             as_ClassType;
+  UWORD             as_Size;
+  UWORD             as_Reference;
   UWORD             as_Arch;
   UWORD             as_Id;
 };
@@ -270,11 +261,9 @@ struct GAME_INFO
   UWORD                     gi_Width;
   UWORD                     gi_Height;
   UWORD                     gi_Depth;
-  UWORD                     gi_RoomCount;
-  struct OBJECT_TABLE_REF   gi_StartTables[16];
+  UWORD                     gi_NumAssetTables;
   UWORD                     gi_StartPalette;
   UWORD                     gi_StartCursorPalette;
-  UWORD                     gi_StartRoom;
   UWORD                     gi_StartScript;
 };
 
@@ -307,6 +296,12 @@ struct OBJECT_TABLE
     Asset Table
 */
 
+struct ASSET_TABLE_ENTRY
+{
+  UWORD  ti_Id;
+  UWORD  ti_Archive;
+};
+
 struct ASSET_TABLE
 {
   ULONG  at_AssetType;
@@ -314,12 +309,15 @@ struct ASSET_TABLE
   UWORD  at_Count;
   UWORD  at_Lowest;
   UWORD  at_Highest;
+  struct ASSET_TABLE_ENTRY at_Assets[];
 };
 
-struct ASSET_TABLE_ITEM
+struct NEW_ASSET
 {
-  UWORD  ti_Id;
-  UWORD  ti_Archive;
+  ULONG  as_Size;
+  ULONG  as_Type;
+  UWORD  as_Id;
+  UWORD  as_Gc;
 };
 
 /*

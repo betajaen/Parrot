@@ -1,5 +1,5 @@
 /**
-    $Id: Asset.h 1.2 2020/05/17 16:49:00, betajaen Exp $
+    $Id: Squawk.h 1.2 2020/11/24 06:30:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,22 +25,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
-#define ID_MNIC MAKE_NODE_ID('M','N','C','M')
+UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, APTR outAssets, UWORD outCapacity);
 
-#if 1
+APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena);
 
-VOID LoadAssetTables(UWORD archive, UWORD count);
-
-#else
-
-APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWORD assetId, UWORD arch);
-
-void UnloadAsset(struct ARENA* arena, APTR asset);
-
-#define LoadAssetT(T, ARENA, ARCHIVE, TYPE, ID, ARCH) \
-  ( (T*) LoadAsset(ARENA, ARCHIVE, TYPE, ID, ARCH) )
-
-UWORD FindAssetArchive(UWORD assetId, ULONG classType, ULONG arch);
-
-#endif
+VOID GcArchives(UWORD olderThan);
