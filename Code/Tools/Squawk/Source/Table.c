@@ -216,12 +216,12 @@ UWORD GenerateAssetId(ULONG classType)
   return 0;
 }
 
-VOID ExportTables(IffPtr master)
+VOID ExportTables(SquawkPtr master)
 {
   UWORD ii;
   struct WRITE_ASSET_TABLE* tbl;
 
-  StartAssetList(master, CT_TABLE);
+  StartAssetList(master, CT_TABLE, 0);
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {

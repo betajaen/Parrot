@@ -122,6 +122,37 @@ union DIALOGUE_TEXT
   DIALOGUE  dt_AssetId;
 };
 
+/*
+  Squawk Files
+*/
+
+#define ASSET_HEADER           \
+  UWORD             as_Id;     \
+  UWORD             as_Flags;  \
+  ULONG             as_Length
+
+struct SQUAWK_ASSET_LIST_HEADER
+{
+  ULONG             al_Type;
+  UWORD             al_Count;
+  UWORD             al_Chapter;
+  ULONG             al_Length;
+};
+
+struct SQUAWK_ASSET_HEADER
+{
+  ASSET_HEADER;
+};
+
+struct ANY_ASSET
+{
+  ASSET_HEADER;
+};
+
+#define GET_ASSET_ID(X) (((struct ANY_ASSET*) (X))->as_Id)
+#define GET_ASSET_TYPE(X) (((struct ANY_ASSET*) (X))->as_Type)
+
+
 /**
     SDL Banned Functions
 */
@@ -202,34 +233,7 @@ struct INPUTEVENT
   WORD              ie_CursY;
 };
 
-struct ASSET
-{
-  ULONG             as_ClassType;
-  UWORD             as_Size;
-  UWORD             as_Reference;
-  UWORD             as_Arch;
-  UWORD             as_Id;
-};
-
-#define GET_ASSET_ID(X) (((UWORD*)X)[-1])
-
-struct ASSET_REF
-{
-  APTR              ar_Ptr;
-  UWORD             ar_Id;
-};
-
 #define IS_REF_LOADED(REF) (NULL != (REF).ar_Ptr)
-
-/*
-  An asset header is a 4-byte header after the IFF chunk header containing 
-  the 16-bit ID and 16-bit chunk flags.
-*/
-struct ASSET_HEADER
-{
-  UWORD ah_Id;
-  UWORD ah_AssetFlags;
-};
 
 #define CHUNK_FLAG_ARCH_ECS       (1 << 0)
 #define CHUNK_FLAG_ARCH_AGA       (1 << 1)
@@ -239,57 +243,34 @@ struct ASSET_HEADER
 #define CHUNK_FLAG_HAS_DATA       (1 << 14)
 #define CHUNK_FLAG_IGNORE         (1 << 15)
 
-struct OBJECT_TABLE_REF
-{
-  ULONG tr_ClassType;
-  UWORD tr_ChunkHeaderId;
-  UWORD tr_ArchiveId;
-};
-
 /*
       Game Info
 */
 
+#define GAME_INFO_FIELDS \
+  ULONG                     gi_GameId;\
+  ULONG                     gi_GameVersion;\
+  DIALOGUE                  gi_Title;\
+  DIALOGUE                  gi_ShortTitle;\
+  DIALOGUE                  gi_Author;\
+  DIALOGUE                  gi_Release;\
+  UWORD                     gi_Width;\
+  UWORD                     gi_Height;\
+  UWORD                     gi_Depth;\
+  UWORD                     gi_NumAssetTables;\
+  UWORD                     gi_StartPalette;\
+  UWORD                     gi_StartCursorPalette;\
+  UWORD                     gi_StartScript
+
 struct GAME_INFO
 {
-  ULONG                     gi_GameId;
-  ULONG                     gi_GameVersion;
-  DIALOGUE                  gi_Title;
-  DIALOGUE                  gi_ShortTitle;
-  DIALOGUE                  gi_Author;
-  DIALOGUE                  gi_Release;
-  UWORD                     gi_Width;
-  UWORD                     gi_Height;
-  UWORD                     gi_Depth;
-  UWORD                     gi_NumAssetTables;
-  UWORD                     gi_StartPalette;
-  UWORD                     gi_StartCursorPalette;
-  UWORD                     gi_StartScript;
+  GAME_INFO_FIELDS;
 };
 
-/*
-    Object Table
-*/
-
-struct OBJECT_TABLE_ITEM
+struct GAME_INFO_ASSET
 {
-  UWORD ot_Id;
-  UWORD ot_Archive;
-  UWORD ot_Flags;
-  ULONG ot_Size;
-  APTR  ot_Ptr;
-};
-
-#define MAX_ITEMS_PER_TABLE 64
-
-struct OBJECT_TABLE
-{
-  APTR                      ot_Next;
-  struct OBJECT_TABLE_REF   ot_NextRef;
-  ULONG                     ot_ClassType;
-  UWORD                     ot_IdMin;
-  UWORD                     ot_IdMax;
-  struct OBJECT_TABLE_ITEM  ot_Items[MAX_ITEMS_PER_TABLE];
+  ASSET_HEADER;
+  GAME_INFO_FIELDS;
 };
 
 /*
@@ -312,14 +293,6 @@ struct ASSET_TABLE
   struct ASSET_TABLE_ENTRY at_Assets[];
 };
 
-struct NEW_ASSET
-{
-  ULONG  as_Size;
-  ULONG  as_Type;
-  UWORD  as_Id;
-  UWORD  as_Gc;
-};
-
 /*
   
   String Tables
@@ -331,6 +304,12 @@ struct STRING_TABLE
   UWORD   st_Language;
   UWORD   st_Offsets[256];
   CHAR    st_Text[];
+};
+
+struct STRING_TABLE_ASSET
+{
+  ASSET_HEADER;
+  struct STRING_TABLE as_Table;
 };
 
 #define LANG_ENGLISH  MAKE_LANGUAGE_CODE('e','n')
@@ -351,6 +330,12 @@ struct PALETTE_TABLE
   ULONG pt_Data[64];
 };
 
+struct PALETTE_TABLE_ASSET
+{
+  ASSET_HEADER;
+  struct PALETTE_TABLE as_Palette;
+};
+
 /*
       Image
 */
@@ -366,6 +351,12 @@ struct IMAGE
   UWORD             im_Width;
   UWORD             im_Palette;
   ULONG             im_PlaneSize;
+};
+
+struct IMAGE_ASSET
+{
+  ASSET_HEADER;
+  struct IMAGE as_Image;
 };
 
 /*
@@ -438,12 +429,24 @@ struct NEW_ANY_ENTITY
   LONG                 en_Params[];
 };
 
+struct NEW_ANY_ENTITY_ASSET
+{
+  ASSET_HEADER;
+  STRUCT_ENTITY_COMMON;
+};
+
 struct NEW_EXIT_ENTITY
 {
   STRUCT_ENTITY_COMMON;
   LONG                 ex_Target;
 };
 
+struct NEW_EXIT_ENTITY_ASSET
+{
+  ASSET_HEADER;
+  STRUCT_ENTITY_COMMON;
+  LONG                 ex_Target;
+};
 
 struct ENTITY
 {
@@ -470,6 +473,12 @@ struct ROOM
   UWORD               rm_Exits[MAX_ROOM_EXITS];
   UWORD               rm_Entities[MAX_ROOM_ENTITIES];
   UWORD               rm_Scripts[MAX_ROOM_SCRIPTS];
+};
+
+struct ROOM_ASSET
+{
+  ASSET_HEADER;
+  struct ROOM as_Room;
 };
 
 #define UFLG_DEBUG    1

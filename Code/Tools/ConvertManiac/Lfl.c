@@ -43,7 +43,7 @@
 STATIC BYTE*  LflData;
 STATIC ULONG  LflLength;
 STATIC ULONG  LflCapacity;
-STATIC IffPtr Archive;
+STATIC SquawkPtr Archive;
 STATIC UWORD  ArchiveId;
 
 STATIC UWORD  RoomId;
@@ -162,7 +162,7 @@ VOID ExportLfl(UWORD lflNum)
   ExportRoom();
   ExportEntities();
 
-  StartAssetList(Archive, CT_IMAGE);
+  StartAssetList(Archive, CT_IMAGE, 1);
   ExportImageBackdrop(BackdropId);
   EndAssetList(Archive);
 
@@ -183,7 +183,7 @@ STATIC VOID ExportRoom()
   room.rm_Width = RoomWidth;
   room.rm_Height = RoomHeight;
 
-  StartAssetList(Archive, CT_ROOM);
+  StartAssetList(Archive, CT_ROOM, 1);
   SaveAssetQuick(Archive, &room, sizeof(room), CT_ROOM, RoomId, CHUNK_FLAG_ARCH_ANY);
   AddToTable(CT_ROOM, RoomId, ArchiveId, MM_CHAPTER);
   EndAssetList(Archive);
@@ -241,7 +241,7 @@ STATIC VOID ExportEntities()
   dataIdx = ObjectOffset;
   graphicsIdx = GraphicsOffset;
 
-  StartAssetList(Archive, CT_ENTITY);
+  StartAssetList(Archive, CT_ENTITY, 1);
   for (ii = 0; ii < NumObjects; ii++)
   {
     dataOffset = ReadUWordLE(dataIdx);

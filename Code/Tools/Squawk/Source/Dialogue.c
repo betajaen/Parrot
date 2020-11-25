@@ -132,7 +132,7 @@ struct WRITE_STRING_TABLE* GetOrAddTable(UWORD language, ULONG estimatedNeedSize
   return NewTable(language);
 }
 
-VOID ExportDialogue(IffPtr iff)
+VOID ExportDialogue(SquawkPtr iff)
 {
   UWORD ii;
   struct WRITE_STRING_TABLE* tbl;
@@ -149,7 +149,7 @@ VOID ExportDialogue(IffPtr iff)
       if (hasWrittenHeader == FALSE)
       {
         hasWrittenHeader = TRUE;
-        StartAssetList(iff, CT_STRING_TABLE);
+        StartAssetList(iff, CT_STRING_TABLE, 0);
       }
 
       SaveAssetWithData(iff,

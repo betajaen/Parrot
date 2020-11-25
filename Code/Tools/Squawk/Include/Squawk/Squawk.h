@@ -36,15 +36,15 @@
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
 
-typedef struct IFFHandle* IffPtr;
+typedef struct SquawkFile* SquawkPtr;
 
-IffPtr OpenSquawkFile(UWORD id);
-VOID CloseSquawkFile(IffPtr squawk);
+SquawkPtr OpenSquawkFile(UWORD id);
+VOID CloseSquawkFile(SquawkPtr squawk);
 
-VOID StartAssetList(IffPtr squawk, ULONG classType);
-VOID EndAssetList(IffPtr squawk);
-VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags);
-VOID SaveAssetWithData(IffPtr iff, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags);
+VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter);
+VOID EndAssetList(SquawkPtr squawk);
+VOID SaveAssetQuick(SquawkPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags);
+VOID SaveAssetWithData(SquawkPtr iff, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags);
 
 UWORD GenerateAssetId(ULONG classType);
 UWORD GenerateArchiveId();

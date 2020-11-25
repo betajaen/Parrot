@@ -43,7 +43,7 @@
 #include <proto/dos.h>
 
 struct ARCHIVE* GameArchive;
-struct GAME_INFO* GameInfo;
+struct GAME_INFO_ASSET* GameInfo;
 struct PALETTE_TABLE* GamePalette;
 struct PALETTE_TABLE* GameCursorPalette;
 struct UNPACKED_ROOM  GameRoom;
@@ -131,11 +131,17 @@ EXPORT VOID GameStart(STRPTR path)
 
 #if 1
 
+  //Requester("OK", "Initialising Archives");
+
+  InitArchives();
+
+  //Requester("OK", "Loading Game Info");
+  
   /*
     Load the first and only 1 of a GameInfo
     As the ID may not necessarily be 1.
   */
-  if (1 != GetAllAssetsFromArchive(CT_GAME_INFO, 0, ArenaGame, GameInfo, 1))
+  if (1 != GetAllAssetsFromArchive(CT_GAME_INFO, 0, ArenaGame, &GameInfo, 1))
   {
     PARROT_ERR0(
       "Could not start Game!\n"
@@ -143,9 +149,17 @@ EXPORT VOID GameStart(STRPTR path)
     );
   }
 
+  RequesterF("OK", "Game Size=%ldx%ld, Palette=%ld", GameInfo->gi_Width, GameInfo->gi_Height, GameInfo->gi_StartPalette);
+
+  Requester("OK", "Loading Tables.");
+
   LoadAssetTables(0, GameInfo->gi_NumAssetTables);
 
+  Requester("OK", "Loaded Tables.");
 
+  GamePalette = (struct PALETTE_TABLE*)GetAsset(GameInfo->gi_StartPalette, 0, CT_PALETTE, ArenaGame);
+
+  Requester("OK", "Loaded Palette");
 
 #else
   InitialiseArchives(path);
@@ -222,8 +236,8 @@ EXPORT VOID GameStart(STRPTR path)
 
   InputInitialise();
 
-#if 0
-  RunScript(1);
+#if 1
+  /* RunScript(1); */
 #else
   entrance.en_Room = 3; // GameInfo->gi_StartRoom;
   entrance.en_Exit = 0;

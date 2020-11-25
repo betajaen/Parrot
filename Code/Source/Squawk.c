@@ -28,6 +28,8 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
+#include <Parrot/Asset.h>
+#include <Parrot/Arena.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
@@ -39,13 +41,13 @@ extern UWORD GcCounter;
 struct NEW_ARCHIVE
 {
   BPTR              ar_File;
-  struct IFFHandle* ar_Iff;
   UWORD             ar_Id;
   UWORD             ar_Gc;
-  ULONG             ar_CurrentAssetListType;
+  struct SQUAWK_ASSET_LIST_HEADER ar_CurrentHeader;
 };
 
 STATIC char strType[5];
+STATIC char strType2[5];
 STATIC struct NEW_ARCHIVE Archives[MAX_OPEN_ARCHIVES];
 
 /* Private */
@@ -60,29 +62,26 @@ STATIC VOID UnloadArchive(struct NEW_ARCHIVE* archive)
     return;
   }
 
-  FreeIFF(archive->ar_Iff);
   Close(archive->ar_File);
 
   archive->ar_File = NULL;
-  archive->ar_Iff = NULL;
   archive->ar_Id = 0;
   archive->ar_Gc = 0;
-  archive->ar_CurrentAssetListType = 0;
 }
 
 STATIC VOID LoadArchive(struct NEW_ARCHIVE* archive, UWORD id)
 {
   CHAR path[128];
+  ULONG header;
 
   archive->ar_Id = id;
   archive->ar_Gc = GcCounter;
-  archive->ar_CurrentAssetListType = 0;
 
   if (0 == StrFormat(&path[0], sizeof(path), DEFAULT_ARCHIVE_PATH_FSTR, (ULONG)id))
   {
     PARROT_ERR(
       "Unable to load assets!\n"
-      "Reason: (4) Base path is to long to be assembled into an archive path"
+      "Reason: (1) Base path is to long to be assembled into an archive path"
       PARROT_ERR_INT("Id")
       PARROT_ERR_STR("Base Path"),
       (ULONG)id,
@@ -90,13 +89,17 @@ STATIC VOID LoadArchive(struct NEW_ARCHIVE* archive, UWORD id)
     );
   }
 
+  //RequesterF("OK", "Opening archive %s", path);
+
   archive->ar_File = Open(&path[0], MODE_OLDFILE);
+
+  //RequesterF("OK", "Opening archive %ld", archive->ar_File);
 
   if (NULL == archive->ar_File)
   {
     PARROT_ERR(
       "Unable to load assets!\n"
-      "Reason: (5) Path does not exist or file cannot be opened"
+      "Reason: (2) Path does not exist or file cannot be opened"
       PARROT_ERR_INT("Id")
       PARROT_ERR_STR("Path"),
       (ULONG)id,
@@ -104,13 +107,15 @@ STATIC VOID LoadArchive(struct NEW_ARCHIVE* archive, UWORD id)
     );
   }
 
-  archive->ar_Iff = AllocIFF();
+  Read(archive->ar_File, &header, sizeof(ULONG));
 
-  if (NULL == archive->ar_Iff)
+  if (header != ID_SQWK)
   {
+    Close(archive->ar_File);
+
     PARROT_ERR(
       "Unable to load assets!\n"
-      "Reason: (6) IFF archive could not be allocated"
+      "Reason: (3) File is not a Squawk file"
       PARROT_ERR_INT("Id")
       PARROT_ERR_STR("Path"),
       (ULONG)id,
@@ -118,8 +123,6 @@ STATIC VOID LoadArchive(struct NEW_ARCHIVE* archive, UWORD id)
     );
   }
 
-  archive->ar_Iff->iff_Stream = archive->ar_File;
-  InitIFFasDOS(archive->ar_Iff);
 }
 
 STATIC struct NEW_ARCHIVE* GetOrOpenArchive(UWORD id)
@@ -131,11 +134,14 @@ STATIC struct NEW_ARCHIVE* GetOrOpenArchive(UWORD id)
   {
     archive = &Archives[ii];
 
-    if (id == archive->ar_Id)
-    {
-      archive->ar_Gc = GcCounter;
-      return archive;
-    }
+    if (id != archive->ar_Id)
+      continue;
+
+    if (NULL == archive->ar_File)
+      continue;
+
+    archive->ar_Gc = GcCounter;
+    return archive;
   }
 
   for (ii = 0; ii < MAX_OPEN_ARCHIVES; ii++)
@@ -162,18 +168,89 @@ STATIC struct NEW_ARCHIVE* GetOrOpenArchive(UWORD id)
 
 STATIC BOOL NavigateToAssetList(struct NEW_ARCHIVE* archive, ULONG classType)
 {
-  archive->ar_Gc = GcCounter;
+  LONG err;
+  struct SQUAWK_ASSET_LIST_HEADER hdr;
 
-  /* ... */
+  err = Seek(archive->ar_File, 4, OFFSET_BEGINNING);
+
+  while (TRUE)
+  {
+    Read(archive->ar_File, &hdr, sizeof(struct SQUAWK_ASSET_LIST_HEADER));
+
+    RequesterF("OK", "Name = %s, Count = %ld, Chapter = %ld, Size = %ld", IDtoStr(hdr.al_Type, strType), hdr.al_Count, hdr.al_Chapter, hdr.al_Length);
+
+    if (hdr.al_Type == classType)
+    {
+      RequesterF("OK", "Found it");
+      archive->ar_CurrentHeader = hdr;
+      return TRUE;
+    }
+
+    if (hdr.al_Type == MAKE_ID('S', 'T', 'O', 'P'))
+    {
+      break;
+    }
+
+    Seek(archive->ar_File, hdr.al_Length, OFFSET_CURRENT);
+  }
 
   return FALSE;
 }
 
-STATIC UWORD LoadAll(ULONG classType, struct NEW_ARCHIVE* archive, struct NEW_ASSET* outAssets, UWORD outCapacity)
+STATIC BOOL NavigateToId(struct NEW_ARCHIVE* archive, UWORD id)
 {
+  return FALSE;
+
+#if 0
+
+  LONG err;
+  struct ContextNode* node;
+  ULONG fourId;
+
+  fourId = UWordToId(id);
+  
+  PushChunk(archive->ar_Iff, 0, 0, 0);
+
+  while (TRUE)
+  {
+    err = ParseIFF(archive->ar_Iff, IFFPARSE_RAWSTEP);
+
+    if (err == IFFERR_EOC)
+    {
+      continue;
+    }
+    else if (err)
+    {
+      PARROT_ERR(
+        "Unable to load assets!\n"
+        "Reason: (2) Chunk Read Error"
+        PARROT_ERR_INT("Archive")
+        PARROT_ERR_INT("Err"),
+        (ULONG)archive->ar_Id,
+        err
+      );
+    }
+
+    node = CurrentChunk(archive->ar_Iff);
+
+    RequesterF("OK", "Found AssetList %s", IDtoStr(node->cn_ID, strType));
+
+  }
+
+  PopChunk(archive->ar_Iff);
+#endif
+
+}
+
+STATIC UWORD LoadAll(ULONG classType, struct NEW_ARCHIVE* archive, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity)
+{
+  UWORD count, ii;
+  struct ANY_ASSET hdr;
+  ULONG memSize;
+  struct ANY_ASSET* asset;
+
   archive->ar_Gc = GcCounter;
-
-
+  
   if (NavigateToAssetList(archive, classType) == FALSE)
   {
     PARROT_ERR(
@@ -186,9 +263,32 @@ STATIC UWORD LoadAll(ULONG classType, struct NEW_ARCHIVE* archive, struct NEW_AS
       );
   }
 
-  /* ... */
+  count = outCapacity;
 
-  return 0;
+  if (archive->ar_CurrentHeader.al_Count < count)
+  {
+    count = archive->ar_CurrentHeader.al_Count;
+  }
+
+  for (ii = 0; ii < count; ii++)
+  {
+    Read(archive->ar_File, &hdr, sizeof(struct ANY_ASSET));
+    
+    memSize = sizeof(struct ANY_ASSET) + hdr.as_Length;
+    asset = (struct ANY_ASSET*) NewObject(arena, memSize, FALSE);
+    asset->as_Id = hdr.as_Id;
+    asset->as_Flags = hdr.as_Flags;
+    asset->as_Length = hdr.as_Length;
+
+    RequesterF("OK", "Id = %ld, Len = %ld", asset->as_Id, asset->as_Length);
+
+    Read(archive->ar_File, (APTR) (&asset[1]), hdr.as_Length);
+
+    outAssets[ii] = asset;
+  }
+
+  return count;
+
 }
 
 STATIC APTR Load(ULONG classType, struct NEW_ARCHIVE* archive, UWORD id)
@@ -218,13 +318,29 @@ STATIC APTR Load(ULONG classType, struct NEW_ARCHIVE* archive, UWORD id)
 
 /* Public */
 
-UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, APTR outAssets, UWORD outCapacity)
+VOID InitArchives()
+{
+  struct NEW_ARCHIVE* archive;
+
+  for (UWORD ii = 0; ii < MAX_OPEN_ARCHIVES; ii++)
+  {
+    archive = &Archives[ii];
+
+    archive->ar_Id = 0;
+    archive->ar_Gc = 0;
+    archive->ar_File = 0;
+    archive->ar_CurrentHeader.al_Length = 0;
+    archive->ar_CurrentHeader.al_Type = 0;
+  }
+}
+
+UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity)
 {
   struct NEW_ARCHIVE* archive;
 
   archive = GetOrOpenArchive(archiveId);
 
-  return LoadAll(classType, archive, outAssets, outCapacity);
+  return LoadAll(classType, archive, arena, outAssets, outCapacity);
 }
 
 APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena)

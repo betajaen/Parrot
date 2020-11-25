@@ -48,14 +48,14 @@ VOID ReadGameInfo()
 
 }
 
-VOID ExportGameInfo(IffPtr master)
+VOID ExportGameInfo(SquawkPtr master)
 {
-  StartAssetList(master, CT_GAME_INFO);
+  StartAssetList(master, CT_GAME_INFO, 0);
   SaveAssetQuick(master, (APTR)&GameInfo, sizeof(GameInfo), CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
   EndAssetList(master);
 }
 
-STATIC VOID ExportGamePalette(IffPtr master, UWORD id)
+STATIC VOID ExportGamePalette(SquawkPtr master, UWORD id)
 {
   struct PALETTE_TABLE pal;
   ULONG* pData;
@@ -156,7 +156,7 @@ STATIC VOID ExportGamePalette(IffPtr master, UWORD id)
   SaveAssetQuick(master, (APTR)&pal, sizeof(pal), CT_PALETTE, id, CHUNK_FLAG_ARCH_ANY);
 }
 
-STATIC VOID ExportCursorPalette(IffPtr iff, UWORD id)
+STATIC VOID ExportCursorPalette(SquawkPtr iff, UWORD id)
 {
   struct PALETTE_TABLE  pal;
   ULONG* pData;
@@ -180,9 +180,9 @@ STATIC VOID ExportCursorPalette(IffPtr iff, UWORD id)
 }
 
 
-VOID ExportPalettes(IffPtr iff)
+VOID ExportPalettes(SquawkPtr iff)
 {
-  StartAssetList(iff, CT_PALETTE);
+  StartAssetList(iff, CT_PALETTE, 0);
   ExportGamePalette(iff, MM_PALETTE_ID);
   ExportCursorPalette(iff, MM_PALETTE_ID + 1);
   EndAssetList(iff);

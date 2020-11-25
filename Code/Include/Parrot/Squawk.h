@@ -25,7 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, APTR outAssets, UWORD outCapacity);
+VOID InitArchives();
+
+UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity);
 
 APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena);
 

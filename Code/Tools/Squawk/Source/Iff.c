@@ -30,32 +30,32 @@
 
 #define SAVE_PATH "PROGDIR:%ld.Parrot"
 
-IffPtr OpenSquawkFile(UWORD id)
+struct SquawkFile
 {
-  IffPtr iff;
+  BPTR   sq_File;
+  ULONG  sq_ListPos;
+  struct SQUAWK_ASSET_LIST_HEADER sq_ListHeader;
+};
+
+
+#define SQUAWK_HEADER "SQWK"
+#define SQUAWK_FOOTER "STOP\0\0\0\0\0\0"
+
+STATIC CHAR strtype[5];
+
+SquawkPtr OpenSquawkFile(UWORD id)
+{
+  SquawkPtr squawk;
   LONG err;
-  BPTR file;
   CHAR path[1 + sizeof(SAVE_PATH) + 6];
+
+  squawk = AllocMem(sizeof(struct SquawkFile), MEMF_CLEAR);
 
   StrFormat(path, sizeof(path), SAVE_PATH, (ULONG)id);
 
-  iff = AllocIFF();
+  squawk->sq_File = Open(path, MODE_NEWFILE);
 
-  if (iff == NULL)
-  {
-    PARROT_ERR(
-      "Unable open squawk file for writing.\n"
-      "Reason: (1) IFF pointer could not be allocated"
-      PARROT_ERR_INT("Id")
-      PARROT_ERR_STR("Path"),
-      id,
-      path
-    );
-  }
-
-  file = Open(path, MODE_NEWFILE);
-
-  if (file == 0)
+  if (squawk->sq_File == 0)
   {
     PARROT_ERR(
       "Unable open squawk file for writing.\n"
@@ -65,240 +65,122 @@ IffPtr OpenSquawkFile(UWORD id)
       PARROT_ERR_STR("Path")
       PARROT_ERR_INT("IoErr"),
       id,
-      file,
+      squawk->sq_File,
       path,
       IoErr()
     );
   }
-
-  iff->iff_Stream = file;
-
-  InitIFFasDOS(iff);
-
-  err = OpenIFF(iff, IFFF_WRITE);
-
-  if (err != 0)
-  {
-    PARROT_ERR(
-      "Unable open squawk file for writing.\n"
-      "Reason: (3) Could not Open IFF DOS File"
-      PARROT_ERR_INT("Id")
-      PARROT_ERR_INT("Err")
-      PARROT_ERR_STR("Path"),
-      id,
-      err,
-      path
-    );
-  }
-
-  err = PushChunk(iff, MAKE_ID('I', 'L', 'B', 'M'), ID_LIST, IFFSIZE_UNKNOWN);
   
-  if (err != 0)
+  Write(squawk->sq_File, SQUAWK_HEADER, literal_strlen(SQUAWK_HEADER));
+  
+  return squawk;
+}
+VOID EndAssetList(SquawkPtr squawk);
+
+VOID CloseSquawkFile(SquawkPtr squawk)
+{
+  if (squawk->sq_ListPos > 0)
   {
-    PARROT_ERR(
-      "Unable open squawk file for writing.\n"
-      "Reason: (4) Opening chunk could not be written"
-      PARROT_ERR_INT("Id")
-      PARROT_ERR_INT("Err")
-      PARROT_ERR_STR("Path"),
-      id,
-      err,
-      path
-    );
+    EndAssetList(squawk);
   }
 
-  return iff;
+  /* Footer */
+  Write(squawk->sq_File, SQUAWK_FOOTER, literal_strlen(SQUAWK_FOOTER));
+
+  Close(squawk->sq_File);
+
+  FreeMem(squawk, sizeof(struct SquawkFile));
 }
 
-VOID CloseSquawkFile(IffPtr iff)
+VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter)
 {
-  LONG err;
+  ULONG zero;
 
-  if (NULL != iff)
+  if (squawk->sq_ListPos != 0)
   {
-    err = PopChunk(iff); /* ID_LIST */
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Asset list is already open"
+      PARROT_ERR_STR("Current"),
+      IDtoStr(squawk->sq_ListHeader.al_Type, strtype)
+    );
+  }
 
-    if (err != 0)
-    {
-      PARROT_ERR(
-        "Unable close squawk file for writing.\n"
-        "Reason: (5) Closing chunk could not be finalised"
-        PARROT_ERR_INT("Err"),
-        err
-      );
-    }
+  squawk->sq_ListHeader.al_Type = classType;
+  squawk->sq_ListHeader.al_Chapter = chapter;
+  squawk->sq_ListHeader.al_Count = 0;
+  squawk->sq_ListHeader.al_Length = 0;
 
-    CloseIFF(iff);
-    Close(iff->iff_Stream);
-    FreeIFF(iff);
+  squawk->sq_ListPos = Seek(squawk->sq_File, 0, OFFSET_CURRENT);
+
+  Write(squawk->sq_File, &squawk->sq_ListHeader, sizeof(struct SQUAWK_ASSET_LIST_HEADER));
+}
+
+VOID EndAssetList(SquawkPtr squawk)
+{
+  ULONG len;
+
+  if (squawk->sq_ListPos > 0)
+  {
+    len = Seek(squawk->sq_File, 0, OFFSET_CURRENT);
+    len = len - squawk->sq_ListPos;
+    len -= sizeof(struct SQUAWK_ASSET_LIST_HEADER);
+
+    squawk->sq_ListHeader.al_Length = len;
+
+    Seek(squawk->sq_File, squawk->sq_ListPos, OFFSET_BEGINNING);
+    Write(squawk->sq_File, &squawk->sq_ListHeader, sizeof(struct SQUAWK_ASSET_LIST_HEADER));
+    Seek(squawk->sq_File, 0, OFFSET_END);
+
+    squawk->sq_ListHeader.al_Type = 0;
+    squawk->sq_ListHeader.al_Chapter = 0;
+    squawk->sq_ListHeader.al_Count = 0;
+    squawk->sq_ListHeader.al_Length = 0;
+    squawk->sq_ListPos = 0;
   }
   else
   {
-    PARROT_ERR0(
-      "Unable to close Squawk File.\n"
-      "Reason: Null pointer given to CloseSquawkFunction"
-    );
-  }
-}
-
-VOID StartAssetList(IffPtr iff, ULONG classType)
-{
-  char strtype[5];
-  LONG err;
-
-  err = PushChunk(iff, classType, ID_FORM, IFFSIZE_UNKNOWN);
-
-  if (err != 0)
-  {
     PARROT_ERR(
       "Unable serialise assets.\n"
-      "Reason: Asset list could not be started"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Err"),
-      IDtoStr(classType, strtype),
-      err
+      "Reason: Asset list is already open"
+      PARROT_ERR_STR("Current"),
+      IDtoStr(squawk->sq_ListHeader.al_Type, strtype)
     );
   }
 }
 
-VOID EndAssetList(IffPtr iff)
+VOID SaveAssetQuick(SquawkPtr squawk, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags)
 {
-  LONG err;
+  struct SQUAWK_ASSET_HEADER hdr;
 
-  err = PopChunk(iff);
-
-  if (err != 0)
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Asset list could not be ended"
-      PARROT_ERR_INT("Err"),
-      err
-    );
-  }
-}
-
-VOID SaveAssetQuick(IffPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags)
-{
-  struct ASSET_HEADER hdr;
   LONG err;
   char strtype[5];
   
-  hdr.ah_Id = id;
-  hdr.ah_AssetFlags = chunkHeaderflags;
+  hdr.as_Length = dataLength;
+  hdr.as_Id = id;
+  hdr.as_Flags = chunkHeaderflags;
+  
+  Write(squawk->sq_File, &hdr, sizeof(struct SQUAWK_ASSET_HEADER));
+  Write(squawk->sq_File, data, dataLength);
 
-  PushChunk(iff, ID_SQWK, UWordToId(id), sizeof(struct ASSET_HEADER) + dataLength);
-  err = WriteChunkBytes(iff, &hdr, sizeof(struct ASSET_HEADER));
-
-  if (err != sizeof(struct ASSET_HEADER))
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Header was not written"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Id"),
-      IDtoStr(classType, strtype),
-      id
-    );
-  }
-
-  err = WriteChunkBytes(iff, data, dataLength);
-
-  if (err != dataLength)
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Data was not written"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Id"),
-      IDtoStr(classType, strtype),
-      id
-    );
-  }
-
-  err = PopChunk(iff);
-
-  if (err != 0)
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Data chunk was not popped"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Id")
-      PARROT_ERR_INT("Err"),
-      IDtoStr(classType, strtype),
-      id,
-      (LONG) err
-    );
-  }
+  squawk->sq_ListHeader.al_Count++;
 }
 
 
-VOID SaveAssetWithData(IffPtr iff, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags)
+VOID SaveAssetWithData(SquawkPtr squawk, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags)
 {
-  struct ASSET_HEADER hdr;
+  struct SQUAWK_ASSET_HEADER hdr;
+
   LONG err;
   char strtype[5];
 
-  hdr.ah_Id = id;
-  hdr.ah_AssetFlags = chunkHeaderflags | CHUNK_FLAG_HAS_DATA;
+  hdr.as_Length = dataLength + data2Length;
+  hdr.as_Id = id;
+  hdr.as_Flags = chunkHeaderflags | CHUNK_FLAG_HAS_DATA;
 
-  PushChunk(iff, ID_SQWK, UWordToId(id), sizeof(struct ASSET_HEADER) + dataLength + data2Length);
-  err = WriteChunkBytes(iff, &hdr, sizeof(struct ASSET_HEADER));
+  Write(squawk->sq_File, &hdr, sizeof(struct SQUAWK_ASSET_HEADER));
+  Write(squawk->sq_File, data, dataLength);
+  Write(squawk->sq_File, data2, data2Length);
 
-  if (err != sizeof(struct ASSET_HEADER))
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Header was not written"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Id"),
-      IDtoStr(classType, strtype),
-      id
-    );
-  }
-
-  err = WriteChunkBytes(iff, data, dataLength);
-
-  if (err != dataLength)
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Data (1) was not written"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Id"),
-      IDtoStr(classType, strtype),
-      id
-    );
-  }
-
-  err = WriteChunkBytes(iff, data2, data2Length);
-
-  if (err != data2Length)
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Data (2) was not written"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Id"),
-      IDtoStr(classType, strtype),
-      id
-    );
-  }
-
-  err = PopChunk(iff);
-
-  if (err != 0)
-  {
-    PARROT_ERR(
-      "Unable serialise assets.\n"
-      "Reason: Data and Data2 chunks was not popped"
-      PARROT_ERR_STR("Type")
-      PARROT_ERR_INT("Id")
-      PARROT_ERR_INT("Err"),
-      IDtoStr(classType, strtype),
-      id,
-      (LONG)err
-    );
-  }
+  squawk->sq_ListHeader.al_Count++;
 }

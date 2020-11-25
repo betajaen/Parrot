@@ -29,15 +29,15 @@
 #include <Squawk/Squawk.h>
 #include "Maniac.h"
 
-STATIC IffPtr master;
+STATIC SquawkPtr master;
 
 extern struct GAME_INFO GameInfo;
 extern UWORD GameLanguage;
 
-VOID ExportTables(IffPtr master);
+VOID ExportTables(SquawkPtr master);
 VOID ReadGameInfo();
-VOID ExportGameInfo(IffPtr master);
-VOID ExportPalettes(IffPtr master);
+VOID ExportGameInfo(SquawkPtr master);
+VOID ExportPalettes(SquawkPtr master);
 VOID ExportLfl(UWORD lflNum);
 VOID StartTables();
 VOID EndTables();
@@ -45,7 +45,7 @@ VOID StartLfl();
 VOID EndLfl();
 VOID StartDialogue();
 VOID EndDialogue();
-VOID ExportDialogue(IffPtr master);
+VOID ExportDialogue(SquawkPtr master);
 UWORD GetNumTables();
 
 VOID ConverterMain()
