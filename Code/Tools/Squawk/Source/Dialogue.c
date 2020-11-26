@@ -132,7 +132,7 @@ struct WRITE_STRING_TABLE* GetOrAddTable(UWORD language, ULONG estimatedNeedSize
   return NewTable(language);
 }
 
-VOID ExportDialogue(SquawkPtr iff)
+VOID ExportDialogue(SquawkPtr squawk)
 {
   UWORD ii;
   struct WRITE_STRING_TABLE* tbl;
@@ -149,24 +149,25 @@ VOID ExportDialogue(SquawkPtr iff)
       if (hasWrittenHeader == FALSE)
       {
         hasWrittenHeader = TRUE;
-        StartAssetList(iff, CT_STRING_TABLE, 0);
+        StartAssetList(squawk, CT_STRING_TABLE, 0);
       }
 
-      SaveAssetWithData(iff,
-        &tbl->st_Table,
+      tbl->st_Table.as_Id = tbl->st_Id;
+      tbl->st_Table.as_Flags = CHUNK_FLAG_ARCH_ANY;
+
+      SaveAssetExtra(
+        squawk,
+        (struct ANY_ASSET*) &tbl->st_Table,
         sizeof(struct STRING_TABLE),
         &tbl->st_Table.st_Text[0],
-        tbl->st_Write,
-        CT_STRING_TABLE,
-        tbl->st_Id,
-        CHUNK_FLAG_ARCH_ANY
+        tbl->st_Write
       );
     }
   }
 
   if (hasWrittenHeader)
   {
-    EndAssetList(iff);
+    EndAssetList(squawk);
   }
 }
 

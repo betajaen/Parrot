@@ -184,7 +184,11 @@ STATIC VOID ExportRoom()
   room.rm_Height = RoomHeight;
 
   StartAssetList(Archive, CT_ROOM, 1);
-  SaveAssetQuick(Archive, &room, sizeof(room), CT_ROOM, RoomId, CHUNK_FLAG_ARCH_ANY);
+
+  room.as_Id = RoomId;
+  room.as_Flags = CHUNK_FLAG_ARCH_ANY;
+
+  SaveAsset(Archive, (struct ANY_ASSET*) &room, sizeof(struct ROOM));
   AddToTable(CT_ROOM, RoomId, ArchiveId, MM_CHAPTER);
   EndAssetList(Archive);
 }
@@ -229,7 +233,10 @@ STATIC VOID ExportEntity(UWORD id, ULONG dataOffset, ULONG graphicsOffset)
   entity.en_Type = ET_ANY;
   entity.en_Size = sizeof(struct NEW_ANY_ENTITY);
   
-  SaveAssetQuick(Archive, &entity, entity.en_Size, CT_ENTITY, id, CHUNK_FLAG_ARCH_ANY);
+  entity.as_Id = id;
+  entity.as_Flags = CHUNK_FLAG_ARCH_ANY;
+
+  SaveAsset(Archive, (struct ANY_ASSET*)&entity, sizeof(struct NEW_ANY_ENTITY));
   AddToTable(CT_ENTITY, id, ArchiveId, MM_CHAPTER);
 }
 
@@ -307,6 +314,8 @@ STATIC VOID ExportImageBackdrop(UWORD id)
   DecodeBackdrop(LflData + offset, ChunkyData, RoomWidth, RoomHeight);
   ConvertImageDataToPlanar(ChunkyData, PlanarData, RoomWidth, RoomHeight);
 
+  backdrop.as_Id = id;
+  backdrop.as_Flags = CHUNK_FLAG_ARCH_ANY;
   backdrop.im_Width = RoomWidth;
   backdrop.im_Height = RoomHeight;
   backdrop.im_Depth = 4;
@@ -314,7 +323,7 @@ STATIC VOID ExportImageBackdrop(UWORD id)
   backdrop.im_BytesPerRow = (RoomWidth >> 3);
   backdrop.im_PlaneSize = backdrop.im_BytesPerRow * backdrop.im_Height;
 
-  SaveAssetWithData(Archive, &backdrop, sizeof(backdrop), ChunkyData, planarSize, CT_IMAGE, id, CHUNK_FLAG_ARCH_ANY | CHUNK_FLAG_HAS_DATA);
+  SaveAssetExtra(Archive, (struct ANY_ASSET*) &backdrop, sizeof(backdrop), ChunkyData, chunkySize);
   AddToTable(CT_IMAGE, id, ArchiveId, MM_CHAPTER);
   
 }

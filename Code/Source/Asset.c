@@ -31,10 +31,17 @@
 #include <Parrot/String.h>
 #include <Parrot/Squawk.h>
 
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/iffparse.h>
+
 #define NO_ARCHIVE 65535
+
 
 STATIC struct ASSET_TABLE* AssetTables[256];
 UWORD  NumAssetTables;
+char strType[5];
+
 
 STATIC UWORD FindAssetArchive(UWORD assetId, UWORD chapter, ULONG assetType)
 {
@@ -66,7 +73,7 @@ STATIC UWORD FindAssetArchive(UWORD assetId, UWORD chapter, ULONG assetType)
   return NO_ARCHIVE;
 }
 
-VOID LoadAssetTables(UWORD archive, UWORD count)
+VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
 {
   UWORD ii;
   NumAssetTables = count;
@@ -94,7 +101,6 @@ VOID LoadAssetTables(UWORD archive, UWORD count)
 
 APTR GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena)
 {
-
   return NULL;
 }
 

@@ -30,7 +30,7 @@
 
 #if 1
 
-VOID LoadAssetTables(UWORD archive, UWORD count);
+VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count);
 
 APTR GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena);
 

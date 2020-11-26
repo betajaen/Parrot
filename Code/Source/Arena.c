@@ -34,6 +34,7 @@
 
 struct ARENA
 {
+  ULONG   ah_Name;
   ULONG   ah_Size;
   ULONG   ah_Used;
 };
@@ -42,7 +43,9 @@ struct ARENA* ArenaGame = NULL;
 struct ARENA* ArenaChapter = NULL;
 struct ARENA* ArenaRoom = NULL;
 
-EXPORT struct ARENA* ArenaOpen(ULONG size, ULONG requirements)
+STATIC CHAR strType[5];
+
+EXPORT struct ARENA* ArenaOpen(ULONG name, ULONG size, ULONG requirements)
 {
   struct ARENA* arena;
 
@@ -64,6 +67,7 @@ EXPORT struct ARENA* ArenaOpen(ULONG size, ULONG requirements)
     goto CLEAN_EXIT;
   }
 
+  arena->ah_Name = name;
   arena->ah_Size = size;
   arena->ah_Used = 0;
   
@@ -142,7 +146,6 @@ EXPORT ULONG ArenaSize(struct ARENA* arena)
 EXPORT APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill)
 {
   APTR result;
-  CHAR strType;
 
   result = NULL;
 
@@ -151,8 +154,10 @@ EXPORT APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill)
     PARROT_ERR(
       "Cannot Allocate Memory!\n"
       "Reason: Arena given is NULL"
+      PARROT_ERR_STR("ARENA::ah_Name")
       PARROT_ERR_INT("ARENA::ah_Used")
       PARROT_ERR_INT("ARENA::ah_Size"),
+      IDtoStr(arena->ah_Name, strType),
       arena->ah_Used,
       arena->ah_Size
     );
@@ -168,11 +173,13 @@ EXPORT APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill)
       "Cannot Allocate Memory!\n"
       "Reason: Allocation is to large for arena"
       PARROT_ERR_INT("Arena")
+      PARROT_ERR_STR("ARENA::ah_Name")
       PARROT_ERR_INT("ARENA::ah_Used")
       PARROT_ERR_INT("ARENA::ah_Size")
       PARROT_ERR_INT("arg size")
       PARROT_ERR_INT("arg zeroFill"),
       arena,
+      IDtoStr(arena->ah_Name, strType),
       arena->ah_Used,
       arena->ah_Size,
       size,

@@ -37,9 +37,8 @@ struct SquawkFile
   struct SQUAWK_ASSET_LIST_HEADER sq_ListHeader;
 };
 
-
 #define SQUAWK_HEADER "SQWK"
-#define SQUAWK_FOOTER "STOP\0\0\0\0\0\0"
+#define SQUAWK_FOOTER "STOP\0\0\0\0\0\0\0\0"
 
 STATIC CHAR strtype[5];
 
@@ -149,38 +148,22 @@ VOID EndAssetList(SquawkPtr squawk)
   }
 }
 
-VOID SaveAssetQuick(SquawkPtr squawk, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags)
+VOID SaveAsset(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize)
 {
-  struct SQUAWK_ASSET_HEADER hdr;
+  asset->as_Length = assetSize;
 
-  LONG err;
-  char strtype[5];
-  
-  hdr.as_Length = dataLength;
-  hdr.as_Id = id;
-  hdr.as_Flags = chunkHeaderflags;
-  
-  Write(squawk->sq_File, &hdr, sizeof(struct SQUAWK_ASSET_HEADER));
-  Write(squawk->sq_File, data, dataLength);
+  Write(squawk->sq_File, asset, assetSize);
 
   squawk->sq_ListHeader.al_Count++;
 }
 
-
-VOID SaveAssetWithData(SquawkPtr squawk, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags)
+VOID SaveAssetExtra(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize, APTR data, ULONG dataLength)
 {
-  struct SQUAWK_ASSET_HEADER hdr;
+  asset->as_Length = assetSize + dataLength;
+  asset->as_Flags |= CHUNK_FLAG_HAS_DATA;
 
-  LONG err;
-  char strtype[5];
-
-  hdr.as_Length = dataLength + data2Length;
-  hdr.as_Id = id;
-  hdr.as_Flags = chunkHeaderflags | CHUNK_FLAG_HAS_DATA;
-
-  Write(squawk->sq_File, &hdr, sizeof(struct SQUAWK_ASSET_HEADER));
+  Write(squawk->sq_File, asset, assetSize);
   Write(squawk->sq_File, data, dataLength);
-  Write(squawk->sq_File, data2, data2Length);
 
   squawk->sq_ListHeader.al_Count++;
 }

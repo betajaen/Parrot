@@ -43,7 +43,7 @@
 #include <proto/dos.h>
 
 struct ARCHIVE* GameArchive;
-struct GAME_INFO_ASSET* GameInfo;
+struct GAME_INFO* GameInfo;
 struct PALETTE_TABLE* GamePalette;
 struct PALETTE_TABLE* GameCursorPalette;
 struct UNPACKED_ROOM  GameRoom;
@@ -125,9 +125,9 @@ EXPORT VOID GameStart(STRPTR path)
 
   InitStackVar(uroom);
 
-  ArenaGame = ArenaOpen(16384, MEMF_CLEAR);
-  ArenaChapter = ArenaOpen(131072, MEMF_CLEAR);
-  ArenaRoom = ArenaOpen(131072, MEMF_CLEAR);
+  ArenaGame = ArenaOpen(MAKE_NODE_ID('G', 'A', 'M', 'E'), 16384, MEMF_CLEAR);
+  ArenaChapter = ArenaOpen(MAKE_NODE_ID('C', 'H', 'A', 'P'), 131072, MEMF_CLEAR);
+  ArenaRoom = ArenaOpen(MAKE_NODE_ID('R', 'O', 'O', 'M'), 131072, MEMF_CLEAR);
 
 #if 1
 
@@ -141,7 +141,7 @@ EXPORT VOID GameStart(STRPTR path)
     Load the first and only 1 of a GameInfo
     As the ID may not necessarily be 1.
   */
-  if (1 != GetAllAssetsFromArchive(CT_GAME_INFO, 0, ArenaGame, &GameInfo, 1))
+  if (1 != GetAllAssetsFromArchive(CT_GAME_INFO, 0, ArenaGame, (struct ANY_ASSET**) &GameInfo, 1))
   {
     PARROT_ERR0(
       "Could not start Game!\n"
@@ -149,17 +149,9 @@ EXPORT VOID GameStart(STRPTR path)
     );
   }
 
-  RequesterF("OK", "Game Size=%ldx%ld, Palette=%ld", GameInfo->gi_Width, GameInfo->gi_Height, GameInfo->gi_StartPalette);
-
-  Requester("OK", "Loading Tables.");
-
-  LoadAssetTables(0, GameInfo->gi_NumAssetTables);
-
-  Requester("OK", "Loaded Tables.");
+  LoadAssetTables(0, 0, GameInfo->gi_NumAssetTables);
 
   GamePalette = (struct PALETTE_TABLE*)GetAsset(GameInfo->gi_StartPalette, 0, CT_PALETTE, ArenaGame);
-
-  Requester("OK", "Loaded Palette");
 
 #else
   InitialiseArchives(path);

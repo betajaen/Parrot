@@ -126,11 +126,6 @@ union DIALOGUE_TEXT
   Squawk Files
 */
 
-#define ASSET_HEADER           \
-  UWORD             as_Id;     \
-  UWORD             as_Flags;  \
-  ULONG             as_Length
-
 struct SQUAWK_ASSET_LIST_HEADER
 {
   ULONG             al_Type;
@@ -139,10 +134,10 @@ struct SQUAWK_ASSET_LIST_HEADER
   ULONG             al_Length;
 };
 
-struct SQUAWK_ASSET_HEADER
-{
-  ASSET_HEADER;
-};
+#define ASSET_HEADER           \
+  UWORD             as_Id;     \
+  UWORD             as_Flags;  \
+  ULONG             as_Length
 
 struct ANY_ASSET
 {
@@ -151,7 +146,6 @@ struct ANY_ASSET
 
 #define GET_ASSET_ID(X) (((struct ANY_ASSET*) (X))->as_Id)
 #define GET_ASSET_TYPE(X) (((struct ANY_ASSET*) (X))->as_Type)
-
 
 /**
     SDL Banned Functions
@@ -247,30 +241,23 @@ struct INPUTEVENT
       Game Info
 */
 
-#define GAME_INFO_FIELDS \
-  ULONG                     gi_GameId;\
-  ULONG                     gi_GameVersion;\
-  DIALOGUE                  gi_Title;\
-  DIALOGUE                  gi_ShortTitle;\
-  DIALOGUE                  gi_Author;\
-  DIALOGUE                  gi_Release;\
-  UWORD                     gi_Width;\
-  UWORD                     gi_Height;\
-  UWORD                     gi_Depth;\
-  UWORD                     gi_NumAssetTables;\
-  UWORD                     gi_StartPalette;\
-  UWORD                     gi_StartCursorPalette;\
-  UWORD                     gi_StartScript
-
 struct GAME_INFO
 {
-  GAME_INFO_FIELDS;
-};
-
-struct GAME_INFO_ASSET
-{
   ASSET_HEADER;
-  GAME_INFO_FIELDS;
+  
+  ULONG                     gi_GameId;
+  ULONG                     gi_GameVersion;
+  DIALOGUE                  gi_Title;
+  DIALOGUE                  gi_ShortTitle;
+  DIALOGUE                  gi_Author;
+  DIALOGUE                  gi_Release;
+  UWORD                     gi_Width;
+  UWORD                     gi_Height;
+  UWORD                     gi_Depth;
+  UWORD                     gi_NumAssetTables;
+  UWORD                     gi_StartPalette;
+  UWORD                     gi_StartCursorPalette;
+  UWORD                     gi_StartScript;
 };
 
 /*
@@ -285,11 +272,14 @@ struct ASSET_TABLE_ENTRY
 
 struct ASSET_TABLE
 {
+  ASSET_HEADER;
+
   ULONG  at_AssetType;
   UWORD  at_Chapter;
   UWORD  at_Count;
   UWORD  at_Lowest;
   UWORD  at_Highest;
+
   struct ASSET_TABLE_ENTRY at_Assets[];
 };
 
@@ -301,15 +291,11 @@ struct ASSET_TABLE
 
 struct STRING_TABLE
 {
+  ASSET_HEADER;
+
   UWORD   st_Language;
   UWORD   st_Offsets[256];
   CHAR    st_Text[];
-};
-
-struct STRING_TABLE_ASSET
-{
-  ASSET_HEADER;
-  struct STRING_TABLE as_Table;
 };
 
 #define LANG_ENGLISH  MAKE_LANGUAGE_CODE('e','n')
@@ -325,15 +311,11 @@ struct STRING_TABLE_ASSET
 */
 struct PALETTE_TABLE
 {
+  ASSET_HEADER;
+
   UBYTE pt_Begin;
   UBYTE pt_End;
   ULONG pt_Data[64];
-};
-
-struct PALETTE_TABLE_ASSET
-{
-  ASSET_HEADER;
-  struct PALETTE_TABLE as_Palette;
 };
 
 /*
@@ -342,6 +324,8 @@ struct PALETTE_TABLE_ASSET
 
 struct IMAGE
 {
+  ASSET_HEADER;
+
   UWORD             im_BytesPerRow;
   UWORD             im_Height;
   UBYTE             im_Flags;
@@ -351,12 +335,6 @@ struct IMAGE
   UWORD             im_Width;
   UWORD             im_Palette;
   ULONG             im_PlaneSize;
-};
-
-struct IMAGE_ASSET
-{
-  ASSET_HEADER;
-  struct IMAGE as_Image;
 };
 
 /*
@@ -414,6 +392,7 @@ struct POINT
 #define ETF_IS_OPEN   (1 << 15)
 
 #define STRUCT_ENTITY_COMMON \
+  ASSET_HEADER;               \
   UWORD                en_Size;\
   UWORD                en_Type;\
   struct RECT          en_HitBox;\
@@ -431,7 +410,6 @@ struct NEW_ANY_ENTITY
 
 struct NEW_ANY_ENTITY_ASSET
 {
-  ASSET_HEADER;
   STRUCT_ENTITY_COMMON;
 };
 
@@ -441,12 +419,6 @@ struct NEW_EXIT_ENTITY
   LONG                 ex_Target;
 };
 
-struct NEW_EXIT_ENTITY_ASSET
-{
-  ASSET_HEADER;
-  STRUCT_ENTITY_COMMON;
-  LONG                 ex_Target;
-};
 
 struct ENTITY
 {
@@ -467,18 +439,14 @@ struct EXIT
 
 struct ROOM
 {
+  ASSET_HEADER;
+
   UWORD               rm_Width;
   UWORD               rm_Height;
   UWORD               rm_Backdrops[MAX_ROOM_BACKDROPS];
   UWORD               rm_Exits[MAX_ROOM_EXITS];
   UWORD               rm_Entities[MAX_ROOM_ENTITIES];
   UWORD               rm_Scripts[MAX_ROOM_SCRIPTS];
-};
-
-struct ROOM_ASSET
-{
-  ASSET_HEADER;
-  struct ROOM as_Room;
 };
 
 #define UFLG_DEBUG    1

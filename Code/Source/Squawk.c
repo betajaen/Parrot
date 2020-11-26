@@ -177,11 +177,8 @@ STATIC BOOL NavigateToAssetList(struct NEW_ARCHIVE* archive, ULONG classType)
   {
     Read(archive->ar_File, &hdr, sizeof(struct SQUAWK_ASSET_LIST_HEADER));
 
-    RequesterF("OK", "Name = %s, Count = %ld, Chapter = %ld, Size = %ld", IDtoStr(hdr.al_Type, strType), hdr.al_Count, hdr.al_Chapter, hdr.al_Length);
-
     if (hdr.al_Type == classType)
     {
-      RequesterF("OK", "Found it");
       archive->ar_CurrentHeader = hdr;
       return TRUE;
     }
@@ -197,49 +194,28 @@ STATIC BOOL NavigateToAssetList(struct NEW_ARCHIVE* archive, ULONG classType)
   return FALSE;
 }
 
-STATIC BOOL NavigateToId(struct NEW_ARCHIVE* archive, UWORD id)
+STATIC ULONG NavigateToId(struct NEW_ARCHIVE* archive, UWORD id)
 {
-  return FALSE;
+  struct ANY_ASSET hdr;
+  UWORD ii, count;
 
-#if 0
+  count = archive->ar_CurrentHeader.al_Count;
 
-  LONG err;
-  struct ContextNode* node;
-  ULONG fourId;
-
-  fourId = UWordToId(id);
-  
-  PushChunk(archive->ar_Iff, 0, 0, 0);
-
-  while (TRUE)
+  for (ii = 0; ii < count; ii++)
   {
-    err = ParseIFF(archive->ar_Iff, IFFPARSE_RAWSTEP);
+    Read(archive->ar_File, &hdr, sizeof(struct ANY_ASSET));
 
-    if (err == IFFERR_EOC)
+    if (hdr.as_Id != id)
     {
+      Seek(archive->ar_File, hdr.as_Length - sizeof(struct ANY_ASSET), OFFSET_CURRENT);
       continue;
     }
-    else if (err)
-    {
-      PARROT_ERR(
-        "Unable to load assets!\n"
-        "Reason: (2) Chunk Read Error"
-        PARROT_ERR_INT("Archive")
-        PARROT_ERR_INT("Err"),
-        (ULONG)archive->ar_Id,
-        err
-      );
-    }
 
-    node = CurrentChunk(archive->ar_Iff);
-
-    RequesterF("OK", "Found AssetList %s", IDtoStr(node->cn_ID, strType));
-
+    Seek(archive->ar_File, -(sizeof(struct ANY_ASSET)), OFFSET_CURRENT);
+    return hdr.as_Length;
   }
 
-  PopChunk(archive->ar_Iff);
-#endif
-
+  return 0;
 }
 
 STATIC UWORD LoadAll(ULONG classType, struct NEW_ARCHIVE* archive, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity)
@@ -280,8 +256,6 @@ STATIC UWORD LoadAll(ULONG classType, struct NEW_ARCHIVE* archive, struct ARENA*
     asset->as_Flags = hdr.as_Flags;
     asset->as_Length = hdr.as_Length;
 
-    RequesterF("OK", "Id = %ld, Len = %ld", asset->as_Id, asset->as_Length);
-
     Read(archive->ar_File, (APTR) (&asset[1]), hdr.as_Length);
 
     outAssets[ii] = asset;
@@ -291,9 +265,10 @@ STATIC UWORD LoadAll(ULONG classType, struct NEW_ARCHIVE* archive, struct ARENA*
 
 }
 
-STATIC APTR Load(ULONG classType, struct NEW_ARCHIVE* archive, UWORD id)
+STATIC struct ANY_ASSET* Load(ULONG classType, struct NEW_ARCHIVE* archive, struct ARENA* arena, UWORD id)
 {
-  APTR asset;
+  struct ANY_ASSET* asset;
+  ULONG assetLength;
 
   asset = NULL;
 
@@ -312,6 +287,28 @@ STATIC APTR Load(ULONG classType, struct NEW_ARCHIVE* archive, UWORD id)
       (ULONG) id
     );
   }
+
+  assetLength = NavigateToId(archive, id);
+
+  if (0 == assetLength)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (3) No assets of this id are in the given asset list in this archive"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Archive")
+      PARROT_ERR_INT("Asset"),
+      IDtoStr(classType, strType),
+      (ULONG)archive->ar_Id,
+      (ULONG)id
+    );
+  }
+
+  
+
+  asset = (struct ANY_ASSET*) NewObject(arena, assetLength, FALSE);
+
+  Read(archive->ar_File, (APTR)asset, assetLength);
 
   return asset;
 }
@@ -348,7 +345,7 @@ APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct AREN
   struct NEW_ARCHIVE* archive;
   archive = GetOrOpenArchive(archiveId);
 
-  return Load(classType, archive, id);
+  return Load(classType, archive, arena, id);
 }
 
 VOID GcArchives(UWORD olderThan)

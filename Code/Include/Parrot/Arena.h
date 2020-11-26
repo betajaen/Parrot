@@ -27,7 +27,7 @@
 
 extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom;
 
-struct ARENA* ArenaOpen(ULONG size, ULONG requirements);
+struct ARENA* ArenaOpen(ULONG name, ULONG size, ULONG requirements);
 
 BOOL ArenaClose(struct ARENA* arena);
 

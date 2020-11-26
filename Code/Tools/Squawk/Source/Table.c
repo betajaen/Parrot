@@ -216,12 +216,12 @@ UWORD GenerateAssetId(ULONG classType)
   return 0;
 }
 
-VOID ExportTables(SquawkPtr master)
+VOID ExportTables(SquawkPtr squawk)
 {
   UWORD ii;
   struct WRITE_ASSET_TABLE* tbl;
 
-  StartAssetList(master, CT_TABLE, 0);
+  StartAssetList(squawk, CT_TABLE, 0);
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
@@ -229,19 +229,19 @@ VOID ExportTables(SquawkPtr master)
 
     if (tbl == NULL)
       continue;
-
-    SaveAssetWithData(master,
-      &tbl->at_Table,
+    
+    tbl->at_Table.as_Id = 1 + ii;
+    tbl->at_Table.as_Flags = CHUNK_FLAG_ARCH_ANY;
+    
+    SaveAssetExtra(squawk,
+      (struct ANY_ASSET*) &tbl->at_Table,
       sizeof(struct ASSET_TABLE),
       TableData[ii],
-      tbl->at_Table.at_Count * sizeof(struct ASSET_TABLE_ENTRY),
-      CT_TABLE,
-      1 + ii,
-      CHUNK_FLAG_ARCH_ANY
+      tbl->at_Table.at_Count * sizeof(struct ASSET_TABLE_ENTRY)
     );
   }
 
-  EndAssetList(master);
+  EndAssetList(squawk);
 }
 
 VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter)

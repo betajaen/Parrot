@@ -43,8 +43,8 @@ VOID CloseSquawkFile(SquawkPtr squawk);
 
 VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter);
 VOID EndAssetList(SquawkPtr squawk);
-VOID SaveAssetQuick(SquawkPtr iff, APTR data, ULONG dataLength, ULONG classType, UWORD id, UWORD chunkHeaderflags);
-VOID SaveAssetWithData(SquawkPtr iff, APTR data, ULONG dataLength, APTR data2, ULONG data2Length, ULONG classType, UWORD id, UWORD chunkHeaderflags);
+VOID SaveAsset(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize);
+VOID SaveAssetExtra(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize, APTR data, ULONG dataLength);
 
 UWORD GenerateAssetId(ULONG classType);
 UWORD GenerateArchiveId();
