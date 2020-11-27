@@ -53,8 +53,8 @@ STATIC UWORD FindAssetArchive(UWORD assetId, UWORD chapter, ULONG assetType)
   {
     tbl = AssetTables[ii];
     
-    RequesterF("OK", "Table %ld, Type=%s, Count=%ld, Chapter=%ld",
-      (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
+    //RequesterF("OK", "Table %ld, Type=%s, Count=%ld, Chapter=%ld",
+    //  (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
 
     if (tbl->at_AssetType != assetType)
       continue;
@@ -98,8 +98,8 @@ VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
       );
     }
 
-    RequesterF("OK", "Loaded %ld, Type=%s, Count=%ld, Chapter=%ld",
-      (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
+    //RequesterF("OK", "Loaded %ld, Type=%s, Count=%ld, Chapter=%ld",
+    //  (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
 
 
     AssetTables[ii] = tbl;
@@ -127,11 +127,9 @@ struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct AREN
     );
   }
 
-  RequesterF("OK", "Asset found. Archive=%ld AssetId=%ld, Type=%ld", archiveId, id, IDtoStr(assetType, strType));
+  /* FUTURE - CACHING */
 
-  /* FUTURE */
-
-  return NULL;
+  return GetAssetFromArchive(assetType, archiveId, id, arena);
 }
 
 VOID ReleaseAsset(struct ANY_ASSET* asset)

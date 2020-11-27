@@ -340,7 +340,7 @@ UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* ar
   return LoadAll(classType, archive, arena, outAssets, outCapacity);
 }
 
-APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena)
+struct ANY_ASSET* GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena)
 {
   struct NEW_ARCHIVE* archive;
   archive = GetOrOpenArchive(archiveId);

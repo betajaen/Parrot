@@ -39,6 +39,7 @@ STATIC UWORD NextEntityId;
 STATIC UWORD NextImageId;
 STATIC UWORD NextScriptId;
 STATIC UWORD NextPaletteId;
+STATIC UWORD NextTableId;
 
 struct WRITE_ASSET_TABLE
 {
@@ -152,6 +153,7 @@ VOID StartTables()
   NextScriptId = 1;
   NextArchiveId = 1;
   NextPaletteId = 1;
+  NextTableId = 1;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
@@ -207,6 +209,7 @@ UWORD GenerateAssetId(ULONG classType)
     case CT_IMAGE: return NextImageId++;
     case CT_SCRIPT: return NextScriptId++;
     case CT_PALETTE: return NextPaletteId++;
+    case CT_TABLE: return NextTableId++;
   }
 
   PARROT_ERR(
@@ -223,17 +226,20 @@ VOID ExportTables(SquawkPtr squawk)
 {
   UWORD ii;
   struct WRITE_ASSET_TABLE* tbl;
-
+  
   StartAssetList(squawk, CT_TABLE, 0);
-
+  
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
     tbl = &Table[ii];
 
     if (tbl == NULL)
       continue;
+
+    if (tbl->at_Table.at_Count == 0)
+      continue;
     
-    tbl->at_Table.as_Id = 1 + ii;
+    tbl->at_Table.as_Id = GenerateAssetId(CT_TABLE);
     tbl->at_Table.as_Flags = CHUNK_FLAG_ARCH_ANY;
     
     SaveAssetExtra(squawk,
@@ -285,6 +291,9 @@ UWORD GetNumTables()
     tbl = &Table[ii];
 
     if (tbl == NULL)
+      continue;
+
+    if (tbl->at_Table.at_Count == 0)
       continue;
 
     ++count;
