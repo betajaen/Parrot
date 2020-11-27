@@ -32,9 +32,9 @@
 
 VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count);
 
-APTR GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena);
+struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena);
 
-VOID ReleaseAsset(APTR asset);
+VOID ReleaseAsset(struct ANY_ASSET* asset);
 
 #else
 

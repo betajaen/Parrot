@@ -38,6 +38,7 @@ STATIC UWORD NextRoomId;
 STATIC UWORD NextEntityId;
 STATIC UWORD NextImageId;
 STATIC UWORD NextScriptId;
+STATIC UWORD NextPaletteId;
 
 struct WRITE_ASSET_TABLE
 {
@@ -150,6 +151,7 @@ VOID StartTables()
   NextImageId = 1;
   NextScriptId = 1;
   NextArchiveId = 1;
+  NextPaletteId = 1;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
@@ -204,6 +206,7 @@ UWORD GenerateAssetId(ULONG classType)
     case CT_ENTITY: return NextEntityId++;
     case CT_IMAGE: return NextImageId++;
     case CT_SCRIPT: return NextScriptId++;
+    case CT_PALETTE: return NextPaletteId++;
   }
 
   PARROT_ERR(

@@ -32,3 +32,6 @@
 #define MM_META_RELEASE "Commodore Amiga"
 #define MM_NUM_ROOMS 54
 #define MM_PALETTE_ID 1
+#define MM_SHARED_CHAPTER 0
+#define MM_STORY_CHAPTER 1
+#define MM_SHARED_ARCHIVE_ID 0

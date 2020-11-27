@@ -39,8 +39,8 @@
 
 
 STATIC struct ASSET_TABLE* AssetTables[256];
-UWORD  NumAssetTables;
-char strType[5];
+STATIC UWORD  NumAssetTables;
+STATIC char strType[5];
 
 
 STATIC UWORD FindAssetArchive(UWORD assetId, UWORD chapter, ULONG assetType)
@@ -53,6 +53,9 @@ STATIC UWORD FindAssetArchive(UWORD assetId, UWORD chapter, ULONG assetType)
   {
     tbl = AssetTables[ii];
     
+    RequesterF("OK", "Table %ld, Type=%s, Count=%ld, Chapter=%ld",
+      (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
+
     if (tbl->at_AssetType != assetType)
       continue;
 
@@ -95,16 +98,43 @@ VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
       );
     }
 
+    RequesterF("OK", "Loaded %ld, Type=%s, Count=%ld, Chapter=%ld",
+      (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
+
+
     AssetTables[ii] = tbl;
   }
 }
 
-APTR GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena)
+
+struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena)
 {
+  UWORD archiveId;
+  
+  archiveId = FindAssetArchive(id, chapter, assetType);
+
+  if (NO_ARCHIVE == archiveId)
+  {
+    PARROT_ERR(
+      "Unable to load asset\n"
+      "Reason: (1) Asset Id was not found in any asset table"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Chapter"),
+      IDtoStr(assetType, strType),
+      (ULONG)id,
+      (ULONG)chapter
+    );
+  }
+
+  RequesterF("OK", "Asset found. Archive=%ld AssetId=%ld, Type=%ld", archiveId, id, IDtoStr(assetType, strType));
+
+  /* FUTURE */
+
   return NULL;
 }
 
-VOID ReleaseAsset(APTR asset)
+VOID ReleaseAsset(struct ANY_ASSET* asset)
 {
-  /* */
+  /* FUTURE */
 }
