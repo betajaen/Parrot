@@ -44,64 +44,7 @@
 
 struct ARCHIVE* GameArchive;
 struct GAME_INFO* GameInfo;
-struct PALETTE_TABLE* GamePalette;
-struct PALETTE_TABLE* GameCursorPalette;
 struct UNPACKED_ROOM  GameRoom;
-
-STATIC VOID Load(STRPTR path)
-{
-  UWORD ii, roomNo;
-
-  WORD w, lw;
-
-  Busy();
-
-  /* Load all Start Object Tables */
-
-#if 0
-
-  for (ii = 0; ii < 16; ii++)
-  {
-    if (GameInfo->gi_StartTables[ii].tr_ClassType == 0)
-      break;
-  
-    LoadObjectTable(&GameInfo->gi_StartTables[ii]);
-  }
-
-  /* Load and Use Start Palette */
-
-  if (0 == GameInfo->gi_StartPalette)
-  {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting Palette was None"
-      PARROT_ERR_INT("GAME_INFO::gi_StartPalette"),
-      GameInfo->gi_StartPalette
-    );
-  }
-
-  GamePalette = LoadAssetT(struct PALETTE_TABLE, ArenaGame, ARCHIVE_UNKNOWN, CT_PALETTE, GameInfo->gi_StartPalette, CHUNK_FLAG_ARCH_AGA);
-
-  if (NULL == GamePalette)
-  {
-    PARROT_ERR(
-      "Unable to start Game!\n"
-      "Reason: Starting Palette Table was not found"
-      PARROT_ERR_INT("GAME_INFO::gi_StartPalette"),
-      (ULONG)GameInfo->gi_StartCursorPalette
-    );
-  }
-
-  GfxLoadColours32(0, (ULONG*) &GamePalette->pt_Data[0]);
-
-#endif
-
-  ArenaRollback(ArenaChapter);
-  ArenaRollback(ArenaRoom);
-
-  NotBusy();
-
-}
 
 EXPORT VOID GameStart(STRPTR path)
 {
@@ -117,8 +60,6 @@ EXPORT VOID GameStart(STRPTR path)
 
   GameArchive = NULL;
   GameInfo = NULL;
-  GamePalette = NULL;
-  GameCursorPalette = NULL;
   ArenaGame = NULL;
   ArenaChapter = NULL;
   ArenaRoom = NULL;
@@ -128,15 +69,10 @@ EXPORT VOID GameStart(STRPTR path)
   ArenaGame = ArenaOpen(MAKE_NODE_ID('G', 'A', 'M', 'E'), 16384, MEMF_CLEAR);
   ArenaChapter = ArenaOpen(MAKE_NODE_ID('C', 'H', 'A', 'P'), 131072, MEMF_CLEAR);
   ArenaRoom = ArenaOpen(MAKE_NODE_ID('R', 'O', 'O', 'M'), 131072, MEMF_CLEAR);
-
-#if 1
-
-  //Requester("OK", "Initialising Archives");
+  ArenaFrameTemp = ArenaOpen(MAKE_NODE_ID('F', 'R', 'T', 'M'), 16384, MEMF_CLEAR);
 
   InitArchives();
 
-  //Requester("OK", "Loading Game Info");
-  
   /*
     Load the first and only 1 of a GameInfo
     As the ID may not necessarily be 1.
@@ -150,28 +86,6 @@ EXPORT VOID GameStart(STRPTR path)
   }
 
   LoadAssetTables(0, 0, GameInfo->gi_NumAssetTables);
-
-  GamePalette = (struct PALETTE_TABLE*)GetAsset(GameInfo->gi_StartPalette, 0, CT_PALETTE, ArenaGame);
-
-#else
-  InitialiseArchives(path);
-
-  GameArchive = OpenArchive(0);
-
-  if (GameArchive == NULL)
-  {
-    ErrorF("Did not open Game Archive");
-  }
-
-  GameInfo = LoadAssetT(struct GAME_INFO, ArenaGame, ARCHIVE_GLOBAL, CT_GAME_INFO, 1, CHUNK_FLAG_ARCH_ANY);
-
-  if (GameInfo == NULL)
-  {
-    ErrorF("Did not load Game Info");
-  }
-
-  CloseArchive(0);
-#endif
 
   ScriptInitialise();
 
@@ -222,14 +136,16 @@ EXPORT VOID GameStart(STRPTR path)
   GfxOpen(&viewLayouts);
   GfxShow();
 
-  Load(path);
-
+  ArenaRollback(ArenaFrameTemp);
   ArenaRollback(ArenaChapter);
 
   InputInitialise();
 
 #if 1
-  /* RunScript(1); */
+  
+  RunScriptNow(GameInfo->gi_StartScript, 0, ArenaFrameTemp);
+  ArenaRollback(ArenaFrameTemp);
+  
 #else
   entrance.en_Room = 3; // GameInfo->gi_StartRoom;
   entrance.en_Exit = 0;
@@ -270,4 +186,14 @@ EXPORT VOID GameDelayTicks(UWORD ticks)
 EXPORT VOID GameDelaySeconds(UWORD seconds)
 {
   Delay(seconds * 50);
+}
+
+
+EXPORT VOID GameLoadPalette(UWORD palette)
+{
+  struct PALETTE_TABLE pal;
+  
+  GetAssetInto(palette, 0, CT_PALETTE, (struct ANY_ASSET*) &pal, sizeof(pal));
+
+  GfxLoadColours32(0, (ULONG*)&pal.pt_Data[0]);
 }

@@ -34,6 +34,8 @@ VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count);
 
 struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena);
 
+BOOL GetAssetInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize);
+
 VOID ReleaseAsset(struct ANY_ASSET* asset);
 
 #else

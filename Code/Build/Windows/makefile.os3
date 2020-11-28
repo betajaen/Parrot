@@ -34,7 +34,7 @@ CFLAGS  = -lamiga -nostdlib -IInclude -ITools/Squawk/Include
 # PARROT
 
 PARROT_OBJ = main.o arena.o string.o requester.o game.o room.o image.o asset.o entity.o view.o input.o cursor.o verbs.o script.o squawk.o
-SQUAWK_OBJ = squawk_main.o squawk_writer.o squawk_table.o squawk_dialogue.o string.o requester.o Source/minstart.o
+SQUAWK_OBJ = squawk_main.o squawk_writer.o squawk_table.o squawk_dialogue.o squawk_script.o string.o requester.o Source/minstart.o
 CONVERTER_MANIAC_OBJ = $(SQUAWK_OBJ) maniac_main.o maniac_meta.o maniac_lfl.o
 
 parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
@@ -99,6 +99,9 @@ squawk_table.o: Tools/Squawk/Source/Table.c
 
 squawk_dialogue.o: Tools/Squawk/Source/Dialogue.c
 	$(CC) $(CFLAGS) -c Tools/Squawk/Source/Dialogue.c -o squawk_dialogue.o
+
+squawk_script.o: Tools/Squawk/Source/ScriptWriter.c
+	$(CC) $(CFLAGS) -c Tools/Squawk/Source/ScriptWriter.c -o squawk_script.o
 
 # MANIAC
 

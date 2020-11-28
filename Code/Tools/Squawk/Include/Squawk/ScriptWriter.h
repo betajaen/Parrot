@@ -25,121 +25,30 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <Squawk/Squawk.h>
+VOID ScriptWriteByte2(UBYTE first, UBYTE second);
 
-#define MAX_SCRIPT_WRITER_SIZE 256
+VOID ScriptWriteWord(WORD value);
 
-STATIC BYTE ScriptData[MAX_SCRIPT_WRITER_SIZE];
-STATIC UWORD ScriptSize = 0;
-extern VOID exit();
+VOID ScriptWriteLong(LONG value);
 
-STATIC VOID ScriptEnforceSpace(UWORD length)
-{
-  if (ScriptSize + length >= MAX_SCRIPT_WRITER_SIZE)
-  {
-    DebugF("OK", "Ran out of script space when compiling script");
-    exit();
-  }
-}
+VOID ScriptOpStop();
 
-STATIC VOID ScriptWriteByte2(UBYTE first, UBYTE second)
-{
-  ScriptEnforceSpace(2);
-  ScriptData[ScriptSize++] = first;
-  ScriptData[ScriptSize++] = second;
-}
+VOID ScriptOpRem(BYTE user);
 
-STATIC VOID ScriptWriteWord(WORD value)
-{
-  ScriptEnforceSpace(2);
-  ScriptData[ScriptSize++] = (value & 0xFF00) >> 8;
-  ScriptData[ScriptSize++] = value & 0xFF;
-}
+VOID ScriptOpPushByte(BYTE value);
 
-STATIC VOID ScriptWriteLong(LONG value)
-{
-  ScriptEnforceSpace(4);
-  ScriptData[ScriptSize++] = ((value) >> 24) & 0xFF;
-  ScriptData[ScriptSize++] = ((value) >> 16) & 0xFF;
-  ScriptData[ScriptSize++] = ((value) >> 8) & 0xFF;
-  ScriptData[ScriptSize++] = (value & 0xFF);
-}
+VOID ScriptOpPushWord(WORD value);
 
-STATIC VOID ScriptOpStop()
-{
-  ScriptWriteByte2(0, 0);
-}
+VOID ScriptOpPushLong(LONG value);
 
-STATIC VOID ScriptOpRem(BYTE user)
-{
-  ScriptWriteByte2(1, user);
-}
+VOID ScriptOpPushStack(BYTE where);
 
-STATIC VOID ScriptOpPushByte(BYTE value)
-{
-  ScriptWriteByte2(2, value);
-}
+VOID ScriptOpPop(BYTE where);
 
-STATIC VOID ScriptOpPushWord(WORD value)
-{
-  ScriptWriteByte2(3, 0);
-  ScriptWriteWord(value);
-}
+VOID ScriptOpLoadPalette(UWORD assetId);
 
-STATIC VOID ScriptOpPushLong(LONG value)
-{
-  ScriptWriteByte2(4, 0);
-  ScriptWriteWord(value);
-}
+VOID ScriptBegin();
 
-STATIC VOID ScriptOpPushStack(BYTE where)
-{
-  ScriptWriteByte2(5, where);
-}
+VOID ScriptEnd();
 
-STATIC VOID ScriptOpPop(BYTE where)
-{
-  ScriptWriteByte2(6, 0);
-}
-
-/* 0x7 - Reserved */
-/* 0x8 - j */
-/* 0x9 - jz */
-/* 0xA - jnz */
-/* 0xB - je */
-/* 0xC - jne */
-/* 0xD - jg */
-/* 0xE - jge */
-/* 0xF - jl */
-/* 0x10 - jle */
-/* 0x11 - load */
-/* 0x12 - save */
-/* 0x13 - gload */
-/* 0x14 - gsave */
-/* 0x15 - Reserved */
-/* 0x16 - Reserved */
-/* 0x17 - Reserved */
-/* 0x18 - Reserved */
-/* 0x19 - Reserved */
-/* 0x1A - OpAdd(vm) */
-/* 0x1B - OpAddQuick(vm) */
-/* 0x1C - OpSub(vm) */
-/* 0x1D - OpSubQuick(vm) */
-
-STATIC VOID ScriptOpRoom()
-{
-  ScriptWriteByte2(0x20, 0);
-}
-
-/* 0x40 - Audio */
-/* 0x80 - Print */
-
-STATIC VOID ScriptBegin()
-{
-  ScriptSize = 0;
-}
-
-STATIC VOID ScriptEnd()
-{
-  ScriptOpStop();
-}
+VOID ScriptSave(SquawkPtr archive, UWORD id, UWORD scriptType);

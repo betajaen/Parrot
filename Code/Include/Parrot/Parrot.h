@@ -255,8 +255,6 @@ struct GAME_INFO
   UWORD                     gi_Height;
   UWORD                     gi_Depth;
   UWORD                     gi_NumAssetTables;
-  UWORD                     gi_StartPalette;
-  UWORD                     gi_StartCursorPalette;
   UWORD                     gi_StartScript;
 };
 
@@ -489,9 +487,11 @@ struct ENTRANCE
 
 struct SCRIPT
 {
+  ASSET_HEADER;
+  
   UWORD  sc_Type;
-  UWORD  sc_Flags;
-  ULONG  sc_Length;
+  UWORD  sc_Length;
+  UBYTE  sc_Data[];
 };
 
 #define SCRIPT_TYPE_ROOM   1
@@ -499,6 +499,7 @@ struct SCRIPT
 #define SCRIPT_TYPE_ACTOR  3
 #define SCRIPT_TYPE_UI     4
 #define SCRIPT_TYPE_SCENE  5
+#define SCRIPT_TYPE_START  6
 
 struct VIRTUAL_MACHINE
 {
@@ -508,7 +509,7 @@ struct VIRTUAL_MACHINE
   UWORD            vm_Timer;
   UWORD            vm_StackHead;
   UBYTE*           vm_Instructions;
-  UWORD            vm_Stack[MAX_VM_STACK_SIZE];
+  LONG             vm_Stack[MAX_VM_STACK_SIZE];
 };
 
 #define VM_STATE_FREE  0

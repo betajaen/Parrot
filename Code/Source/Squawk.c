@@ -303,14 +303,72 @@ STATIC struct ANY_ASSET* Load(ULONG classType, struct NEW_ARCHIVE* archive, stru
       (ULONG)id
     );
   }
-
   
-
   asset = (struct ANY_ASSET*) NewObject(arena, assetLength, FALSE);
-
+  
   Read(archive->ar_File, (APTR)asset, assetLength);
-
+  
   return asset;
+}
+
+
+STATIC BOOL LoadInto(ULONG classType, struct NEW_ARCHIVE* archive, struct ANY_ASSET* asset, ULONG assetSize, UWORD id)
+{
+  ULONG assetLength;
+
+  asset = NULL;
+
+  archive->ar_Gc = GcCounter;
+
+  if (NavigateToAssetList(archive, classType) == FALSE)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (2) No assets of type are in the given archive"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Archive")
+      PARROT_ERR_INT("Asset"),
+      IDtoStr(classType, strType),
+      (ULONG)archive->ar_Id,
+      (ULONG)id
+    );
+  }
+
+  assetLength = NavigateToId(archive, id);
+
+  if (0 == assetLength)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (3) No assets of this id are in the given asset list in this archive"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Archive")
+      PARROT_ERR_INT("Asset"),
+      IDtoStr(classType, strType),
+      (ULONG)archive->ar_Id,
+      (ULONG)id
+    );
+  }
+
+  if (assetLength > assetSize)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (4) Asset does not fit in given asset"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Asset Size (Given)")
+      PARROT_ERR_INT("Asset Size (Stored"),
+      IDtoStr(classType, strType),
+      (ULONG) id,
+      (ULONG) assetSize,
+      (ULONG) assetLength
+    );
+  }
+  
+  Read(archive->ar_File, (APTR)asset, assetLength);
+  
+  return TRUE;
 }
 
 /* Public */
@@ -346,6 +404,14 @@ struct ANY_ASSET* GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id
   archive = GetOrOpenArchive(archiveId);
 
   return Load(classType, archive, arena, id);
+}
+
+BOOL GetAssetFromArchiveInto(ULONG classType, UWORD archiveId, UWORD id, struct ANY_ASSET* asset, ULONG assetSize)
+{
+  struct NEW_ARCHIVE* archive;
+  archive = GetOrOpenArchive(archiveId);
+
+  return LoadInto(classType, archive, asset, assetSize, id);
 }
 
 VOID GcArchives(UWORD olderThan)

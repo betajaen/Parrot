@@ -31,4 +31,6 @@ UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* ar
 
 APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena);
 
+BOOL GetAssetFromArchiveInto(ULONG classType, UWORD archiveId, UWORD id, struct ANY_ASSET* asset, ULONG assetSize);
+
 struct ANY_ASSET* GcArchives(UWORD olderThan);

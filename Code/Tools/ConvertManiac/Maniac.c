@@ -29,7 +29,7 @@
 #include <Squawk/Squawk.h>
 #include "Maniac.h"
 
-STATIC SquawkPtr master;
+STATIC SquawkPtr primary;
 
 extern struct GAME_INFO GameInfo;
 extern UWORD GameLanguage;
@@ -38,6 +38,7 @@ VOID ExportTables(SquawkPtr master);
 VOID ReadGameInfo();
 VOID ExportGameInfo(SquawkPtr master);
 VOID ExportPalettes(SquawkPtr master);
+VOID ExportStartScript(SquawkPtr master);
 VOID ExportLfl(UWORD lflNum);
 VOID StartTables();
 VOID EndTables();
@@ -56,10 +57,10 @@ VOID ConverterMain()
   StartTables();
   StartDialogue();
 
-  master = OpenSquawkFile(0);
+  primary = OpenSquawkFile(0);
 
   ReadGameInfo();
-  ExportPalettes(master);
+  ExportPalettes(primary);
 
   StartLfl();
   for (roomNum = 1; roomNum < MM_NUM_ROOMS; roomNum++)
@@ -68,15 +69,17 @@ VOID ConverterMain()
   }
   EndLfl();
 
-  ExportDialogue(master);
-  ExportTables(master);
+  ExportStartScript(primary);
+
+  ExportDialogue(primary);
+  ExportTables(primary);
 
   GameInfo.gi_NumAssetTables = GetNumTables();
 
-  ExportGameInfo(master);
+  ExportGameInfo(primary);
 
-  CloseSquawkFile(master);
-  master = NULL;
+  CloseSquawkFile(primary);
+  primary = NULL;
 
   EndDialogue();
   EndTables();

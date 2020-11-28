@@ -27,9 +27,15 @@
 
 #include <exec/types.h>
 #include <Squawk/Squawk.h>
+#include <Squawk/ScriptWriter.h>
+
 #include "Maniac.h"
 
 struct GAME_INFO GameInfo;
+
+STATIC UWORD GamePaletteId;
+STATIC UWORD GameCursorPaletteId;
+STATIC UWORD GameStartScript;
 
 VOID ReadGameInfo()
 {
@@ -41,8 +47,6 @@ VOID ReadGameInfo()
   GameInfo.gi_Width = 320;
   GameInfo.gi_Height = 200;
   GameInfo.gi_Depth = 4;
-  GameInfo.gi_StartPalette = 0;
-  GameInfo.gi_StartCursorPalette = 0;
   GameInfo.gi_StartScript = 0;
   GameInfo.gi_NumAssetTables = 0;
 
@@ -50,6 +54,8 @@ VOID ReadGameInfo()
 
 VOID ExportGameInfo(SquawkPtr archive)
 {
+  GameInfo.gi_StartScript = GameStartScript;
+
   StartAssetList(archive, CT_GAME_INFO, MM_SHARED_CHAPTER);
   SaveAsset(archive, (struct ANY_ASSET*)&GameInfo, sizeof(struct GAME_INFO));
   EndAssetList(archive);
@@ -189,12 +195,23 @@ STATIC VOID ExportCursorPalette(SquawkPtr archive, UWORD id)
 
 VOID ExportPalettes(SquawkPtr archive)
 {
-  GameInfo.gi_StartPalette = GenerateAssetId(CT_PALETTE);
-  GameInfo.gi_StartCursorPalette = GenerateAssetId(CT_PALETTE);
+  GamePaletteId = GenerateAssetId(CT_PALETTE);
+  GameCursorPaletteId = GenerateAssetId(CT_PALETTE);
 
   StartAssetList(archive, CT_PALETTE, MM_SHARED_CHAPTER);
-  ExportGamePalette(archive, GameInfo.gi_StartPalette);
-  ExportCursorPalette(archive, GameInfo.gi_StartCursorPalette);
+  ExportGamePalette(archive, GamePaletteId);
+  ExportCursorPalette(archive, GameCursorPaletteId);
   EndAssetList(archive);
 
+}
+
+VOID ExportStartScript(SquawkPtr archive)
+{
+  GameStartScript = GenerateAssetId(CT_SCRIPT);
+
+  ScriptBegin();
+  ScriptOpLoadPalette(GamePaletteId);
+  ScriptEnd();
+
+  ScriptSave(archive, GameStartScript, SCRIPT_TYPE_START);
 }

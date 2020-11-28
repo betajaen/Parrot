@@ -132,6 +132,31 @@ struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct AREN
   return GetAssetFromArchive(assetType, archiveId, id, arena);
 }
 
+BOOL GetAssetInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize)
+{
+  UWORD archiveId;
+
+  archiveId = FindAssetArchive(id, chapter, assetType);
+
+  if (NO_ARCHIVE == archiveId)
+  {
+    PARROT_ERR(
+      "Unable to load asset\n"
+      "Reason: (1) Asset Id was not found in any asset table"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Chapter"),
+      IDtoStr(assetType, strType),
+      (ULONG)id,
+      (ULONG)chapter
+    );
+  }
+
+  /* FUTURE - CACHING */
+
+  return GetAssetFromArchiveInto(assetType, archiveId, id, asset, assetSize);
+}
+
 VOID ReleaseAsset(struct ANY_ASSET* asset)
 {
   /* FUTURE */

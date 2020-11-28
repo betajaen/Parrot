@@ -42,6 +42,7 @@ struct ARENA
 struct ARENA* ArenaGame = NULL;
 struct ARENA* ArenaChapter = NULL;
 struct ARENA* ArenaRoom = NULL;
+struct ARENA* ArenaFrameTemp = NULL;
 
 STATIC CHAR strType[5];
 

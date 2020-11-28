@@ -31,4 +31,6 @@ EXPORT VOID ScriptShutdown();
 
 EXPORT VOID RunScript(UWORD id);
 
+EXPORT VOID RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena);
+
 EXPORT VOID TickVirtualMachines();

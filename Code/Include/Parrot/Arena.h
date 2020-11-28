@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom;
+extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom, *ArenaFrameTemp;
 
 struct ARENA* ArenaOpen(ULONG name, ULONG size, ULONG requirements);
 

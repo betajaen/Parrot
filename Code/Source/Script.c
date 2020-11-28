@@ -36,6 +36,8 @@ STATIC struct VIRTUAL_MACHINE VirtualMachine[MAX_VIRTUAL_MACHINES];
 
 STATIC VOID TickVirtualMachine(struct VIRTUAL_MACHINE* vm);
 
+VOID GameLoadPalette(UWORD asset);
+
 #define VM_PARAM_B(VM, WHERE) 0
 #define VM_PARAM_W(VM, WHERE) 0
 #define VM_PARAM_L(VM, WHERE) 0
@@ -71,6 +73,17 @@ VOID ScriptShutdown()
 {
 }
 
+STATIC VOID PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
+{
+  vm->vm_PC = 0;
+  vm->vm_Script = script;
+  vm->vm_StackHead = 0;
+  vm->vm_Stack[0] = 0;
+  vm->vm_State = VM_STATE_RUN;
+  vm->vm_Timer = 0;
+  vm->vm_Instructions = ((UBYTE*)&script->sc_Data);
+}
+
 STATIC VOID StartScript(struct SCRIPT* script)
 {
   struct VIRTUAL_MACHINE* vm;
@@ -102,6 +115,27 @@ VOID RunScript(UWORD id)
   script = LoadAssetT(struct SCRIPT, ArenaChapter, archive, CT_SCRIPT, id, CHUNK_FLAG_ARCH_ANY);
 #endif
   StartScript(script);
+}
+
+VOID RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena)
+{
+  struct SCRIPT* script;
+  struct VIRTUAL_MACHINE vm;
+
+  InitStackVar(vm);
+
+  script = (struct SCRIPT*) GetAsset(id, chapter, CT_SCRIPT, arena);
+
+  PrepareVm(&vm, script);
+
+  while (TRUE)
+  {
+    if (vm.vm_State == VM_STATE_FREE)
+      break;
+
+    TickVirtualMachine(&vm);
+  }
+
 }
 
 VOID TickVirtualMachines()
@@ -202,6 +236,11 @@ STATIC INLINE LONG StackPopL(struct VIRTUAL_MACHINE* vm)
   value = vm->vm_Stack[vm->vm_StackHead];
   --vm->vm_StackHead;
   return value;
+}
+
+STATIC INLINE UWORD StackPopUWord(struct VIRTUAL_MACHINE* vm)
+{
+  return (UWORD)StackPopL(vm);
 }
 
 /*
@@ -508,12 +547,23 @@ STATIC INLINE VOID OpSubQuick(struct VIRTUAL_MACHINE* vm)
   StackPushL(vm, result);
 }
 
-/* @UNIMPLEMENTED OpRoom */
+/* lpal
+   LoadPalette
+   pal <- stack[0]
+   2 => 90, val
+*/
+STATIC INLINE VOID OpLoadPalette(struct VIRTUAL_MACHINE* vm)
+{
+  UWORD asset;
+  
+  asset = StackPopUWord(vm);
+  
+  GameLoadPalette(asset);
+}
 
-/* @UNIMPLEMENTED OpAudio */
+/* @UNIMPLEMENTED OpLoadRoom */
 
 /* @UNIMPLEMENTED OpPrint */
-
 
 STATIC VOID TickVirtualMachine(struct VIRTUAL_MACHINE* vm)
 {
@@ -553,8 +603,7 @@ STATIC VOID TickVirtualMachine(struct VIRTUAL_MACHINE* vm)
     case 0x1B: OpAddQuick(vm); break;
     case 0x1C: OpSub(vm); break;
     case 0x1D: OpSubQuick(vm); break;
-    /* 0x20 - Room */
-    /* 0x40 - Audio */
-    /* 0x80 - Print */
+    case 0x20: OpLoadPalette(vm); break;
+    /* 0x21 - lroom */
   }
 }
