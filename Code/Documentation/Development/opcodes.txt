@@ -1,77 +1,78 @@
 Virtual Machine Opcodes
 # Opcodes
 
-_Id_ _Len_  _Name_       _Arguments_                  _Description_
-0  2    stop                                  Stop Script
-1  2    rem        user.b                     Remark (Ignored)
-2  2    pushb      val.b                      push byte onto stack
-3  4    pushw      pad.x, val.w               push word onto stack
-4  6    pushl      pad.x, val.l               push long onto stack
-5  2    pushs      where.b                    push stack[-where] onto stack
-6  2    pop                                   pop stack. value is discarded
-7  Reserved
-8  2    j          addr.sb                    pc <- pc + addr * 2
-9  2    jz         addr.sb                    pc <- pc + addr * 2
-                                              if stack[0] = 0
-                                              and pop stack
-A  2    jnz        addr.sb                    pc <- pc + addr * 2
-                                              if stack[0] <> 0
-                                              and pop stack twice
-B  2    je         addr.sb                    pc <- pc + addr * 2
-                                              if stack[-1] = stack[0]
-                                              and pop stack twice
-C  2    jne        addr.sb                    pc <- pc + addr * 2
-                                              if stack[-1] <> stack[0]
-                                              and pop stack twice
-D  2    jg         addr.sb                    pc <- pc + addr * 2
-                                              if stack[-1] > stack[0]
-                                              and pop stack twice
-E  2    jge        addr.sb                    pc <- pc + addr * 2
-                                              if stack[-1] >= stack[0]
-                                              and pop stack twice
-F  2    jl         addr.sb                    pc <- pc + addr * 2
-                                              if stack[-1] < stack[0]
-                                              and pop stack twice
-10 2    jle        addr.sb                    pc <- pc + addr * 2
-                                              if stack[-1] <= stack[0]
-                                              and pop stack twice
-11 2    load       var.lb                     push vars[var] onto stack
-12 2    save       var.lb                     vars[var] = stack[0]
-                                              and pop stack
-13 2    gload      var.b                      push globals[var] onto stack
-14 2    gsave      var.b                      globals[var] = stack[0]
-                                              and pop stack
-15 Reserved
-16 Reserved
-17 Reserved
-18 Reserved
-19 Reserved
-1A 2    add                                   t <- stack[-1] + stack[0]
-                                              pop stack twice
-                                              push t
-                                              Stack: -1 = lhs.l
-                                              Stack:  0 = rhs.l
-1B 2    addq       rhs.sb                     t <- stack[0] + rhs
-                                              pop stack
-                                              push t
-                                              Stack: 0 = left.l
-1C 2    sub                                   t <- stack[-1] - stack[0]
-                                              pop stack twice
-                                              push t
-                                              Stack: -1 = lhs.l
-                                              Stack:  0 = rhs.l
-1D 2    subq       rhs.sb                     t <- stack[-1] - val
-                                              pop stack
-                                              push t
-                                              Stack: 0 = left.l
-20 2    room                                  load room[0] (as Room)
-                                              pop stack
-                                              Stack: 0 = room.a
-40 2    audio                                 play stack[0] (as SFX Asset)
-                                              pop stack
-                                              Stack: 0 = sfx.a
-80 2    print                                 print stack[0] (as Dialogue)
-                                              at y stack[-1] * 8
-                                              pop stack twice
-                                              Stack: -1 = y.b
-                                              Stack:  0 = text.d
+Each opcode is 2-bytes.
+
+First 6 bits are the opcode, remaining bits is the argument (10-bits)
+
+Constants may be stored in the argument, or in the ULONG constants
+table, which is per script.
+
+_Id_      _Name_      _Argument_                    _Operation_
+00      stop                                  Stop Script
+01      rem       user                        Remark
+02      pushs     value.s                     Push signed value
+03      pushu     value.u                     Push unsigned value
+04      pushcs    value.s                     Push signed constant
+05      pushcu    value.u                     Push unsigned constant
+06      dup                                   Duplicate top of stack
+07      dis                                   Discard top of stack
+08      load      index.u                     Push from self field
+09      save      index.u                     Pop to self field
+0A      gload     index.u                     Push to global field
+0B      gsave     index.u                     Pop to global field
+0C      cmp                                   Compare s[0] and s[-1]
+0D      cmpc      value.s                     Compare s[0] and value
+0E      j         address.s                   pc=addr always
+0F      je        address.s                   pc=addr if equal
+10      jne       address.s                   pc=addr if not equal
+11      jg        address.s                   pc=addr if greater
+12      jge       address.s                   pc=addr if greater/equal
+13      jl        address.s                   pc=addr if less
+14      jle       address.s                   pc=addr if less/equal
+15      add                                   pop s[0],s[-1] s[0]=a+b
+16      addq      value.s                     pop s[0] s[0]=a+value
+17      sub                                   pop s[0],s[-1] s[0]=a-b
+18      subq      value.s                     pop s[0] s[0]=a-value
+19      mul                                   pop s[0],s[-1] s[0]=a*b
+1A      div                                   pop s[0],s[-1] s[0]=a/b
+1B      shl       bit                         pop s[0], s[0]=a<<bits
+1C      shr       bit                         pop s[0], s[0]=a>>bits
+1E      and                                   pop s[0],s[-1] s[0]=a&b
+1D      or                                    pop s[0],s[-1] s[0]=a|b
+1F      xor                                   pop s[0],s[-1] s[0]=a^b
+20      not                                   pop s[0], s[0]=~a
+21      neg                                   pop s[0], s[0]=-a
+22      gbit      bit                         pop s[0], s[0]=a[bit]
+23      sbit      bit                         pop s[0], s[0]=a&1<<bit
+24      RESERVED
+25      RESERVED
+26      lpal      asset|stack                 Load and Use Palette
+27      RESERVED
+28      RESERVED
+29      RESERVED
+2A      RESERVED
+2B      RESERVED
+2C      RESERVED
+2D      RESERVED
+2E      RESERVED
+2F      RESERVED
+30      RESERVED
+31      RESERVED
+32      RESERVED
+33      RESERVED
+34      RESERVED
+35      RESERVED
+36      RESERVED
+37      RESERVED
+38      RESERVED
+39      RESERVED
+3A      RESERVED
+3B      RESERVED
+3C      RESERVED
+3D      RESERVED
+3E      RESERVED
+3F      sys      argument                     Expanded Call
+
+* asset|stack refers to when the value is 0 it should pop s[0] and use that
+  as the asset ID, otherwise use the 10-bit value.
