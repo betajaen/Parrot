@@ -145,13 +145,11 @@ VOID ScriptEnd()
   ScriptOpStop();
 }
 
-VOID ScriptSave(SquawkPtr archive, UWORD id, UWORD scriptType)
+VOID ScriptSave(SquawkPtr archive, UWORD id)
 {
   struct SCRIPT script;
   script.as_Id = id;
   script.as_Flags = CHUNK_FLAG_ARCH_ANY;
-  script.sc_Type = scriptType;
-  script.sc_Length = ScriptSize;
 
   SaveAssetExtra(
     archive,

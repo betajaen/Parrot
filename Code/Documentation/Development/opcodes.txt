@@ -18,12 +18,12 @@ Dialogue ref ids can be made up with the two push dialogue opcodes; pdt/pdi.
 _Id_      _Name_      _Argument_                    _Operation_
 00      stop                                  Stop Script
 01      rem       user                        Remark
-02      pushs     value.s                     push v
-03      pushu     value.u                     push v
-04      pushcs    value.s                     push v
-05      pushcu    value.u                     push v
-06      dup                                   pop(a) push a,a
-07      dis                                   pop(a)
+02      push      value.u                     push v
+03      pushs     value.s                     push v (signed)
+04      pushc     index.u                     push constant[i]
+05      dup                                   pop(a) push a,a
+06      dis                                   pop(a)
+07      RESERVED
 08      load      index.u                     push self[i]
 09      save      index.u                     pop(a) self[i]=a
 0A      gload     index.u                     push global[i]
@@ -42,7 +42,7 @@ _Id_      _Name_      _Argument_                    _Operation_
 17      sub                                   pop(b,a) push a-b
 18      subq      value.s                     pop(a)   push a-v
 19      mul                                   pop(b,a) push a*b
-1A      div                                   pop(b,a) push a/b
+1A      RESERVED
 1B      shl       shift                       pop(a)   push a<<s
 1C      shr       shift                       pop(a)   push a>>s
 1E      and                                   pop(b,a) push a&b
@@ -98,6 +98,14 @@ uw
 bit
 
   unsigned number with a value upto 31
+
+address
+
+  absolute address from the start of the script.
+
+  10-bit unsigned integer.
+
+  address value is always multiplied by 2 before use.
 
 asset|stack
 

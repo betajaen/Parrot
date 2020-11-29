@@ -485,21 +485,15 @@ struct ENTRANCE
       Script
 */
 
+typedef UWORD OPCODE;
+
 struct SCRIPT
 {
   ASSET_HEADER;
   
-  UWORD  sc_Type;
-  UWORD  sc_Length;
-  UBYTE  sc_Data[];
+  LONG   sc_Constants[MAX_CONSTANTS_PER_SCRIPT];
+  OPCODE sc_Opcodes[];
 };
-
-#define SCRIPT_TYPE_ROOM   1
-#define SCRIPT_TYPE_ENTITY 2
-#define SCRIPT_TYPE_ACTOR  3
-#define SCRIPT_TYPE_UI     4
-#define SCRIPT_TYPE_SCENE  5
-#define SCRIPT_TYPE_START  6
 
 struct VIRTUAL_MACHINE
 {
@@ -508,7 +502,11 @@ struct VIRTUAL_MACHINE
   struct SCRIPT*   vm_Script;
   UWORD            vm_Timer;
   UWORD            vm_StackHead;
-  UBYTE*           vm_Instructions;
+  UWORD            vm_Cmp;
+  UWORD            vm_Reserved;
+  DIALOGUE         vm_DialogueRegister;
+  OPCODE*          vm_Instructions;
+  LONG*            vm_Constants;
   LONG             vm_Stack[MAX_VM_STACK_SIZE];
 };
 

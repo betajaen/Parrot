@@ -51,4 +51,4 @@ VOID ScriptBegin();
 
 VOID ScriptEnd();
 
-VOID ScriptSave(SquawkPtr archive, UWORD id, UWORD scriptType);
+VOID ScriptSave(SquawkPtr archive, UWORD id);

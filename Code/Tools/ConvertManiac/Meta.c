@@ -213,5 +213,5 @@ VOID ExportStartScript(SquawkPtr archive)
   ScriptOpLoadPalette(GamePaletteId);
   ScriptEnd();
 
-  ScriptSave(archive, GameStartScript, SCRIPT_TYPE_START);
+  ScriptSave(archive, GameStartScript);
 }

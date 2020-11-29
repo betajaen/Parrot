@@ -81,7 +81,8 @@ STATIC VOID PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
   vm->vm_Stack[0] = 0;
   vm->vm_State = VM_STATE_RUN;
   vm->vm_Timer = 0;
-  vm->vm_Instructions = ((UBYTE*)&script->sc_Data);
+  vm->vm_Constants = (ULONG*)&script->sc_Constants;
+  vm->vm_Instructions = ((UBYTE*)&script->sc_Opcodes);
 }
 
 STATIC VOID StartScript(struct SCRIPT* script)
@@ -169,441 +170,661 @@ VOID TickVirtualMachines()
 
 /*
 
-    Internal Stack Functions
-
-*/
-
-STATIC INLINE VOID StackPushW(struct VIRTUAL_MACHINE* vm, WORD value)
-{
-
-  if (vm->vm_StackHead == MAX_VM_STACK_SIZE)
-  {
-    PARROT_ERR(
-      "VM Is out of Stack Space!\n"
-      "Reason: Tried to push a byte on stack, and ran out of space"
-      PARROT_ERR_STR("Function")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "StackPushW",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  vm->vm_Stack[vm->vm_StackHead] = value;
-  ++vm->vm_StackHead;
-}
-
-STATIC INLINE VOID StackPushL(struct VIRTUAL_MACHINE* vm, LONG value)
-{
-
-  if (vm->vm_StackHead == MAX_VM_STACK_SIZE)
-  {
-    PARROT_ERR(
-      "VM Is out of Stack Space!\n"
-      "Reason: Tried to push a byte on stack, and ran out of space"
-      PARROT_ERR_STR("Function")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "StackPushW",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  vm->vm_Stack[vm->vm_StackHead] = value;
-  ++vm->vm_StackHead;
-}
-
-STATIC INLINE LONG StackPopL(struct VIRTUAL_MACHINE* vm)
-{
-  LONG value;
-
-  if (vm->vm_StackHead == 0)
-  {
-    PARROT_ERR(
-      "VM stack underflow!\n"
-      "Reason: Tried to pop from the stack when it is empty!"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "pop",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  value = vm->vm_Stack[vm->vm_StackHead];
-  --vm->vm_StackHead;
-  return value;
-}
-
-STATIC INLINE UWORD StackPopUWord(struct VIRTUAL_MACHINE* vm)
-{
-  return (UWORD)StackPopL(vm);
-}
-
-/*
-
     Opcodes
 
 */
+#define DECL_OPCODE(NUM) \
+  STATIC VOID Op_##NUM(struct VIRTUAL_MACHINE* vm, UWORD opcode)
 
-/* stop
-   Stop Script
-   2 => 0, 0
-*/
-STATIC INLINE VOID OpStop(struct VIRTUAL_MACHINE* vm)
+#define VM_CONSTANT_MASK (MAX_CONSTANTS_PER_SCRIPT - 1);
+#define VM_GLOBALS_MASK (MAX_SCRIPT_GLOBALS-1)
+
+#define VM_ARG_S     (0) /* FUTURE */
+#define VM_ARG_U     (0) /* FUTURE */
+#define VM_CONST(X)  (0) /* FUTURE */
+
+#define VM_PUSH(X)      /* FUTURE */
+#define VM_POP       (0) /* FUTURE */
+#define VM_TOP       (0) /* FUTURE */
+
+#define VM_CMP_EQ     1
+#define VM_CMP_LESS   2
+#define VM_CMP_MORE   4
+
+/* stop */
+DECL_OPCODE(00)
 {
   vm->vm_State = VM_STATE_STOP;
 }
 
-/* rem
-   Remark
-   2 => 1, user
-*/
-STATIC INLINE VOID OpRem(struct VIRTUAL_MACHINE* vm)
+/* rem */
+DECL_OPCODE(01)
 {
-  vm->vm_PC += 2;
+  /* No Operation */
+  vm->vm_PC++;
 }
 
-/* pushb
-   Push Byte onto Stack
-   2 => 2, value
-*/
-STATIC INLINE VOID OpPushByte(struct VIRTUAL_MACHINE* vm)
+/* push */
+DECL_OPCODE(02)
 {
-  BYTE value;
+  LONG v;
 
-  if (vm->vm_StackHead == MAX_VM_STACK_SIZE)
-  {
-    PARROT_ERR(
-      "VM Is out of Stack Space!\n"
-      "Reason: Tried to push a byte on stack, and ran out of space"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "pushb",
-      (ULONG) GET_ASSET_ID(vm->vm_Script),
-      (ULONG) vm->vm_PC
-    );
-  }
-
-  value = VM_PARAM_B(VM, 1);
-
-  vm->vm_Stack[vm->vm_StackHead] = value;
-  ++vm->vm_StackHead;
-  vm->vm_PC += 2;
+  v = VM_ARG_S;
+  VM_PUSH(v);
+  vm->vm_PC++;
 }
 
-/* pushw 
-   Push Word onto Stack
-   4 => 3, 0, value.w[1], value.w[0]
-*/
-STATIC INLINE VOID OpPushWord(struct VIRTUAL_MACHINE* vm)
+/* pushu */
+DECL_OPCODE(03)
 {
-  WORD value;
+  LONG v;
 
-  if (vm->vm_StackHead == MAX_VM_STACK_SIZE)
-  {
-    PARROT_ERR(
-      "VM Is out of Stack Space!\n"
-      "Reason: Tried to push a word on stack, and ran out of space"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "pushw",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  value = VM_PARAM_W(vm, 2);
-
-  vm->vm_Stack[vm->vm_StackHead] = value;
-  ++vm->vm_StackHead;
-  vm->vm_PC += 4;
+  v = VM_ARG_U;
+  VM_PUSH(v);
+  vm->vm_PC++;
 }
 
-/* pushl
-   Push Long onto Stack
-   6 => 4, 0, value.l[3], value.[2], value.w[2], value.w[0]
-*/
-STATIC INLINE VOID OpPushLong(struct VIRTUAL_MACHINE* vm)
+/* pushc */
+DECL_OPCODE(04)
 {
-  LONG value;
+  LONG vi;
 
-  if (vm->vm_StackHead == MAX_VM_STACK_SIZE)
-  {
-    PARROT_ERR(
-      "VM Is out of Stack Space!\n"
-      "Reason: Tried to push a long on stack, and ran out of space"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "pushl",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
+  vi = VM_ARG_U & VM_CONSTANT_MASK;
+  vi = VM_CONST(vi);
 
-  value = VM_PARAM_W(vm, 2);
-
-  vm->vm_Stack[vm->vm_StackHead] = value;
-  ++vm->vm_StackHead;
-  vm->vm_PC += 6;
+  VM_PUSH(vi);
+  vm->vm_PC++;
 }
 
-/* pushs
-   Push Stack value onto Stack
-   2 => 5, where
-*/
-STATIC INLINE VOID OpPushStack(struct VIRTUAL_MACHINE* vm)
+/* dup */
+DECL_OPCODE(05)
 {
-  BYTE where;
-  WORD loc;
+  LONG v;
 
-  where = VM_PARAM_B(vm, 1);
-
-  loc = vm->vm_StackHead - (WORD) where;
-
-  if (loc < 0)
-  {
-    PARROT_ERR(
-      "Stack Outof bounds!\n"
-      "Reason: Tried to push a stack value from the stack on an out of bounds stack area"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "pushs",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  vm->vm_Stack[vm->vm_StackHead] = vm->vm_Stack[loc];
-  ++vm->vm_StackHead;
-  vm->vm_PC += 2;
+  v = VM_TOP;
+  VM_PUSH(v);
+  vm->vm_PC++;
 }
 
-/* pop
-   Pop Stack value from the stack and discard value.
-   2 => 6, 0
-*/
-STATIC INLINE VOID OpPop(struct VIRTUAL_MACHINE* vm)
+/* dis */
+DECL_OPCODE(06)
 {
-  if (vm->vm_StackHead == 0)
-  {
-    PARROT_ERR(
-      "VM stack underflow!\n"
-      "Reason: Tried to pop from the stack when it is empty!"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "pop",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  --vm->vm_StackHead;
-  vm->vm_PC += 2;
+  LONG x;
+  x = VM_POP;
+  vm->vm_PC++;
 }
 
-
-/* j
-   Jump to relative address
-   2 => 7, address
-*/
-STATIC INLINE VOID OpJump(struct VIRTUAL_MACHINE* vm)
+/* RESERVED */
+DECL_OPCODE(07)
 {
-  LONG newPc;
-  newPc = VM_PARAM_B(VM, 1);
-  newPc *= 2;
-  newPc += vm->vm_PC;
-
-  if (newPc < 0)
-  {
-    PARROT_ERR(
-      "Program Counter underflow!\n"
-      "Reason: Tried to jump to an address outside script space"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "j",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  if (newPc >= vm->vm_Script->sc_Length)
-  {
-    PARROT_ERR(
-      "Program Counter overflow!\n"
-      "Reason: Tried to jump to an address outside script space"
-      PARROT_ERR_STR("Opcode")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("PC"),
-      "j",
-      (ULONG)GET_ASSET_ID(vm->vm_Script),
-      (ULONG)vm->vm_PC
-    );
-  }
-
-  vm->vm_PC = newPc;
+  vm->vm_PC++;
 }
 
-/* @UNIMPLEMENTED OpJumpZero */
-
-/* @UNIMPLEMENTED OpJumpNotZero */
-
-/* @UNIMPLEMENTED OpJumpEqual */
-
-/* @UNIMPLEMENTED OpJumpNotEqual */
-
-/* @UNIMPLEMENTED OpJumpGreater */
-
-/* @UNIMPLEMENTED OpJumpGreaterEqual */
-
-/* @UNIMPLEMENTED OpJumpLess */
-
-/* @UNIMPLEMENTED OpLoad */
-
-/* @UNIMPLEMENTED OpSave */
-
-/* @UNIMPLEMENTED OpGlobalLoad */
-
-/* @UNIMPLEMENTED OpGlobalSave */
-
-/* add
-   Add
-   lhs <- stack[-1]
-   rhs <- stack[0]
-   2 => 1A, 0
-*/
-STATIC INLINE VOID OpAdd(struct VIRTUAL_MACHINE* vm)
+/* FUTURE load */
+DECL_OPCODE(08)
 {
-  LONG lhs, rhs, result;
-
-  rhs = StackPopL(vm);
-  lhs = StackPopL(vm);
-
-  result = lhs + rhs;
-
-  StackPushL(vm, result);
+  vm->vm_PC++;
 }
 
-/* addq
-   AddQuick
-   lhs <- stack[0]
-   rhs <- val
-   2 => 1B, val
-*/
-STATIC INLINE VOID OpAddQuick(struct VIRTUAL_MACHINE* vm)
+/* FUTURE save */
+DECL_OPCODE(09)
 {
-  LONG lhs, rhs, result;
-
-  lhs = StackPopL(vm);
-  rhs = VM_PARAM_B(vm, 1);
-
-  result = lhs + rhs;
-
-  StackPushL(vm, result);
+  vm->vm_PC++;
 }
 
-/* sub
-   Sub
-   lhs <- stack[-1]
-   rhs <- stack[0]
-   2 => 1C, 0
-*/
-STATIC INLINE VOID OpSub(struct VIRTUAL_MACHINE* vm)
+/* gload */
+DECL_OPCODE(0A)
 {
-  LONG lhs, rhs, result;
+  LONG vi;
+  vi = VM_ARG_U & VM_GLOBALS_MASK;
+  vi = Globals[vi];
 
-  rhs = StackPopL(vm);
-  lhs = StackPopL(vm);
-
-  result = lhs - rhs;
-
-  StackPushL(vm, result);
+  VM_PUSH(vi);
+  vm->vm_PC++;
 }
 
-/* subq
-   SubQuick
-   lhs <- stack[0]
-   rhs <- val
-   2 => 1D, val
-*/
-STATIC INLINE VOID OpSubQuick(struct VIRTUAL_MACHINE* vm)
+/* gsave */
+DECL_OPCODE(0B)
 {
-  LONG lhs, rhs, result;
+  LONG v, i;
+  v = VM_POP;
+  i = VM_ARG_U & VM_GLOBALS_MASK;
 
-  lhs = StackPopL(vm);
-  rhs = VM_PARAM_B(vm, 1);
-
-  result = lhs - rhs;
-
-  StackPushL(vm, result);
+  Globals[i] = v;
+  vm->vm_PC++;
 }
 
-/* lpal
-   LoadPalette
-   pal <- stack[0]
-   2 => 90, val
-*/
-STATIC INLINE VOID OpLoadPalette(struct VIRTUAL_MACHINE* vm)
+/* cmp */
+DECL_OPCODE(0C)
 {
-  UWORD asset;
+  LONG r, l, c;
+
+  r = VM_POP;
+  l = VM_POP;
+
+  c = 0;
+
+  if (l == r)
+    c |= VM_CMP_EQ;
   
-  asset = StackPopUWord(vm);
-  
-  GameLoadPalette(asset);
+  if (l < r)
+    c |= VM_CMP_LESS;
+
+  if (l > r)
+    c |= VM_CMP_MORE;
+
+  vm->vm_Cmp = c;
+  vm->vm_PC++;
 }
 
-/* @UNIMPLEMENTED OpLoadRoom */
+/* cmpc */
+DECL_OPCODE(0D)
+{
+  LONG r, l, c;
 
-/* @UNIMPLEMENTED OpPrint */
+  r = VM_ARG_S;
+  l = VM_POP;
+
+  c = 0;
+
+  if (l == r)
+    c |= VM_CMP_EQ;
+
+  if (l < r)
+    c |= VM_CMP_LESS;
+
+  if (l > r)
+    c |= VM_CMP_MORE;
+
+  vm->vm_Cmp = c;
+  vm->vm_PC++;
+}
+
+/* j */
+DECL_OPCODE(0E)
+{
+  LONG a;
+
+  a = VM_ARG_U;
+  a <<= 2;
+
+  vm->vm_PC = a;
+}
+
+/* je */
+DECL_OPCODE(0F)
+{
+  LONG a;
+  
+  if (vm->vm_Cmp == VM_CMP_EQ)
+  {
+    a = VM_ARG_U;
+    a <<= 1;
+  }
+  else
+  {
+    a = vm->vm_PC + 1;
+  }
+  
+  vm->vm_PC = a;
+}
+
+/* jne */
+DECL_OPCODE(10)
+{
+  LONG a;
+
+  if (vm->vm_Cmp == 0)
+  {
+    a = VM_ARG_U;
+    a <<= 1;
+  }
+  else
+  {
+    a = vm->vm_PC + 1;
+  }
+
+  vm->vm_PC = a;
+}
+
+/* jg */
+DECL_OPCODE(11)
+{
+  LONG a;
+
+  if (vm->vm_Cmp == VM_CMP_MORE)
+  {
+    a = VM_ARG_U;
+    a <<= 1;
+  }
+  else
+  {
+    a = vm->vm_PC + 1;
+  }
+
+  vm->vm_PC = a;
+}
+
+/* jge */
+DECL_OPCODE(12)
+{
+  LONG a;
+
+  if ((vm->vm_Cmp & (VM_CMP_MORE | VM_CMP_EQ)) != 0)
+  {
+    a = VM_ARG_U;
+    a <<= 1;
+  }
+  else
+  {
+    a = vm->vm_PC + 1;
+  }
+
+  vm->vm_PC = a;
+}
+
+/* jl */
+DECL_OPCODE(13)
+{
+  LONG a;
+
+  if (vm->vm_Cmp == VM_CMP_LESS)
+  {
+    a = VM_ARG_U;
+    a <<= 1;
+  }
+  else
+  {
+    a = vm->vm_PC + 1;
+  }
+
+  vm->vm_PC = a;
+}
+
+/* jle */
+DECL_OPCODE(14)
+{
+  LONG a;
+
+  if ((vm->vm_Cmp & (VM_CMP_LESS | VM_CMP_EQ)) != 0)
+  {
+    a = VM_ARG_U;
+    a <<= 1;
+  }
+  else
+  {
+    a = vm->vm_PC + 1;
+  }
+
+  vm->vm_PC = a;
+}
+
+/* add */
+DECL_OPCODE(15)
+{
+  LONG lv, r;
+
+  r = VM_POP;
+  lv = VM_POP;
+  
+  lv += r;
+  VM_PUSH(lv);
+  vm->vm_PC++;
+}
+
+/* addq */
+DECL_OPCODE(16)
+{
+  LONG lv, r;
+
+  r = VM_ARG_S;
+  lv = VM_POP;
+
+  lv += r;
+  VM_PUSH(lv);
+  vm->vm_PC++;
+}
+
+/* sub */
+DECL_OPCODE(17)
+{
+  LONG lv, r;
+
+  r = VM_POP;
+  lv = VM_POP;
+
+  lv -= r;
+  VM_PUSH(lv);
+  vm->vm_PC++;
+}
+
+/* subq */
+DECL_OPCODE(18)
+{
+  LONG lv, r;
+
+  r = VM_ARG_S;
+  lv = VM_POP;
+
+  lv -= r;
+  VM_PUSH(lv);
+  vm->vm_PC++;
+}
+
+/* mul */
+DECL_OPCODE(19)
+{
+  LONG lv, r;
+
+  r = VM_POP;
+  lv = VM_POP;
+
+  lv *= r;
+  VM_PUSH(lv);
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(1A)
+{
+  vm->vm_PC++;
+}
+
+/* shl */
+DECL_OPCODE(1B)
+{
+  LONG lv, r;
+
+  r = VM_ARG_S;
+  lv = VM_POP;
+
+  lv <<= r;
+  VM_PUSH(lv);
+  vm->vm_PC++;
+}
+
+/* shr */
+DECL_OPCODE(1C)
+{
+  LONG lv, r;
+
+  r = VM_ARG_S;
+  lv = VM_POP;
+
+  lv >>= r;
+  VM_PUSH(lv);
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(1D)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(1E)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(1F)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(20)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(21)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(22)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(23)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(24)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(25)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(26)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(27)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(28)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(29)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(2A)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(2B)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(2C)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(2D)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(2E)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(2F)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(30)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(31)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(32)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(33)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(34)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(35)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(36)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(37)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(38)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(39)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(3A)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(3B)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(3C)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(3D)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(3E)
+{
+  vm->vm_PC++;
+}
+
+/* RESERVED */
+DECL_OPCODE(3F)
+{
+  vm->vm_PC++;
+}
+
+#undef DECL_OPCODE
+
+#define CASE_OPCODE(NUM) case 0x##NUM: Op_##NUM(vm, opcode); return
 
 STATIC VOID TickVirtualMachine(struct VIRTUAL_MACHINE* vm)
 {
-  UBYTE opcode;
-
+  UWORD opcode;
+  
   opcode = vm->vm_Instructions[vm->vm_PC];
-
-  switch (opcode)
+  
+  switch (opcode & 0x3F)
   {
-    case 0x0: OpStop(vm); break;
-    case 0x1: OpRem(vm); break;
-    case 0x2: OpPushByte(vm); break;
-    case 0x3: OpPushWord(vm); break;
-    case 0x4: OpPushLong(vm); break;
-    case 0x5: OpPushStack(vm); break;
-    case 0x6: OpPop(vm); break;
-    /* 0x7 - Reserved */
-    case 0x8: OpJump(vm); break;
-    /* 0x9 - jz */
-    /* 0xA - jnz */
-    /* 0xB - je */
-    /* 0xC - jne */
-    /* 0xD - jg */
-    /* 0xE - jge */
-    /* 0xF - jl */
-    /* 0x10 - jle */
-    /* 0x11 - load */
-    /* 0x12 - save */
-    /* 0x13 - gload */
-    /* 0x14 - gsave */
-    /* 0x15 - Reserved */
-    /* 0x16 - Reserved */
-    /* 0x17 - Reserved */
-    /* 0x18 - Reserved */
-    /* 0x19 - Reserved */
-    case 0x1A: OpAdd(vm); break;
-    case 0x1B: OpAddQuick(vm); break;
-    case 0x1C: OpSub(vm); break;
-    case 0x1D: OpSubQuick(vm); break;
-    case 0x20: OpLoadPalette(vm); break;
-    /* 0x21 - lroom */
+    CASE_OPCODE(00);
+    CASE_OPCODE(01);
+    CASE_OPCODE(02);
+    CASE_OPCODE(03);
+    CASE_OPCODE(04);
+    CASE_OPCODE(05);
+    CASE_OPCODE(06);
+    CASE_OPCODE(07);
+    CASE_OPCODE(08);
+    CASE_OPCODE(09);
+    CASE_OPCODE(0A);
+    CASE_OPCODE(0B);
+    CASE_OPCODE(0C);
+    CASE_OPCODE(0D);
+    CASE_OPCODE(0E);
+    CASE_OPCODE(0F);
+    CASE_OPCODE(20);
+    CASE_OPCODE(21);
+    CASE_OPCODE(22);
+    CASE_OPCODE(23);
+    CASE_OPCODE(24);
+    CASE_OPCODE(25);
+    CASE_OPCODE(26);
+    CASE_OPCODE(27);
+    CASE_OPCODE(28);
+    CASE_OPCODE(29);
+    CASE_OPCODE(2A);
+    CASE_OPCODE(2B);
+    CASE_OPCODE(2C);
+    CASE_OPCODE(2D);
+    CASE_OPCODE(2E);
+    CASE_OPCODE(2F);
+    CASE_OPCODE(30);
+    CASE_OPCODE(31);
+    CASE_OPCODE(32);
+    CASE_OPCODE(33);
+    CASE_OPCODE(34);
+    CASE_OPCODE(35);
+    CASE_OPCODE(36);
+    CASE_OPCODE(37);
+    CASE_OPCODE(38);
+    CASE_OPCODE(39);
+    CASE_OPCODE(3A);
+    CASE_OPCODE(3B);
+    CASE_OPCODE(3C);
+    CASE_OPCODE(3D);
+    CASE_OPCODE(3E);
+    CASE_OPCODE(3F);
   }
 }
