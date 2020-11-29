@@ -6,21 +6,28 @@ Each opcode is 2-bytes.
 First 6 bits are the opcode, remaining bits is the argument (10-bits)
 
 Constants may be stored in the argument, or in the ULONG constants
-table, which is per script.
+table which is per script. 
+
+16-bit constants can be made up with the pushu/pushs and pushuu opcodes.
+
+32-bit constants can be made up with bitshifting two 16-bit values, or
+using the ULONG constants table.
+
+Dialogue ref ids can be made up with the two push dialogue opcodes; pdt/pdi.
 
 _Id_      _Name_      _Argument_                    _Operation_
 00      stop                                  Stop Script
 01      rem       user                        Remark
-02      pushs     value.s                     Push signed value
-03      pushu     value.u                     Push unsigned value
-04      pushcs    value.s                     Push signed constant
-05      pushcu    value.u                     Push unsigned constant
-06      dup                                   Duplicate top of stack
-07      dis                                   Discard top of stack
-08      load      index.u                     Push from self field
-09      save      index.u                     Pop to self field
-0A      gload     index.u                     Push to global field
-0B      gsave     index.u                     Pop to global field
+02      pushs     value.s                     push v
+03      pushu     value.u                     push v
+04      pushcs    value.s                     push v
+05      pushcu    value.u                     push v
+06      dup                                   pop(a) push a,a
+07      dis                                   pop(a)
+08      load      index.u                     push self[i]
+09      save      index.u                     pop(a) self[i]=a
+0A      gload     index.u                     push global[i]
+0B      gsave     index.u                     pop(a) global[i]=a
 0C      cmp                                   Compare s[0] and s[-1]
 0D      cmpc      value.s                     Compare s[0] and value
 0E      j         address.s                   pc=addr always
@@ -30,25 +37,25 @@ _Id_      _Name_      _Argument_                    _Operation_
 12      jge       address.s                   pc=addr if greater/equal
 13      jl        address.s                   pc=addr if less
 14      jle       address.s                   pc=addr if less/equal
-15      add                                   pop s[0],s[-1] s[0]=a+b
-16      addq      value.s                     pop s[0] s[0]=a+value
-17      sub                                   pop s[0],s[-1] s[0]=a-b
-18      subq      value.s                     pop s[0] s[0]=a-value
-19      mul                                   pop s[0],s[-1] s[0]=a*b
-1A      div                                   pop s[0],s[-1] s[0]=a/b
-1B      shl       bit                         pop s[0], s[0]=a<<bits
-1C      shr       bit                         pop s[0], s[0]=a>>bits
-1E      and                                   pop s[0],s[-1] s[0]=a&b
-1D      or                                    pop s[0],s[-1] s[0]=a|b
-1F      xor                                   pop s[0],s[-1] s[0]=a^b
-20      not                                   pop s[0], s[0]=~a
-21      neg                                   pop s[0], s[0]=-a
-22      gbit      bit                         pop s[0], s[0]=a[bit]
-23      sbit      bit                         pop s[0], s[0]=a&1<<bit
-24      RESERVED
-25      RESERVED
-26      lpal      asset|stack                 Load and Use Palette
-27      RESERVED
+15      add                                   pop(b,a) push a+b
+16      addq      value.s                     pop(a)   push a+v
+17      sub                                   pop(b,a) push a-b
+18      subq      value.s                     pop(a)   push a-v
+19      mul                                   pop(b,a) push a*b
+1A      div                                   pop(b,a) push a/b
+1B      shl       shift                       pop(a)   push a<<s
+1C      shr       shift                       pop(a)   push a>>s
+1E      and                                   pop(b,a) push a&b
+1D      or                                    pop(b,a) push a|b
+1F      xor                                   pop(b,a) push a^b
+20      not                                   pop(a)   push ~a
+21      neg                                   pop(a)   push -a
+22      gbit      bit                         pop(a)   push a[b]
+23      sbit      bit                         pop(a) a[b]=1 push a
+24      pushuu    value.uw                    pop(a) push a|v<<10
+25      pdt       dt_Table                    set  DIALOGUE (1)
+26      pdi       dt_Item                     push DIALOGUE (2)
+27      lpal      asset|stack                 Load and Use Palette
 28      RESERVED
 29      RESERVED
 2A      RESERVED
@@ -72,7 +79,59 @@ _Id_      _Name_      _Argument_                    _Operation_
 3C      RESERVED
 3D      RESERVED
 3E      RESERVED
-3F      sys      argument                     Expanded Call
+3F      ext      ext-opcode                   Extension Opcodes
 
-* asset|stack refers to when the value is 0 it should pop s[0] and use that
-  as the asset ID, otherwise use the 10-bit value.
+## Types
+
+s
+
+  signed 12-bit number
+
+u
+
+  unsigned 12-bit number
+
+uw
+
+  upper 6-bits of a UWORD
+
+bit
+
+  unsigned number with a value upto 31
+
+asset|stack
+
+  An Asset ID
+
+  When the argument is is zero, it refers to an Asset ID at the top
+  of the stack which should be popped.
+
+  Otherwise when it is not zero (1-1023) that is the asset ID.
+
+ext-opcode
+
+  An opcode placed within the argument. See Extension table.
+
+dt_Table, dt_Item
+
+  These are two 8-bit values which must be used together with the 
+  pdt and pdi opcodes. 
+  When pdt is used the dt_Table value is temporary stored in a 
+  DIALOGUE_REF register. WHen pdi is used the dt_Item is copied into
+  the register, and then register is pushed onto the stack as a 32-bit
+  value.
+
+## Notes
+
+The result of a comparision is placed within a single use register.
+
+
+# Extension Opcodes
+
+Argument
+
+00    exit                                   Exit Parrot Program
+01    RESERVED
+02    RESERVED
+..
+3FF   RESERVED

@@ -251,10 +251,10 @@ Game Information Table
 @{FG Text}@{BG None}    ULONG                     gi_FeatureSet;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    ULONG                     gi_GameId;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    ULONG                     gi_GameVersion;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    union DIALOGUE            gi_Title;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    union DIALOGUE            gi_ShortTitle;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    union DIALOGUE            gi_Author;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    union DIALOGUE            gi_Release;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    DIALOGUE                  gi_Title;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    DIALOGUE                  gi_ShortTitle;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    DIALOGUE                  gi_Author;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    DIALOGUE                  gi_Release;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD                     gi_Width;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD                     gi_Height;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    UWORD                     gi_Depth;@{BG Background}@{FG Text}
@@ -298,7 +298,7 @@ example:
   0x100
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Title (CHAR[64])@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_Title (DIALOGUE)@{uu}@{ui}@{BG Background}@{FG Text}
 
 English title of the Game
 
@@ -306,7 +306,7 @@ example:
   "Adventures of Parrot"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_ShortTitle (CHAR[16])@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_ShortTitle (DIALOGUE)@{uu}@{ui}@{BG Background}@{FG Text}
 
 English short-hand title of the Game
 
@@ -314,7 +314,7 @@ example:
   "Parrot"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Author (CHAR[128])@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_Author (DIALOGUE)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Full legal text of the Author and/or Publisher of the Game
 
@@ -322,7 +322,7 @@ example:
   "An Adventure Game Company And Associates"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Release (CHAR[128])@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_Release (DIALOGUE)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Release information, including version number and/or Language
 
@@ -670,80 +670,150 @@ address.
 @NODE OPCODES "Virtual Machine Opcodes"
 @{FG None}@{BG None}@{b}@{u}@{i}Opcodes@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
 
-@{u}Id@{uu} @{u}Len@{uu}  @{u}Name@{uu}       @{u}Arguments@{uu}                  @{u}Description@{uu}
-0  2    stop                                  Stop Script
-1  2    rem        user.b                     Remark (Ignored}
-2  2    pushb      val.b                      push byte onto stack
-3  4    pushw      pad.x, val.w               push word onto stack
-4  6    pushl      pad.x, val.l               push long onto stack
-5  2    pushs      where.b                    push stack[-where] onto stack
-6  2    pop                                   pop stack. value is discarded
-7  Reserved
-8  2    j          addr.sb                    pc <- pc + addr @{b} 2@{ub}
-9  2    jz         addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[0] = 0
-                                              and pop stack
-A  2    jnz        addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[0] <> 0
-                                              and pop stack twice
-B  2    je         addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[-1] = stack[0]
-                                              and pop stack twice
-C  2    jne        addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[-1] <> stack[0]
-                                              and pop stack twice
-D  2    jg         addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[-1] > stack[0]
-                                              and pop stack twice
-E  2    jge        addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[-1] >= stack[0]
-                                              and pop stack twice
-F  2    jl         addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[-1] < stack[0]
-                                              and pop stack twice
-10 2    jle        addr.sb                    pc <- pc + addr @{b} 2@{ub}
-                                              if stack[-1] <= stack[0]
-                                              and pop stack twice
-11 2    load       var.lb                     push vars[var] onto stack
-12 2    save       var.lb                     vars[var] = stack[0]
-                                              and pop stack
-13 2    gload      var.b                      push globals[var] onto stack
-14 2    gsave      var.b                      globals[var] = stack[0]
-                                              and pop stack
-15 Reserved
-16 Reserved
-17 Reserved
-18 Reserved
-19 Reserved
-1A 2    add                                   t <- stack[-1] + stack[0]
-                                              pop stack twice
-                                              push t
-                                              Stack: -1 = lhs.l
-                                              Stack:  0 = rhs.l
-1B 2    addq       rhs.sb                     t <- stack[0] + rhs
-                                              pop stack
-                                              push t
-                                              Stack: 0 = left.l
-1C 2    sub                                   t <- stack[-1] - stack[0]
-                                              pop stack twice
-                                              push t
-                                              Stack: -1 = lhs.l
-                                              Stack:  0 = rhs.l
-1D 2    subq       rhs.sb                     t <- stack[-1] - val
-                                              pop stack
-                                              push t
-                                              Stack: 0 = left.l
-20 2    room                                  load room[0] (as Room}
-                                              pop stack
-                                              Stack: 0 = room.a
-40 2    audio                                 play stack[0] (as SFX Asset}
-                                              pop stack
-                                              Stack: 0 = sfx.a
-80 2    print                                 print stack[0] (as Dialogue}
-                                              at y stack[-1] @{b} 8@{ub}
-                                              pop stack twice
-                                              Stack: -1 = y.b
-                                              Stack:  0 = text.d
+Each opcode is 2-bytes.
+
+First 6 bits are the opcode, remaining bits is the argument (10-bits}
+
+Constants may be stored in the argument, or in the ULONG constants
+table which is per script. 
+
+16-bit constants can be made up with the pushu/pushs and pushuu opcodes.
+
+32-bit constants can be made up with bitshifting two 16-bit values, or
+using the ULONG constants table.
+
+Dialogue ref ids can be made up with the two push dialogue opcodes; pdt/pdi.
+
+@{u}Id@{uu}      @{u}Name@{uu}      @{u}Argument@{uu}                    @{u}Operation@{uu}
+00      stop                                  Stop Script
+01      rem       user                        Remark
+02      pushs     value.s                     push v
+03      pushu     value.u                     push v
+04      pushcs    value.s                     push v
+05      pushcu    value.u                     push v
+06      dup                                   pop(a} push a,a
+07      dis                                   pop(a}
+08      load      index.u                     push self[i]
+09      save      index.u                     pop(a} self[i]=a
+0A      gload     index.u                     push global[i]
+0B      gsave     index.u                     pop(a} global[i]=a
+0C      cmp                                   Compare s[0] and s[-1]
+0D      cmpc      value.s                     Compare s[0] and value
+0E      j         address.s                   pc=addr always
+0F      je        address.s                   pc=addr if equal
+10      jne       address.s                   pc=addr if not equal
+11      jg        address.s                   pc=addr if greater
+12      jge       address.s                   pc=addr if greater/equal
+13      jl        address.s                   pc=addr if less
+14      jle       address.s                   pc=addr if less/equal
+15      add                                   pop(b,a} push a+b
+16      addq      value.s                     pop(a}   push a+v
+17      sub                                   pop(b,a} push a-b
+18      subq      value.s                     pop(a}   push a-v
+19      mul                                   pop(b,a} push a*b
+1A      div                                   pop(b,a} push a/b
+1B      shl       shift                       pop(a}   push a<<s
+1C      shr       shift                       pop(a}   push a>>s
+1E      and                                   pop(b,a} push a&b
+1D      or                                    pop(b,a} push a|b
+1F      xor                                   pop(b,a} push a^b
+20      not                                   pop(a}   push ~a
+21      neg                                   pop(a}   push -a
+22      gbit      bit                         pop(a}   push a[b]
+23      sbit      bit                         pop(a} a[b]=1 push a
+24      pushuu    value.uw                    pop(a} push a|v<<10
+25      pdt       dt_Table                    set  DIALOGUE (1}
+26      pdi       dt_Item                     push DIALOGUE (2}
+27      lpal      asset|stack                 Load and Use Palette
+28      RESERVED
+29      RESERVED
+2A      RESERVED
+2B      RESERVED
+2C      RESERVED
+2D      RESERVED
+2E      RESERVED
+2F      RESERVED
+30      RESERVED
+31      RESERVED
+32      RESERVED
+33      RESERVED
+34      RESERVED
+35      RESERVED
+36      RESERVED
+37      RESERVED
+38      RESERVED
+39      RESERVED
+3A      RESERVED
+3B      RESERVED
+3C      RESERVED
+3D      RESERVED
+3E      RESERVED
+3F      ext      ext-opcode                   Extension Opcodes
+
+
+@{FG None}@{BG None}@{u}@{i}Types@{uu}@{ui}@{BG Background}@{FG Text}
+
+s
+
+
+@{FG Text}@{BG None}  signed 12-bit number@{BG Background}@{FG Text}
+
+u
+
+
+@{FG Text}@{BG None}  unsigned 12-bit number@{BG Background}@{FG Text}
+
+uw
+
+
+@{FG Text}@{BG None}  upper 6-bits of a UWORD@{BG Background}@{FG Text}
+
+bit
+
+
+@{FG Text}@{BG None}  unsigned number with a value upto 31@{BG Background}@{FG Text}
+
+asset|stack
+
+
+@{FG Text}@{BG None}  An Asset ID@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  When the argument is is zero, it refers to an Asset ID at the top@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  of the stack which should be popped.@{BG Background}@{FG Text}
+
+@{FG Text}@{BG None}  Otherwise when it is not zero (1-1023) that is the asset ID.@{BG Background}@{FG Text}
+
+ext-opcode
+
+
+@{FG Text}@{BG None}  An opcode placed within the argument. See Extension table.@{BG Background}@{FG Text}
+
+dt_Table, dt_Item
+
+
+@{FG Text}@{BG None}  These are two 8-bit values which must be used together with the @{BG Background}@{FG Text}
+@{FG Text}@{BG None}  pdt and pdi opcodes. @{BG Background}@{FG Text}
+@{FG Text}@{BG None}  When pdt is used the dt_Table value is temporary stored in a @{BG Background}@{FG Text}
+@{FG Text}@{BG None}  DIALOGUE_REF register. WHen pdi is used the dt_Item is copied into@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  the register, and then register is pushed onto the stack as a 32-bit@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  value.@{BG Background}@{FG Text}
+
+@{FG None}@{BG None}@{u}@{i}Notes@{uu}@{ui}@{BG Background}@{FG Text}
+
+
+The result of a comparision is placed within a single use register.
+
+
+
+@{FG None}@{BG None}@{b}@{u}@{i}Extension Opcodes@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
+
+Argument
+
+00    exit                                   Exit Parrot Program
+01    RESERVED
+02    RESERVED
+..
+3FF   RESERVED
 
 @ENDNODE
 
@@ -1172,5 +1242,8 @@ Stack based virtual machine. Each stack variable is 4 bytes (LONG}.
 There are 16 variables and 256 global variables.
 
 Variables may belong to the object or room running with the script.
+
+@ENDNODE
+e script.
 
 @ENDNODE
