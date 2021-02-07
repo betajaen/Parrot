@@ -33,13 +33,15 @@ CFLAGS  = -lamiga -nostdlib -IInclude -ITools/Squawk/Include
 
 # PARROT
 
-PARROT_OBJ = main.o arena.o string.o requester.o game.o room.o image.o asset.o entity.o view.o input.o cursor.o verbs.o script.o squawk.o
+PARROT_OBJ = main.o arena.o string.o requester.o game.o room.o image.o asset.o entity.o view.o input.o cursor.o verbs.o vm.o squawk.o syscall.o
 SQUAWK_OBJ = squawk_main.o squawk_writer.o squawk_table.o squawk_dialogue.o squawk_script.o string.o requester.o Source/minstart.o
 CONVERTER_MANIAC_OBJ = $(SQUAWK_OBJ) maniac_main.o maniac_meta.o maniac_lfl.o
+OPCODE_GENERATOR_OBJ = Source/minstart.o string.o opcode_main.o
 
-parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ)
+parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ) $(OPCODE_GENERATOR_OBJ)
 	$(CC) +aos68km $(CFLAGS) Source/minstart.o $(PARROT_OBJ) -o ../Releases/Parrot/Parrot
 	$(CC) +aos68km $(CFLAGS) $(CONVERTER_MANIAC_OBJ) -o ../Releases/Parrot/Tools/ConvertManiac
+	$(CC) +aos68km $(CFLAGS) $(OPCODE_GENERATOR_OBJ) -o ../Releases/Parrot/Tools/OpcodeGenerator
 
 main.o: Source/Main.c
 	$(CC) $(CFLAGS) -c Source/Main.c -o main.o
@@ -80,11 +82,14 @@ cursor.o: Source/Cursor.c
 verbs.o: Source/Verbs.c
 	$(CC) $(CFLAGS) -c Source/Verbs.c -o verbs.o
 
-script.o: Source/Script.c
-	$(CC) $(CFLAGS) -c Source/Script.c -o script.o
+vm.o: Source/Vm.c
+	$(CC) $(CFLAGS) -c Source/Vm.c -o vm.o
 
 squawk.o: Source/Squawk.c
 	$(CC) $(CFLAGS) -c Source/Squawk.c -o squawk.o
+
+syscall.o: Source/SysCall.c
+	$(CC) $(CFLAGS) -c Source/SysCall.c -o syscall.o
 
 # SQUAWK
 
@@ -114,9 +119,15 @@ maniac_meta.o: Tools/ConvertManiac/Meta.c
 maniac_lfl.o: Tools/ConvertManiac/Lfl.c
 	$(CC) $(CFLAGS) -c Tools/ConvertManiac/Lfl.c -o maniac_lfl.o
 
+# OPCODE GENERATOR
+
+opcode_main.o: Tools/OpcodeGenerator/Main.c
+	$(CC) $(CFLAGS) -c Tools/OpcodeGenerator/Main.c -o opcode_main.o
+
 .PHONY: clean
 
 clean:
 	rm ../Releases/Latest/Parrot
 	rm ../Releases/Latest/Tools/ConvertManiac
+	rm ../Releases/Latest/Tools/OpcodeGenerator
 	rm $(objects)

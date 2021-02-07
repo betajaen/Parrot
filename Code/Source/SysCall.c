@@ -1,5 +1,5 @@
 /**
-    $Id: Script.h 1.2 2020/11/12 16:34:00, betajaen Exp $
+    $Id: Room.c, 1.2 2020/05/11 15:49:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,10 +25,37 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-EXPORT VOID VmInitialise();
+#include <Parrot/Parrot.h>
 
-EXPORT VOID VmShutdown();
+extern BOOL InEvtForceQuit;
 
-EXPORT VOID RunScript(UWORD id);
+VOID Parrot_SysCall(UWORD function, LONG argument)
+{
+  switch (function)
+  {
+    case SYSCALL_EXIT:
+    {
+      InEvtForceQuit = TRUE;
+    }
+    break;
+    case SYSCALL_STOP_SCRIPT:
+    {
+      if (Vm_Current->vm_State == VM_STATE_RUN)
+      {
+        Vm_Current->vm_State = VM_STATE_STOPPING;
+      }
+    }
+    break;
+    case SYSCALL_LOAD_GAME:
+    {
+      /* argument is slot number */
+    }
+    break;
+    case SYSCALL_SAVE_GAME:
+    {
+      /* argument is slot number */
+    }
+    break;
+  }
+}
 
-EXPORT VOID RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena);

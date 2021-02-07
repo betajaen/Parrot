@@ -41,6 +41,8 @@ BOOL StrStartsWith(CONST CHAR* pTest, CHAR value);
 
 BOOL StrEndsWith(CONST CHAR* test, CHAR value);
 
+BOOL StrStartsWithStr(CONST CHAR* pTest, CONST CHAR* pPrefix);
+
 VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value);
 
 #define InitStackVar(X) FillMem((UBYTE*) &X, sizeof(X), 0);

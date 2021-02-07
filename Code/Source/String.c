@@ -182,6 +182,22 @@ CLEAN_EXIT:
   return rc;
 }
 
+BOOL StrStartsWithStr(CONST CHAR* pTest, CONST CHAR* pPrefix)
+{
+  if (NULL == pTest || NULL == pPrefix)
+  {
+    return FALSE;
+  }
+
+  while (*pPrefix != 0)
+  {
+    if (*pPrefix++ != *pTest++)
+      return FALSE;
+  }
+
+  return TRUE;
+}
+
 BOOL StrEndsWith(CONST CHAR* pTest, CHAR value)
 {
   BOOL rc;

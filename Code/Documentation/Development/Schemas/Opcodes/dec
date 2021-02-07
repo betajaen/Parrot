@@ -1,0 +1,8 @@
+Name:
+  dec
+Description:
+  Decrease variable by 1
+Argument:
+  i : Var
+Code:
+  Vm_DecVar(#V);

@@ -1,0 +1,12 @@
+Name:
+  subs
+Description:
+  Pop last two values from stack and subtract them together. Result is in stack.
+Argument:
+  0 : LHS
+  1 : RHS
+Code:
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_Push(l - r);

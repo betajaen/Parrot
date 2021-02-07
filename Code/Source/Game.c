@@ -87,7 +87,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   LoadAssetTables(0, 0, GameInfo->gi_NumAssetTables);
 
-  ScriptInitialise();
+  VmInitialise();
 
 
 #if 0
@@ -166,7 +166,7 @@ EXPORT VOID GameStart(STRPTR path)
 
 #endif
   
-  ScriptShutdown();
+  VmShutdown();
 
 #if 0
   CloseArchives();

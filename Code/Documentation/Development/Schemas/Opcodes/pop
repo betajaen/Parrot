@@ -1,0 +1,6 @@
+Name:
+  pop
+Description:
+  Pop stack value and discard
+Code:
+  Vm_Pop();

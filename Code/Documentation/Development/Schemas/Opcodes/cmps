@@ -1,0 +1,12 @@
+Name:
+  cmps
+Description:
+  Compare two stack values together
+Argument:
+  0 : LHS
+  1 : RHS
+Code:
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_Compare(l, r);

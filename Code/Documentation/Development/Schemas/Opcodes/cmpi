@@ -1,0 +1,12 @@
+Name:
+  cmpi
+Description:
+  Compare variable to last item to an immediate on stack
+Argument:
+  i : LHS
+  0 : RHS
+Code:
+  LONG l, r;
+  r = Vm_Pop();
+  l = #L;
+  Vm_Compare(l, r);

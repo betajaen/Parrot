@@ -1,0 +1,11 @@
+Name:
+  bne
+Description:
+  Branch to address not equals
+Argument:
+  s : Address
+Code:
+  if ((Vm_LastCmp & VM_CMP_EQUALS) == 0)
+  {
+    return #A;
+  }

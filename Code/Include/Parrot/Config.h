@@ -17,7 +17,9 @@
 #define MAX_ENTITY_SCRIPTS            4
 #define MAX_ENTITY_IMAGES             4
 #define MAX_VIRTUAL_MACHINES          8
-#define MAX_VM_STACK_SIZE             32
+#define MAX_VM_STACK_SIZE             16
+#define MAX_VM_VARIABLES              16
+#define MAX_VM_GLOBALS                64
 #define MAX_OPEN_ARCHIVES             8
 #define DEFAULT_ARCHIVE_PATH_FSTR     "PROGDIR:Tools/%lld.parrot"
 

@@ -1,0 +1,8 @@
+Name:
+  inc
+Description:
+  Increase variable by 1
+Argument:
+  i : Var
+Code:
+  Vm_IncVar(#V);

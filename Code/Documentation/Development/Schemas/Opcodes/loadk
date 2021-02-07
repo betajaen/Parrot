@@ -1,0 +1,10 @@
+Name:
+  loadk
+Description:
+  Load a constant and place it onto the stack
+Argument:
+  i : Constant
+Code:
+  LONG v;
+  v = Vm_GetConstant(#C);
+  Vm_Push(v);

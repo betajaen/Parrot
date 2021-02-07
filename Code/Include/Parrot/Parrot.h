@@ -491,28 +491,45 @@ struct SCRIPT
 {
   ASSET_HEADER;
   
+  UWORD  sc_Length;
   LONG   sc_Constants[MAX_CONSTANTS_PER_SCRIPT];
   OPCODE sc_Opcodes[];
 };
 
+extern LONG Vm_Globals[MAX_VM_GLOBALS];
+
 struct VIRTUAL_MACHINE
 {
   UWORD            vm_State;
-  UWORD            vm_PC;
-  struct SCRIPT*   vm_Script;
+  WORD             vm_PC;
   UWORD            vm_Timer;
   UWORD            vm_StackHead;
   UWORD            vm_Cmp;
   UWORD            vm_Reserved;
   DIALOGUE         vm_DialogueRegister;
-  OPCODE*          vm_Instructions;
+  OPCODE*          vm_Opcodes;
+  UWORD            vm_OpcodesLength;
   LONG*            vm_Constants;
+  struct SCRIPT*   vm_Script;
+  LONG             vm_Vars[MAX_VM_VARIABLES];
   LONG             vm_Stack[MAX_VM_STACK_SIZE];
 };
 
-#define VM_STATE_FREE  0
+extern struct VIRTUAL_MACHINE* Vm_Current;
+
+#define VM_STATE_END   0
 #define VM_STATE_TIMER 1
 #define VM_STATE_RUN   2
-#define VM_STATE_STOP  3
+#define VM_STATE_STOPPING 3
+
+#define VM_CMP_NONE 0
+#define VM_CMP_EQUALS 1
+#define VM_CMP_GT 2
+#define VM_CMP_LT 4
+
+#define SYSCALL_EXIT 0
+#define SYSCALL_STOP_SCRIPT 1
+#define SYSCALL_LOAD_GAME 2
+#define SYSCALL_SAVE_GAME 3
 
 #endif

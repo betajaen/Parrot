@@ -1,0 +1,11 @@
+Name:
+  shl
+Description:
+  Pop a value. Left Shift it and push the result on the stack
+Argument:
+  i : Var
+  0 : LHS
+Code:
+  LONG l;
+  l = Vm_Pop();
+  Vm_Push(l << #V);

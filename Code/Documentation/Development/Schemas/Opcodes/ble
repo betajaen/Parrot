@@ -1,0 +1,11 @@
+Name:
+  ble
+Description:
+  Branch to address if less than or equals
+Argument:
+  s : Address
+Code:
+  if ((Vm_LastCmp & (VM_CMP_LT | VM_CMP_EQUALS)) != 0)
+  {
+    return #A;
+  }

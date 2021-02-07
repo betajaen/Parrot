@@ -1,0 +1,8 @@
+Name:
+  loadi
+Description:
+  Load a 10-bit signed value and place it onto the stack
+Argument:
+  i : Value
+Code:
+  Vm_Push(#V);

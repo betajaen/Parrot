@@ -1,0 +1,11 @@
+Name:
+  bge
+Description:
+  Branch to address if greater than or equals
+Argument:
+  s : Address
+Code:
+  if ((Vm_LastCmp & (VM_CMP_GT | VM_CMP_EQUALS)) != 0)
+  {
+    return #A;
+  }

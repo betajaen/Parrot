@@ -1,145 +1,504 @@
-Virtual Machine Opcodes
+Opcodes
 # Opcodes
+## add
 
-Each opcode is 2-bytes.
+Pop last two values from stack and add them together. Result is in vars
 
-First 6 bits are the opcode, remaining bits is the argument (10-bits)
+Id
+  0
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_SetVar(#V, l + r);
+Arg '#V'
+  Name
+    Var
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[-1]
 
-Constants may be stored in the argument, or in the ULONG constants
-table which is per script. 
+## adds
 
-16-bit constants can be made up with the pushu/pushs and pushuu opcodes.
+Pop last two values from stack and add them together. Result is in stack
 
-32-bit constants can be made up with bitshifting two 16-bit values, or
-using the ULONG constants table.
+Id
+  1
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_Push(l + r);
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[-1]
 
-Dialogue ref ids can be made up with the two push dialogue opcodes; pdt/pdi.
+## beq
 
-_Id_      _Name_      _Argument_                    _Operation_
-00      stop                                  Stop Script
-01      rem       user                        Remark
-02      push      value.u                     push v
-03      pushs     value.s                     push v (signed)
-04      pushc     index.u                     push constant[i]
-05      dup                                   pop(a) push a,a
-06      dis                                   pop(a)
-07      RESERVED
-08      load      index.u                     push self[i]
-09      save      index.u                     pop(a) self[i]=a
-0A      gload     index.u                     push global[i]
-0B      gsave     index.u                     pop(a) global[i]=a
-0C      cmp                                   Compare s[0] and s[-1]
-0D      cmpc      value.s                     Compare s[0] and value
-0E      j         address.s                   pc=addr always
-0F      je        address.s                   pc=addr if equal
-10      jne       address.s                   pc=addr if not equal
-11      jg        address.s                   pc=addr if greater
-12      jge       address.s                   pc=addr if greater/equal
-13      jl        address.s                   pc=addr if less
-14      jle       address.s                   pc=addr if less/equal
-15      add                                   pop(b,a) push a+b
-16      addq      value.s                     pop(a)   push a+v
-17      sub                                   pop(b,a) push a-b
-18      subq      value.s                     pop(a)   push a-v
-19      mul                                   pop(b,a) push a*b
-1A      RESERVED
-1B      shl       shift                       pop(a)   push a<<s
-1C      shr       shift                       pop(a)   push a>>s
-1E      and                                   pop(b,a) push a&b
-1D      or                                    pop(b,a) push a|b
-1F      xor                                   pop(b,a) push a^b
-20      not                                   pop(a)   push ~a
-21      neg                                   pop(a)   push -a
-22      gbit      bit                         pop(a)   push a[b]
-23      sbit      bit                         pop(a) a[b]=1 push a
-24      pushuu    value.uw                    pop(a) push a|v<<10
-25      pdt       dt_Table                    set  DIALOGUE (1)
-26      pdi       dt_Item                     push DIALOGUE (2)
-27      lpal      asset|stack                 Load and Use Palette
-28      RESERVED
-29      RESERVED
-2A      RESERVED
-2B      RESERVED
-2C      RESERVED
-2D      RESERVED
-2E      RESERVED
-2F      RESERVED
-30      RESERVED
-31      RESERVED
-32      RESERVED
-33      RESERVED
-34      RESERVED
-35      RESERVED
-36      RESERVED
-37      RESERVED
-38      RESERVED
-39      RESERVED
-3A      RESERVED
-3B      RESERVED
-3C      RESERVED
-3D      RESERVED
-3E      RESERVED
-3F      ext      ext-opcode                   Extension Opcodes
+Branch to address if equals
 
-## Types
+Id
+  2
+Code
+  if ((Vm_LastCmp & VM_CMP_EQUALS) == VM_CMP_EQUALS)
+  {
+    return #A;
+  }
+Arg '#A'
+  Name
+    Address
+  Type
+    10-bit signed
+  Encoding
+    Bits 6-15
 
-s
+## bge
 
-  signed 12-bit number
+Branch to address if greater than or equals
 
-u
+Id
+  3
+Code
+  if ((Vm_LastCmp & (VM_CMP_GT | VM_CMP_EQUALS)) != 0)
+  {
+    return #A;
+  }
+Arg '#A'
+  Name
+    Address
+  Type
+    10-bit signed
+  Encoding
+    Bits 6-15
 
-  unsigned 12-bit number
+## bgt
 
-uw
+Branch to address if greater than
 
-  upper 6-bits of a UWORD
+Id
+  4
+Code
+  if ((Vm_LastCmp & VM_CMP_GT) == VM_CMP_GT)
+  {
+    return #A;
+  }
+Arg '#A'
+  Name
+    Address
+  Type
+    10-bit signed
+  Encoding
+    Bits 6-15
 
-bit
+## ble
 
-  unsigned number with a value upto 31
+Branch to address if less than or equals
 
-address
+Id
+  5
+Code
+  if ((Vm_LastCmp & (VM_CMP_LT | VM_CMP_EQUALS)) != 0)
+  {
+    return #A;
+  }
+Arg '#A'
+  Name
+    Address
+  Type
+    10-bit signed
+  Encoding
+    Bits 6-15
 
-  absolute address from the start of the script.
+## blt
 
-  10-bit unsigned integer.
+Branch to address if less than
 
-  address value is always multiplied by 2 before use.
+Id
+  6
+Code
+  if ((Vm_LastCmp & VM_CMP_LT) == VM_CMP_LT)
+  {
+    return #A;
+  }
+Arg '#A'
+  Name
+    Address
+  Type
+    10-bit signed
+  Encoding
+    Bits 6-15
 
-asset|stack
+## bne
 
-  An Asset ID
+Branch to address not equals
 
-  When the argument is is zero, it refers to an Asset ID at the top
-  of the stack which should be popped.
+Id
+  7
+Code
+  if ((Vm_LastCmp & VM_CMP_EQUALS) == 0)
+  {
+    return #A;
+  }
+Arg '#A'
+  Name
+    Address
+  Type
+    10-bit signed
+  Encoding
+    Bits 6-15
 
-  Otherwise when it is not zero (1-1023) that is the asset ID.
+## bra
 
-ext-opcode
+Branch to address always
 
-  An opcode placed within the argument. See Extension table.
+Id
+  8
+Code
+  return #A;
+Arg '#A'
+  Name
+    Address
+  Type
+    10-bit signed
+  Encoding
+    Bits 6-15
 
-dt_Table, dt_Item
+## cmp
 
-  These are two 8-bit values which must be used together with the 
-  pdt and pdi opcodes. 
-  When pdt is used the dt_Table value is temporary stored in a 
-  DIALOGUE_REF register. WHen pdi is used the dt_Item is copied into
-  the register, and then register is pushed onto the stack as a 32-bit
-  value.
+Compare variable to last item on stack
 
-## Notes
+Id
+  9
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_GetVar(#L);
+  Vm_Compare(l, r);
+Arg '#L'
+  Name
+    LHS
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[0]
 
-The result of a comparision is placed within a single use register.
+## cmpi
 
+Compare variable to last item to an immediate on stack
 
-# Extension Opcodes
+Id
+  10
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = #L;
+  Vm_Compare(l, r);
+Arg '#L'
+  Name
+    LHS
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[0]
 
-Argument
+## cmps
 
-00    exit                                   Exit Parrot Program
-01    RESERVED
-02    RESERVED
-..
-3FF   RESERVED
+Compare two stack values together
+
+Id
+  11
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_Compare(l, r);
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[-1]
+
+## dec
+
+Decrease variable by 1
+
+Id
+  12
+Code
+  Vm_DecVar(#V);
+Arg '#V'
+  Name
+    Var
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+
+## dup
+
+Duplicate the stack value
+
+Id
+  13
+Code
+  Vm_Push(Vm_Peek());
+
+## inc
+
+Increase variable by 1
+
+Id
+  14
+Code
+  Vm_IncVar(#V);
+Arg '#V'
+  Name
+    Var
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+
+## loadi
+
+Load a 10-bit signed value and place it onto the stack
+
+Id
+  15
+Code
+  Vm_Push(#V);
+Arg '#V'
+  Name
+    Value
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+
+## loadk
+
+Load a constant and place it onto the stack
+
+Id
+  16
+Code
+  LONG v;
+  v = Vm_GetConstant(#C);
+  Vm_Push(v);
+Arg '#C'
+  Name
+    Constant
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+
+## mul
+
+Pop last two values from stack and add them together. Result is in vars
+
+Id
+  17
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_SetVar(#V, l * r);
+Arg '#V'
+  Name
+    Var
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[-1]
+
+## pop
+
+Pop stack value and discard
+
+Id
+  18
+Code
+  Vm_Pop();
+
+## pushi
+
+Push 10-bit signed value on the stack
+
+Id
+  19
+Code
+  LONG v;
+  v = Vm_GetVar(#V);
+  Vm_Push(v);
+Arg '#V'
+  Name
+    Variable
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+
+## shl
+
+Pop a value. Left Shift it and push the result on the stack
+
+Id
+  20
+Code
+  LONG l;
+  l = Vm_Pop();
+  Vm_Push(l << #V);
+Arg '#V'
+  Name
+    Var
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+
+## shr
+
+Pop a value. Right Shift it and push the result on the stack
+
+Id
+  21
+Code
+  LONG l;
+  l = Vm_Pop();
+  Vm_Push(l >> #V);
+Arg '#V'
+  Name
+    Var
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+
+## sub
+
+Pop last two values from stack and subtract them together. Result is in vars
+
+Id
+  22
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_SetVar(#V, l - r);
+Arg '#V'
+  Name
+    Var
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[-1]
+
+## subs
+
+Pop last two values from stack and subtract them together. Result is in stack.
+
+Id
+  23
+Code
+  LONG l, r;
+  r = Vm_Pop();
+  l = Vm_Pop();
+  Vm_Push(l - r);
+Arg '#L'
+  Name
+    LHS
+  Type
+    Value at Stack[0]
+Arg '#R'
+  Name
+    RHS
+  Type
+    Value at Stack[-1]
+
+## sys
+
+Perform a System Call, where the top of the stack is the argument.
+
+Id
+  24
+Code
+  LONG arg;
+  arg = Vm_Pop();
+  Parrot_SysCall(#F, arg);
+Arg '#F'
+  Name
+    Function
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+Arg '#A'
+  Name
+    Argument
+  Type
+    Value at Stack[0]
+
