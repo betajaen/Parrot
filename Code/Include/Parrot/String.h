@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_STRING_H
+#define PARROT_STRING_H
+
 ULONG StrLength(CONST_STRPTR pStr);
 
 ULONG StrLengthFormat(CHAR* pFmt, ...);
@@ -51,3 +54,4 @@ CHAR* StrDuplicate(CONST CHAR* pSrc);
 
 ULONG UWordToId(UWORD value);
 
+#endif

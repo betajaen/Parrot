@@ -1,5 +1,5 @@
 /**
-    $Id: Room.c, 1.2 2020/05/11 15:49:00, betajaen Exp $
+    $Id: Log.c, 1.2 2021/02/10 16:56:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -26,52 +26,61 @@
 */
 
 #include <Parrot/Parrot.h>
-#include <Parrot/Requester.h>
 #include <Parrot/Log.h>
 
-extern BOOL InEvtForceQuit;
+#include <proto/exec.h>
+#include <proto/dos.h>
 
-VOID Parrot_SysCall(UWORD function, LONG argument)
+static BPTR sLog = NULL;
+
+void Log_Initialise()
 {
-  switch (function)
+  if (sLog == NULL)
   {
-    default:
-    {
-      ERRORF("SysCall. Unknown Function = %ld, Argument = 0x%lx", function, argument);
-    }
-    break;
-    case SYSCALL_EXIT:
-    {
-      InEvtForceQuit = TRUE;
-      TRACEF("SysCall. Exit. Argument = 0x%lx", argument);
-    }
-    break;
-    case SYSCALL_TRACE:
-    {
-      INFOF("SysCall. Trace. Argument = 0x%lx", argument);
-    }
-    break;
-    case SYSCALL_STOP_SCRIPT:
-    {
-      if (Vm_Current->vm_State == VM_STATE_RUN)
-      {
-        Vm_Current->vm_State = VM_STATE_STOPPING;
-      }
-      TRACEF("SysCall. Stop. Argument = 0x%lx", argument);
-    }
-    break;
-    case SYSCALL_LOAD_GAME:
-    {
-      /* argument is slot number */
-      TRACEF("SysCall. LoadGame. Argument = 0x%lx", argument);
-    }
-    break;
-    case SYSCALL_SAVE_GAME:
-    {
-      /* argument is slot number */
-      TRACEF("SysCall. SaveGame. Argument = 0x%lx", argument);
-    }
-    break;
+    sLog = Open("Parrot:Parrot.log", MODE_NEWFILE);
   }
 }
 
+void Log_Shutdown()
+{
+  if (sLog != NULL)
+  {
+    Close(sLog);
+    sLog = NULL;
+  }
+}
+
+void Log(UWORD logType, CONST_STRPTR text)
+{
+  switch (logType)
+  {
+    case LOG_TYPE_TRACE:   FPuts(sLog, "TRC "); break;
+    case LOG_TYPE_VERBOSE: FPuts(sLog, "VRB "); break;
+    case LOG_TYPE_INFO:    FPuts(sLog, "INF "); break;
+    case LOG_TYPE_WARNING: FPuts(sLog, "WAR "); break;
+    case LOG_TYPE_ERROR:   FPuts(sLog, "ERR "); break;
+  }
+
+  FPuts(sLog, text);
+  FPutC(sLog, '\n');
+  Flush(sLog);
+}
+
+void LogF(UWORD logType, CONST_STRPTR format, ...)
+{
+  APTR arg;
+  arg = (CONST_STRPTR*)(&format + 1);
+
+  switch (logType)
+  {
+    case LOG_TYPE_TRACE:    FPuts(sLog, "TRC "); break;
+    case LOG_TYPE_VERBOSE:  FPuts(sLog, "VRB "); break;
+    case LOG_TYPE_INFO:     FPuts(sLog, "INF "); break;
+    case LOG_TYPE_WARNING:  FPuts(sLog, "WAR "); break;
+    case LOG_TYPE_ERROR:    FPuts(sLog, "ERR "); break;
+  }
+
+  VFPrintf(sLog, format, arg);
+  FPutC(sLog, '\n');
+  Flush(sLog);
+}

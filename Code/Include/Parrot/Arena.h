@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_ARENA_H
+#define PARROT_ARENA_H
+
 extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom, *ArenaFrameTemp;
 
 struct ARENA* ArenaOpen(ULONG name, ULONG size, ULONG requirements);
@@ -38,3 +41,5 @@ ULONG ArenaSpace(struct ARENA* arena);
 ULONG ArenaSize(struct ARENA* arena);
 
 APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill);
+
+#endif

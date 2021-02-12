@@ -30,7 +30,7 @@
 #include <Parrot/String.h>
 #include <Parrot/Asset.h>
 #include <Parrot/Arena.h>
-
+#include <Parrot/Log.h>
 
 void Parrot_SysCall(UWORD function, LONG argument);
 STATIC struct VIRTUAL_MACHINE VirtualMachine[MAX_VIRTUAL_MACHINES];
@@ -40,7 +40,7 @@ LONG Vm_Globals[MAX_SCRIPT_GLOBALS];
 STATIC VOID Vm_TickAll();
 STATIC VOID Vm_Tick();
 
-VOID VmInitialise()
+VOID Vm_Initialise()
 {
   UWORD ii, jj;
   struct VIRTUAL_MACHINE* vm;
@@ -75,11 +75,11 @@ VOID VmInitialise()
 
 }
 
-VOID VmShutdown()
+VOID Vm_Shutdown()
 {
 }
 
-STATIC VOID PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
+STATIC VOID Vm_PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
 {
   UWORD ii;
 
@@ -90,7 +90,7 @@ STATIC VOID PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
   vm->vm_Timer = 0;
   vm->vm_Constants = (ULONG*)&script->sc_Constants;
   vm->vm_Opcodes = ((OPCODE*) &script->sc_Opcodes);
-  vm->vm_OpcodesLength = script->sc_Length;
+  vm->vm_OpcodesLength = script->sc_NumOpcodes;
   vm->vm_Script = script;
 
   for (ii = 0; ii < MAX_VM_STACK_SIZE; ii++)
@@ -120,7 +120,7 @@ STATIC VOID Vm_Recycle(struct VIRTUAL_MACHINE* vm)
   vm->vm_State = VM_STATE_END;
 }
 
-STATIC VOID StartScript(struct SCRIPT* script)
+STATIC VOID Vm_StartScript(struct SCRIPT* script)
 {
   struct VIRTUAL_MACHINE* vm;
   UWORD ii;
@@ -131,13 +131,13 @@ STATIC VOID StartScript(struct SCRIPT* script)
 
     if (vm->vm_State == VM_STATE_END)
     {
-      PrepareVm(vm, script);
+      Vm_PrepareVm(vm, script);
       return;
     }
   }
 }
 
-VOID RunScript(UWORD id)
+VOID Vm_RunScript(UWORD id)
 {
   struct SCRIPT* script;
   UWORD archive;
@@ -146,10 +146,10 @@ VOID RunScript(UWORD id)
   archive = FindAssetArchive(id, CT_SCRIPT, CHUNK_FLAG_ARCH_ANY);
   script = LoadAssetT(struct SCRIPT, ArenaChapter, archive, CT_SCRIPT, id, CHUNK_FLAG_ARCH_ANY);
 #endif
-  StartScript(script);
+  Vm_StartScript(script);
 }
 
-VOID RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena)
+VOID Vm_RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena)
 {
   struct SCRIPT* script;
   struct VIRTUAL_MACHINE vm;
@@ -158,7 +158,9 @@ VOID RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena)
 
   script = (struct SCRIPT*)GetAsset(id, chapter, CT_SCRIPT, arena);
 
-  PrepareVm(&vm, script);
+  Vm_PrepareVm(&vm, script);
+
+  TRACEF("VM Script::RunNow. Script = %ld, NumOpcodes = %ld", script->as_Id, script->sc_NumOpcodes);
 
   if (vm.vm_OpcodesLength > 0)
   {
@@ -197,8 +199,9 @@ INLINE VOID Vm_Push(LONG value)
   if (Vm_Current->vm_StackHead < MAX_VM_STACK_SIZE)
   {
     Vm_Current->vm_Stack[Vm_Current->vm_StackHead] = value;
-
     Vm_Current->vm_StackHead++;
+
+    TRACEF("VM Stack::Push. Size=%ld, Top=%ld", Vm_Current->vm_StackHead, value);
   }
   else
   {
@@ -214,19 +217,25 @@ INLINE VOID Vm_Push(LONG value)
 
 INLINE LONG Vm_Pop()
 {
-  LONG value = Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
-
   if (Vm_Current->vm_StackHead > 0)
   {
     Vm_Current->vm_StackHead--;
   }
+
+  LONG value = Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
+
+  TRACEF("Vm Stack::Pop. Size=%ld, Top=%ld", Vm_Current->vm_StackHead, value);
 
   return value;
 }
 
 INLINE LONG Vm_Peek()
 {
-  return Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
+  LONG value = Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
+
+  TRACEF("Vm Stack::Peek. Size=%ld, Top=%ld", Vm_Current->vm_StackHead, value);
+
+  return value;
 }
 
 INLINE VOID Vm_SetVar(UWORD index, LONG v)
@@ -254,19 +263,19 @@ INLINE LONG Vm_GetConstant(UWORD index)
   return Vm_Current->vm_Constants[index];
 }
 
-INLINE UWORD Vm_s10tos16(UWORD value)
+INLINE LONG Vm_s10tos16(UWORD value)
 {
-  return 0;
+  return value >> 6;
 }
 
-INLINE UWORD Vm_u10tou16(UWORD value)
+INLINE LONG Vm_u10tou16(UWORD value)
 {
-  return 0;
+  return value >> 6;
 }
 
 #define Vm_LastCmp (Vm_Current->vm_Cmp)
 
-#include <Parrot/Opcodes.h>
+#include <Parrot/Vm_Opcodes.h>
 #include "Vm_RunOpcode.inc"
 
 STATIC VOID Vm_TickAll()
@@ -298,9 +307,14 @@ STATIC VOID Vm_Tick()
     case VM_STATE_RUN:
     {
       WORD pc, nextPc;
-      pc = Vm_Current->vm_PC;
+      OPCODE opcode;
 
-      nextPc = pc + Vm_RunOpcode(pc);
+      pc = Vm_Current->vm_PC;
+      opcode = Vm_Current->vm_Opcodes[pc];
+
+      TRACEF("VM Tick. Pc = %ld, Opcode = %s, Arg = %ld", pc, OpcodesStr[opcode & 0x3F], opcode >> 6);
+
+      nextPc = pc + Vm_RunOpcode(opcode);
 
       if (nextPc >= 0 && nextPc < Vm_Current->vm_OpcodesLength)
       {

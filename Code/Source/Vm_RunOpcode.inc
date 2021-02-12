@@ -155,9 +155,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     case VM_OP_PUSHI:
     {
       LONG arg_V = Vm_u10tou16(opcode);
-      LONG v;
-      v = Vm_GetVar(arg_V);
-      Vm_Push(v);
+      Vm_Push(arg_V);
     }
     return 1;
     case VM_OP_SHL:

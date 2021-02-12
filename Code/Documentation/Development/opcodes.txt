@@ -371,9 +371,7 @@ Push 10-bit signed value on the stack
 Id
   19
 Code
-  LONG v;
-  v = Vm_GetVar(#V);
-  Vm_Push(v);
+  Vm_Push(#V);
 Arg '#V'
   Name
     Variable

@@ -28,6 +28,7 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/Graphics.h>
+#include <Parrot/Log.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
@@ -35,8 +36,10 @@
 #include <dos/dos.h>
 #include <workbench/startup.h>
 
-BYTE VersionString[]   = "$VER: Parrot 1.1 (6.5.2020)\r\n";
-BYTE CopyrightString[] = "Copyright(c) 2020 Robin Southern. All Rights Reserved.";
+#define PARROT_VERSION "Parrot 1.3 (11.02.2021)"
+
+BYTE VersionString[]   = "$VER: " PARROT_VERSION "\r\n";
+BYTE CopyrightString[] = "Copyright(c) 2021 Robin Southern. All Rights Reserved.";
 
 //struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
@@ -84,6 +87,9 @@ INT main()
     rc = RETURN_FAIL;
     goto CLEAN_EXIT;
   }
+
+  Log_Initialise();
+  INFO("Parrot " PARROT_VERSION);
 
   IntuitionBase = (struct IntuitionBase*) OpenLibrary("intuition.library", 33L);
 
@@ -139,6 +145,9 @@ INT main()
 
   if (NULL != DOSBase)
   {
+    INFO("Log Shutdown");
+    Log_Shutdown();
+
     CloseLibrary((struct Library*) DOSBase);
     DOSBase = NULL;
   }

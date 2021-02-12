@@ -1,5 +1,5 @@
 /**
-    $Id: ScriptWriter, 1.0, 2020/11/14 06:45:00, betajaen Exp $
+    $Id: Main.c, 1.0, 2020/05/13 07:16:00, betajaen Exp $
 
     Maniac Game Converter for Parrot
     ================================
@@ -25,30 +25,66 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-VOID ScriptWriteByte2(UBYTE first, UBYTE second);
+#include <Squawk/Squawk.h>
+#include <Squawk/Writer/Script.h>
+#include <Parrot/Asset.h>
 
-VOID ScriptWriteWord(WORD value);
 
-VOID ScriptWriteLong(LONG value);
+UWORD ScriptData[MAX_SCRIPT_WRITER_SIZE];
+UWORD ScriptSize = 0;
 
-VOID ScriptOpStop();
+UWORD ScriptConstants[MAX_CONSTANTS_PER_SCRIPT];
+UWORD ScriptNumConstants = 0;
 
-VOID ScriptOpRem(BYTE user);
+extern VOID exit();
 
-VOID ScriptOpPushByte(BYTE value);
+VOID ScriptEnforceSpace()
+{
+  if (ScriptSize >= MAX_SCRIPT_WRITER_SIZE)
+  {
+    PARROT_ERR0("Ran out of script space when compiling script");
+  }
+}
 
-VOID ScriptOpPushWord(WORD value);
+VOID ScriptBegin()
+{
+  ScriptSize = 0;
+  ScriptNumConstants = 0;
+  
+  for (UWORD ii = 0; ii < MAX_CONSTANTS_PER_SCRIPT; ii++)
+  {
+    ScriptConstants[ii] = 0;
+  }
 
-VOID ScriptOpPushLong(LONG value);
+}
 
-VOID ScriptOpPushStack(BYTE where);
+VOID ScriptEnd()
+{
+}
 
-VOID ScriptOpPop(BYTE where);
+VOID ScriptSave(SquawkPtr archive, UWORD id, UWORD chapter)
+{
+  struct SCRIPT script;
 
-VOID ScriptOpLoadPalette(UWORD assetId);
+  UWORD archiveId = 0;
+  
+  script.as_Id = id;
+  script.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  
+  script.sc_NumOpcodes = ScriptSize;
+  
+  for (UWORD ii = 0; ii < MAX_CONSTANTS_PER_SCRIPT; ii++)
+  {
+    script.sc_Constants[ii] = ScriptConstants[ii];
+  }
+  
+  SaveAssetExtra(
+    archive,
+    (struct ANY_ASSET*) &script,
+    sizeof (struct SCRIPT),
+    &ScriptData,
+    ScriptSize * sizeof(UWORD)
+  );
 
-VOID ScriptBegin();
-
-VOID ScriptEnd();
-
-VOID ScriptSave(SquawkPtr archive, UWORD id);
+  AddToTable(CT_SCRIPT, script.as_Id, archiveId, chapter);
+}

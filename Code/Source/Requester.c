@@ -95,34 +95,6 @@ LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...)
 #endif
 }
 
-VOID TraceF(CONST_STRPTR pFmt, ...)
-{
-#if defined(IS_M68K)
-  LONG size;;
-  STRPTR* arg;
-
-  size = 0;
-  arg = (STRPTR*)(&pFmt + 1);
-  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & CountChar, (STRPTR)&size);
-
-  if (size >= sizeof(RequesterText) || (0 == size))
-  {
-    return;
-  }
-
-  RawDoFmt((STRPTR)pFmt, arg, (void (*)(void)) & PutChar, (STRPTR)&RequesterText[0]);
-
-  EasyRequesterStruct.es_GadgetFormat = "OK";
-  EasyRequesterStruct.es_Title = "Parrot Trace";
-  EasyRequesterStruct.es_TextFormat = &RequesterText[0];
-
-  EasyRequest(NULL, &EasyRequesterStruct, NULL);
-
-  EasyRequesterStruct.es_Title = "Parrot";
-#else
-  return; /* Unimplemented */
-#endif
-}
 
 VOID ExitNow();
 

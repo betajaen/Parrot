@@ -25,13 +25,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_REQUESTER_H
+#define PARROT_REQUESTER_H
+
 VOID SetRequesterWindow(APTR window);
 
 LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText);
 
 LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
-
-VOID TraceF(CONST_STRPTR pFmt, ...);
 
 VOID ErrorF(CONST_STRPTR pFmt, ...);
 
@@ -55,3 +56,5 @@ VOID ErrorF(CONST_STRPTR pFmt, ...);
 
 #define PARROT_ERR0(MESSAGE) \
   ErrorF(MESSAGE);
+
+#endif

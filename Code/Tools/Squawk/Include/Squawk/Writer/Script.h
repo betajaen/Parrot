@@ -1,8 +1,8 @@
 /**
-    $Id: ScriptWriter.h 1.2 2021/02/06 09:47:44, betajaen Exp $
+    $Id: ScriptWriter, 1.0, 2020/11/14 06:45:00, betajaen Exp $
 
-    Parrot - Point and Click Adventure Game Player
-    ==============================================
+    Maniac Game Converter for Parrot
+    ================================
 
     Copyright 2020 Robin Southern http://github.com/betajaen/parrot
 
@@ -18,23 +18,43 @@
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
     THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
 
-INLINE UWORD Vm_s16tos10(UWORD value)
+#pragma once
+
+#ifndef SQUAWK_WRITER_SCRIPT_H
+#define SQUAWK_WRITER_SCRIPT_H
+
+#define MAX_SCRIPT_WRITER_SIZE 256
+
+extern UWORD ScriptData[MAX_SCRIPT_WRITER_SIZE];
+extern UWORD ScriptSize;
+
+VOID ScriptEnforceSpace();
+
+VOID ScriptBegin();
+
+VOID ScriptEnd();
+
+VOID ScriptSave(SquawkPtr archive, UWORD id, UWORD chapter);
+
+inline UWORD ScriptU16tou10(UWORD value)
 {
-  return 0;
+  return value << 6;
 }
 
-INLINE UWORD Vm_u16tou10(UWORD value)
+inline UWORD ScriptS16tos10(WORD value)
 {
-  return 0;
+  UWORD v = value << 6;
+  return v;
 }
 
+#include <Parrot/Vm_Opcodes.h>
+#include "Script_Opcodes.inc"
 
-#include <Parrot/ScriptIds.inc>
-#include <Parrot/ScriptWriter.inc>
+#endif

@@ -34,7 +34,7 @@
 #include <Parrot/String.h>
 #include <Parrot/Graphics.h>
 #include <Parrot/Input.h>
-#include <Parrot/Script.h>
+#include <Parrot/Vm.h>
 
 #include <Parrot/Asset.h>
 #include <Parrot/Squawk.h>
@@ -84,11 +84,9 @@ EXPORT VOID GameStart(STRPTR path)
       "Reason: (1) GAME_INFO structure was not found in the first archive"
     );
   }
-
   LoadAssetTables(0, 0, GameInfo->gi_NumAssetTables);
 
-  VmInitialise();
-
+  Vm_Initialise();
 
 #if 0
 
@@ -143,7 +141,7 @@ EXPORT VOID GameStart(STRPTR path)
 
 #if 1
   
-  RunScriptNow(GameInfo->gi_StartScript, 0, ArenaFrameTemp);
+  Vm_RunScriptNow(GameInfo->gi_StartScript, 0, ArenaFrameTemp);
   ArenaRollback(ArenaFrameTemp);
   
 #else
@@ -166,7 +164,7 @@ EXPORT VOID GameStart(STRPTR path)
 
 #endif
   
-  VmShutdown();
+  Vm_Shutdown();
 
 #if 0
   CloseArchives();

@@ -38,9 +38,10 @@ struct DosLibrary* DOSBase;
 
 #define OPCODE_DIR "Parrot:Code/Documentation/Development/Schemas/Opcodes"
 #define DOCUMENTATION_PATH "Parrot:Code/Documentation/Development/opcodes.txt"
-#define CWRITER_PATH "Parrot:Code/Include/Parrot/ScriptWriter.inc"
+#define CWRITER_PATH "Parrot:Code/Tools/Squawk/Include/Squawk/Writer/Script_Opcodes.inc"
 #define CREADER_PATH "Parrot:Code/Source/Vm_RunOpcode.inc"
-#define CIDS_PATH "Parrot:Code/Include/Parrot/Opcodes.h"
+#define COPCODES_HEADER_PATH "Parrot:Code/Include/Parrot/Vm_Opcodes.h"
+#define COPCODES_SOURCE_PATH "Parrot:Code/Source/Vm_Opcodes.c"
 
 /* Opcodes */
 
@@ -561,7 +562,7 @@ VOID WriteCWriter(UWORD id, BPTR file)
 
   FILE_PRINT(file, "*/\n");
   
-  FILE_PRINTF(file, "VOID Vm_Write_%s(OPCODE* script", opcode->Name);
+  FILE_PRINTF(file, "inline void Op_%s(", opcode->Name);
 
   if (opcode->NumArguments > 0)
   {
@@ -577,10 +578,18 @@ VOID WriteCWriter(UWORD id, BPTR file)
         case AT_STACK:
           continue;
         case AT_IMM:
-          FILE_PRINTF(file, ", UWORD arg_%s", tmpStr);
+          if (ii > 0)
+          {
+            FILE_PRINT(file, ", ");
+          }
+          FILE_PRINTF(file, "UWORD arg_%s", tmpStr);
         continue;
         case AT_SIGNED_IMM:
-          FILE_PRINTF(file, ", WORD arg_%s", tmpStr);
+          if (ii > 0)
+          {
+            FILE_PRINT(file, ", ");
+          }
+          FILE_PRINTF(file, "WORD arg_%s", tmpStr);
         continue;
       }
     }
@@ -588,7 +597,9 @@ VOID WriteCWriter(UWORD id, BPTR file)
   FILE_PRINT(file, ")\n");
   FILE_PRINT(file, "{\n");
 
-  FILE_PRINT(file, "  *script++ =  VM_OP_");
+  FILE_PRINT(file, "  ScriptEnforceSpace();\n")
+  FILE_PRINT(file, "  ScriptData[ScriptSize++] =  VM_OP_");
+
   PrintUpperCase(file, opcode->Name);
 
   if (opcode->NumArguments)
@@ -605,10 +616,10 @@ VOID WriteCWriter(UWORD id, BPTR file)
         case AT_STACK:
           continue;
         case AT_IMM:
-          FILE_PRINTF(file, " | Vm_u16tou10(arg_%s)", tmpStr);
+          FILE_PRINTF(file, " | ScriptU16tou10(arg_%s)", tmpStr);
           continue;
         case AT_SIGNED_IMM:
-          FILE_PRINTF(file, " | Vm_s16tos10(arg_%s)", tmpStr);
+          FILE_PRINTF(file, " | ScriptS16tos10(arg_%s)", tmpStr);
           continue;
       }
     }
@@ -748,14 +759,14 @@ void WriteCReaderFile()
   Close(file);
 }
 
-void WriteCIdsFile()
+void WriteCOpcodesHeaderFile()
 {
   BPTR file;
   LONG err;
   UWORD ii;
   struct Opcode* opcode;
 
-  file = Open(CIDS_PATH, MODE_NEWFILE);
+  file = Open(COPCODES_HEADER_PATH, MODE_NEWFILE);
 
   if (file == 0)
   {
@@ -778,6 +789,45 @@ void WriteCIdsFile()
     PrintUpperCase(file, opcode->Name);
     FILE_PRINTF(file, " %ld\n", ii);
   }
+
+  FILE_PRINT(file, "\n\nextern const char* OpcodesStr[];\n\n");
+
+  Flush(file);
+  Close(file);
+}
+
+void WriteCOpcodesSourceFile()
+{
+  BPTR file;
+  LONG err;
+  UWORD ii;
+  struct Opcode* opcode;
+
+  file = Open(COPCODES_SOURCE_PATH, MODE_NEWFILE);
+
+  if (file == 0)
+  {
+    err = IoErr();
+    PrintFault(err, NULL);
+    CLI_PRINTF("Cannot open file %s\n", DOCUMENTATION_PATH);
+    return;
+  }
+
+  FILE_PRINT(file, "/* This is an automatically generated file */\n\n");
+
+  FILE_PRINT(file, "const char* OpcodesStr[] = {\n");
+
+  for (ii = 0; ii < MAX_OPCODES; ii++)
+  {
+    opcode = &Opcodes[ii];
+
+    if (opcode->Name == NULL)
+      continue;
+
+    FILE_PRINTF(file, "  \"%s\",\n", opcode->Name);
+  }
+
+  FILE_PRINT(file, "};\n\n");
 
   Flush(file);
   Close(file);
@@ -929,7 +979,8 @@ int main()
   WriteDocumentationFile();
   WriteCWriterFile();
   WriteCReaderFile();
-  WriteCIdsFile();
+  WriteCOpcodesHeaderFile();
+  WriteCOpcodesSourceFile();
 
   for (ii = 0; ii < MAX_OPCODES; ii++)
   {

@@ -89,11 +89,7 @@ STATIC VOID LoadArchive(struct NEW_ARCHIVE* archive, UWORD id)
     );
   }
 
-  //RequesterF("OK", "Opening archive %s", path);
-
   archive->ar_File = Open(&path[0], MODE_OLDFILE);
-
-  //RequesterF("OK", "Opening archive %ld", archive->ar_File);
 
   if (NULL == archive->ar_File)
   {

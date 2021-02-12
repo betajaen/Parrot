@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_SQUAWK_H
+#define PARROT_SQUAWK_H
+
 VOID InitArchives();
 
 UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity);
@@ -34,3 +37,5 @@ APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct AREN
 BOOL GetAssetFromArchiveInto(ULONG classType, UWORD archiveId, UWORD id, struct ANY_ASSET* asset, ULONG assetSize);
 
 struct ANY_ASSET* GcArchives(UWORD olderThan);
+
+#endif

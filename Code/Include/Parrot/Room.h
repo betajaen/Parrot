@@ -25,9 +25,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_ROOM_H
+#define PARROT_ROOM_H
+
 VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
 
 VOID PackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
 
 VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInfo);
 
+#endif

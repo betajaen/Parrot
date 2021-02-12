@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_ASSET_H
+#define PARROT_ASSET_H
+
 #define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
 #define ID_MNIC MAKE_NODE_ID('M','N','C','M')
 
@@ -48,5 +51,8 @@ void UnloadAsset(struct ARENA* arena, APTR asset);
   ( (T*) LoadAsset(ARENA, ARCHIVE, TYPE, ID, ARCH) )
 
 UWORD FindAssetArchive(UWORD assetId, ULONG classType, ULONG arch);
+
+#endif
+
 
 #endif

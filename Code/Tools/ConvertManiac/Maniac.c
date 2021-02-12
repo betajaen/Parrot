@@ -34,11 +34,11 @@ STATIC SquawkPtr primary;
 extern struct GAME_INFO GameInfo;
 extern UWORD GameLanguage;
 
-VOID ExportTables(SquawkPtr master);
+VOID ExportTables(SquawkPtr primary);
 VOID ReadGameInfo();
-VOID ExportGameInfo(SquawkPtr master);
-VOID ExportPalettes(SquawkPtr master);
-VOID ExportStartScript(SquawkPtr master);
+VOID ExportGameInfo(SquawkPtr primary);
+VOID ExportPalettes(SquawkPtr primary);
+VOID ExportPrimaryScripts(SquawkPtr primary);
 VOID ExportLfl(UWORD lflNum);
 VOID StartTables();
 VOID EndTables();
@@ -46,7 +46,7 @@ VOID StartLfl();
 VOID EndLfl();
 VOID StartDialogue();
 VOID EndDialogue();
-VOID ExportDialogue(SquawkPtr master);
+VOID ExportDialogue(SquawkPtr primary);
 UWORD GetNumTables();
 
 VOID ConverterMain()
@@ -61,6 +61,7 @@ VOID ConverterMain()
 
   ReadGameInfo();
   ExportPalettes(primary);
+  ExportPrimaryScripts(primary);
 
   StartLfl();
   for (roomNum = 1; roomNum < MM_NUM_ROOMS; roomNum++)
@@ -69,13 +70,11 @@ VOID ConverterMain()
   }
   EndLfl();
 
-  ExportStartScript(primary);
-
   ExportDialogue(primary);
   ExportTables(primary);
-
+  
   GameInfo.gi_NumAssetTables = GetNumTables();
-
+  
   ExportGameInfo(primary);
 
   CloseSquawkFile(primary);

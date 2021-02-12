@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef SQUAWK_H
+#define SQUAWK_H
+
 #include <exec/types.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
@@ -59,3 +62,5 @@ ULONG PushDialogue(UWORD language, UBYTE textLength, STRPTR text);
         VAL = AllocMem(NEED, 0);\
         CAPACITY = NEED; \
     }
+
+#endif

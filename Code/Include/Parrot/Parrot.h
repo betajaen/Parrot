@@ -491,7 +491,7 @@ struct SCRIPT
 {
   ASSET_HEADER;
   
-  UWORD  sc_Length;
+  UWORD  sc_NumOpcodes;
   LONG   sc_Constants[MAX_CONSTANTS_PER_SCRIPT];
   OPCODE sc_Opcodes[];
 };
@@ -528,8 +528,9 @@ extern struct VIRTUAL_MACHINE* Vm_Current;
 #define VM_CMP_LT 4
 
 #define SYSCALL_EXIT 0
-#define SYSCALL_STOP_SCRIPT 1
-#define SYSCALL_LOAD_GAME 2
-#define SYSCALL_SAVE_GAME 3
+#define SYSCALL_TRACE 1
+#define SYSCALL_STOP_SCRIPT 2
+#define SYSCALL_LOAD_GAME 3
+#define SYSCALL_SAVE_GAME 4
 
 #endif

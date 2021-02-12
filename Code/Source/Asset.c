@@ -30,6 +30,7 @@
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
 #include <Parrot/Squawk.h>
+#include <Parrot/Log.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
@@ -82,6 +83,8 @@ VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
   NumAssetTables = count;
   struct ASSET_TABLE* tbl;
 
+  TRACEF("LoadAssetTables. Archive = %ld, Chapter = %ld, Count = %ld", archive, chapter, count);
+
   for (ii = 0; ii < count; ii++)
   {
     tbl = (struct ASSET_TABLE*)GetAssetFromArchive(CT_TABLE, archive, 1 + ii, ArenaGame);
@@ -98,9 +101,7 @@ VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
       );
     }
 
-    //RequesterF("OK", "Loaded %ld, Type=%s, Count=%ld, Chapter=%ld",
-    //  (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
-
+    TRACEF("LoadAssetTables. Loaded. Id = %ld, Count = %ld, Chapter = %ld, AssetType = %s", tbl->as_Id, tbl->at_Count, tbl->at_Chapter, IDtoStr(tbl->at_AssetType, strType));
 
     AssetTables[ii] = tbl;
   }
@@ -111,6 +112,8 @@ struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct AREN
 {
   UWORD archiveId;
   
+  TRACEF("GetAsset. Id = %ld, Chapter = %ld, AssetType = %s", id, chapter, IDtoStr(assetType, strType));
+
   archiveId = FindAssetArchive(id, chapter, assetType);
 
   if (NO_ARCHIVE == archiveId)
@@ -136,6 +139,8 @@ BOOL GetAssetInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* as
 {
   UWORD archiveId;
 
+  TRACEF("GetAssetInto. Id = %ld, Chapter = %ld, AssetType = %s", id, chapter, IDtoStr(assetType, strType));
+
   archiveId = FindAssetArchive(id, chapter, assetType);
 
   if (NO_ARCHIVE == archiveId)
@@ -159,5 +164,7 @@ BOOL GetAssetInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* as
 
 VOID ReleaseAsset(struct ANY_ASSET* asset)
 {
+  TRACEF("ReleaseAsset. Id = %ld", asset != NULL ? asset->as_Id : 0);
+
   /* FUTURE */
 }

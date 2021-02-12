@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_ARCHIVE_H
+#define PARROT_ARCHIVE_H
+
 struct ARCHIVE;
 
 VOID InitialiseArchives(CHAR* path);
@@ -36,3 +39,5 @@ VOID CloseArchive(UWORD id);
 VOID CloseArchives();
 
 VOID LoadObjectTable(struct OBJECT_TABLE_REF* ref);
+
+#endif

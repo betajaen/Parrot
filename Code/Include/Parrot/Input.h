@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_INPUT_H
+#define PARROT_INPUT_H
+
 #define INEVT_CURSOR 1
 #define INEVT_KEY    2
 
@@ -46,3 +49,5 @@ EXPORT BOOL IsMenuDown();
 #define KC_ESC     0x45
 #define KC_F1      0x50
 #define KC_LSHIFT  0x60
+
+#endif

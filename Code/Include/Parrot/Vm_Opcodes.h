@@ -25,3 +25,7 @@
 #define VM_OP_SUB 22
 #define VM_OP_SUBS 23
 #define VM_OP_SYS 24
+
+
+extern const char* OpcodesStr[];
+

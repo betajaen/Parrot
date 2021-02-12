@@ -34,6 +34,7 @@ struct SquawkFile
 {
   BPTR   sq_File;
   ULONG  sq_ListPos;
+  CHAR   sq_Path[1 + sizeof(SAVE_PATH) + 6];
   struct SQUAWK_ASSET_LIST_HEADER sq_ListHeader;
 };
 
@@ -46,13 +47,12 @@ SquawkPtr OpenSquawkFile(UWORD id)
 {
   SquawkPtr squawk;
   LONG err;
-  CHAR path[1 + sizeof(SAVE_PATH) + 6];
 
   squawk = AllocMem(sizeof(struct SquawkFile), MEMF_CLEAR);
 
-  StrFormat(path, sizeof(path), SAVE_PATH, (ULONG)id);
+  StrFormat(squawk->sq_Path, sizeof(squawk->sq_Path), SAVE_PATH, (ULONG)id);
 
-  squawk->sq_File = Open(path, MODE_NEWFILE);
+  squawk->sq_File = Open(squawk->sq_Path, MODE_NEWFILE);
 
   if (squawk->sq_File == 0)
   {
@@ -65,7 +65,7 @@ SquawkPtr OpenSquawkFile(UWORD id)
       PARROT_ERR_INT("IoErr"),
       id,
       squawk->sq_File,
-      path,
+      squawk->sq_Path,
       IoErr()
     );
   }
@@ -107,8 +107,8 @@ VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter)
 
   squawk->sq_ListHeader.al_Type = classType;
   squawk->sq_ListHeader.al_Chapter = chapter;
-  squawk->sq_ListHeader.al_Count = 0;
-  squawk->sq_ListHeader.al_Length = 0;
+  squawk->sq_ListHeader.al_Count = 0x55;
+  squawk->sq_ListHeader.al_Length = 0xBEEFCAFE;
 
   squawk->sq_ListPos = Seek(squawk->sq_File, 0, OFFSET_CURRENT);
 
@@ -117,19 +117,18 @@ VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter)
 
 VOID EndAssetList(SquawkPtr squawk)
 {
-  ULONG len;
+  ULONG now, len;
 
-  if (squawk->sq_ListPos > 0)
+  if (squawk->sq_ListPos != 0)
   {
-    len = Seek(squawk->sq_File, 0, OFFSET_CURRENT);
-    len = len - squawk->sq_ListPos;
-    len -= sizeof(struct SQUAWK_ASSET_LIST_HEADER);
+    now = Seek(squawk->sq_File, 0, OFFSET_CURRENT);
+    len = now - squawk->sq_ListPos - sizeof(struct SQUAWK_ASSET_LIST_HEADER);
 
     squawk->sq_ListHeader.al_Length = len;
 
     Seek(squawk->sq_File, squawk->sq_ListPos, OFFSET_BEGINNING);
     Write(squawk->sq_File, &squawk->sq_ListHeader, sizeof(struct SQUAWK_ASSET_LIST_HEADER));
-    Seek(squawk->sq_File, 0, OFFSET_END);
+    Seek(squawk->sq_File, now, OFFSET_BEGINNING);
 
     squawk->sq_ListHeader.al_Type = 0;
     squawk->sq_ListHeader.al_Chapter = 0;
@@ -142,7 +141,9 @@ VOID EndAssetList(SquawkPtr squawk)
     PARROT_ERR(
       "Unable serialise assets.\n"
       "Reason: Asset list is already open"
+      PARROT_ERR_STR("File")
       PARROT_ERR_STR("Current"),
+      squawk->sq_Path,
       IDtoStr(squawk->sq_ListHeader.al_Type, strtype)
     );
   }
@@ -150,6 +151,20 @@ VOID EndAssetList(SquawkPtr squawk)
 
 VOID SaveAsset(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize)
 {
+
+  if (squawk->sq_ListPos == 0)
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Asset list is not open (1)"
+      PARROT_ERR_STR("File")
+      PARROT_ERR_INT("Asset Id"),
+      squawk->sq_Path,
+      asset->as_Id
+    );
+    exit();
+  }
+
   asset->as_Length = assetSize;
 
   Write(squawk->sq_File, asset, assetSize);
@@ -159,6 +174,20 @@ VOID SaveAsset(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize)
 
 VOID SaveAssetExtra(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize, APTR data, ULONG dataLength)
 {
+  if (squawk->sq_ListPos == 0)
+  {
+    PARROT_ERR(
+      "Unable serialise assets.\n"
+      "Reason: Asset list is not open (2)"
+      PARROT_ERR_STR("File")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Asset Length"),
+      squawk->sq_Path,
+      (assetSize + dataLength)
+    );
+    exit();
+  }
+
   asset->as_Length = assetSize + dataLength;
   asset->as_Flags |= CHUNK_FLAG_HAS_DATA;
 

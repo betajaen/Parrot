@@ -27,7 +27,7 @@
 
 #include <exec/types.h>
 #include <Squawk/Squawk.h>
-#include <Squawk/ScriptWriter.h>
+#include <Squawk/Writer/Script.h>
 
 #include "Maniac.h"
 
@@ -205,13 +205,21 @@ VOID ExportPalettes(SquawkPtr archive)
 
 }
 
-VOID ExportStartScript(SquawkPtr archive)
+VOID ExportPrimaryScripts(SquawkPtr archive)
 {
   GameStartScript = GenerateAssetId(CT_SCRIPT);
 
+  StartAssetList(archive, CT_SCRIPT, 0);
+
   ScriptBegin();
-  ScriptOpLoadPalette(GamePaletteId);
+  Op_pushi(123);
+  Op_sys(SYSCALL_TRACE);
+
+  Op_pushi(0);
+  Op_sys(SYSCALL_EXIT);
   ScriptEnd();
 
-  ScriptSave(archive, GameStartScript);
+  ScriptSave(archive, GameStartScript, 0);
+
+  EndAssetList(archive);
 }

@@ -25,6 +25,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_GRAPHICS_H
+#define PARROT_GRAPHICS_H
+
 EXPORT VOID GfxInitialise();
 
 EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* view);
@@ -76,3 +79,5 @@ EXPORT UWORD CursorGetType();
 EXPORT VOID CursorSetPos(WORD x, WORD y);
 
 EXPORT VOID CursorGetPos(WORD* x, WORD* y);
+
+#endif

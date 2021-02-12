@@ -25,10 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-EXPORT VOID VmInitialise();
+#ifndef PARROT_VM_H
+#define PARROT_VM_H
 
-EXPORT VOID VmShutdown();
+EXPORT VOID Vm_Initialise();
 
-EXPORT VOID RunScript(UWORD id);
+EXPORT VOID Vm_Shutdown();
 
-EXPORT VOID RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena);
+EXPORT VOID Vm_RunScript(UWORD id);
+
+EXPORT VOID Vm_RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena);
+
+#endif
+

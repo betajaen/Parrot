@@ -1,0 +1,30 @@
+/* This is an automatically generated file */
+
+const char* OpcodesStr[] = {
+  "add",
+  "adds",
+  "beq",
+  "bge",
+  "bgt",
+  "ble",
+  "blt",
+  "bne",
+  "bra",
+  "cmp",
+  "cmpi",
+  "cmps",
+  "dec",
+  "dup",
+  "inc",
+  "loadi",
+  "loadk",
+  "mul",
+  "pop",
+  "pushi",
+  "shl",
+  "shr",
+  "sub",
+  "subs",
+  "sys",
+};
+
