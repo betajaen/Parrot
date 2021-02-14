@@ -28,13 +28,16 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
-#include <Parrot/Asset.h>
+#include <Parrot/Squawk.h>
 #include <Parrot/Arena.h>
+#include <Parrot/Log.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <proto/iffparse.h>
 #include <exec/lists.h>
+
+#define NO_ARCHIVE 65535
 
 extern UWORD GcCounter;
 
@@ -312,8 +315,6 @@ STATIC BOOL LoadInto(ULONG classType, struct NEW_ARCHIVE* archive, struct ANY_AS
 {
   ULONG assetLength;
 
-  asset = NULL;
-
   archive->ar_Gc = GcCounter;
 
   if (NavigateToAssetList(archive, classType) == FALSE)
@@ -361,15 +362,126 @@ STATIC BOOL LoadInto(ULONG classType, struct NEW_ARCHIVE* archive, struct ANY_AS
       (ULONG) assetLength
     );
   }
+
+  TRACEF("About to read %lx into %lx of length %ld", archive, asset, assetLength);
   
   Read(archive->ar_File, (APTR)asset, assetLength);
   
   return TRUE;
 }
 
+
+STATIC BOOL LoadInto_Callback(ULONG classType, struct NEW_ARCHIVE* archive, struct ANY_ASSET* asset, ULONG assetSize, UWORD id, LoadSpecialCallback cb)
+{
+  ULONG assetLength;
+
+  archive->ar_Gc = GcCounter;
+
+  if (NavigateToAssetList(archive, classType) == FALSE)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (2) No assets of type are in the given archive"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Archive")
+      PARROT_ERR_INT("Asset"),
+      IDtoStr(classType, strType),
+      (ULONG)archive->ar_Id,
+      (ULONG)id
+    );
+  }
+
+  assetLength = NavigateToId(archive, id);
+
+  TRACEF("About to read %lx into %lx of length %ld", archive, asset, assetLength);
+
+  Read(archive->ar_File, (APTR)asset, assetSize);
+
+  UWORD counter = 0;
+
+  while (TRUE)
+  {
+    ULONG readLength = 0;
+    APTR readInto = 0;
+    cb(asset, counter, &readLength, &readInto);
+    
+    if (readLength == 0)
+      break;
+
+    LONG r = Read(archive->ar_File, readInto, readLength);
+
+    TRACEF("Read %ld of %ld into %lx", r, readLength, readInto);
+
+    ULONG* rx = readInto;
+    *rx = 0x55555555;
+
+    counter++;
+  }
+
+  return TRUE;
+}
+
+STATIC BOOL LoadIntoRaster(ULONG classType, struct NEW_ARCHIVE* archive, struct ANY_ASSET* asset, ULONG assetSize, UWORD id)
+{
+  ULONG assetLength;
+
+  archive->ar_Gc = GcCounter;
+
+  if (NavigateToAssetList(archive, classType) == FALSE)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (2) No assets of type are in the given archive"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Archive")
+      PARROT_ERR_INT("Asset"),
+      IDtoStr(classType, strType),
+      (ULONG)archive->ar_Id,
+      (ULONG)id
+    );
+  }
+
+  assetLength = NavigateToId(archive, id);
+
+  if (0 == assetLength)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (3) No assets of this id are in the given asset list in this archive"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Archive")
+      PARROT_ERR_INT("Asset"),
+      IDtoStr(classType, strType),
+      (ULONG)archive->ar_Id,
+      (ULONG)id
+    );
+  }
+
+  if (assetLength > assetSize)
+  {
+    PARROT_ERR(
+      "Unable to load asset!\n"
+      "Reason: (4) Asset does not fit in given asset"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Asset Size (Given)")
+      PARROT_ERR_INT("Asset Size (Stored"),
+      IDtoStr(classType, strType),
+      (ULONG)id,
+      (ULONG)assetSize,
+      (ULONG)assetLength
+    );
+  }
+
+  TRACEF("About to read %lx into %lx of length %ld", archive, asset, assetLength);
+
+  Read(archive->ar_File, (APTR)asset, assetLength);
+
+  return TRUE;
+}
 /* Public */
 
-VOID InitArchives()
+VOID Archives_Initialise()
 {
   struct NEW_ARCHIVE* archive;
 
@@ -385,7 +497,8 @@ VOID InitArchives()
   }
 }
 
-UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity)
+
+UWORD Asset_LoadAll(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity)
 {
   struct NEW_ARCHIVE* archive;
 
@@ -394,7 +507,7 @@ UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* ar
   return LoadAll(classType, archive, arena, outAssets, outCapacity);
 }
 
-struct ANY_ASSET* GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena)
+struct ANY_ASSET* Asset_Load_KnownArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena)
 {
   struct NEW_ARCHIVE* archive;
   archive = GetOrOpenArchive(archiveId);
@@ -402,15 +515,27 @@ struct ANY_ASSET* GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id
   return Load(classType, archive, arena, id);
 }
 
-BOOL GetAssetFromArchiveInto(ULONG classType, UWORD archiveId, UWORD id, struct ANY_ASSET* asset, ULONG assetSize)
+BOOL Asset_LoadInto_KnownArchive(UWORD id, UWORD archiveId, ULONG classType, struct ANY_ASSET* outAsset, ULONG assetSize)
 {
   struct NEW_ARCHIVE* archive;
   archive = GetOrOpenArchive(archiveId);
 
-  return LoadInto(classType, archive, asset, assetSize, id);
+  TRACEF("ASSET LoadIntoKnownArchive. Id=%ld, ArchiveId=%ld, ClassType=%s", id, archiveId, IDtoStr(classType, strType));
+
+  return LoadInto(classType, archive, outAsset, assetSize, id);
 }
 
-VOID GcArchives(UWORD olderThan)
+BOOL Asset_LoadInto_Callback_KnownArchive(UWORD id, UWORD archiveId, ULONG classType, struct ANY_ASSET* outAsset, ULONG assetSize, LoadSpecialCallback cb)
+{
+  struct NEW_ARCHIVE* archive;
+  archive = GetOrOpenArchive(archiveId);
+
+  TRACEF("ASSET LoadIntoKnownRasterArchive. Id=%ld, ArchiveId=%ld, ClassType=%s", id, archiveId, IDtoStr(classType, strType));
+
+  return LoadInto_Callback(classType, archive, outAsset, assetSize, id, cb);
+}
+
+VOID Archives_Unload(UWORD olderThan)
 {
   struct NEW_ARCHIVE* archive;
 
@@ -423,4 +548,91 @@ VOID GcArchives(UWORD olderThan)
       UnloadArchive(archive);
     }
   }
+}
+
+
+struct ANY_ASSET* Asset_Load(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena)
+{
+  UWORD archiveId;
+
+  TRACEF("ASSET GetAsset. Id = %ld, Chapter = %ld, AssetType = %s", id, chapter, IDtoStr(assetType, strType));
+
+  archiveId = AssetTables_FindArchive(id, chapter, assetType);
+
+  if (NO_ARCHIVE == archiveId)
+  {
+    PARROT_ERR(
+      "Unable to load asset\n"
+      "Reason: (1) Asset Id was not found in any asset table"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Chapter"),
+      IDtoStr(assetType, strType),
+      (ULONG)id,
+      (ULONG)chapter
+    );
+  }
+
+  /* FUTURE - CACHING */
+
+  return Asset_Load_KnownArchive(assetType, archiveId, id, arena);
+}
+
+BOOL Asset_LoadInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize)
+{
+  UWORD archiveId;
+
+  TRACEF("ASSET LoadInto. Id = %ld, Chapter = %ld, AssetType = %s", id, chapter, IDtoStr(assetType, strType));
+
+  archiveId = AssetTables_FindArchive(id, chapter, assetType);
+
+  if (NO_ARCHIVE == archiveId)
+  {
+    PARROT_ERR(
+      "Unable to load asset\n"
+      "Reason: (1) Asset Id was not found in any asset table"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Chapter"),
+      IDtoStr(assetType, strType),
+      (ULONG)id,
+      (ULONG)chapter
+    );
+  }
+
+  return Asset_LoadInto_KnownArchive(id, archiveId, assetType, asset, assetSize);
+}
+
+VOID Asset_Unload(struct ANY_ASSET* asset)
+{
+  TRACEF("ReleaseAsset. Id = %ld", asset != NULL ? asset->as_Id : 0);
+
+  /* FUTURE */
+}
+
+
+VOID Asset_LoadInto_Callback(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize, LoadSpecialCallback cb)
+{
+
+  UWORD archiveId;
+
+  TRACEF("ASSET LoadInto. Id = %ld, Chapter = %ld, AssetType = %s", id, chapter, IDtoStr(assetType, strType));
+
+  archiveId = AssetTables_FindArchive(id, chapter, assetType);
+
+  if (NO_ARCHIVE == archiveId)
+  {
+    PARROT_ERR(
+      "Unable to load asset\n"
+      "Reason: (1) Asset Id was not found in any asset table"
+      PARROT_ERR_STR("Asset Type")
+      PARROT_ERR_INT("Asset Id")
+      PARROT_ERR_INT("Chapter"),
+      IDtoStr(assetType, strType),
+      (ULONG)id,
+      (ULONG)chapter
+    );
+  }
+
+  return Asset_LoadInto_Callback_KnownArchive(id, archiveId, assetType, asset, assetSize, cb);
 }

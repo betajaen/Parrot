@@ -1,0 +1,8 @@
+Name:
+  loadroom
+Description:
+  Load a room
+Argument:
+  i : RoomNum
+Code:
+  Api_LoadRoom(#R);

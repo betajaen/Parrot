@@ -41,7 +41,7 @@ PARROT_OBJ = \
 						game.o \
 						room.o \
 						image.o \
-						asset.o \
+						assettables.o \
 						entity.o \
 						view.o \
 						input.o \
@@ -83,8 +83,8 @@ room.o: Source/Room.c
 image.o: Source/Image.c
 	$(CC) $(CFLAGS) -c Source/Image.c -o image.o
 
-asset.o: Source/Asset.c
-	$(CC) $(CFLAGS) -c Source/Asset.c -o asset.o
+assettables.o: Source/AssetTables.c
+	$(CC) $(CFLAGS) -c Source/AssetTables.c -o assettables.o
 
 entity.o: Source/Entity.c
 	$(CC) $(CFLAGS) -c Source/Entity.c -o entity.o

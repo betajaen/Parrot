@@ -39,6 +39,9 @@ STATIC UWORD GameStartScript;
 
 VOID ReadGameInfo()
 {
+  GameInfo.as_Id = 1;
+  GameInfo.as_Flags = CHUNK_FLAG_ARCH_ANY;
+
   GameInfo.gi_Title = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_TITLE), MM_META_TITLE);
   GameInfo.gi_ShortTitle = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_SHORT_TITLE), MM_META_SHORT_TITLE);
   GameInfo.gi_Author = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_AUTHOR), MM_META_AUTHOR);
@@ -61,7 +64,7 @@ VOID ExportGameInfo(SquawkPtr archive)
   EndAssetList(archive);
 }
 
-STATIC VOID ExportGamePalette(SquawkPtr archive, UWORD id)
+STATIC VOID ExportGamePalette(SquawkPtr primary, UWORD id)
 {
   struct PALETTE_TABLE pal;
   ULONG* pData;
@@ -161,11 +164,10 @@ STATIC VOID ExportGamePalette(SquawkPtr archive, UWORD id)
   pal.as_Id = id;
   pal.as_Flags = CHUNK_FLAG_ARCH_ANY;
 
-  SaveAsset(archive, (struct ANY_ASSET*)&pal, sizeof(struct PALETTE_TABLE));
-  AddToTable(CT_PALETTE, pal.as_Id, MM_SHARED_ARCHIVE_ID, MM_SHARED_CHAPTER);
+  SaveAsset(primary, (struct ANY_ASSET*)&pal, sizeof(struct PALETTE_TABLE));
 }
 
-STATIC VOID ExportCursorPalette(SquawkPtr archive, UWORD id)
+STATIC VOID ExportCursorPalette(SquawkPtr primary, UWORD id)
 {
   struct PALETTE_TABLE  pal;
   ULONG* pData;
@@ -188,38 +190,41 @@ STATIC VOID ExportCursorPalette(SquawkPtr archive, UWORD id)
   pal.as_Id = id;
   pal.as_Flags = CHUNK_FLAG_ARCH_ANY;
 
-  SaveAsset(archive, (struct ANY_ASSET*)&pal, sizeof(struct PALETTE_TABLE));
-  AddToTable(CT_PALETTE, pal.as_Id, MM_SHARED_ARCHIVE_ID, MM_SHARED_CHAPTER);
+  SaveAsset(primary, (struct ANY_ASSET*)&pal, sizeof(struct PALETTE_TABLE));
 }
 
 
-VOID ExportPalettes(SquawkPtr archive)
+VOID ExportPalettes(SquawkPtr primary)
 {
   GamePaletteId = GenerateAssetId(CT_PALETTE);
   GameCursorPaletteId = GenerateAssetId(CT_PALETTE);
 
-  StartAssetList(archive, CT_PALETTE, MM_SHARED_CHAPTER);
-  ExportGamePalette(archive, GamePaletteId);
-  ExportCursorPalette(archive, GameCursorPaletteId);
-  EndAssetList(archive);
-
+  StartAssetList(primary, CT_PALETTE, 0);
+  ExportGamePalette(primary, GamePaletteId);
+  ExportCursorPalette(primary, GameCursorPaletteId);
+  EndAssetList(primary);
 }
 
-VOID ExportPrimaryScripts(SquawkPtr archive)
+VOID ExportPrimaryScripts(SquawkPtr primary)
 {
   GameStartScript = GenerateAssetId(CT_SCRIPT);
 
-  StartAssetList(archive, CT_SCRIPT, 0);
+  StartAssetList(primary, CT_SCRIPT, 0);
 
   ScriptBegin();
-  Op_pushi(123);
-  Op_sys(SYSCALL_TRACE);
 
-  Op_pushi(0);
-  Op_sys(SYSCALL_EXIT);
+  Op_loadpal(GamePaletteId);
+  // Op_loadpal(GameCursorPaletteId);
+
+  Op_loadroom(3);
+
+  Op_sys1(SYSCALL_DELAY_SECONDS, 3);
+
+  Op_sys1(SYSCALL_EXIT, 0);
+
   ScriptEnd();
 
-  ScriptSave(archive, GameStartScript, 0);
+  ScriptSave(primary, GameStartScript, 0);
 
-  EndAssetList(archive);
+  EndAssetList(primary);
 }

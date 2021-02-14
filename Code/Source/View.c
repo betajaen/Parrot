@@ -29,6 +29,7 @@
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
 #include <Parrot/Graphics.h>
+#include <Parrot/Log.h>
 
 #include <proto/exec.h>
 #include <proto/intuition.h>
@@ -45,7 +46,6 @@
 #include <graphics/clip.h>
 #include <graphics/text.h>
 #include <graphics/gfxbase.h>
-
 
 #include <clib/graphics_protos.h>
 
@@ -95,7 +95,7 @@ UWORD                IsShown;
 STATIC ULONG DefaultPalette[] =
 {
     4 << 16 | 0,
-    0,0,0,
+    0X00000000, 0X00000000, 0X00000000,
     0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
     0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
     0X55555555, 0X55555555, 0X55555555,
@@ -103,6 +103,30 @@ STATIC ULONG DefaultPalette[] =
     0,0,0,
     0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
     0
+};
+
+STATIC ULONG MouseFramePalette0[8] =
+{
+    2 << 16 | 17,
+    0,0,0,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0,
+};
+
+STATIC ULONG MouseFramePalette1[8] =
+{
+    2 << 16 | 17,
+    0,0,0,
+    0XAAAAAAAA, 0XAAAAAAAA, 0XAAAAAAAA,
+    0,
+};
+
+STATIC ULONG MouseFramePalette2[8] =
+{
+    2 << 16 | 17,
+    0,0,0,
+    0X55555555, 0X55555555, 0X55555555,
+    0,
 };
 
 EXPORT VOID GfxInitialise()
@@ -284,6 +308,7 @@ EXPORT VOID GfxShow()
     LoadRGB32(vp, (CONST ULONG*) &DefaultPalette[0]);
   }
 
+  TRACE("GFX Shown.");
 }
 
 EXPORT VOID GfxHide()
@@ -302,6 +327,8 @@ EXPORT VOID GfxHide()
   WaitTOF();
 
   OpenWorkBench();
+
+  TRACE("GFX Hidden.");
 }
 
 EXPORT BOOL GfxIsPal()
@@ -309,9 +336,32 @@ EXPORT BOOL GfxIsPal()
   return (GfxBase->DisplayFlags & PAL) == PAL;
 }
 
+EXPORT VOID GfxAnimateCursor(UWORD frame)
+{
+  ULONG* animation;
+
+  switch (frame)
+  {
+    default:
+    case 0:
+      animation = &MouseFramePalette0;
+      break;
+    case 1:
+      animation = &MouseFramePalette1;
+      break;
+    case 2:
+      animation = &MouseFramePalette2;
+      break;
+  }
+
+  LoadRGB32(&ViewPorts[0].v_ViewPort, animation);
+  LoadRGB32(&ViewPorts[1].v_ViewPort, animation);
+}
 
 EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table)
 {
+  TRACEF("Gfx LoadPal. Loading Palette into vp = %ld", vp);
+
   LoadRGB32(&ViewPorts[vp].v_ViewPort, (CONST ULONG*) table);
 }
 
@@ -358,6 +408,8 @@ EXPORT VOID GfxSubmit(UWORD id)
   vp->v_RasInfo.RyOffset = vp->v_ReadOffset + vp->v_ScrollY;
 
   ScrollVPort(&vp->v_ViewPort);
+
+  TRACEF("GFX Submit. Id=%ld", id);
 }
 
 EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)
@@ -372,6 +424,8 @@ EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)
   vp->v_RasInfo.RyOffset = vp->v_ReadOffset + vp->v_ScrollY;
 
   ScrollVPort(&vp->v_ViewPort);
+
+  TRACEF("GFX Scroll Offset. Id=%ld, X=%ld, Y=%ld", id, x, y);
 }
 
 EXPORT VOID GfxClear(UWORD id)
@@ -388,6 +442,8 @@ EXPORT VOID GfxClear(UWORD id)
     vp->v_BitMapWidth-1,
     (vp->v_BitmapHeight*2)-1
   );
+
+  TRACEF("GFX Clear. Id=%ld", id);
 }
 
 EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
@@ -422,16 +478,24 @@ EXPORT VOID GfxRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
   );
 }
 
-EXPORT VOID GfxBlitBitmap(UWORD id, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
+EXPORT VOID GfxBlitBitmap(UWORD viewportId, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
 {
+  if (NULL == image)
+  {
+    WARNINGF("GFX Blit. Cannot blit null image to View %ld!", viewportId);
+    return;
+  }
+
   struct RastPort* rp;
   WORD offset;
 
-  offset = ViewPorts[id].v_WriteOffset;
+  offset = ViewPorts[viewportId].v_WriteOffset;
 
-  rp = &ViewPorts[id].v_RastPort;
+  rp = &ViewPorts[viewportId].v_RastPort;
   
-  BltBitMapRastPort((struct BitMap*) image, sx, sy, rp, dx, dy + offset, sw, sh, 0xC0);
+  BltBitMapRastPort(CAST_IMAGE_TO_BITMAP(image), sx, sy, rp, dx, dy + offset, sw, sh, 0xC0);
+
+  TRACEF("GFX Blit. Id=%ld Image=%lx", viewportId, image);
 }
 
 
@@ -521,4 +585,16 @@ EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLe
 
   Move(rp, x0, y0);
   Text(rp, name, nameLength);
+
+}
+
+EXPORT VOID Api_LoadPalette(UWORD palette)
+{
+  struct PALETTE_TABLE pal;
+  
+  TRACEF("API LoadPalette. Palette = %ld", palette);
+  
+  Asset_LoadInto_KnownArchive(palette, 0, CT_PALETTE, &pal, sizeof(pal));
+  
+  GfxLoadColours32(0, (ULONG*)&pal.pt_Data[0]);
 }

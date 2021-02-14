@@ -32,6 +32,7 @@
 STATIC SquawkPtr primary;
 
 extern struct GAME_INFO GameInfo;
+
 extern UWORD GameLanguage;
 
 VOID ExportTables(SquawkPtr primary);
@@ -56,6 +57,7 @@ VOID ConverterMain()
 
   StartTables();
   StartDialogue();
+
 
   primary = OpenSquawkFile(0);
 

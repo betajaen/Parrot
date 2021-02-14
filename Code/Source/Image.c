@@ -27,6 +27,7 @@
 
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
+#include <Parrot/Log.h>
 
 #include <proto/iffparse.h>
 #include <proto/graphics.h>
@@ -40,11 +41,14 @@ EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
 
   if (img->im_Planes[0] != NULL)
   {
-    goto CLEAN_EXIT;
+    WARNINGF("Cannot unpack bitmap %ld. Bitmap planes[0] is not null!", img->as_Id);
+    return;
   }
 
   img->im_pad = 0;
   img->im_Flags = 0;
+
+  TRACEF("IMAGE UnpackBitmap. Id, Size=%ld", ii, img->im_PlaneSize);
 
   for (ii = 0; ii < img->im_Depth; ii++)
   {
@@ -62,13 +66,14 @@ EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
         img->im_Width, img->im_Height, img->im_Depth, (ULONG)ii
       );
 
-      goto CLEAN_EXIT;
+      return;
     }
 
     ReadChunkBytes(iff, img->im_Planes[ii], img->im_PlaneSize);
-  }
 
-  CLEAN_EXIT:
+    TRACEF("IMAGE UnpackBitmap. AllocedRaster Bitmap. Plane=%ld, Size=%ld", ii, img->im_PlaneSize);
+
+  }
 }
 
 EXPORT VOID PackBitmap(APTR asset)
@@ -86,4 +91,29 @@ EXPORT VOID PackBitmap(APTR asset)
       img->im_Planes[ii] = NULL;
     }
   }
+}
+
+VOID Asset_CallbackFor_Image(struct ANY_ASSET* asset, UWORD counter, ULONG* readLength, APTR* readInto)
+{
+  struct IMAGE* img;
+  APTR plane;
+
+  img = (struct IMAGE*)asset;
+
+  TRACEF("ASSET ImageCallback.  ImageId=%ld, Plane=%ld/%ld PlaneSize=%ld", img->as_Id, counter, img->im_Depth, img->im_PlaneSize);
+
+  if (counter >= img->im_Depth)
+  {
+    readLength = 0;
+    readInto = NULL;
+    return;
+  }
+
+  plane = (PLANEPTR)AllocRaster(img->im_Width, img->im_Height);
+  img->im_Planes[counter] = plane;
+
+  TRACEF("ASSET ImageCallback.  AllocRaster. ImageId=%ld, Plane=%ld/%ld PlaneSize=%ld Raster=%lx WidthxHeight=%ldx%ld", img->as_Id, counter, img->im_Depth, img->im_PlaneSize, plane, img->im_Width, img->im_Height);
+
+  *readInto = plane;
+  *readLength = img->im_PlaneSize;
 }

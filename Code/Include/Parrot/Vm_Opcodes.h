@@ -17,14 +17,16 @@
 #define VM_OP_INC 14
 #define VM_OP_LOADI 15
 #define VM_OP_LOADK 16
-#define VM_OP_MUL 17
-#define VM_OP_POP 18
-#define VM_OP_PUSHI 19
-#define VM_OP_SHL 20
-#define VM_OP_SHR 21
-#define VM_OP_SUB 22
-#define VM_OP_SUBS 23
-#define VM_OP_SYS 24
+#define VM_OP_LOADPAL 17
+#define VM_OP_LOADROOM 18
+#define VM_OP_MUL 19
+#define VM_OP_POP 20
+#define VM_OP_PUSHI 21
+#define VM_OP_SHL 22
+#define VM_OP_SHR 23
+#define VM_OP_SUB 24
+#define VM_OP_SUBS 25
+#define VM_OP_SYS 26
 
 
 extern const char* OpcodesStr[];

@@ -57,4 +57,9 @@ inline UWORD ScriptS16tos10(WORD value)
 #include <Parrot/Vm_Opcodes.h>
 #include "Script_Opcodes.inc"
 
+
+#define Op_sys1(NAME, ARG) \
+  Op_pushi(ARG); \
+  Op_sys(NAME)
+
 #endif

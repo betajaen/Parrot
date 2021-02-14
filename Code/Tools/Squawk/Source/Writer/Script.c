@@ -27,7 +27,6 @@
 
 #include <Squawk/Squawk.h>
 #include <Squawk/Writer/Script.h>
-#include <Parrot/Asset.h>
 
 
 UWORD ScriptData[MAX_SCRIPT_WRITER_SIZE];

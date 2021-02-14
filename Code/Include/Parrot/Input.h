@@ -48,6 +48,7 @@ EXPORT BOOL IsMenuDown();
 
 #define KC_ESC     0x45
 #define KC_F1      0x50
+#define KC_F2      0x51
 #define KC_LSHIFT  0x60
 
 #endif

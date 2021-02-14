@@ -28,9 +28,10 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
-#include <Parrot/Asset.h>
 #include <Parrot/Arena.h>
+#include <Parrot/Squawk.h>
 #include <Parrot/Log.h>
+#include <Parrot/Api.h>
 
 void Parrot_SysCall(UWORD function, LONG argument);
 STATIC struct VIRTUAL_MACHINE VirtualMachine[MAX_VIRTUAL_MACHINES];
@@ -156,7 +157,7 @@ VOID Vm_RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena)
 
   InitStackVar(vm);
 
-  script = (struct SCRIPT*)GetAsset(id, chapter, CT_SCRIPT, arena);
+  script = (struct SCRIPT*)Asset_Load(id, chapter, CT_SCRIPT, arena);
 
   Vm_PrepareVm(&vm, script);
 

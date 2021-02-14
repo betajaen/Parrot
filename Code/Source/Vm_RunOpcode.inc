@@ -138,6 +138,18 @@ WORD Vm_RunOpcode(OPCODE opcode)
       Vm_Push(v);
     }
     return 1;
+    case VM_OP_LOADPAL:
+    {
+      LONG arg_P = Vm_u10tou16(opcode);
+      Api_LoadPalette(arg_P);
+    }
+    return 1;
+    case VM_OP_LOADROOM:
+    {
+      LONG arg_R = Vm_u10tou16(opcode);
+      Api_LoadRoom(arg_R);
+    }
+    return 1;
     case VM_OP_MUL:
     {
       LONG arg_V = Vm_u10tou16(opcode);

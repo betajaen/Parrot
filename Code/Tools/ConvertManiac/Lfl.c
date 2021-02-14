@@ -182,6 +182,7 @@ STATIC VOID ExportRoom()
 
   room.rm_Width = RoomWidth;
   room.rm_Height = RoomHeight;
+  room.rm_Backdrops[0] = BackdropId;
 
   StartAssetList(Archive, CT_ROOM, 1);
 
@@ -323,7 +324,7 @@ STATIC VOID ExportImageBackdrop(UWORD id)
   backdrop.im_BytesPerRow = (RoomWidth >> 3);
   backdrop.im_PlaneSize = backdrop.im_BytesPerRow * backdrop.im_Height;
 
-  SaveAssetExtra(Archive, (struct ANY_ASSET*) &backdrop, sizeof(backdrop), ChunkyData, chunkySize);
+  SaveAssetExtra(Archive, (struct ANY_ASSET*) &backdrop, sizeof(backdrop), PlanarData, planarSize);
   AddToTable(CT_IMAGE, id, ArchiveId, MM_CHAPTER);
   
 }
@@ -386,15 +387,13 @@ STATIC VOID ReadRoomData()
   ObjectOffset = 28 + (NumObjects * 2);
 }
 
-STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, UWORD w, UWORD h)
+STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, ULONG w, ULONG h)
 {
-  UWORD x, y;
+  ULONG x, y, z;
   UBYTE r, len, col;
-  ULONG offset;
   
   x = 0;
   y = 0;
-  offset = 0;
 
   while (x < w)
   {
@@ -403,25 +402,23 @@ STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, UWORD w, UWORD h)
 
     if (r < 0x80)
     {
-      len = (r >> 4) & 0xF;
+      len = (r >> 4);
       col = r & 0xF;
 
       if (0 == len)
       {
-        r = *src++;
-        r ^= 0xFF; /* Copy Protection */
+        len = *src++;
+        len ^= 0xFF; /* Copy Protection */
       }
 
-      while (len--)
+      for (z=0;z < len;z++)
       {
-        dst[offset] = col;
+        dst[x + (y * w)] = col;
         y++;
-        offset += w;
         if (y >= h)
         {
           y = 0;
           x++;
-          offset = x;
         }
       }
 
@@ -436,17 +433,15 @@ STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, UWORD w, UWORD h)
         len ^= 0xFF; /* Copy Protection */
       }
 
-      while (len--)
+      for (z = 0; z < len; z++)
       {
-        col = dst[offset - 1];
-        dst[offset] = col;
-        offset += w;
+        col = dst[(x - 1) + (y * w)];
+        dst[x + (y * w)] = col;
         y++;
         if (y >= h)
         {
           y = 0;
           x++;
-          offset = x;
         }
       }
     }

@@ -258,6 +258,8 @@ struct GAME_INFO
   UWORD                     gi_StartScript;
 };
 
+extern struct GAME_INFO GameInfo;
+
 /*
     Asset Table
 */
@@ -334,6 +336,9 @@ struct IMAGE
   UWORD             im_Palette;
   ULONG             im_PlaneSize;
 };
+
+#define CAST_IMAGE_TO_BITMAP(IMG) ((struct BitMap*)(&IMG->im_BytesPerRow))
+
 
 /*
 
@@ -447,21 +452,23 @@ struct ROOM
   UWORD               rm_Scripts[MAX_ROOM_SCRIPTS];
 };
 
-#define UFLG_DEBUG    1
-#define UFLG_SCENE    2
-#define UFLG_SCROLL   4
-#define UFLG_CAPTION  8
-#define UFLG_ALL      (2 | 4 | 8)
+#define UFLG_DEBUG     1
+#define UFLG_SCENE     2
+#define UFLG_SCROLL    4
+#define UFLG_CAPTION   8
+#define UFLG_MOUSEANIM 16
+#define UFLG_ALL       (2 | 4 | 8)
 
 struct UNPACKED_ROOM
 {
-  struct ROOM*        ur_Room;
-  struct IMAGE*       ur_Backdrops[MAX_ROOM_BACKDROPS];
+  struct ROOM         ur_Room;
+
+  struct IMAGE        ur_Backdrops[MAX_ROOM_BACKDROPS];
   struct EXIT*        ur_Exits[MAX_ROOM_EXITS];
   struct ENTITIES*    ur_Entities[MAX_ROOM_ENTITIES];
   struct SCRIPT*      ur_Scripts[MAX_ROOM_SCRIPTS];
   struct VERBS        ur_Verbs;
-  UWORD               ur_Id;
+
   ULONG               ur_Unpacked;
   WORD                ur_CamX;
   WORD                ur_CamY;
@@ -532,5 +539,7 @@ extern struct VIRTUAL_MACHINE* Vm_Current;
 #define SYSCALL_STOP_SCRIPT 2
 #define SYSCALL_LOAD_GAME 3
 #define SYSCALL_SAVE_GAME 4
+#define SYSCALL_DELAY_TICKS 5
+#define SYSCALL_DELAY_SECONDS 6
 
 #endif

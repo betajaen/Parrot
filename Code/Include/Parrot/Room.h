@@ -32,6 +32,6 @@ VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
 
 VOID PackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
 
-VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInfo);
+VOID Room_Run(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInfo);
 
 #endif

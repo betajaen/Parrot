@@ -36,15 +36,14 @@
 #include <proto/dos.h>
 #include <proto/iffparse.h>
 
-#define NO_ARCHIVE 65535
-
+#define NO_ARCHIVE 0xFFFF
 
 STATIC struct ASSET_TABLE* AssetTables[256];
 STATIC UWORD  NumAssetTables;
 STATIC char strType[5];
 
 
-STATIC UWORD FindAssetArchive(UWORD assetId, UWORD chapter, ULONG assetType)
+UWORD AssetTables_FindArchive(UWORD assetId, UWORD chapter, ULONG assetType)
 {
   UWORD ii, jj;
   struct ASSET_TABLE* tbl;
@@ -77,7 +76,7 @@ STATIC UWORD FindAssetArchive(UWORD assetId, UWORD chapter, ULONG assetType)
   return NO_ARCHIVE;
 }
 
-VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
+VOID AssetTables_Load(UWORD archive, UWORD chapter, UWORD count)
 {
   UWORD ii;
   NumAssetTables = count;
@@ -87,7 +86,7 @@ VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
 
   for (ii = 0; ii < count; ii++)
   {
-    tbl = (struct ASSET_TABLE*)GetAssetFromArchive(CT_TABLE, archive, 1 + ii, ArenaGame);
+    tbl = (struct ASSET_TABLE*)Asset_Load_KnownArchive(CT_TABLE, archive, 1 + ii, ArenaGame);
 
     if (NULL == tbl)
     {
@@ -107,64 +106,3 @@ VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count)
   }
 }
 
-
-struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena)
-{
-  UWORD archiveId;
-  
-  TRACEF("GetAsset. Id = %ld, Chapter = %ld, AssetType = %s", id, chapter, IDtoStr(assetType, strType));
-
-  archiveId = FindAssetArchive(id, chapter, assetType);
-
-  if (NO_ARCHIVE == archiveId)
-  {
-    PARROT_ERR(
-      "Unable to load asset\n"
-      "Reason: (1) Asset Id was not found in any asset table"
-      PARROT_ERR_STR("Asset Type")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("Chapter"),
-      IDtoStr(assetType, strType),
-      (ULONG)id,
-      (ULONG)chapter
-    );
-  }
-
-  /* FUTURE - CACHING */
-
-  return GetAssetFromArchive(assetType, archiveId, id, arena);
-}
-
-BOOL GetAssetInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize)
-{
-  UWORD archiveId;
-
-  TRACEF("GetAssetInto. Id = %ld, Chapter = %ld, AssetType = %s", id, chapter, IDtoStr(assetType, strType));
-
-  archiveId = FindAssetArchive(id, chapter, assetType);
-
-  if (NO_ARCHIVE == archiveId)
-  {
-    PARROT_ERR(
-      "Unable to load asset\n"
-      "Reason: (1) Asset Id was not found in any asset table"
-      PARROT_ERR_STR("Asset Type")
-      PARROT_ERR_INT("Asset Id")
-      PARROT_ERR_INT("Chapter"),
-      IDtoStr(assetType, strType),
-      (ULONG)id,
-      (ULONG)chapter
-    );
-  }
-
-  /* FUTURE - CACHING */
-
-  return GetAssetFromArchiveInto(assetType, archiveId, id, asset, assetSize);
-}
-
-VOID ReleaseAsset(struct ANY_ASSET* asset)
-{
-  TRACEF("ReleaseAsset. Id = %ld", asset != NULL ? asset->as_Id : 0);
-
-  /* FUTURE */
-}

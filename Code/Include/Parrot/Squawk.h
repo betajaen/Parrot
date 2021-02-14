@@ -28,14 +28,36 @@
 #ifndef PARROT_SQUAWK_H
 #define PARROT_SQUAWK_H
 
-VOID InitArchives();
+#include <Parrot/Parrot.h>
 
-UWORD GetAllAssetsFromArchive(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity);
+#define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
+#define ID_MNIC MAKE_NODE_ID('M','N','C','M')
 
-APTR GetAssetFromArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena);
+struct ARENA;
+struct ANY_ASSET;
 
-BOOL GetAssetFromArchiveInto(ULONG classType, UWORD archiveId, UWORD id, struct ANY_ASSET* asset, ULONG assetSize);
+typedef VOID(*LoadSpecialCallback)(struct ANY_ASSET* asset, UWORD counter, ULONG* readLength, APTR* readInto);
 
-struct ANY_ASSET* GcArchives(UWORD olderThan);
+VOID Archives_Initialise();
+
+struct ANY_ASSET* Archives_Unload(UWORD olderThan);
+
+VOID AssetTables_Load(UWORD archive, UWORD chapter, UWORD count);
+
+UWORD Asset_LoadAll(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity);
+
+struct ANY_ASSET* Asset_Load_KnownArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena);
+
+BOOL Asset_LoadInto_KnownArchive(UWORD id, UWORD archiveId, ULONG classType, struct ANY_ASSET* outAsset, ULONG assetSize);
+
+struct ANY_ASSET* Asset_Load(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena);
+
+BOOL Asset_LoadInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize);
+
+VOID Asset_Unload(struct ANY_ASSET* asset);
+
+VOID Asset_LoadInto_Callback(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize, LoadSpecialCallback cb);
+
+VOID Asset_CallbackFor_Image(struct ANY_ASSET* asset, UWORD counter, ULONG* readLength, APTR* readInto);
 
 #endif

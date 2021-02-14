@@ -26,7 +26,6 @@
 */
 
 #include <Squawk/Squawk.h>
-#include <Parrot/Asset.h>
 
 #define SAVE_PATH "PROGDIR:%ld.Parrot"
 

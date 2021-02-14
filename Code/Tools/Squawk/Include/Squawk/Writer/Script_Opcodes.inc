@@ -229,6 +229,32 @@ inline void Op_loadk(UWORD arg_C)
 
 
 /*
+  loadpal
+  Load a palette
+  Args:
+    arg_P = PaletteNum
+*/
+inline void Op_loadpal(UWORD arg_P)
+{
+  ScriptEnforceSpace();
+  ScriptData[ScriptSize++] =  VM_OP_LOADPAL | ScriptU16tou10(arg_P);
+}
+
+
+/*
+  loadroom
+  Load a room
+  Args:
+    arg_R = RoomNum
+*/
+inline void Op_loadroom(UWORD arg_R)
+{
+  ScriptEnforceSpace();
+  ScriptData[ScriptSize++] =  VM_OP_LOADROOM | ScriptU16tou10(arg_R);
+}
+
+
+/*
   mul
   Pop last two values from stack and add them together. Result is in vars
   Args:

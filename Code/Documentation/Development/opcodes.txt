@@ -326,12 +326,44 @@ Arg '#C'
   Encoding
     Bits 6-15
 
+## loadpal
+
+Load a palette
+
+Id
+  17
+Code
+  Api_LoadPalette(#P);
+Arg '#P'
+  Name
+    PaletteNum
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+
+## loadroom
+
+Load a room
+
+Id
+  18
+Code
+  Api_LoadRoom(#R);
+Arg '#R'
+  Name
+    RoomNum
+  Type
+    10-bit
+  Encoding
+    Bits 6-15
+
 ## mul
 
 Pop last two values from stack and add them together. Result is in vars
 
 Id
-  17
+  19
 Code
   LONG l, r;
   r = Vm_Pop();
@@ -360,7 +392,7 @@ Arg '#R'
 Pop stack value and discard
 
 Id
-  18
+  20
 Code
   Vm_Pop();
 
@@ -369,7 +401,7 @@ Code
 Push 10-bit signed value on the stack
 
 Id
-  19
+  21
 Code
   Vm_Push(#V);
 Arg '#V'
@@ -385,7 +417,7 @@ Arg '#V'
 Pop a value. Left Shift it and push the result on the stack
 
 Id
-  20
+  22
 Code
   LONG l;
   l = Vm_Pop();
@@ -408,7 +440,7 @@ Arg '#L'
 Pop a value. Right Shift it and push the result on the stack
 
 Id
-  21
+  23
 Code
   LONG l;
   l = Vm_Pop();
@@ -431,7 +463,7 @@ Arg '#L'
 Pop last two values from stack and subtract them together. Result is in vars
 
 Id
-  22
+  24
 Code
   LONG l, r;
   r = Vm_Pop();
@@ -460,7 +492,7 @@ Arg '#R'
 Pop last two values from stack and subtract them together. Result is in stack.
 
 Id
-  23
+  25
 Code
   LONG l, r;
   r = Vm_Pop();
@@ -482,7 +514,7 @@ Arg '#R'
 Perform a System Call, where the top of the stack is the argument.
 
 Id
-  24
+  26
 Code
   LONG arg;
   arg = Vm_Pop();

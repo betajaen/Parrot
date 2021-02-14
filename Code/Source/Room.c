@@ -27,12 +27,13 @@
 
 #include <Parrot/Parrot.h>
 #include <Parrot/Arena.h>
-#include <Parrot/Asset.h>
+#include <Parrot/Squawk.h>
 #include <Parrot/String.h>
 #include <Parrot/Requester.h>
 #include <Parrot/Graphics.h>
 #include <Parrot/Input.h>
 #include <Parrot/Game.h>
+#include <Parrot/Log.h>
 
 #include <proto/dos.h>
 #include <proto/graphics.h>
@@ -42,16 +43,21 @@ EXTERN WORD CursorY;
 
 STATIC VOID PlayRoomDebug(struct UNPACKED_ROOM* room);
 
-EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
+EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack, UWORD roomId)
 {
   UBYTE ii;
   UWORD id;
 
+  VERBOSEF("ROOM Unpack. Unpacking Room Id=%ld", roomId);
+
+
   if ((unpack & UNPACK_ROOM_ASSET) != 0 && (room->ur_Unpacked & UNPACK_ROOM_ASSET) == 0)
   {
-#if 0
-    room->ur_Room = LoadAssetT(struct ROOM, ArenaChapter, room->ur_Id, CT_ROOM, room->ur_Id, CHUNK_FLAG_ARCH_ANY);
-#endif
+    if ( FALSE == Asset_LoadInto(roomId, 1, CT_ROOM, (struct ANY_ASSET*) room, sizeof(struct ROOM)) )
+    {
+      ERRORF("ROOM Unpack. Cannot find room asset Id=%ld, UnpackFlags=%lx", (ULONG) roomId, unpack);
+      return;
+    }
 
     room->ur_Unpacked |= UNPACK_ROOM_ASSET;
   }
@@ -60,13 +66,31 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
   {
     for (ii = 0; ii < MAX_ROOM_BACKDROPS; ii++)
     {
-      id = room->ur_Room->rm_Backdrops[ii];
+      id = room->ur_Room.rm_Backdrops[ii];
 
-      if (0 != id && NULL == room->ur_Backdrops[ii])
+      if (0 != id)
       {
-#if 0
-        room->ur_Backdrops[ii] = LoadAsset(ArenaRoom, room->ur_Id, CT_IMAGE, id, CHUNK_FLAG_ARCH_ANY);
-#endif
+        TRACEF("ROOM Unpack. Unpacking Backdrop Id=%ld", id);
+
+        struct IMAGE* backdrop = &room->ur_Backdrops[ii];
+
+        Asset_LoadInto_Callback(id, 1, CT_IMAGE, (struct ANY_ASSET*) backdrop, sizeof(struct IMAGE), Asset_CallbackFor_Image);
+
+        TRACEF("ROOM Unpack. Id=%ld, Loaded Backdrop = %ld, Width=%ld, Height=%ld", roomId, id, backdrop->im_Width, backdrop->im_Height);
+        
+        TRACEF("ROOM. Unpack. Backdrop Plane[0] = %lx", backdrop->im_Planes[0]);
+      }
+      else
+      {
+        room->ur_Backdrops[ii].im_Planes[0] = NULL;
+        if (ii == 0)
+        {
+          WARNINGF("ROOM Unpack. Room Id=%ld, Has no backdrop assigned for slot %ld!", roomId, ii);
+        }
+        else
+        {
+          TRACEF("ROOM Unpack. No backdrop for slot %ld!", ii);
+        }
       }
     }
 
@@ -77,7 +101,7 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
   {
     for (ii = 0; ii < MAX_ROOM_EXITS; ii++)
     {
-      id = room->ur_Room->rm_Exits[ii];
+      id = room->ur_Room.rm_Exits[ii];
 
       if (0 == id)
         break;
@@ -93,7 +117,7 @@ EXPORT VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack)
 
     for (ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
     {
-      id = room->ur_Room->rm_Entities[ii];
+      id = room->ur_Room.rm_Entities[ii];
 
       if (0 == id)
         break;
@@ -120,7 +144,7 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
   {
     for (ii = 0; ii < MAX_ROOM_ENTITIES; ii++)
     {
-      id = room->ur_Room->rm_Entities[ii];
+      id = room->ur_Room.rm_Entities[ii];
 
       if (0 == id)
         break;
@@ -136,7 +160,7 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 
     for (ii = 0; ii < MAX_ROOM_EXITS; ii++)
     {
-      id = room->ur_Room->rm_Exits[ii];
+      id = room->ur_Room.rm_Exits[ii];
 
       if (0 == id)
         break;
@@ -157,14 +181,14 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
   {
     for (ii = 0; ii < MAX_ROOM_BACKDROPS; ii++)
     {
-      backdrop = room->ur_Room->rm_Backdrops[ii];
+      backdrop = room->ur_Room.rm_Backdrops[ii];
 
-      if (0 != backdrop && NULL != room->ur_Backdrops[ii])
+      if (0 != backdrop && NULL != room->ur_Backdrops[ii].im_Planes[0])
       {
 #if 0
         UnloadAsset(ArenaRoom, room->ur_Backdrops[ii]);
 #endif
-        room->ur_Backdrops[ii] = NULL;
+        room->ur_Backdrops[ii].im_Planes[0] = NULL;
       }
     }
 
@@ -176,7 +200,6 @@ EXPORT VOID PackRoom(struct UNPACKED_ROOM* room, ULONG pack)
 #if 0
     UnloadAsset(ArenaChapter, room->ur_Room);
 #endif
-    room->ur_Room = NULL;
     room->ur_Unpacked &= ~UNPACK_ROOM_ASSET;
   }
 }
@@ -215,7 +238,7 @@ STATIC BOOL PointInside(struct RECT* rect, WORD x, WORD y)
   return x >= rect->rt_Left && x <= rect->rt_Right && y >= rect->rt_Top && y <= rect->rt_Bottom;
 }
 
-VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInfo)
+VOID Room_Run(UWORD screen, struct ENTRANCE* entrance)
 {
   struct UNPACKED_ROOM room;
   struct INPUTEVENT evt;
@@ -226,6 +249,9 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   WORD rmMouseX, rmMouseY;
   BOOL updateCaption;
   BOOL hasCaption;
+  BOOL eventThisFrame;
+  UWORD mouseFrameTimer;
+  UWORD mouseFrame;
 
   exitRoom = FALSE;
 
@@ -241,18 +267,22 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   room.ur_UpdateFlags = UFLG_ALL;
   room.ur_Verbs.vb_Allowed = VERB_NONE | VERB_WALK;
   room.ur_Verbs.vb_Selected = VERB_NONE;
-  room.ur_Id = entrance->en_Room;
+  
 
-  UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
+  TRACEF("ROOM Run. Unpacking. Id = %ld. UpdateFlags = %lx, Verbs = %lx", entrance->en_Room, room.ur_UpdateFlags, room.ur_Verbs.vb_Allowed);
 
-  mostLeftEdge = room.ur_Room->rm_Width - gameInfo->gi_Width;
+  UnpackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES, entrance->en_Room);
+
+  TRACE("ROOM Run. Unpacked");
+
+  mostLeftEdge = room.ur_Room.rm_Width - GameInfo.gi_Width;
 
   if (mostLeftEdge > 1)
   {
     mostLeftEdge -= 1;
   }
 
-  if (entrance->en_Exit != 0 && room.ur_Room->rm_Width > gameInfo->gi_Width)
+  if (entrance->en_Exit != 0 && room.ur_Room.rm_Width > GameInfo.gi_Width)
   {
     struct EXIT* exit;
 
@@ -267,6 +297,8 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
     room.ur_UpdateFlags |= UFLG_SCROLL;
   }
+
+  TRACE("ROOM Run. Cls.");
   
   NotBusy();
   GfxClear(0);
@@ -276,10 +308,18 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
   GfxSubmit(1);
   WaitTOF();
 
+  TRACEF("ROOM Run. Entering Loop. ExitRoom=%ld, ForceQuit=%ld", exitRoom, InEvtForceQuit);
+
+  mouseFrameTimer = 0;
+  mouseFrame = 0;
+
   while (exitRoom == FALSE && InEvtForceQuit == FALSE)
   {
+    eventThisFrame = FALSE;
+
     while (PopEvent(&evt))
     {
+      eventThisFrame = TRUE;
       switch (evt.ie_Type)
       {
         case IET_KEYUP:
@@ -288,6 +328,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
           {
             exitRoom = TRUE;
             entrance->en_Room = 0;
+            TRACE("ROOM Run. Escaping room via ESC key");
           }
           else if (evt.ie_Code == KC_F1)
           {
@@ -301,11 +342,18 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
             if ((room.ur_UpdateFlags & UFLG_DEBUG) != 0)
             {
               room.ur_UpdateFlags = UFLG_ALL;
+              TRACE("ROOM Run. Normal Mode via F1 key");
             }
             else
             {
               room.ur_UpdateFlags = UFLG_ALL | UFLG_DEBUG;
+              TRACE("ROOM Run. Debug Mode via F1 key");
             }
+          }
+          else if (evt.ie_Code == KC_F2)
+          {
+            room.ur_UpdateFlags = UFLG_ALL;
+            TRACE("ROOM Run. Forced Redraw (Not debug)");
           }
         }
         break;
@@ -384,6 +432,22 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
       }
     }
 
+    if (mouseFrameTimer++ >= 50000)
+    {
+      mouseFrameTimer = 0;
+
+      mouseFrame++;
+      if (mouseFrame == 4)
+        mouseFrame = 0;
+
+      GfxAnimateCursor(mouseFrame);
+    }
+
+    if (eventThisFrame == FALSE)
+    {
+      continue;
+    }
+
     if (IsMenuDown())
     {
       room.ur_CamX = CursorX << 2;
@@ -424,7 +488,7 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
 
       room.ur_UpdateFlags &= ~UFLG_SCENE;
 
-      GfxBlitBitmap(0, room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0]->im_Width, room.ur_Backdrops[0]->im_Height);
+      GfxBlitBitmap(0, &room.ur_Backdrops[0], 0, 0, 0, 0, room.ur_Backdrops[0].im_Width, room.ur_Backdrops[0].im_Height);
       {
         if ((room.ur_UpdateFlags & UFLG_DEBUG) != 0)
         {
@@ -464,8 +528,12 @@ VOID PlayRoom(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInf
     entrance->en_Room = 0;
   }
 
+  TRACEF("ROOM Run. Left Loop. Next Room is = %ld", entrance->en_Room);
+
   /* Unload */
   PackRoom(&room, UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES);
+
+  TRACEF("ROOM Run. Packing Room. Id= %ld", room.ur_Room.as_Id);
 }
 
 
@@ -489,7 +557,28 @@ STATIC VOID PlayRoomDebug(struct UNPACKED_ROOM* room)
   }
 
 
-  strLen = StrFormat(debugText, sizeof(debugText), "Rm %ld Ex %ld En %ld", (ULONG)room->ur_Id, (ULONG)numExits, (ULONG) numEntities )-1;
+  strLen = StrFormat(debugText, sizeof(debugText), "Rm %ld Ex %ld En %ld", (ULONG)room->ur_Room.as_Id, (ULONG)numExits, (ULONG) numEntities )-1;
   GfxMove(1, 0, 50);
   GfxText(1, debugText, strLen);
+}
+
+VOID Api_LoadRoom(LONG roomNum)
+{
+
+  struct ENTRANCE entrance;
+
+  entrance.en_Room = roomNum;
+  entrance.en_Exit = 0;
+
+  TRACEF("ROOM. LoadRoom. Room Num = %ld, Exit = %ld", entrance.en_Room, entrance.en_Exit);
+
+  while (entrance.en_Room != 0 && InEvtForceQuit == FALSE)
+  {
+    ArenaRollback(ArenaRoom);
+
+    /* Start First Room */
+    Room_Run(0, &entrance);
+  }
+
+  TRACEF("ROOM. LoadRoom. NextRoom = %ld, Exit = %ld", entrance.en_Room, entrance.en_Exit);
 }

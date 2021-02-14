@@ -1,5 +1,5 @@
 /**
-    $Id: Asset.h 1.2 2020/05/17 16:49:00, betajaen Exp $
+    $Id: Script.h 1.2 2020/11/12 16:34:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,34 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PARROT_ASSET_H
-#define PARROT_ASSET_H
+#ifndef PARROT_API_H
+#define PARROT_API_H
 
-#define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
-#define ID_MNIC MAKE_NODE_ID('M','N','C','M')
+VOID Api_LoadRoom(LONG roomNum);
 
-#if 1
+VOID Api_LoadPalette(LONG paletteNum);
 
-VOID LoadAssetTables(UWORD archive, UWORD chapter, UWORD count);
+VOID Api_DelayTicks(UWORD ticks);
 
-struct ANY_ASSET* GetAsset(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena);
-
-BOOL GetAssetInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize);
-
-VOID ReleaseAsset(struct ANY_ASSET* asset);
-
-#else
-
-APTR LoadAsset(struct ARENA* arena, UWORD archiveId, ULONG nodeType, UWORD assetId, UWORD arch);
-
-void UnloadAsset(struct ARENA* arena, APTR asset);
-
-#define LoadAssetT(T, ARENA, ARCHIVE, TYPE, ID, ARCH) \
-  ( (T*) LoadAsset(ARENA, ARCHIVE, TYPE, ID, ARCH) )
-
-UWORD FindAssetArchive(UWORD assetId, ULONG classType, ULONG arch);
+VOID Api_DelaySeconds(UWORD seconds);
 
 #endif
 
-
-#endif

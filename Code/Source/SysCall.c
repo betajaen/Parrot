@@ -28,6 +28,7 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Requester.h>
 #include <Parrot/Log.h>
+#include <Parrot/Api.h>
 
 extern BOOL InEvtForceQuit;
 
@@ -70,6 +71,20 @@ VOID Parrot_SysCall(UWORD function, LONG argument)
     {
       /* argument is slot number */
       TRACEF("SysCall. SaveGame. Argument = 0x%lx", argument);
+    }
+    break;
+    case SYSCALL_DELAY_TICKS:
+    {
+      /* argument is slot number */
+      TRACEF("SysCall. DelayTicks. Argument = 0x%lx", argument);
+      Api_DelayTicks(argument);
+    }
+    break;
+    case SYSCALL_DELAY_SECONDS:
+    {
+      /* argument is slot number */
+      TRACEF("SysCall. DelaySeconds. Argument = 0x%lx", argument);
+      Api_DelaySeconds(argument);
     }
     break;
   }

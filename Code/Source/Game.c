@@ -26,24 +26,23 @@
 */
 
 #include <Parrot/Parrot.h>
-#include <Parrot/Archive.h>
 #include <Parrot/Arena.h>
 #include <Parrot/Requester.h>
-#include <Parrot/Asset.h>
 #include <Parrot/Room.h>
 #include <Parrot/String.h>
 #include <Parrot/Graphics.h>
 #include <Parrot/Input.h>
 #include <Parrot/Vm.h>
+#include <Parrot/Log.h>
 
-#include <Parrot/Asset.h>
 #include <Parrot/Squawk.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
 
+struct GAME_INFO GameInfo;
+
 struct ARCHIVE* GameArchive;
-struct GAME_INFO* GameInfo;
 struct UNPACKED_ROOM  GameRoom;
 
 EXPORT VOID GameStart(STRPTR path)
@@ -59,55 +58,41 @@ EXPORT VOID GameStart(STRPTR path)
   UBYTE ii;
 
   GameArchive = NULL;
-  GameInfo = NULL;
   ArenaGame = NULL;
   ArenaChapter = NULL;
   ArenaRoom = NULL;
 
   InitStackVar(uroom);
+  InitStackVar(GameInfo);
 
   ArenaGame = ArenaOpen(MAKE_NODE_ID('G', 'A', 'M', 'E'), 16384, MEMF_CLEAR);
   ArenaChapter = ArenaOpen(MAKE_NODE_ID('C', 'H', 'A', 'P'), 131072, MEMF_CLEAR);
   ArenaRoom = ArenaOpen(MAKE_NODE_ID('R', 'O', 'O', 'M'), 131072, MEMF_CLEAR);
   ArenaFrameTemp = ArenaOpen(MAKE_NODE_ID('F', 'R', 'T', 'M'), 16384, MEMF_CLEAR);
 
-  InitArchives();
+  Archives_Initialise();
 
-  /*
-    Load the first and only 1 of a GameInfo
-    As the ID may not necessarily be 1.
-  */
-  if (1 != GetAllAssetsFromArchive(CT_GAME_INFO, 0, ArenaGame, (struct ANY_ASSET**) &GameInfo, 1))
+  TRACE("GAME Start. Attempting to load Game Info.");
+
+  if (FALSE == Asset_LoadInto_KnownArchive(1, 0, CT_GAME_INFO, (struct ANY_ASSET*) &GameInfo, sizeof(GameInfo)))
   {
+    ERROR("GAME_INFO structure was not found in the first archive");
+    
     PARROT_ERR0(
       "Could not start Game!\n"
       "Reason: (1) GAME_INFO structure was not found in the first archive"
     );
   }
-  LoadAssetTables(0, 0, GameInfo->gi_NumAssetTables);
+
+  TRACEF("GAME Start. Id=%ld, Version=%ld, Width=%ld, Height=%ld, Depth=%ld", GameInfo.gi_GameId, GameInfo.gi_GameVersion, GameInfo.gi_Width, GameInfo.gi_Height, GameInfo.gi_Depth);
+
+  AssetTables_Load(0, 0, GameInfo.gi_NumAssetTables);
 
   Vm_Initialise();
 
-#if 0
-
-  screenInfo.si_Width = GameInfo->gi_Width;
-  screenInfo.si_Height = 128; // GameInfo->gi_Height;
-  screenInfo.si_Depth = GameInfo->gi_Depth;
-  screenInfo.si_Flags = 0;
-  screenInfo.si_Left = 0;
-  screenInfo.si_Top = 0;
-  screenInfo.si_Title = &GameInfo->gi_Title[0];
-  ScreenOpen(0, &screenInfo);
-  ScreenLoadPaletteTable(0, &DefaultPalette);
-
-  
-
-  ScreenClose(0);
-#else
-
   viewLayouts.v_NumLayouts = 2;
-  viewLayouts.v_Width = GameInfo->gi_Width;
-  viewLayouts.v_Height = GameInfo->gi_Height;
+  viewLayouts.v_Width = GameInfo.gi_Width;
+  viewLayouts.v_Height = GameInfo.gi_Height;
   viewLayouts.v_Left = 0;
   viewLayouts.v_Top = 0;
   roomLayout = &viewLayouts.v_Layouts[0];
@@ -138,37 +123,17 @@ EXPORT VOID GameStart(STRPTR path)
   ArenaRollback(ArenaChapter);
 
   InputInitialise();
-
-#if 1
   
-  Vm_RunScriptNow(GameInfo->gi_StartScript, 0, ArenaFrameTemp);
-  ArenaRollback(ArenaFrameTemp);
+  Vm_RunScriptNow(GameInfo.gi_StartScript, 0, ArenaFrameTemp);
   
-#else
-  entrance.en_Room = 3; // GameInfo->gi_StartRoom;
-  entrance.en_Exit = 0;
-
-  while (entrance.en_Room != 0 && InEvtForceQuit == FALSE)
-  {
-    ArenaRollback(ArenaRoom);
-
-    /* Start First Room */
-    PlayRoom(0, &entrance, GameInfo);
-  }
-#endif
-
   InputExit();
 
   GfxHide();
   GfxClose();
 
-#endif
-  
   Vm_Shutdown();
 
-#if 0
-  CloseArchives();
-#endif
+  /* CloseArchives(); */
 
   ArenaClose(ArenaRoom);
   ArenaClose(ArenaChapter);
@@ -176,22 +141,12 @@ EXPORT VOID GameStart(STRPTR path)
 
 }
 
-EXPORT VOID GameDelayTicks(UWORD ticks)
+EXPORT VOID Api_DelayTicks(UWORD ticks)
 {
   Delay(ticks);
 }
 
-EXPORT VOID GameDelaySeconds(UWORD seconds)
+EXPORT VOID Api_DelaySeconds(UWORD seconds)
 {
-  Delay(seconds * 50);
-}
-
-
-EXPORT VOID GameLoadPalette(UWORD palette)
-{
-  struct PALETTE_TABLE pal;
-  
-  GetAssetInto(palette, 0, CT_PALETTE, (struct ANY_ASSET*) &pal, sizeof(pal));
-
-  GfxLoadColours32(0, (ULONG*)&pal.pt_Data[0]);
+  Delay(seconds);
 }

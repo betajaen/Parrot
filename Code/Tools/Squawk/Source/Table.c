@@ -26,7 +26,6 @@
 */
 
 #include <Squawk/Squawk.h>
-#include <Parrot/Asset.h>
 
 #define MAX_TABLES 16
 #define NEW_TABLE_CAPACITY 1024

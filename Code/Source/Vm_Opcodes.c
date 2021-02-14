@@ -18,6 +18,8 @@ const char* OpcodesStr[] = {
   "inc",
   "loadi",
   "loadk",
+  "loadpal",
+  "loadroom",
   "mul",
   "pop",
   "pushi",
