@@ -52,11 +52,11 @@
 **
 ** We create a handler function for the input.device.
 **
-** HANDLERPROTO( handlerfunc, ULONG, struct InputEvent *inputevent, APTR userdata)
+** HANDLERPROTO( handlerfunc, PtUnsigned32, struct InputEvent *inputevent, APTR userdata)
 ** {
 ** ... Modify/parse input stream here
 ** ...
-** return( (ULONG) inputevent );
+** return( (PtUnsigned32) inputevent );
 ** }
 ** MakeHandler( handlerstruct, handlerfunc, "TestHandler", &our_user_data);
 **
@@ -88,8 +88,8 @@
 
   struct SDI_EmulLibEntry
   {
-    UWORD Trap;
-    UWORD pad;
+    PtUnsigned16 Trap;
+    PtUnsigned16 pad;
     APTR  Func;
   };
 #endif

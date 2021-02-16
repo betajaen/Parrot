@@ -35,6 +35,7 @@
 #define MAX_ENTITY_NAME_LENGTH        29
 #define MAX_VIEW_LAYOUTS              2
 #define MAX_INPUT_EVENT_SIZE          32
+#define MAX_UI_PANELS                 2
 
 /* 
   Maximum number of globals for scripting.

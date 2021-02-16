@@ -34,18 +34,18 @@
 
 struct WRITE_STRING_TABLE
 {
-  UWORD st_Id;
-  UWORD st_Count;
-  ULONG st_Write;
-  ULONG st_Hashes[256];
-  struct STRING_TABLE st_Table;
+  PtUnsigned16 st_Id;
+  PtUnsigned16 st_Count;
+  PtUnsigned32 st_Write;
+  PtUnsigned32 st_Hashes[256];
+  struct StringTable st_Table;
 };
 
 static struct WRITE_STRING_TABLE*  StringTables[MAX_TABLES];
 
-STATIC struct WRITE_STRING_TABLE*  NewTable(UWORD language)
+STATIC struct WRITE_STRING_TABLE*  NewTable(PtUnsigned16 language)
 {
-  UWORD id;
+  PtUnsigned16 id;
   struct WRITE_STRING_TABLE* tbl;
 
   for (id = 0; id < MAX_TABLES; id++)
@@ -74,9 +74,9 @@ STATIC struct WRITE_STRING_TABLE*  NewTable(UWORD language)
   return tbl;
 }
 
-VOID StartDialogue()
+void StartDialogue()
 {
-  UWORD ii;
+  PtUnsigned16 ii;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
@@ -84,9 +84,9 @@ VOID StartDialogue()
   }
 }
 
-VOID EndDialogue()
+void EndDialogue()
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct WRITE_STRING_TABLE* tbl;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
@@ -102,11 +102,11 @@ VOID EndDialogue()
   }
 }
 
-struct WRITE_STRING_TABLE* GetOrAddTable(UWORD language, ULONG estimatedNeedSize)
+struct WRITE_STRING_TABLE* GetOrAddTable(PtUnsigned16 language, PtUnsigned32 estimatedNeedSize)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct WRITE_STRING_TABLE* tbl;
-  UWORD writeEnd;
+  PtUnsigned16 writeEnd;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
@@ -132,9 +132,9 @@ struct WRITE_STRING_TABLE* GetOrAddTable(UWORD language, ULONG estimatedNeedSize
   return NewTable(language);
 }
 
-VOID ExportDialogue(SquawkPtr squawk)
+void ExportDialogue(SquawkPtr squawk)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct WRITE_STRING_TABLE* tbl;
   BOOL hasWrittenHeader;
 
@@ -149,16 +149,16 @@ VOID ExportDialogue(SquawkPtr squawk)
       if (hasWrittenHeader == FALSE)
       {
         hasWrittenHeader = TRUE;
-        StartAssetList(squawk, CT_STRING_TABLE, 0);
+        StartAssetList(squawk, PT_AT_STRING_TABLE, 0);
       }
 
       tbl->st_Table.as_Id = tbl->st_Id;
-      tbl->st_Table.as_Flags = CHUNK_FLAG_ARCH_ANY;
+      tbl->st_Table.as_Flags = PT_AF_ARCH_ANY;
 
       SaveAssetExtra(
         squawk,
-        (struct ANY_ASSET*) &tbl->st_Table,
-        sizeof(struct STRING_TABLE),
+        (PtAsset*) &tbl->st_Table,
+        sizeof(struct StringTable),
         &tbl->st_Table.st_Text[0],
         tbl->st_Write
       );
@@ -171,11 +171,11 @@ VOID ExportDialogue(SquawkPtr squawk)
   }
 }
 
-STATIC ULONG FindDialogue(UWORD language, ULONG hash)
+STATIC PtUnsigned32 FindDialogue(PtUnsigned16 language, PtUnsigned32 hash)
 {
-  UWORD ii, jj, count;
+  PtUnsigned16 ii, jj, count;
   struct WRITE_STRING_TABLE* tbl;
-  union DIALOGUE_TEXT dialogue;
+  union PtDialogueText_t dialogue;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
@@ -189,7 +189,7 @@ STATIC ULONG FindDialogue(UWORD language, ULONG hash)
       {
         if (tbl->st_Hashes[jj] == hash)
         {
-          dialogue.dt_Parts.dp_Magic = DIALOGUE_MAGIC;
+          dialogue.dt_Parts.dp_Magic = Pt_DialogueMagic;
           dialogue.dt_Parts.dp_Table = tbl->st_Id;
           dialogue.dt_Parts.dp_Item = jj;
 
@@ -202,13 +202,13 @@ STATIC ULONG FindDialogue(UWORD language, ULONG hash)
   return 0;
 }
 
-STATIC ULONG WriteDialogue(UWORD language, UBYTE textLength, STRPTR text, ULONG hash)
+STATIC PtUnsigned32 WriteDialogue(PtUnsigned16 language, PtUnsigned8 textLength, STRPTR text, PtUnsigned32 hash)
 {
   struct WRITE_STRING_TABLE* tbl;
-  ULONG writeEnd;
-  CHAR* dst;
-  UWORD ii;
-  union DIALOGUE_TEXT dialogue;
+  PtUnsigned32 writeEnd;
+  PtChar* dst;
+  PtUnsigned16 ii;
+  union PtDialogueText_t dialogue;
 
   tbl = GetOrAddTable(language, textLength + 3);
   writeEnd = tbl->st_Write + textLength + 2;  /* text + null + length */
@@ -230,7 +230,7 @@ STATIC ULONG WriteDialogue(UWORD language, UBYTE textLength, STRPTR text, ULONG 
   
   tbl->st_Write = writeEnd;
 
-  dialogue.dt_Parts.dp_Magic = DIALOGUE_MAGIC;
+  dialogue.dt_Parts.dp_Magic = Pt_DialogueMagic;
   dialogue.dt_Parts.dp_Table = tbl->st_Id;
   dialogue.dt_Parts.dp_Item = tbl->st_Count;
 
@@ -243,9 +243,9 @@ STATIC ULONG WriteDialogue(UWORD language, UBYTE textLength, STRPTR text, ULONG 
 }
 
 
-ULONG PushDialogue(UWORD language, UBYTE textLength, STRPTR text)
+PtUnsigned32 PushDialogue(PtUnsigned16 language, PtUnsigned8 textLength, STRPTR text)
 {
-  ULONG hash, assetId;
+  PtUnsigned32 hash, assetId;
 
   if (textLength == 0)
     return 0;

@@ -72,10 +72,10 @@
 **
 ** Example:
 **
-** Defines a library jump function "TestFunc" with a ULONG return value and
+** Defines a library jump function "TestFunc" with a PtUnsigned32 return value and
 ** which is called by the corresponding library vector of a shared library.
 **
-** LIBPROTO(TestFunc, ULONG, REG(a6, UNUSED __BASE_OR_IFACE), REG(a0, char *text))
+** LIBPROTO(TestFunc, PtUnsigned32, REG(a6, UNUSED __BASE_OR_IFACE), REG(a0, char *text))
 ** {
 **   Printf(text);
 **   return 0;
@@ -93,7 +93,7 @@
 ** If you now require to have some OS/compiler independent prototype
 ** definition please use the following statement:
 **
-** LIBPROTO(TestFunc, ULONG, REG(a6, UNUSED __BASE_OR_IFACE), REG(a0, char *text));
+** LIBPROTO(TestFunc, PtUnsigned32, REG(a6, UNUSED __BASE_OR_IFACE), REG(a0, char *text));
 **
 ** This will ensure that you get a proper prototype for the same function
 ** where this macro will automatically take care that a LIBSTUB_* stub
@@ -117,7 +117,7 @@
 **
 ** Stub functions are needed for MorphOS only and usually look like this:
 **
-** LIBSTUB(TestFunc, ULONG)
+** LIBSTUB(TestFunc, PtUnsigned32)
 ** {
 **   __BASE_OR_IFACE = (__BASE_OR_IFACE_TYPE)REG_A6;
 **   return CALL_LFUNC(TestFunc, (char *)REG_A0);

@@ -30,30 +30,30 @@
 #define MAX_TABLES 16
 #define NEW_TABLE_CAPACITY 1024
 
-STATIC CHAR strtype[5];
+STATIC PtChar strtype[5];
 
-STATIC UWORD NextArchiveId;
-STATIC UWORD NextRoomId;
-STATIC UWORD NextEntityId;
-STATIC UWORD NextImageId;
-STATIC UWORD NextScriptId;
-STATIC UWORD NextPaletteId;
-STATIC UWORD NextTableId;
+STATIC PtUnsigned16 NextArchiveId;
+STATIC PtUnsigned16 NextRoomId;
+STATIC PtUnsigned16 NextEntityId;
+STATIC PtUnsigned16 NextImageId;
+STATIC PtUnsigned16 NextScriptId;
+STATIC PtUnsigned16 NextPaletteId;
+STATIC PtUnsigned16 NextTableId;
 
 struct WRITE_ASSET_TABLE
 {
-  ULONG at_Capacity;
-  struct ASSET_TABLE at_Table;
+  PtUnsigned32 at_Capacity;
+  struct AssetTable at_Table;
 };
 
 STATIC struct WRITE_ASSET_TABLE    Table[MAX_TABLES];
-STATIC struct ASSET_TABLE_ENTRY*   TableData[MAX_TABLES];
+STATIC struct AssetTableEntry*   TableData[MAX_TABLES];
 STATIC char strtype[5];
 
-STATIC VOID NewTable(UWORD idx, ULONG classType, UWORD chapter)
+STATIC void NewTable(PtUnsigned16 idx, PtUnsigned32 classType, PtUnsigned16 chapter)
 {
   struct WRITE_ASSET_TABLE* tbl;
-  struct ASSET_TABLE_ENTRY* ent;
+  struct AssetTableEntry* ent;
 
   tbl = &Table[idx];
 
@@ -66,14 +66,14 @@ STATIC VOID NewTable(UWORD idx, ULONG classType, UWORD chapter)
 
   ent = TableData[idx];
 
-  TableData[idx] = AllocMem(tbl->at_Capacity * sizeof(struct ASSET_TABLE_ENTRY), MEMF_CLEAR);
+  TableData[idx] = AllocMem(tbl->at_Capacity * sizeof(struct AssetTableEntry), MEMF_CLEAR);
 }
 
-STATIC VOID GrowTable(UWORD idx)
+STATIC void GrowTable(PtUnsigned16 idx)
 {
   struct WRITE_ASSET_TABLE* tbl;
-  struct ASSET_TABLE_ENTRY* ent, *newEnt, *dst;
-  ULONG newCapacity, capacity, ii;
+  struct AssetTableEntry* ent, *newEnt, *dst;
+  PtUnsigned32 newCapacity, capacity, ii;
 
   tbl = &Table[idx];
 
@@ -81,22 +81,22 @@ STATIC VOID GrowTable(UWORD idx)
   newCapacity = capacity * 2;
 
   ent = TableData[idx];
-  newEnt = AllocMem(newCapacity * sizeof(struct ASSET_TABLE_ENTRY), MEMF_CLEAR);
+  newEnt = AllocMem(newCapacity * sizeof(struct AssetTableEntry), MEMF_CLEAR);
 
   for (ii = 0; ii < capacity; ii++)
   {
     newEnt[ii] = ent[ii];
   }
 
-  FreeMem(ent, capacity * sizeof(struct ASSET_TABLE_ENTRY));
+  FreeMem(ent, capacity * sizeof(struct AssetTableEntry));
 
   TableData[idx] = newEnt;
   tbl->at_Capacity = newCapacity;
 }
 
-STATIC ULONG GetOrAddTableIdx(ULONG classType, UWORD chapter)
+STATIC PtUnsigned32 GetOrAddTableIdx(PtUnsigned32 classType, PtUnsigned16 chapter)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct WRITE_ASSET_TABLE* tbl;
 
   for (ii = 0; ii < MAX_TABLES;ii++)
@@ -137,14 +137,14 @@ STATIC ULONG GetOrAddTableIdx(ULONG classType, UWORD chapter)
     PARROT_ERR_STR("Class Type")
     PARROT_ERR_INT("Chapter"),
     IDtoStr(classType, strtype),
-    (ULONG) chapter
+    (PtUnsigned32) chapter
   );
 }
 
-VOID StartTables()
+void StartTables()
 {
   struct WRITE_ASSET_TABLE* tbl;
-  UWORD ii;
+  PtUnsigned16 ii;
 
   NextRoomId = 1;
   NextEntityId = 1;
@@ -169,9 +169,9 @@ VOID StartTables()
   }
 }
 
-VOID EndTables()
+void EndTables()
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct WRITE_ASSET_TABLE* tbl;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
@@ -181,7 +181,7 @@ VOID EndTables()
     if (tbl->at_Capacity == 0)
       continue;
 
-    FreeMem(TableData[ii], tbl->at_Table.at_Count * sizeof(struct ASSET_TABLE_ENTRY));
+    FreeMem(TableData[ii], tbl->at_Table.at_Count * sizeof(struct AssetTableEntry));
 
     TableData[ii] = NULL;
 
@@ -194,21 +194,21 @@ VOID EndTables()
   }
 }
 
-UWORD GenerateArchiveId()
+PtUnsigned16 GenerateArchiveId()
 {
   return NextArchiveId++;
 }
 
-UWORD GenerateAssetId(ULONG classType)
+PtUnsigned16 GenerateAssetId(PtUnsigned32 classType)
 {
   switch (classType)
   {
-    case CT_ROOM:  return NextRoomId++;
-    case CT_ENTITY: return NextEntityId++;
-    case CT_IMAGE: return NextImageId++;
-    case CT_SCRIPT: return NextScriptId++;
-    case CT_PALETTE: return NextPaletteId++;
-    case CT_TABLE: return NextTableId++;
+    case PT_AT_ROOM:  return NextRoomId++;
+    case PT_AT_ENTITY: return NextEntityId++;
+    case PT_AT_IMAGE: return NextImageId++;
+    case PT_AT_SCRIPT: return NextScriptId++;
+    case PT_AT_PALETTE: return NextPaletteId++;
+    case PT_AT_TABLE: return NextTableId++;
   }
 
   PARROT_ERR(
@@ -221,12 +221,12 @@ UWORD GenerateAssetId(ULONG classType)
   return 0;
 }
 
-VOID ExportTables(SquawkPtr squawk)
+void ExportTables(SquawkPtr squawk)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct WRITE_ASSET_TABLE* tbl;
   
-  StartAssetList(squawk, CT_TABLE, 0);
+  StartAssetList(squawk, PT_AT_TABLE, 0);
   
   for (ii = 0; ii < MAX_TABLES; ii++)
   {
@@ -238,25 +238,25 @@ VOID ExportTables(SquawkPtr squawk)
     if (tbl->at_Table.at_Count == 0)
       continue;
     
-    tbl->at_Table.as_Id = GenerateAssetId(CT_TABLE);
-    tbl->at_Table.as_Flags = CHUNK_FLAG_ARCH_ANY;
+    tbl->at_Table.as_Id = GenerateAssetId(PT_AT_TABLE);
+    tbl->at_Table.as_Flags = PT_AF_ARCH_ANY;
     
     SaveAssetExtra(squawk,
-      (struct ANY_ASSET*) &tbl->at_Table,
-      sizeof(struct ASSET_TABLE),
+      (PtAsset*) &tbl->at_Table,
+      sizeof(struct AssetTable),
       TableData[ii],
-      tbl->at_Table.at_Count * sizeof(struct ASSET_TABLE_ENTRY)
+      tbl->at_Table.at_Count * sizeof(struct AssetTableEntry)
     );
   }
 
   EndAssetList(squawk);
 }
 
-VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter)
+void AddToTable(PtUnsigned32 classType, PtUnsigned16 id, PtUnsigned16 archive, PtUnsigned16 chapter)
 {
-  UWORD tableIdx;
+  PtUnsigned16 tableIdx;
   struct WRITE_ASSET_TABLE* tbl;
-  struct ASSET_TABLE_ENTRY* ent;
+  struct AssetTableEntry* ent;
 
   tableIdx = GetOrAddTableIdx(classType, chapter);
 
@@ -279,11 +279,11 @@ VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter)
   ++tbl->at_Table.at_Count;
 }
 
-UWORD GetNumTables()
+PtUnsigned16 GetNumTables()
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct WRITE_ASSET_TABLE* tbl;
-  UWORD count = 0;
+  PtUnsigned16 count = 0;
 
   for (ii = 0; ii < MAX_TABLES; ii++)
   {

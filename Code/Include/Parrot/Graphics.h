@@ -28,58 +28,60 @@
 #ifndef PARROT_GRAPHICS_H
 #define PARROT_GRAPHICS_H
 
-EXPORT VOID GfxInitialise();
+#include <Parrot/Parrot.h>
 
-EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* view);
+PtPublic void GfxInitialise();
 
-EXPORT VOID GfxClose();
+PtPublic void GfxOpen(PtViewLayouts* view);
 
-EXPORT VOID GfxShow();
+PtPublic void GfxClose();
 
-EXPORT VOID GfxHide();
+PtPublic void GfxShow();
 
-EXPORT BOOL GfxIsPal();
+PtPublic void GfxHide();
 
-EXPORT VOID GfxSetScrollOffset(UWORD vp, WORD x, WORD y);
+PtPublic BOOL GfxIsPal();
 
-EXPORT VOID GfxSubmit(UWORD id);
+PtPublic void GfxSetScrollOffset(PtUnsigned16 vp, PtSigned16 x, PtSigned16 y);
 
-EXPORT VOID GfxClear(UWORD id);
+PtPublic void GfxSubmit(PtUnsigned16 id);
 
-EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen);
+PtPublic void GfxClear(PtUnsigned16 id);
 
-EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen);
+PtPublic void GfxSetAPen(PtUnsigned16 vp, PtUnsigned16 pen);
 
-EXPORT VOID GfxRectFill(UWORD vp, WORD x0, WORD y0, WORD x1, WORD y1);
+PtPublic void GfxSetBPen(PtUnsigned16 vp, PtUnsigned16 pen);
 
-EXPORT VOID GfxBlitBitmap(UWORD viewportId, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh);
+PtPublic void GfxRectFill(PtUnsigned16 vp, PtSigned16 x0, PtSigned16 y0, PtSigned16 x1, PtSigned16 y1);
 
-EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table);
+PtPublic void GfxBlitBitmap(PtUnsigned16 viewportId, struct IMAGE* image, PtSigned16 dx, PtSigned16 dy, PtSigned16 sx, PtSigned16 sy, PtSigned16 sw, PtSigned16 sh);
 
-EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y);
+PtPublic void GfxLoadColours32(PtUnsigned16 vp, PtUnsigned32* table);
 
-EXPORT WORD GfxTextLength(UWORD vp, STRPTR text, WORD textLength);
+PtPublic void GfxMove(PtUnsigned16 vp, PtSigned16 x, PtSigned16 y);
 
-EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength);
+PtPublic PtSigned16 GfxTextLength(PtUnsigned16 vp, STRPTR text, PtSigned16 textLength);
 
-EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLength);
+PtPublic void GfxText(PtUnsigned16 vp, STRPTR text, PtSigned16 textLength);
 
-EXPORT VOID GfxAnimateCursor(UWORD frame);
+PtPublic void GfxDrawHitBox(PtUnsigned16 id, struct Rect* rect, STRPTR name, PtUnsigned16 nameLength);
 
-EXPORT VOID Busy();
+PtPublic void GfxAnimateCursor(PtUnsigned16 frame);
 
-EXPORT VOID NotBusy();
+PtPublic void Busy();
 
-EXPORT UWORD CursorInitialise();
+PtPublic void NotBusy();
 
-EXPORT VOID CursorShutdown();
+PtPublic PtUnsigned16 CursorInitialise();
 
-EXPORT VOID CursorSetType(UWORD cursor);
+PtPublic void CursorShutdown();
 
-EXPORT UWORD CursorGetType();
+PtPublic void CursorSetType(PtUnsigned16 cursor);
 
-EXPORT VOID CursorSetPos(WORD x, WORD y);
+PtPublic PtUnsigned16 CursorGetType();
 
-EXPORT VOID CursorGetPos(WORD* x, WORD* y);
+PtPublic void CursorSetPos(PtSigned16 x, PtSigned16 y);
+
+PtPublic void CursorGetPos(PtSigned16* x, PtSigned16* y);
 
 #endif

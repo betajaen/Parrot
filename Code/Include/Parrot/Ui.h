@@ -1,5 +1,5 @@
 /**
-    $Id: Log.c, 1.2 2021/02/10 16:56:00, betajaen Exp $
+    $Id: Ui.h 1.2 2020/11/14 16:37:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,62 +25,24 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef PARROT_UI_H
+#define PARROT_UI_H
+
 #include <Parrot/Parrot.h>
-#include <Parrot/Log.h>
 
-#include <proto/exec.h>
-#include <proto/dos.h>
+void Ui_Initialise();
 
-static BPTR sLog = NULL;
+void Ui_Teardown();
 
-void Log_Initialise()
-{
-  if (sLog == NULL)
-  {
-    sLog = Open("Parrot:Parrot.log", MODE_NEWFILE);
-  }
-}
+struct UiPanel* Ui_CreatePanel(PtUnsigned32 numElements, PtUnsigned16 screen);
 
-void Log_Shutdown()
-{
-  if (sLog != NULL)
-  {
-    Close(sLog);
-    sLog = NULL;
-  }
-}
+struct UiElement* Ui_CreateButton(struct UiPanel* panel, PtUnsigned16 index, PtUnsigned16 x, PtUnsigned16 y, PtUnsigned16 w, PtUnsigned16 h, PtDialogue text);
 
-void Log(PtUnsigned16 logType, CONST_STRPTR text)
-{
-  switch (logType)
-  {
-    case LOG_TYPE_TRACE:   FPuts(sLog, "TRC "); break;
-    case LOG_TYPE_VERBOSE: FPuts(sLog, "VRB "); break;
-    case LOG_TYPE_INFO:    FPuts(sLog, "INF "); break;
-    case LOG_TYPE_WARNING: FPuts(sLog, "WAR "); break;
-    case LOG_TYPE_ERROR:   FPuts(sLog, "ERR "); break;
-  }
+void Ui_RunPanel(struct UiPanel* panel);
 
-  FPuts(sLog, text);
-  FPutC(sLog, '\n');
-  Flush(sLog);
-}
+void Ui_Run();
 
-void LogF(PtUnsigned16 logType, CONST_STRPTR format, ...)
-{
-  APTR arg;
-  arg = (CONST_STRPTR*)(&format + 1);
+void Ui_ShowStartGamePanel();
 
-  switch (logType)
-  {
-    case LOG_TYPE_TRACE:    FPuts(sLog, "TRC "); break;
-    case LOG_TYPE_VERBOSE:  FPuts(sLog, "VRB "); break;
-    case LOG_TYPE_INFO:     FPuts(sLog, "INF "); break;
-    case LOG_TYPE_WARNING:  FPuts(sLog, "WAR "); break;
-    case LOG_TYPE_ERROR:    FPuts(sLog, "ERR "); break;
-  }
+#endif
 
-  VFPrintf(sLog, format, arg);
-  FPutC(sLog, '\n');
-  Flush(sLog);
-}

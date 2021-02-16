@@ -40,42 +40,42 @@ struct EasyStruct EasyRequesterStruct =
   NULL,
 };
 
-STATIC CHAR RequesterText[1024] = { 0 };
+STATIC PtChar RequesterText[1024] = { 0 };
 struct Window* RequesterWindow;
 
 
-LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText)
+PtSigned32 Requester(CONST_STRPTR pOptions, CONST_STRPTR pText)
 {
   if (NULL == pOptions || '\0' == pOptions[0])
   {
-    EasyRequesterStruct.es_GadgetFormat = (UBYTE*)"Okay";
+    EasyRequesterStruct.es_GadgetFormat = (PtUnsigned8*)"Okay";
   }
   else
   {
-    EasyRequesterStruct.es_GadgetFormat = (UBYTE*)pOptions;
+    EasyRequesterStruct.es_GadgetFormat = (PtUnsigned8*)pOptions;
   }
 
   if (NULL == pText || '\0' == pText[0])
   {
-    EasyRequesterStruct.es_TextFormat = (UBYTE*)"No Message.";
+    EasyRequesterStruct.es_TextFormat = (PtUnsigned8*)"No Message.";
   }
   else
   {
-    EasyRequesterStruct.es_TextFormat = (UBYTE*)pText;
+    EasyRequesterStruct.es_TextFormat = (PtUnsigned8*)pText;
   }
 
   return EasyRequest(RequesterWindow, &EasyRequesterStruct, NULL);
 }
 
 #if defined(IS_M68K)
-STATIC CONST ULONG PutChar = 0x16c04e75;
-STATIC CONST ULONG CountChar = 0x52934E75;
+STATIC CONST PtUnsigned32 PutChar = 0x16c04e75;
+STATIC CONST PtUnsigned32 CountChar = 0x52934E75;
 #endif
 
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...)
+PtSigned32 RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...)
 {
 #if defined(IS_M68K)
-  LONG size;;
+  PtSigned32 size;;
   STRPTR* arg;
 
   size = 0;
@@ -96,12 +96,12 @@ LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...)
 }
 
 
-VOID ExitNow();
+void ExitNow();
 
-VOID ErrorF(CONST_STRPTR pFmt, ...)
+void ErrorF(CONST_STRPTR pFmt, ...)
 {
 #if defined(IS_M68K)
-  LONG size;;
+  PtSigned32 size;;
   STRPTR* arg;
 
   size = 0;
@@ -132,7 +132,7 @@ VOID ErrorF(CONST_STRPTR pFmt, ...)
 #endif
 }
 
-VOID SetRequesterWindow(APTR window)
+void SetRequesterWindow(APTR window)
 {
   RequesterWindow = (struct Window*) window;
 }

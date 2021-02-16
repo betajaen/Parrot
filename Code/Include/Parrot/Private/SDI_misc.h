@@ -55,7 +55,7 @@
 ** struct SPrintfStream
 ** {
 **     char    *Target;
-**     ULONG    TargetSize;
+**     PtUnsigned32    TargetSize;
 ** };
 **
 ** PUTCHARPROTO( SPrintf_DoChar, char c, struct SPrintfStream *s )
@@ -63,7 +63,7 @@
 **     *(s->Target++) = c;
 ** }
 **
-** ULONG SPrintf(char *format, char *target, ULONG *args)
+** PtUnsigned32 SPrintf(char *format, char *target, PtUnsigned32 *args)
 ** {
 ** struct SPrintfStream s;
 **
@@ -90,8 +90,8 @@
 
   struct SDI_EmulLibEntry
   {
-    UWORD Trap;
-    UWORD pad;
+    PtUnsigned16 Trap;
+    PtUnsigned16 pad;
     APTR  Func;
   };
 

@@ -58,9 +58,9 @@ extern struct GfxBase* GfxBase;
 
 struct CURSOR_IMAGE
 {
-  WORD  OffsetX, OffsetY;
-  UWORD Height;
-  UWORD Data[2 * 24];
+  PtSigned16  OffsetX, OffsetY;
+  PtUnsigned16 Height;
+  PtUnsigned16 Data[2 * 24];
 };
 
 struct VIEWPORT
@@ -70,29 +70,29 @@ struct VIEWPORT
   struct RastPort     v_RastPort;
   struct BitMap*      v_Bitmap;
   struct ColorMap*    v_ColorMap;
-  UWORD               v_Offset;
-  UWORD               v_ReadOffset;
-  UWORD               v_WriteOffset;
-  UWORD               v_Width;
-  UWORD               v_Height;
-  UWORD               v_BitMapWidth;
-  UWORD               v_BitmapHeight;
-  WORD                v_Horizontal;
-  WORD                v_Vertical;
-  UWORD               v_Depth;
-  WORD                v_ScrollX;
-  WORD                v_ScrollY;
+  PtUnsigned16               v_Offset;
+  PtUnsigned16               v_ReadOffset;
+  PtUnsigned16               v_WriteOffset;
+  PtUnsigned16               v_Width;
+  PtUnsigned16               v_Height;
+  PtUnsigned16               v_BitMapWidth;
+  PtUnsigned16               v_BitmapHeight;
+  PtSigned16                v_Horizontal;
+  PtSigned16                v_Vertical;
+  PtUnsigned16               v_Depth;
+  PtSigned16                v_ScrollX;
+  PtSigned16                v_ScrollY;
 };
 
 struct View*         IntuitionView;
 struct View          View;
 struct VIEWPORT      ViewPorts[MAX_VIEW_LAYOUTS];
-UWORD                ScreenWidth;
-UWORD                ScreenHeight;
-UWORD                NumViewPorts;
-UWORD                IsShown;
+PtUnsigned16                ScreenWidth;
+PtUnsigned16                ScreenHeight;
+PtUnsigned16                NumViewPorts;
+PtUnsigned16                IsShown;
 
-STATIC ULONG DefaultPalette[] =
+STATIC PtUnsigned32 DefaultPalette[] =
 {
     4 << 16 | 0,
     0X00000000, 0X00000000, 0X00000000,
@@ -105,7 +105,7 @@ STATIC ULONG DefaultPalette[] =
     0
 };
 
-STATIC ULONG MouseFramePalette0[8] =
+STATIC PtUnsigned32 MouseFramePalette0[8] =
 {
     2 << 16 | 17,
     0,0,0,
@@ -113,7 +113,7 @@ STATIC ULONG MouseFramePalette0[8] =
     0,
 };
 
-STATIC ULONG MouseFramePalette1[8] =
+STATIC PtUnsigned32 MouseFramePalette1[8] =
 {
     2 << 16 | 17,
     0,0,0,
@@ -121,7 +121,7 @@ STATIC ULONG MouseFramePalette1[8] =
     0,
 };
 
-STATIC ULONG MouseFramePalette2[8] =
+STATIC PtUnsigned32 MouseFramePalette2[8] =
 {
     2 << 16 | 17,
     0,0,0,
@@ -129,7 +129,7 @@ STATIC ULONG MouseFramePalette2[8] =
     0,
 };
 
-EXPORT VOID GfxInitialise()
+void GfxInitialise()
 {
   NumViewPorts = 0;
   IsShown = FALSE;
@@ -140,19 +140,19 @@ EXPORT VOID GfxInitialise()
   InitView(&View);
 }
 
-EXPORT VOID ViewExitNow()
+void ViewExitNow()
 {
   GfxHide();
   GfxClose();
 }
 
-EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* layouts)
+void GfxOpen(PtViewLayouts* layouts)
 {
   struct VIEWPORT* vp, *lastVp;
-  struct VIEW_LAYOUT* vl;
+  PtViewLayout* vl;
   struct ViewPort* avp;
   struct RastPort* rp;
-  UWORD ii, jj, numColours;
+  PtUnsigned16 ii, jj, numColours;
 
   if (layouts->v_NumLayouts > MAX_VIEW_LAYOUTS)
   {
@@ -239,10 +239,10 @@ EXPORT VOID GfxOpen(struct VIEW_LAYOUTS* layouts)
 
 }
 
-EXPORT VOID GfxClose()
+void GfxClose()
 {
   struct VIEWPORT* vp;
-  UWORD ii;
+  PtUnsigned16 ii;
 
   for (ii = 0; ii < NumViewPorts; ii++)
   {
@@ -278,9 +278,9 @@ EXPORT VOID GfxClose()
 
 }
 
-EXPORT VOID GfxShow()
+void GfxShow()
 {
-  UWORD ii, spriteNum, colourRegister;
+  PtUnsigned16 ii, spriteNum, colourRegister;
   struct ViewPort* vp;
 
   if (IsShown)
@@ -305,13 +305,13 @@ EXPORT VOID GfxShow()
   for (ii = 0; ii < NumViewPorts; ii++)
   {
     vp = &ViewPorts[ii].v_ViewPort;
-    LoadRGB32(vp, (CONST ULONG*) &DefaultPalette[0]);
+    LoadRGB32(vp, (CONST PtUnsigned32*) &DefaultPalette[0]);
   }
 
   TRACE("GFX Shown.");
 }
 
-EXPORT VOID GfxHide()
+void GfxHide()
 {
   if (IsShown == FALSE)
   {
@@ -331,14 +331,14 @@ EXPORT VOID GfxHide()
   TRACE("GFX Hidden.");
 }
 
-EXPORT BOOL GfxIsPal()
+BOOL GfxIsPal()
 {
   return (GfxBase->DisplayFlags & PAL) == PAL;
 }
 
-EXPORT VOID GfxAnimateCursor(UWORD frame)
+void GfxAnimateCursor(PtUnsigned16 frame)
 {
-  ULONG* animation;
+  PtUnsigned32* animation;
 
   switch (frame)
   {
@@ -358,17 +358,17 @@ EXPORT VOID GfxAnimateCursor(UWORD frame)
   LoadRGB32(&ViewPorts[1].v_ViewPort, animation);
 }
 
-EXPORT VOID GfxLoadColours32(UWORD vp, ULONG* table)
+void GfxLoadColours32(PtUnsigned16 vp, PtUnsigned32* table)
 {
   TRACEF("Gfx LoadPal. Loading Palette into vp = %ld", vp);
 
-  LoadRGB32(&ViewPorts[vp].v_ViewPort, (CONST ULONG*) table);
+  LoadRGB32(&ViewPorts[vp].v_ViewPort, (CONST PtUnsigned32*) table);
 }
 
-EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y)
+void GfxMove(PtUnsigned16 vp, PtSigned16 x, PtSigned16 y)
 {
   struct VIEWPORT* vpp;
-  WORD offset;
+  PtSigned16 offset;
 
   vpp = &ViewPorts[vp];
 
@@ -377,17 +377,17 @@ EXPORT VOID GfxMove(UWORD vp, WORD x, WORD y)
   Move(&vpp->v_RastPort, x, offset + y);
 }
 
-EXPORT WORD GfxTextLength(UWORD vp, STRPTR text, WORD textLength)
+PtSigned16 GfxTextLength(PtUnsigned16 vp, STRPTR text, PtSigned16 textLength)
 {
   return TextLength(&ViewPorts[vp].v_RastPort, text, textLength);
 }
 
-EXPORT VOID GfxText(UWORD vp, STRPTR text, WORD textLength)
+void GfxText(PtUnsigned16 vp, STRPTR text, PtSigned16 textLength)
 {
   Text(&ViewPorts[vp].v_RastPort, text, textLength);
 }
 
-EXPORT VOID GfxSubmit(UWORD id)
+void GfxSubmit(PtUnsigned16 id)
 {
   struct VIEWPORT* vp;
   
@@ -412,7 +412,7 @@ EXPORT VOID GfxSubmit(UWORD id)
   TRACEF("GFX Submit. Id=%ld", id);
 }
 
-EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)
+void GfxSetScrollOffset(PtUnsigned16 id, PtSigned16 x, PtSigned16 y)
 {
   struct VIEWPORT* vp;
   vp = &ViewPorts[id];
@@ -428,7 +428,7 @@ EXPORT VOID GfxSetScrollOffset(UWORD id, WORD x, WORD y)
   TRACEF("GFX Scroll Offset. Id=%ld, X=%ld, Y=%ld", id, x, y);
 }
 
-EXPORT VOID GfxClear(UWORD id)
+void GfxClear(PtUnsigned16 id)
 {
   struct VIEWPORT* vp;
   vp = &ViewPorts[id];
@@ -446,7 +446,7 @@ EXPORT VOID GfxClear(UWORD id)
   TRACEF("GFX Clear. Id=%ld", id);
 }
 
-EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
+void GfxSetAPen(PtUnsigned16 vp, PtUnsigned16 pen)
 {
   SetAPen(
     &ViewPorts[vp].v_RastPort,
@@ -454,7 +454,7 @@ EXPORT VOID GfxSetAPen(UWORD vp, UWORD pen)
   );
 }
 
-EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen)
+void GfxSetBPen(PtUnsigned16 vp, PtUnsigned16 pen)
 {
   SetBPen(
     &ViewPorts[vp].v_RastPort,
@@ -462,12 +462,12 @@ EXPORT VOID GfxSetBPen(UWORD vp, UWORD pen)
   );
 }
 
-EXPORT VOID GfxRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
+void GfxRectFill(PtUnsigned16 id, PtSigned16 x0, PtSigned16 y0, PtSigned16 x1, PtSigned16 y1)
 {
   struct VIEWPORT* vp; 
   vp = &ViewPorts[id];
 
-  WORD offset;
+  PtSigned16 offset;
 
   offset = vp->v_WriteOffset;
 
@@ -478,7 +478,7 @@ EXPORT VOID GfxRectFill(UWORD id, WORD x0, WORD y0, WORD x1, WORD y1)
   );
 }
 
-EXPORT VOID GfxBlitBitmap(UWORD viewportId, struct IMAGE* image, WORD dx, WORD dy, WORD sx, WORD sy, WORD sw, WORD sh)
+void GfxBlitBitmap(PtUnsigned16 viewportId, struct IMAGE* image, PtSigned16 dx, PtSigned16 dy, PtSigned16 sx, PtSigned16 sy, PtSigned16 sw, PtSigned16 sh)
 {
   if (NULL == image)
   {
@@ -487,7 +487,7 @@ EXPORT VOID GfxBlitBitmap(UWORD viewportId, struct IMAGE* image, WORD dx, WORD d
   }
 
   struct RastPort* rp;
-  WORD offset;
+  PtSigned16 offset;
 
   offset = ViewPorts[viewportId].v_WriteOffset;
 
@@ -499,12 +499,12 @@ EXPORT VOID GfxBlitBitmap(UWORD viewportId, struct IMAGE* image, WORD dx, WORD d
 }
 
 
-EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLength)
+void GfxDrawHitBox(PtUnsigned16 id, struct Rect* rect, STRPTR name, PtUnsigned16 nameLength)
 {
   struct VIEWPORT* vp;
   struct RastPort* rp;
-  WORD offset;
-  LONG x0, y0, x1, y1, t;
+  PtSigned16 offset;
+  PtSigned32 x0, y0, x1, y1, t;
 
   vp = &ViewPorts[id];
   offset = vp->v_WriteOffset;
@@ -588,13 +588,13 @@ EXPORT VOID GfxDrawHitBox(UWORD id, struct RECT* rect, STRPTR name, UWORD nameLe
 
 }
 
-EXPORT VOID Api_LoadPalette(UWORD palette)
+void Api_LoadPalette(PtUnsigned16 palette)
 {
-  struct PALETTE_TABLE pal;
+  struct PaletteTable pal;
   
   TRACEF("API LoadPalette. Palette = %ld", palette);
   
-  Asset_LoadInto_KnownArchive(palette, 0, CT_PALETTE, &pal, sizeof(pal));
+  Asset_LoadInto_KnownArchive(palette, 0, PT_AT_PALETTE, &pal, sizeof(pal));
   
-  GfxLoadColours32(0, (ULONG*)&pal.pt_Data[0]);
+  GfxLoadColours32(0, (PtUnsigned32*)&pal.pt_Data[0]);
 }

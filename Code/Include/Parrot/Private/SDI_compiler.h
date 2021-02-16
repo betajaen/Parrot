@@ -238,10 +238,10 @@
   #define DEPRECATED
 #endif
 #if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(IPTR)
-  #define IPTR ULONG
+  #define IPTR PtUnsigned32
 #endif
 #if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(SIPTR)
-  #define SIPTR LONG
+  #define SIPTR PtSigned32
 #endif
 #if !defined(__AROS__) && !defined(STACKED)
   #define STACKED

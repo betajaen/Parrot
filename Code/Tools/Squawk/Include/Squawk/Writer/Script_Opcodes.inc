@@ -9,7 +9,7 @@
     0 = LHS
     -1 = RHS
 */
-inline void Op_add(UWORD arg_V)
+inline void Op_add(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_ADD | ScriptU16tou10(arg_V);
@@ -36,7 +36,7 @@ inline void Op_adds()
   Args:
     arg_A = Address
 */
-inline void Op_beq(WORD arg_A)
+inline void Op_beq(PtSigned16 arg_A)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_BEQ | ScriptS16tos10(arg_A);
@@ -49,7 +49,7 @@ inline void Op_beq(WORD arg_A)
   Args:
     arg_A = Address
 */
-inline void Op_bge(WORD arg_A)
+inline void Op_bge(PtSigned16 arg_A)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_BGE | ScriptS16tos10(arg_A);
@@ -62,7 +62,7 @@ inline void Op_bge(WORD arg_A)
   Args:
     arg_A = Address
 */
-inline void Op_bgt(WORD arg_A)
+inline void Op_bgt(PtSigned16 arg_A)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_BGT | ScriptS16tos10(arg_A);
@@ -75,7 +75,7 @@ inline void Op_bgt(WORD arg_A)
   Args:
     arg_A = Address
 */
-inline void Op_ble(WORD arg_A)
+inline void Op_ble(PtSigned16 arg_A)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_BLE | ScriptS16tos10(arg_A);
@@ -88,7 +88,7 @@ inline void Op_ble(WORD arg_A)
   Args:
     arg_A = Address
 */
-inline void Op_blt(WORD arg_A)
+inline void Op_blt(PtSigned16 arg_A)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_BLT | ScriptS16tos10(arg_A);
@@ -101,7 +101,7 @@ inline void Op_blt(WORD arg_A)
   Args:
     arg_A = Address
 */
-inline void Op_bne(WORD arg_A)
+inline void Op_bne(PtSigned16 arg_A)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_BNE | ScriptS16tos10(arg_A);
@@ -114,7 +114,7 @@ inline void Op_bne(WORD arg_A)
   Args:
     arg_A = Address
 */
-inline void Op_bra(WORD arg_A)
+inline void Op_bra(PtSigned16 arg_A)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_BRA | ScriptS16tos10(arg_A);
@@ -129,7 +129,7 @@ inline void Op_bra(WORD arg_A)
   Stack:
     0 = RHS
 */
-inline void Op_cmp(UWORD arg_L)
+inline void Op_cmp(PtUnsigned16 arg_L)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_CMP | ScriptU16tou10(arg_L);
@@ -144,7 +144,7 @@ inline void Op_cmp(UWORD arg_L)
   Stack:
     0 = RHS
 */
-inline void Op_cmpi(UWORD arg_L)
+inline void Op_cmpi(PtUnsigned16 arg_L)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_CMPI | ScriptU16tou10(arg_L);
@@ -171,7 +171,7 @@ inline void Op_cmps()
   Args:
     arg_V = Var
 */
-inline void Op_dec(UWORD arg_V)
+inline void Op_dec(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_DEC | ScriptU16tou10(arg_V);
@@ -195,7 +195,7 @@ inline void Op_dup()
   Args:
     arg_V = Var
 */
-inline void Op_inc(UWORD arg_V)
+inline void Op_inc(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_INC | ScriptU16tou10(arg_V);
@@ -208,7 +208,7 @@ inline void Op_inc(UWORD arg_V)
   Args:
     arg_V = Value
 */
-inline void Op_loadi(UWORD arg_V)
+inline void Op_loadi(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_LOADI | ScriptU16tou10(arg_V);
@@ -221,7 +221,7 @@ inline void Op_loadi(UWORD arg_V)
   Args:
     arg_C = Constant
 */
-inline void Op_loadk(UWORD arg_C)
+inline void Op_loadk(PtUnsigned16 arg_C)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_LOADK | ScriptU16tou10(arg_C);
@@ -234,7 +234,7 @@ inline void Op_loadk(UWORD arg_C)
   Args:
     arg_P = PaletteNum
 */
-inline void Op_loadpal(UWORD arg_P)
+inline void Op_loadpal(PtUnsigned16 arg_P)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_LOADPAL | ScriptU16tou10(arg_P);
@@ -247,7 +247,7 @@ inline void Op_loadpal(UWORD arg_P)
   Args:
     arg_R = RoomNum
 */
-inline void Op_loadroom(UWORD arg_R)
+inline void Op_loadroom(PtUnsigned16 arg_R)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_LOADROOM | ScriptU16tou10(arg_R);
@@ -263,7 +263,7 @@ inline void Op_loadroom(UWORD arg_R)
     0 = LHS
     -1 = RHS
 */
-inline void Op_mul(UWORD arg_V)
+inline void Op_mul(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_MUL | ScriptU16tou10(arg_V);
@@ -287,7 +287,7 @@ inline void Op_pop()
   Args:
     arg_V = Variable
 */
-inline void Op_pushi(UWORD arg_V)
+inline void Op_pushi(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_PUSHI | ScriptU16tou10(arg_V);
@@ -302,7 +302,7 @@ inline void Op_pushi(UWORD arg_V)
   Stack:
     0 = LHS
 */
-inline void Op_shl(UWORD arg_V)
+inline void Op_shl(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_SHL | ScriptU16tou10(arg_V);
@@ -317,7 +317,7 @@ inline void Op_shl(UWORD arg_V)
   Stack:
     0 = LHS
 */
-inline void Op_shr(UWORD arg_V)
+inline void Op_shr(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_SHR | ScriptU16tou10(arg_V);
@@ -333,7 +333,7 @@ inline void Op_shr(UWORD arg_V)
     0 = LHS
     -1 = RHS
 */
-inline void Op_sub(UWORD arg_V)
+inline void Op_sub(PtUnsigned16 arg_V)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_SUB | ScriptU16tou10(arg_V);
@@ -362,7 +362,7 @@ inline void Op_subs()
   Stack:
     0 = Argument
 */
-inline void Op_sys(UWORD arg_F)
+inline void Op_sys(PtUnsigned16 arg_F)
 {
   ScriptEnforceSpace();
   ScriptData[ScriptSize++] =  VM_OP_SYS | ScriptU16tou10(arg_F);

@@ -28,18 +28,20 @@
 #ifndef PARROT_ARENA_H
 #define PARROT_ARENA_H
 
+#include <Parrot/Parrot.h>
+
 extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom, *ArenaFrameTemp;
 
-struct ARENA* ArenaOpen(ULONG name, ULONG size, ULONG requirements);
+struct ARENA* ArenaOpen(PtUnsigned32 name, PtUnsigned32 size, PtUnsigned32 requirements);
 
 BOOL ArenaClose(struct ARENA* arena);
 
 BOOL ArenaRollback(struct ARENA* arena);
 
-ULONG ArenaSpace(struct ARENA* arena);
+PtUnsigned32 ArenaSpace(struct ARENA* arena);
 
-ULONG ArenaSize(struct ARENA* arena);
+PtUnsigned32 ArenaSize(struct ARENA* arena);
 
-APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill);
+APTR NewObject(struct ARENA* arena, PtUnsigned32 size, BOOL zeroFill);
 
 #endif

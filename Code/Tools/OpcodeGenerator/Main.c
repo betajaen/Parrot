@@ -53,10 +53,10 @@ struct DosLibrary* DOSBase;
 
 struct Argument
 {
-  CHAR  VarName;
-  CHAR* Name;
-  UBYTE Type;
-  BYTE  StackAddress;
+  PtChar  VarName;
+  PtChar* Name;
+  PtUnsigned8 Type;
+  PtByte  StackAddress;
 };
 
 #define MAX_OPCODES 64
@@ -68,21 +68,21 @@ struct Opcode
   char* Description;
   char* Code;
   BOOL  IsBig;
-  UWORD NumArguments;
+  PtUnsigned16 NumArguments;
   struct Argument Args[MAX_ARGUMENTS];
 };
 
-STATIC UWORD NumOpcodes;
+STATIC PtUnsigned16 NumOpcodes;
 STATIC struct Opcode Opcodes[MAX_OPCODES] = { 0 };
 
-STATIC ULONG sTmpStrLen;
-STATIC CHAR sTmpStr[256];
-STATIC CHAR Line[512];
+STATIC PtUnsigned32 sTmpStrLen;
+STATIC PtChar sTmpStr[256];
+STATIC PtChar Line[512];
 STATIC BOOL LineIsEof;
-STATIC CHAR SectionText[1024];
-STATIC UWORD SectionTextLength;
+STATIC PtChar SectionText[1024];
+STATIC PtUnsigned16 SectionTextLength;
 
-VOID ReadOpcode(char* path);
+void ReadOpcode(char* path);
 
 /* Printing Macros */
 
@@ -109,7 +109,7 @@ VOID ReadOpcode(char* path);
 
 void PrintUpperCase(BPTR file, const char* text)
 {
-  CHAR temp;
+  PtChar temp;
 
   while (*text != 0)
   {
@@ -133,7 +133,7 @@ void ReadOpcodeDirectory(const char* source)
   struct ExAllData* ead, * buffer;
   BPTR            sourcelock;
   BOOL            exmore;
-  LONG            error;
+  PtSigned32            error;
 
   if ( (buffer = AllocMem(BUFFERSIZE, MEMF_CLEAR)) == 0)
     return;
@@ -191,8 +191,8 @@ void ReadOpcodeDirectory(const char* source)
 
 BOOL ReadLine(BPTR file)
 {
-  CHAR ch;
-  UWORD ii;
+  PtChar ch;
+  PtUnsigned16 ii;
 
   for (ii = 0; ii < sizeof(Line)-1; ii++)
   {
@@ -209,7 +209,7 @@ BOOL ReadLine(BPTR file)
       break;
     }
 
-    Line[ii] = (CHAR) ch;
+    Line[ii] = (PtChar) ch;
   }
 
   Line[ii] = 0;
@@ -223,10 +223,10 @@ BOOL ReadLine(BPTR file)
 #define SECTION_ARGUMENT 3
 #define SECTION_CODE 4
 
-CHAR* DuplicateSectionText(UWORD start)
+PtChar* DuplicateSectionText(PtUnsigned16 start)
 {
-  CHAR* text;
-  UWORD ii,jj;
+  PtChar* text;
+  PtUnsigned16 ii,jj;
   
   text = AllocVec(SectionTextLength + 1, MEMF_ANY);
 
@@ -240,9 +240,9 @@ CHAR* DuplicateSectionText(UWORD start)
   return text;
 }
 
-VOID FreeOpcode(UWORD id)
+void FreeOpcode(PtUnsigned16 id)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
 
   struct Opcode* opcode;
   opcode = &Opcodes[id];
@@ -273,7 +273,7 @@ VOID FreeOpcode(UWORD id)
 
 }
 
-VOID CommitOpcodeSection(UWORD section)
+void CommitOpcodeSection(PtUnsigned16 section)
 {
   struct Opcode* opcode;
   opcode = &Opcodes[NumOpcodes];
@@ -292,13 +292,13 @@ VOID CommitOpcodeSection(UWORD section)
   }
 }
 
-VOID CommitArgument()
+void CommitArgument()
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   struct Opcode* opcode;
   opcode = &Opcodes[NumOpcodes];
-  UWORD nameText = 0;
-  CHAR ch = 0;
+  PtUnsigned16 nameText = 0;
+  PtChar ch = 0;
 
   if (opcode->NumArguments == MAX_ARGUMENTS)
   {
@@ -309,7 +309,7 @@ VOID CommitArgument()
   struct Argument* arg;
   arg = &opcode->Args[opcode->NumArguments++];
 
-  CHAR type = SectionText[0];
+  PtChar type = SectionText[0];
 
   switch (type)
   {
@@ -351,7 +351,7 @@ VOID CommitArgument()
     break;
     default:
     {
-      CLI_PRINTF("Opcode has unknown arg type! %ld %s -> %s", NumOpcodes, opcode->Name, (CHAR*) SectionText);
+      CLI_PRINTF("Opcode has unknown arg type! %ld %s -> %s", NumOpcodes, opcode->Name, (PtChar*) SectionText);
       return;
     }
     return;
@@ -380,13 +380,13 @@ VOID CommitArgument()
 
   if (nameText == 0)
   {
-    CLI_PRINTF("Opcode has no description %ld %s -> %s", NumOpcodes, opcode->Name, (CHAR*)SectionText);
+    CLI_PRINTF("Opcode has no description %ld %s -> %s", NumOpcodes, opcode->Name, (PtChar*)SectionText);
     return;
   }
 
   if (arg->VarName == 0)
   {
-    CLI_PRINTF("Opcode has no Id; the first capital letter of the description. %ld %s -> %s", NumOpcodes, opcode->Name, (CHAR*)SectionText);
+    CLI_PRINTF("Opcode has no Id; the first capital letter of the description. %ld %s -> %s", NumOpcodes, opcode->Name, (PtChar*)SectionText);
     return;
   }
 
@@ -394,12 +394,12 @@ VOID CommitArgument()
 
 }
 
-VOID WriteDocumentation(UWORD id, BPTR file)
+void WriteDocumentation(PtUnsigned16 id, BPTR file)
 {
   struct Opcode* opcode;
   struct Argument* arg;
-  CHAR tmpStr[2];
-  UWORD ii;
+  PtChar tmpStr[2];
+  PtUnsigned16 ii;
 
   opcode = &Opcodes[id];
 
@@ -408,7 +408,7 @@ VOID WriteDocumentation(UWORD id, BPTR file)
 
   FILE_PRINTF(file, "## %s\n\n", opcode->Name);
   FILE_PRINTF(file, "%s\n\n", opcode->Description);
-  FILE_PRINTF(file, "Id\n  %ld\n", (ULONG) id);
+  FILE_PRINTF(file, "Id\n  %ld\n", (PtUnsigned32) id);
   FILE_PRINTF(file, "Code\n%s\n", opcode->Code);
 
   for (ii = 0; ii < opcode->NumArguments; ii++)
@@ -425,7 +425,7 @@ VOID WriteDocumentation(UWORD id, BPTR file)
     {
       case AT_STACK:
       {
-        FILE_PRINTF(file, "Value at Stack[%ld]\n", (LONG)arg->StackAddress);
+        FILE_PRINTF(file, "Value at Stack[%ld]\n", (PtSigned32)arg->StackAddress);
       }
       break;
       case AT_IMM:
@@ -444,11 +444,11 @@ VOID WriteDocumentation(UWORD id, BPTR file)
   FILE_PRINT(file, "\n");
 }
 
-VOID WriteDocumentationFile()
+void WriteDocumentationFile()
 {
   BPTR file;
-  LONG err;
-  UWORD ii;
+  PtSigned32 err;
+  PtUnsigned16 ii;
 
   file = Open(DOCUMENTATION_PATH, MODE_NEWFILE);
 
@@ -473,12 +473,12 @@ VOID WriteDocumentationFile()
   Close(file);
 }
 
-VOID WriteCWriter(UWORD id, BPTR file)
+void WriteCWriter(PtUnsigned16 id, BPTR file)
 {
   struct Opcode* opcode;
   struct Argument* arg;
-  CHAR tmpStr[2];
-  UWORD ii;
+  PtChar tmpStr[2];
+  PtUnsigned16 ii;
   BOOL hasStack, hasArgs;
 
   opcode = &Opcodes[id];
@@ -582,14 +582,14 @@ VOID WriteCWriter(UWORD id, BPTR file)
           {
             FILE_PRINT(file, ", ");
           }
-          FILE_PRINTF(file, "UWORD arg_%s", tmpStr);
+          FILE_PRINTF(file, "PtUnsigned16 arg_%s", tmpStr);
         continue;
         case AT_SIGNED_IMM:
           if (ii > 0)
           {
             FILE_PRINT(file, ", ");
           }
-          FILE_PRINTF(file, "WORD arg_%s", tmpStr);
+          FILE_PRINTF(file, "PtSigned16 arg_%s", tmpStr);
         continue;
       }
     }
@@ -632,11 +632,11 @@ VOID WriteCWriter(UWORD id, BPTR file)
   FILE_PRINT(file, "\n");
 }
 
-VOID WriteCWriterFile()
+void WriteCWriterFile()
 {
   BPTR file;
-  LONG err;
-  UWORD ii;
+  PtSigned32 err;
+  PtUnsigned16 ii;
 
   file = Open(CWRITER_PATH, MODE_NEWFILE);
 
@@ -659,13 +659,13 @@ VOID WriteCWriterFile()
   Close(file);
 }
 
-VOID WriteCReader(UWORD id, BPTR file)
+void WriteCReader(PtUnsigned16 id, BPTR file)
 {
   struct Opcode* opcode;
   struct Argument* arg;
-  CHAR tmpStr[2];
-  CHAR ch, *code;
-  UWORD ii;
+  PtChar tmpStr[2];
+  PtChar ch, *code;
+  PtUnsigned16 ii;
   BOOL hasStack, hasArgs;
 
   opcode = &Opcodes[id];
@@ -689,10 +689,10 @@ VOID WriteCReader(UWORD id, BPTR file)
       switch (arg->Type)
       {
         case AT_IMM:
-          FILE_PRINTF(file, "      LONG arg_%s = Vm_u10tou16(opcode);\n", tmpStr, arg->Name);
+          FILE_PRINTF(file, "      PtSigned32 arg_%s = Vm_u10tou16(opcode);\n", tmpStr, arg->Name);
           continue;
         case AT_SIGNED_IMM:
-          FILE_PRINTF(file, "      ULONG arg_%s = Vm_s10tos16(opcode);\n", tmpStr, arg->Name);
+          FILE_PRINTF(file, "      PtUnsigned32 arg_%s = Vm_s10tos16(opcode);\n", tmpStr, arg->Name);
           continue;
       }
     }
@@ -729,8 +729,8 @@ VOID WriteCReader(UWORD id, BPTR file)
 void WriteCReaderFile()
 {
   BPTR file;
-  LONG err;
-  UWORD ii;
+  PtSigned32 err;
+  PtUnsigned16 ii;
 
   file = Open(CREADER_PATH, MODE_NEWFILE);
 
@@ -744,7 +744,7 @@ void WriteCReaderFile()
 
   FILE_PRINT(file, "/* This is an automatically generated file */\n\n");
 
-  FILE_PRINT(file, "WORD Vm_RunOpcode(OPCODE opcode)\n{\n");
+  FILE_PRINT(file, "PtSigned16 Vm_RunOpcode(OPCODE opcode)\n{\n");
 
   FILE_PRINT(file, "  switch(opcode & 0x3F)\n  {\n");
 
@@ -762,8 +762,8 @@ void WriteCReaderFile()
 void WriteCOpcodesHeaderFile()
 {
   BPTR file;
-  LONG err;
-  UWORD ii;
+  PtSigned32 err;
+  PtUnsigned16 ii;
   struct Opcode* opcode;
 
   file = Open(COPCODES_HEADER_PATH, MODE_NEWFILE);
@@ -799,8 +799,8 @@ void WriteCOpcodesHeaderFile()
 void WriteCOpcodesSourceFile()
 {
   BPTR file;
-  LONG err;
-  UWORD ii;
+  PtSigned32 err;
+  PtUnsigned16 ii;
   struct Opcode* opcode;
 
   file = Open(COPCODES_SOURCE_PATH, MODE_NEWFILE);
@@ -833,12 +833,12 @@ void WriteCOpcodesSourceFile()
   Close(file);
 }
 
-VOID ReadOpcode(char* path)
+void ReadOpcode(char* path)
 {
   BPTR file;
-  LONG err;
-  UWORD lineLen;
-  UWORD section;
+  PtSigned32 err;
+  PtUnsigned16 lineLen;
+  PtUnsigned16 section;
   BOOL isTrimming;
   
   file = Open(path, MODE_OLDFILE);
@@ -875,7 +875,7 @@ VOID ReadOpcode(char* path)
       
       isTrimming = TRUE;
 
-      for (UWORD ii = 0; ii < lineLen; ii++)
+      for (PtUnsigned16 ii = 0; ii < lineLen; ii++)
       {
 
         if (SectionTextLength >= sizeof(SectionText))
@@ -899,7 +899,7 @@ VOID ReadOpcode(char* path)
 
       if (SectionTextLength >= sizeof(SectionText))
       {
-        CLI_PRINTF("Text is to large for section -> %s\n", (CHAR*)path);
+        CLI_PRINTF("Text is to large for section -> %s\n", (PtChar*)path);
         Close(file);
         return;
       }
@@ -942,7 +942,7 @@ VOID ReadOpcode(char* path)
       else
       {
         section = SECTION_NONE;
-        CLI_PRINTF("Unknown Opcode Section -> %s\n", (CHAR*)Line);
+        CLI_PRINTF("Unknown Opcode Section -> %s\n", (PtChar*)Line);
         continue;
       }
     }
@@ -958,8 +958,8 @@ VOID ReadOpcode(char* path)
 
 int main()
 {
-  INT rc;
-  UWORD ii;
+  PtSigned32 rc;
+  PtUnsigned16 ii;
 
   rc = RETURN_OK;
 

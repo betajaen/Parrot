@@ -29,13 +29,13 @@
 #include <Parrot/String.h>
 #include <Parrot/Graphics.h>
 
-STATIC CHAR CaptionText[65] = { 0 };
-STATIC UWORD CaptionTextLength = 0;
+STATIC PtChar CaptionText[65] = { 0 };
+STATIC PtUnsigned16 CaptionTextLength = 0;
 
-VOID PlayExit(struct UNPACKED_ROOM* room, struct VERBS* verbs, struct EXIT* exit)
+void PlayExit(struct UNPACKED_ROOM* room, struct Verbs* verbs, struct RoomExit* exit)
 {
 
-  WORD pxlen;
+  PtSigned16 pxlen;
   CaptionTextLength = 0;
 
   if (verbs->vb_Selected == VERB_NONE || verbs->vb_Selected == VERB_WALK)
@@ -67,10 +67,10 @@ VOID PlayExit(struct UNPACKED_ROOM* room, struct VERBS* verbs, struct EXIT* exit
   }
 }
 
-VOID PlayActivator(struct UNPACKED_ROOM* room, struct VERBS* verbs, struct ENTITY* exit)
+void PlayActivator(struct UNPACKED_ROOM* room, struct Verbs* verbs, struct Entity* exit)
 {
 
-  WORD pxlen;
+  PtSigned16 pxlen;
   CaptionTextLength = 0;
 
   if (verbs->vb_Selected == VERB_NONE || verbs->vb_Selected == VERB_WALK)
@@ -104,22 +104,22 @@ VOID PlayActivator(struct UNPACKED_ROOM* room, struct VERBS* verbs, struct ENTIT
 
 
 
-VOID PlayCaption(struct UNPACKED_ROOM* room)
+void PlayCaption(struct UNPACKED_ROOM* room)
 {
-  struct VERBS* verbs;
-  verbs = &room->ur_Verbs;
+  struct Verbs* verbs;
+  verbs = &room->lv_Verbs;
 
-  room->ur_UpdateFlags &= ~UFLG_CAPTION;
+  room->lv_UpdateFlags &= ~UFLG_CAPTION;
 
-  if (room->ur_HoverEntity != NULL)
+  if (room->lv_HoverEntity != NULL)
   {
-    if (room->ur_HoverEntity->en_Type == ET_EXIT)
+    if (room->lv_HoverEntity->en_Type == ET_EXIT)
     {
-      PlayExit(room, &room->ur_Verbs, (struct EXIT*) room->ur_HoverEntity);
+      PlayExit(room, &room->lv_Verbs, (struct RoomExit*) room->lv_HoverEntity);
     }
-    else if (room->ur_HoverEntity->en_Type == ET_ACTIVATOR)
+    else if (room->lv_HoverEntity->en_Type == ET_ACTIVATOR)
     {
-      PlayActivator(room, &room->ur_Verbs, (struct ENTITY*) room->ur_HoverEntity);
+      PlayActivator(room, &room->lv_Verbs, (struct Entity*) room->lv_HoverEntity);
     }
   }
   else

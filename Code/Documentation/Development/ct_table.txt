@@ -12,18 +12,18 @@ Asset Lookup Table
 
   struct ASSET_TABLE
   {
-    ULONG   at_AssetType;
-    UWORD   at_Chapter;
-    UWORD   at_Count;
-    UWORD   at_Lowest;
-    UWORD   at_Highest;
+    PtUnsigned32   at_AssetType;
+    PtUnsigned16   at_Chapter;
+    PtUnsigned16   at_Count;
+    PtUnsigned16   at_Lowest;
+    PtUnsigned16   at_Highest;
     +       ITEMS
   };
 
   struct ASSET_TABLE_ITEM
   {
-    UWORD   ti_Id;
-    UWORD   ti_Archive;
+    PtUnsigned16   ti_Id;
+    PtUnsigned16   ti_Archive;
   };
 
 ## Fields

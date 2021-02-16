@@ -1,13 +1,13 @@
 /* This is an automatically generated file */
 
-WORD Vm_RunOpcode(OPCODE opcode)
+PtSigned16 Vm_RunOpcode(OPCODE opcode)
 {
   switch(opcode & 0x3F)
   {
     case VM_OP_ADD:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
-      LONG l, r;
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = Vm_Pop();
       Vm_SetVar(arg_V, l + r);
@@ -15,7 +15,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_ADDS:
     {
-      LONG l, r;
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = Vm_Pop();
       Vm_Push(l + r);
@@ -23,7 +23,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_BEQ:
     {
-      ULONG arg_A = Vm_s10tos16(opcode);
+      PtUnsigned32 arg_A = Vm_s10tos16(opcode);
       if ((Vm_LastCmp & VM_CMP_EQUALS) == VM_CMP_EQUALS)
       {
         return arg_A;
@@ -32,7 +32,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_BGE:
     {
-      ULONG arg_A = Vm_s10tos16(opcode);
+      PtUnsigned32 arg_A = Vm_s10tos16(opcode);
       if ((Vm_LastCmp & (VM_CMP_GT | VM_CMP_EQUALS)) != 0)
       {
         return arg_A;
@@ -41,7 +41,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_BGT:
     {
-      ULONG arg_A = Vm_s10tos16(opcode);
+      PtUnsigned32 arg_A = Vm_s10tos16(opcode);
       if ((Vm_LastCmp & VM_CMP_GT) == VM_CMP_GT)
       {
         return arg_A;
@@ -50,7 +50,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_BLE:
     {
-      ULONG arg_A = Vm_s10tos16(opcode);
+      PtUnsigned32 arg_A = Vm_s10tos16(opcode);
       if ((Vm_LastCmp & (VM_CMP_LT | VM_CMP_EQUALS)) != 0)
       {
         return arg_A;
@@ -59,7 +59,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_BLT:
     {
-      ULONG arg_A = Vm_s10tos16(opcode);
+      PtUnsigned32 arg_A = Vm_s10tos16(opcode);
       if ((Vm_LastCmp & VM_CMP_LT) == VM_CMP_LT)
       {
         return arg_A;
@@ -68,7 +68,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_BNE:
     {
-      ULONG arg_A = Vm_s10tos16(opcode);
+      PtUnsigned32 arg_A = Vm_s10tos16(opcode);
       if ((Vm_LastCmp & VM_CMP_EQUALS) == 0)
       {
         return arg_A;
@@ -77,14 +77,14 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_BRA:
     {
-      ULONG arg_A = Vm_s10tos16(opcode);
+      PtUnsigned32 arg_A = Vm_s10tos16(opcode);
       return arg_A;
     }
     return 1;
     case VM_OP_CMP:
     {
-      LONG arg_L = Vm_u10tou16(opcode);
-      LONG l, r;
+      PtSigned32 arg_L = Vm_u10tou16(opcode);
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = Vm_GetVar(arg_L);
       Vm_Compare(l, r);
@@ -92,8 +92,8 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_CMPI:
     {
-      LONG arg_L = Vm_u10tou16(opcode);
-      LONG l, r;
+      PtSigned32 arg_L = Vm_u10tou16(opcode);
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = arg_L;
       Vm_Compare(l, r);
@@ -101,7 +101,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_CMPS:
     {
-      LONG l, r;
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = Vm_Pop();
       Vm_Compare(l, r);
@@ -109,7 +109,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_DEC:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
       Vm_DecVar(arg_V);
     }
     return 1;
@@ -120,40 +120,40 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_INC:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
       Vm_IncVar(arg_V);
     }
     return 1;
     case VM_OP_LOADI:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
       Vm_Push(arg_V);
     }
     return 1;
     case VM_OP_LOADK:
     {
-      LONG arg_C = Vm_u10tou16(opcode);
-      LONG v;
+      PtSigned32 arg_C = Vm_u10tou16(opcode);
+      PtSigned32 v;
       v = Vm_GetConstant(arg_C);
       Vm_Push(v);
     }
     return 1;
     case VM_OP_LOADPAL:
     {
-      LONG arg_P = Vm_u10tou16(opcode);
+      PtSigned32 arg_P = Vm_u10tou16(opcode);
       Api_LoadPalette(arg_P);
     }
     return 1;
     case VM_OP_LOADROOM:
     {
-      LONG arg_R = Vm_u10tou16(opcode);
+      PtSigned32 arg_R = Vm_u10tou16(opcode);
       Api_LoadRoom(arg_R);
     }
     return 1;
     case VM_OP_MUL:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
-      LONG l, r;
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = Vm_Pop();
       Vm_SetVar(arg_V, l * r);
@@ -166,30 +166,30 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_PUSHI:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
       Vm_Push(arg_V);
     }
     return 1;
     case VM_OP_SHL:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
-      LONG l;
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
+      PtSigned32 l;
       l = Vm_Pop();
       Vm_Push(l << arg_V);
     }
     return 1;
     case VM_OP_SHR:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
-      LONG l;
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
+      PtSigned32 l;
       l = Vm_Pop();
       Vm_Push(l >> arg_V);
     }
     return 1;
     case VM_OP_SUB:
     {
-      LONG arg_V = Vm_u10tou16(opcode);
-      LONG l, r;
+      PtSigned32 arg_V = Vm_u10tou16(opcode);
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = Vm_Pop();
       Vm_SetVar(arg_V, l - r);
@@ -197,7 +197,7 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_SUBS:
     {
-      LONG l, r;
+      PtSigned32 l, r;
       r = Vm_Pop();
       l = Vm_Pop();
       Vm_Push(l - r);
@@ -205,8 +205,8 @@ WORD Vm_RunOpcode(OPCODE opcode)
     return 1;
     case VM_OP_SYS:
     {
-      LONG arg_F = Vm_u10tou16(opcode);
-      LONG arg;
+      PtSigned32 arg_F = Vm_u10tou16(opcode);
+      PtSigned32 arg;
       arg = Vm_Pop();
       Parrot_SysCall(arg_F, arg);
     }

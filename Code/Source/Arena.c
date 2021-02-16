@@ -34,9 +34,9 @@
 
 struct ARENA
 {
-  ULONG   ah_Name;
-  ULONG   ah_Size;
-  ULONG   ah_Used;
+  PtUnsigned32   ah_Name;
+  PtUnsigned32   ah_Size;
+  PtUnsigned32   ah_Used;
 };
 
 struct ARENA* ArenaGame = NULL;
@@ -44,9 +44,9 @@ struct ARENA* ArenaChapter = NULL;
 struct ARENA* ArenaRoom = NULL;
 struct ARENA* ArenaFrameTemp = NULL;
 
-STATIC CHAR strType[5];
+STATIC PtChar strType[5];
 
-EXPORT struct ARENA* ArenaOpen(ULONG name, ULONG size, ULONG requirements)
+struct ARENA* ArenaOpen(PtUnsigned32 name, PtUnsigned32 size, PtUnsigned32 requirements)
 {
   struct ARENA* arena;
 
@@ -77,7 +77,7 @@ CLEAN_EXIT:
   return arena;
 }
 
-EXPORT VOID ArenaClose(struct ARENA* arena)
+void ArenaClose(struct ARENA* arena)
 {
   if (NULL == arena)
   {
@@ -99,7 +99,7 @@ CLEAN_EXIT:
 }
 
 
-VOID ExitArenaNow()
+void ExitArenaNow()
 {
   if (ArenaRoom != NULL)
   {
@@ -117,7 +117,7 @@ VOID ExitArenaNow()
   }
 }
 
-EXPORT BOOL ArenaRollback(struct ARENA* arena)
+BOOL ArenaRollback(struct ARENA* arena)
 {
   if (NULL == arena)
     return FALSE;
@@ -127,7 +127,7 @@ EXPORT BOOL ArenaRollback(struct ARENA* arena)
   return TRUE;
 }
 
-EXPORT ULONG ArenaSpace(struct ARENA* arena)
+PtUnsigned32 ArenaSpace(struct ARENA* arena)
 {
   if (NULL == arena)
     return FALSE;
@@ -135,7 +135,7 @@ EXPORT ULONG ArenaSpace(struct ARENA* arena)
   return arena->ah_Size - arena->ah_Used;
 }
 
-EXPORT ULONG ArenaSize(struct ARENA* arena)
+PtUnsigned32 ArenaSize(struct ARENA* arena)
 {
   if (NULL == arena)
     return FALSE;
@@ -144,7 +144,7 @@ EXPORT ULONG ArenaSize(struct ARENA* arena)
 }
 
 
-EXPORT APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill)
+APTR NewObject(struct ARENA* arena, PtUnsigned32 size, BOOL zeroFill)
 {
   APTR result;
 
@@ -189,11 +189,11 @@ EXPORT APTR NewObject(struct ARENA* arena, ULONG size, BOOL zeroFill)
     goto CLEAN_EXIT;
   }
 
-  result = (APTR) ((ULONG*) (arena + 1) + arena->ah_Used);
+  result = (APTR) ((PtUnsigned32*) (arena + 1) + arena->ah_Used);
 
   if (zeroFill == TRUE)
   {
-    FillMem((UBYTE*)result, size, 0);
+    FillMem((PtUnsigned8*)result, size, 0);
   }
 
   arena->ah_Used += size;

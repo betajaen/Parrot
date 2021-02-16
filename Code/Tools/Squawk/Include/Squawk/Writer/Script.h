@@ -32,25 +32,25 @@
 
 #define MAX_SCRIPT_WRITER_SIZE 256
 
-extern UWORD ScriptData[MAX_SCRIPT_WRITER_SIZE];
-extern UWORD ScriptSize;
+extern PtUnsigned16 ScriptData[MAX_SCRIPT_WRITER_SIZE];
+extern PtUnsigned16 ScriptSize;
 
-VOID ScriptEnforceSpace();
+void ScriptEnforceSpace();
 
-VOID ScriptBegin();
+void ScriptBegin();
 
-VOID ScriptEnd();
+void ScriptEnd();
 
-VOID ScriptSave(SquawkPtr archive, UWORD id, UWORD chapter);
+void ScriptSave(SquawkPtr archive, PtUnsigned16 id, PtUnsigned16 chapter);
 
-inline UWORD ScriptU16tou10(UWORD value)
+inline PtUnsigned16 ScriptU16tou10(PtUnsigned16 value)
 {
   return value << 6;
 }
 
-inline UWORD ScriptS16tos10(WORD value)
+inline PtUnsigned16 ScriptS16tos10(PtSigned16 value)
 {
-  UWORD v = value << 6;
+  PtUnsigned16 v = value << 6;
   return v;
 }
 

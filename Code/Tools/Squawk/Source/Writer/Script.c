@@ -29,15 +29,15 @@
 #include <Squawk/Writer/Script.h>
 
 
-UWORD ScriptData[MAX_SCRIPT_WRITER_SIZE];
-UWORD ScriptSize = 0;
+PtUnsigned16 ScriptData[MAX_SCRIPT_WRITER_SIZE];
+PtUnsigned16 ScriptSize = 0;
 
-UWORD ScriptConstants[MAX_CONSTANTS_PER_SCRIPT];
-UWORD ScriptNumConstants = 0;
+PtUnsigned16 ScriptConstants[MAX_CONSTANTS_PER_SCRIPT];
+PtUnsigned16 ScriptNumConstants = 0;
 
-extern VOID exit();
+extern void exit();
 
-VOID ScriptEnforceSpace()
+void ScriptEnforceSpace()
 {
   if (ScriptSize >= MAX_SCRIPT_WRITER_SIZE)
   {
@@ -45,45 +45,45 @@ VOID ScriptEnforceSpace()
   }
 }
 
-VOID ScriptBegin()
+void ScriptBegin()
 {
   ScriptSize = 0;
   ScriptNumConstants = 0;
   
-  for (UWORD ii = 0; ii < MAX_CONSTANTS_PER_SCRIPT; ii++)
+  for (PtUnsigned16 ii = 0; ii < MAX_CONSTANTS_PER_SCRIPT; ii++)
   {
     ScriptConstants[ii] = 0;
   }
 
 }
 
-VOID ScriptEnd()
+void ScriptEnd()
 {
 }
 
-VOID ScriptSave(SquawkPtr archive, UWORD id, UWORD chapter)
+void ScriptSave(SquawkPtr archive, PtUnsigned16 id, PtUnsigned16 chapter)
 {
   struct SCRIPT script;
 
-  UWORD archiveId = 0;
+  PtUnsigned16 archiveId = 0;
   
   script.as_Id = id;
-  script.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  script.as_Flags = PT_AF_ARCH_ANY;
   
   script.sc_NumOpcodes = ScriptSize;
   
-  for (UWORD ii = 0; ii < MAX_CONSTANTS_PER_SCRIPT; ii++)
+  for (PtUnsigned16 ii = 0; ii < MAX_CONSTANTS_PER_SCRIPT; ii++)
   {
     script.sc_Constants[ii] = ScriptConstants[ii];
   }
   
   SaveAssetExtra(
     archive,
-    (struct ANY_ASSET*) &script,
+    (PtAsset*) &script,
     sizeof (struct SCRIPT),
     &ScriptData,
-    ScriptSize * sizeof(UWORD)
+    ScriptSize * sizeof(PtUnsigned16)
   );
 
-  AddToTable(CT_SCRIPT, script.as_Id, archiveId, chapter);
+  AddToTable(PT_AT_SCRIPT, script.as_Id, archiveId, chapter);
 }

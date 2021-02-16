@@ -29,13 +29,14 @@
 #include <Parrot/Requester.h>
 #include <Parrot/Log.h>
 
+#include <proto/exec.h>
 #include <proto/iffparse.h>
 #include <proto/graphics.h>
 
-EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
+void UnpackBitmap(APTR asset, struct IFFHandle* iff)
 {
   struct IMAGE*  img;
-  UWORD          ii;
+  PtUnsigned16          ii;
   
   img = (struct IMAGE*) asset;
 
@@ -63,7 +64,7 @@ EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
         PARROT_ERR_INT("IMAGE::im_Height")
         PARROT_ERR_INT("IMAGE::im_Depth")
         PARROT_ERR_INT("Bitplane"),
-        img->im_Width, img->im_Height, img->im_Depth, (ULONG)ii
+        img->im_Width, img->im_Height, img->im_Depth, (PtUnsigned32)ii
       );
 
       return;
@@ -76,10 +77,10 @@ EXPORT VOID UnpackBitmap(APTR asset, struct IFFHandle* iff)
   }
 }
 
-EXPORT VOID PackBitmap(APTR asset)
+void PackBitmap(APTR asset)
 {
   struct IMAGE* img;
-  UWORD ii;
+  PtUnsigned16 ii;
 
   img = (struct IMAGE*) asset;
 
@@ -93,7 +94,7 @@ EXPORT VOID PackBitmap(APTR asset)
   }
 }
 
-VOID Asset_CallbackFor_Image(struct ANY_ASSET* asset, UWORD counter, ULONG* readLength, APTR* readInto)
+void Asset_CallbackFor_Image(PtAsset* asset, PtUnsigned16 counter, PtUnsigned32* readLength, APTR* readInto)
 {
   struct IMAGE* img;
   APTR plane;

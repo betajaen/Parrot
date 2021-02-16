@@ -31,29 +31,29 @@
 
 STATIC SquawkPtr primary;
 
-extern struct GAME_INFO GameInfo;
+extern PtGameInfo GameInfo;
 
-extern UWORD GameLanguage;
+extern PtUnsigned16 GameLanguage;
 
-VOID ExportTables(SquawkPtr primary);
-VOID ReadGameInfo();
-VOID ExportGameInfo(SquawkPtr primary);
-VOID ExportPalettes(SquawkPtr primary);
-VOID ExportPrimaryScripts(SquawkPtr primary);
-VOID ExportLfl(UWORD lflNum);
-VOID StartTables();
-VOID EndTables();
-VOID StartLfl();
-VOID EndLfl();
-VOID StartDialogue();
-VOID EndDialogue();
-VOID ExportDialogue(SquawkPtr primary);
-UWORD GetNumTables();
+void ExportTables(SquawkPtr primary);
+void ReadGameInfo();
+void ExportGameInfo(SquawkPtr primary);
+void ExportPalettes(SquawkPtr primary);
+void ExportPrimaryScripts(SquawkPtr primary);
+void ExportLfl(PtUnsigned16 lflNum);
+void StartTables();
+void EndTables();
+void StartLfl();
+void EndLfl();
+void StartDialogue();
+void EndDialogue();
+void ExportDialogue(SquawkPtr primary);
+PtUnsigned16 GetNumTables();
 
-VOID ConverterMain()
+void ConverterMain()
 {
-  UWORD roomNum;
-  CHAR language[2] = { 'e', 'n' };
+  PtUnsigned16 roomNum;
+  PtChar language[2] = { 'e', 'n' };
 
   StartTables();
   StartDialogue();

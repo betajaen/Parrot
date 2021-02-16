@@ -94,7 +94,7 @@
 ** function "TestFunc" that will be called with a pointer "text"
 ** (in register A1) and returns a long.
 **
-** HOOKPROTONHNO(TestFunc, LONG, STRPTR text)
+** HOOKPROTONHNO(TestFunc, PtSigned32, STRPTR text)
 ** {
 **   Printf(text);
 **   return 0;
@@ -168,8 +168,8 @@
 
     struct SDI_EmulLibEntry
     {
-      UWORD Trap;
-      UWORD pad;
+      PtUnsigned16 Trap;
+      PtUnsigned16 pad;
       APTR  Func;
     };
   #endif
@@ -180,30 +180,30 @@
     {{NULL, NULL}, (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, (APTR)data}
   #define MakeStaticHook(hookname, funcname) static struct Hook hookname =   \
     {{NULL, NULL}, (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, NULL}
-  #define DISPATCHERPROTO(name) ULONG name(struct IClass * cl, Object * obj, \
+  #define DISPATCHERPROTO(name) PtUnsigned32 name(struct IClass * cl, Object * obj, \
     Msg msg);                                                                \
     extern const struct SDI_EmulLibEntry Gate_##name
   #define DISPATCHER(name)                                                   \
     struct IClass;                                                           \
-    ULONG name(struct IClass * cl, Object * obj, Msg msg);                   \
-    static ULONG Trampoline_##name(void) {return name((struct IClass *)      \
+    PtUnsigned32 name(struct IClass * cl, Object * obj, Msg msg);                   \
+    static PtUnsigned32 Trampoline_##name(void) {return name((struct IClass *)      \
     REG_A0, (Object *) REG_A2, (Msg) REG_A1);}                               \
     const struct SDI_EmulLibEntry Gate_##name = {SDI_TRAP_LIB, 0,            \
     (APTR) Trampoline_##name};                                               \
-    ULONG name(struct IClass * cl, Object * obj, Msg msg)
+    PtUnsigned32 name(struct IClass * cl, Object * obj, Msg msg)
   #define SDISPATCHER(name)                                                  \
     struct IClass;                                                           \
-    static ULONG name(struct IClass * cl, Object * obj, Msg msg);            \
-    static ULONG Trampoline_##name(void) {return name((struct IClass *)      \
+    static PtUnsigned32 name(struct IClass * cl, Object * obj, Msg msg);            \
+    static PtUnsigned32 Trampoline_##name(void) {return name((struct IClass *)      \
     REG_A0, (Object *) REG_A2, (Msg) REG_A1);}                               \
     static const struct SDI_EmulLibEntry Gate_##name = {SDI_TRAP_LIB, 0,     \
     (APTR) Trampoline_##name};                                               \
-    static ULONG name(struct IClass * cl, Object * obj, Msg msg)
+    static PtUnsigned32 name(struct IClass * cl, Object * obj, Msg msg)
   #define CROSSCALL1(name, ret, type1, param1)                               \
     static STDARGS SAVEDS ret name(type1 param1);                            \
     static ret Trampoline_##name(void)                                       \
     {                                                                        \
-      ULONG *stk = (ULONG *)REG_A7;                                          \
+      PtUnsigned32 *stk = (PtUnsigned32 *)REG_A7;                                          \
       type1 param1 = (type1)stk[1];                                          \
       return name(param1);                                                   \
     }                                                                        \
@@ -214,7 +214,7 @@
     static STDARGS SAVEDS void name(type1 param1);                           \
     static void Trampoline_##name(void)                                      \
     {                                                                        \
-      ULONG *stk = (ULONG *)REG_A7;                                          \
+      PtUnsigned32 *stk = (PtUnsigned32 *)REG_A7;                                          \
       type1 param1 = (type1)stk[1];                                          \
       name(param1);                                                          \
     }                                                                        \
@@ -225,7 +225,7 @@
     static STDARGS SAVEDS ret name(type1 param1, type2 param2);              \
     static ret Trampoline_##name(void)                                       \
     {                                                                        \
-      ULONG *stk = (ULONG *)REG_A7;                                          \
+      PtUnsigned32 *stk = (PtUnsigned32 *)REG_A7;                                          \
       type1 param1 = (type1)stk[1];                                          \
       type2 param2 = (type2)stk[2];                                          \
       return name(param1, param2);                                           \
@@ -237,7 +237,7 @@
     static STDARGS SAVEDS void name(type1 param1, type2 param2);             \
     static void Trampoline_##name(void)                                      \
     {                                                                        \
-      ULONG *stk = (ULONG *)REG_A7;                                          \
+      PtUnsigned32 *stk = (PtUnsigned32 *)REG_A7;                                          \
       type1 param1 = (type1)stk[1];                                          \
       type2 param2 = (type2)stk[2];                                          \
       name(param1, param2);                                                  \

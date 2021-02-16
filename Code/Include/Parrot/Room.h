@@ -28,10 +28,10 @@
 #ifndef PARROT_ROOM_H
 #define PARROT_ROOM_H
 
-VOID UnpackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
+void Room_Initialise(struct UNPACKED_ROOM* room, PtUnsigned32 unpack);
 
-VOID PackRoom(struct UNPACKED_ROOM* room, ULONG unpack);
+void Room_Teardown(struct UNPACKED_ROOM* room, PtUnsigned32 unpack);
 
-VOID Room_Run(UWORD screen, struct ENTRANCE* entrance, struct GAME_INFO* gameInfo);
+void Room_Run(PtUnsigned16 screen, struct RoomEntrance* entrance, PtGameInfo* gameInfo);
 
 #endif

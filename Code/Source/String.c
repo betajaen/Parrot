@@ -29,9 +29,9 @@
 
 #include <proto/exec.h>
 
-ULONG StrLength(CONST_STRPTR pStr)
+PtUnsigned32 StrLength(CONST_STRPTR pStr)
 {
-  ULONG length;
+  PtUnsigned32 length;
 
   length = 0;
 
@@ -50,14 +50,14 @@ ULONG StrLength(CONST_STRPTR pStr)
 }
 
 #if defined(IS_M68K)
-STATIC CONST ULONG PutChar = 0x16c04e75;
-STATIC CONST ULONG CountChar = 0x52934E75;
+STATIC CONST PtUnsigned32 PutChar = 0x16c04e75;
+STATIC CONST PtUnsigned32 CountChar = 0x52934E75;
 #endif
 
-ULONG StrLengthFormat(CHAR* pFmt, ...)
+PtUnsigned32 StrLengthFormat(PtChar* pFmt, ...)
 {
 #if defined(IS_M68K)
-  LONG size;;
+  PtSigned32 size;;
   STRPTR* arg;
 
   size = 0;
@@ -70,10 +70,10 @@ ULONG StrLengthFormat(CHAR* pFmt, ...)
 #endif
 }
 
-ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...)
+PtUnsigned32 StrFormat(PtChar* pBuffer, PtSigned32 pBufferCapacity, PtChar* pFmt, ...)
 {
 #if defined(IS_M68K)
-  LONG size;
+  PtSigned32 size;
   STRPTR* arg;
   
   if (0 == pBufferCapacity)
@@ -98,9 +98,9 @@ ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...)
 #endif
 }
 
-ULONG StrLen(CONST CHAR* pSrc)
+PtUnsigned32 StrLen(CONST PtChar* pSrc)
 {
-  ULONG ii;
+  PtUnsigned32 ii;
   
   ii = 0;
 
@@ -118,9 +118,9 @@ CLEAN_EXIT:
   return ii;
 }
 
-ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc)
+PtUnsigned32 StrCopy(PtChar* pDst, PtUnsigned32 pDstCapacity, CONST PtChar* pSrc)
 {
-  ULONG copyLen;
+  PtUnsigned32 copyLen;
   
   copyLen = 0;
 
@@ -146,10 +146,10 @@ ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc)
   return copyLen;
 }
 
-CHAR* StrDuplicate(CONST CHAR* pSrc)
+PtChar* StrDuplicate(CONST PtChar* pSrc)
 {
-  ULONG copyLen;
-  CHAR* dst;
+  PtUnsigned32 copyLen;
+  PtChar* dst;
 
   copyLen = StrLen(pSrc);
 
@@ -165,7 +165,7 @@ CHAR* StrDuplicate(CONST CHAR* pSrc)
   return dst;
 }
 
-BOOL StrStartsWith(CONST CHAR* pTest, CHAR value)
+BOOL StrStartsWith(CONST PtChar* pTest, PtChar value)
 {
   BOOL rc;
 
@@ -182,7 +182,7 @@ CLEAN_EXIT:
   return rc;
 }
 
-BOOL StrStartsWithStr(CONST CHAR* pTest, CONST CHAR* pPrefix)
+BOOL StrStartsWithStr(CONST PtChar* pTest, CONST PtChar* pPrefix)
 {
   if (NULL == pTest || NULL == pPrefix)
   {
@@ -198,7 +198,7 @@ BOOL StrStartsWithStr(CONST CHAR* pTest, CONST CHAR* pPrefix)
   return TRUE;
 }
 
-BOOL StrEndsWith(CONST CHAR* pTest, CHAR value)
+BOOL StrEndsWith(CONST PtChar* pTest, PtChar value)
 {
   BOOL rc;
 
@@ -218,7 +218,7 @@ CLEAN_EXIT:
   return rc;
 }
 
-VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value)
+void FillMem(PtUnsigned8* pDst, PtUnsigned32 length, PtUnsigned8 value)
 {
   while (length--)
   {
@@ -226,9 +226,9 @@ VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value)
   }
 }
 
-ULONG UWordToId(UWORD r)
+PtUnsigned32 UWordToId(PtUnsigned16 r)
 {
-  ULONG s = 0x41;
+  PtUnsigned32 s = 0x41;
 
   s += (r & 0xF);
   s <<= 8;
@@ -250,11 +250,11 @@ ULONG UWordToId(UWORD r)
   return s;
 }
 
-ULONG StrHash(UBYTE length, STRPTR text)
+PtUnsigned32 StrHash(PtUnsigned8 length, STRPTR text)
 {
   /* Jenkins One at a time hash */
 
-  ULONG hash;
+  PtUnsigned32 hash;
 
   hash = 0;
 

@@ -39,25 +39,25 @@ struct Message* wbMsg;
 #define RC_OKAY RETURN_OK
 #define RC_FAIL RETURN_FAIL
 
-#ifndef INT
-#define INT int
+#ifndef PtSigned32
+#define PtSigned32 int
 #endif
 
-#ifndef CHAR
-#define CHAR char
+#ifndef PtChar
+#define PtChar char
 #endif
 
-ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
-ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
-extern VOID exit();
+PtUnsigned32 StrFormat(PtChar* pBuffer, PtSigned32 pBufferCapacity, PtChar* pFmt, ...);
+PtUnsigned32 StrCopy(PtChar* pDst, PtUnsigned32 pDstCapacity, CONST PtChar* pSrc);
+extern void exit();
 
-VOID ConverterMain();
-VOID StartTables();
-VOID EndTables();
+void ConverterMain();
+void StartTables();
+void EndTables();
 
-INT main()
+PtSigned32 main()
 {
-  INT rc;
+  PtSigned32 rc;
 
   rc = RETURN_OK;
 
@@ -129,7 +129,7 @@ CLEAN_EXIT:
 }
 
 
-VOID ExitNow()
+void ExitNow()
 {
   if (NULL != wbMsg)
   {

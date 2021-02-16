@@ -136,7 +136,7 @@
 #define SDI_CAT(x, y) SDI_PRIMITIVE_CAT(x, y)
 
 /* This will call a macro on each argument passed in */
-#define SDI_VACAST(...) SDI_CAT(SDI_CAST_, SDI_NARGS(__VA_ARGS__))((ULONG), __VA_ARGS__)
+#define SDI_VACAST(...) SDI_CAT(SDI_CAST_, SDI_NARGS(__VA_ARGS__))((PtUnsigned32), __VA_ARGS__)
 #define SDI_CAST_1(m,x1) m(x1)
 #define SDI_CAST_2(m,x1,x2) m(x1),m(x2)
 #define SDI_CAST_3(m,x1,x2,x3) m(x1),m(x2),m(x3)

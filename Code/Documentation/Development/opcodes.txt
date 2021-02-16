@@ -7,7 +7,7 @@ Pop last two values from stack and add them together. Result is in vars
 Id
   0
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_Pop();
   Vm_SetVar(#V, l + r);
@@ -36,7 +36,7 @@ Pop last two values from stack and add them together. Result is in stack
 Id
   1
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_Pop();
   Vm_Push(l + r);
@@ -188,7 +188,7 @@ Compare variable to last item on stack
 Id
   9
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_GetVar(#L);
   Vm_Compare(l, r);
@@ -212,7 +212,7 @@ Compare variable to last item to an immediate on stack
 Id
   10
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = #L;
   Vm_Compare(l, r);
@@ -236,7 +236,7 @@ Compare two stack values together
 Id
   11
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_Pop();
   Vm_Compare(l, r);
@@ -315,7 +315,7 @@ Load a constant and place it onto the stack
 Id
   16
 Code
-  LONG v;
+  PtSigned32 v;
   v = Vm_GetConstant(#C);
   Vm_Push(v);
 Arg '#C'
@@ -365,7 +365,7 @@ Pop last two values from stack and add them together. Result is in vars
 Id
   19
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_Pop();
   Vm_SetVar(#V, l * r);
@@ -419,7 +419,7 @@ Pop a value. Left Shift it and push the result on the stack
 Id
   22
 Code
-  LONG l;
+  PtSigned32 l;
   l = Vm_Pop();
   Vm_Push(l << #V);
 Arg '#V'
@@ -442,7 +442,7 @@ Pop a value. Right Shift it and push the result on the stack
 Id
   23
 Code
-  LONG l;
+  PtSigned32 l;
   l = Vm_Pop();
   Vm_Push(l >> #V);
 Arg '#V'
@@ -465,7 +465,7 @@ Pop last two values from stack and subtract them together. Result is in vars
 Id
   24
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_Pop();
   Vm_SetVar(#V, l - r);
@@ -494,7 +494,7 @@ Pop last two values from stack and subtract them together. Result is in stack.
 Id
   25
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_Pop();
   Vm_Push(l - r);
@@ -516,7 +516,7 @@ Perform a System Call, where the top of the stack is the argument.
 Id
   26
 Code
-  LONG arg;
+  PtSigned32 arg;
   arg = Vm_Pop();
   Parrot_SysCall(#F, arg);
 Arg '#F'

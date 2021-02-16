@@ -28,8 +28,6 @@
 #define PARROT_H
 
 #include <exec/types.h>
-#include <exec/nodes.h>
-
 #include <Parrot/Private/SDI_compiler.h>
 
 #if defined(__M68K__)
@@ -40,32 +38,47 @@
 
 #include <Parrot/Config.h>
 
+typedef unsigned char  PtUnsigned8;
+typedef unsigned short PtUnsigned16;
+typedef unsigned int   PtUnsigned32;
+
+typedef char  PtSigned8;
+typedef short PtSigned16;
+typedef int   PtSigned32;
+
+typedef APTR PtPtr;
+typedef char PtChar;
+typedef char PtByte;
+
+#if defined(EXTERN)
+#define PtPublic EXTERN
+#else
+#define PtPublic extern
+#endif
+
+#if defined(PtPublic)
+#define PtPrivate STATIC
+#else
+#define PtPrivate static
+#endif
+
 /**
-    Typename consistency
+    Undefine Unsafe Functions
 */
-#ifndef INT
-#define INT int
-#endif
+#define memcpy    /* DO NOT USE     */
+#define strcat    /* DO NOT USE     */
+#define strcpy    /* DO NOT USE     */
+#define sprintf   /* Use StrFormat  */
+#define strlen    /* Use StrLength  */
+#define strtok    /* DO NOT USE     */
 
-#ifndef CHAR
-#define CHAR char
-#endif
-
-#ifndef STATIC
-#define STATIC static
-#endif
-
-#ifndef EXPORT
-#define EXPORT
-#endif
-
-#ifndef EXTERN
-#define EXTERN extern
-#endif
+#define Pt_literal_strlen(TEXT) (sizeof(TEXT)-1)
 
 /**
     Helper Macros
 */
+
+#include <exec/nodes.h>
 
 #define NEW_LIST(list)\
     list.lh_Head          = (struct Node *) &list.lh_Tail;\
@@ -78,7 +91,7 @@
     list.mlh_TailPred      = (struct MinNode*) &list.mlh_Head;
 
 #define MAKE_NODE_ID(a,b,c,d)	\
-    ((ULONG) (a)<<24 | (ULONG) (b)<<16 | (ULONG) (c)<<8 | (ULONG) (d))
+    ((PtUnsigned32) (a)<<24 | (PtUnsigned32) (b)<<16 | (PtUnsigned32) (c)<<8 | (PtUnsigned32) (d))
 
 #define MAKE_ENTITY_ID(a,b)	\
     ((USHORT) (a)<<8 | (USHORT) (b))
@@ -87,77 +100,44 @@
     ((USHORT) (a)<<8 | (USHORT) (b))
 
 /*
-    Version
-*/
-
-struct VERSION_PARTS_INFO
-{
-  UBYTE gv_Game;
-  UBYTE gv_Feature;
-  UBYTE gv_Build;
-};
-
-union VERSION_INFO
-{
-  struct VERSION_PARTS_INFO gv_Version;
-  ULONG gv_Num;
-};
-
-/*
   Dialogue
 */
 
-#define DIALOGUE_MAGIC 0x00FC
+#define Pt_DialogueMagic 0x00FC
 
-typedef ULONG DIALOGUE;
+typedef PtUnsigned32 PtDialogue;
 
-union DIALOGUE_TEXT
+#define Pt_DialogueString(STR) ((PtDialogue) STR)
+
+union PtDialogueText_t
 {
-  struct DIALOGUE_PARTS
+  struct
   {
-    UWORD   dp_Magic;
-    UBYTE   dp_Table;
-    UBYTE   dp_Item;
+    PtUnsigned16   dp_Magic;
+    PtUnsigned8   dp_Table;
+    PtUnsigned8   dp_Item;
   } dt_Parts;
-  DIALOGUE  dt_AssetId;
+  PtDialogue  dt_AssetId;
 };
 
 /*
   Squawk Files
 */
 
-struct SQUAWK_ASSET_LIST_HEADER
+#define PtAssetHeader          \
+  PtUnsigned16      as_Id;     \
+  PtUnsigned16      as_Flags;  \
+  PtUnsigned32      as_Length
+
+typedef struct PtAsset_t PtAsset;
+
+struct PtAsset_t
 {
-  ULONG             al_Type;
-  UWORD             al_Count;
-  UWORD             al_Chapter;
-  ULONG             al_Length;
+  PtAssetHeader;
 };
 
-#define ASSET_HEADER           \
-  UWORD             as_Id;     \
-  UWORD             as_Flags;  \
-  ULONG             as_Length
-
-struct ANY_ASSET
-{
-  ASSET_HEADER;
-};
-
-#define GET_ASSET_ID(X) (((struct ANY_ASSET*) (X))->as_Id)
-#define GET_ASSET_TYPE(X) (((struct ANY_ASSET*) (X))->as_Type)
-
-/**
-    SDL Banned Functions
-*/
-#define memcpy      __unsafe_memcpy   /* DO NOT USE     */
-#define strcat      __unsafe_strcat   /* DO NOT USE     */
-#define strcpy      __unsafe_strcpy   /* DO NOT USE     */
-#define sprintf     __unsafe_sprintf  /* Use StrFormat  */
-#define strlen      __unsafe_strlen   /* Use StrLength  */
-#define strtok      __unsafe_strtok   /* DO NOT USE     */
-
-#define literal_strlen(TEXT) (sizeof(TEXT)-1)
+#define GET_ASSET_ID(X) (((PtAsset*) (X))->as_Id)
+#define GET_ASSET_TYPE(X) (((PtAsset*) (X))->as_Type)
 
 #define SIF_IS_PUBLIC   1
 #define SIF_IS_HIRES    2
@@ -165,122 +145,128 @@ struct ANY_ASSET
 
 struct SCREEN_INFO
 {
-  LONG    si_Left, si_Top, si_Width, si_Height;
+  PtSigned32    si_Left, si_Top, si_Width, si_Height;
   STRPTR  si_Title;
-  UWORD   si_Depth;
-  UWORD   si_Flags;  /* See SIF_* */
+  PtUnsigned16   si_Depth;
+  PtUnsigned16   si_Flags;  /* See SIF_* */
 };
 
-struct VIEW_LAYOUT
+typedef struct PtViewLayout_t PtViewLayout;
+
+struct PtViewLayout_t
 {
-  UWORD  vl_Width;
-  UWORD  vl_Height;
-  UWORD  vl_BitMapWidth;
-  UWORD  vl_BitmapHeight;
-  WORD   vl_Horizontal;
-  WORD   vl_Vertical;
-  UWORD  vl_Depth;
+  PtUnsigned16  vl_Width;
+  PtUnsigned16  vl_Height;
+  PtUnsigned16  vl_BitMapWidth;
+  PtUnsigned16  vl_BitmapHeight;
+  PtSigned16   vl_Horizontal;
+  PtSigned16   vl_Vertical;
+  PtUnsigned16  vl_Depth;
 };
 
-struct VIEW_LAYOUTS
+typedef struct PtViewLayouts_t PtViewLayouts;
+
+struct PtViewLayouts_t
 {
-  LONG               v_Left;
-  LONG               v_Top;
-  LONG               v_Width;
-  LONG               v_Height;
-  UWORD              v_NumLayouts;
-  struct VIEW_LAYOUT v_Layouts[MAX_VIEW_LAYOUTS];
+  PtSigned32    v_Left;
+  PtSigned32    v_Top;
+  PtSigned32    v_Width;
+  PtSigned32    v_Height;
+  PtUnsigned16  v_NumLayouts;
+  PtViewLayout  v_Layouts[MAX_VIEW_LAYOUTS];
 };
 
-#define CURSOR_NONE   0
-#define CURSOR_SELECT 1
-#define CURSOR_BUSY   2
+enum PtCursorType
+{
+  PT_CT_NONE   =  0,
+  PT_CT_SELECT =  1,
+  PT_CT_BUSY    = 2
+};
 
 #define ARCHIVE_GLOBAL  0
 #define ARCHIVE_UNKNOWN 65535
 
-#define CT_COUNT          8
-#define CT_GAME_INFO      MAKE_NODE_ID('G','A','M','E')
-#define CT_ROOM           MAKE_NODE_ID('R','O','O','M')
-#define CT_IMAGE          MAKE_NODE_ID('I','M','G','E')
-#define CT_PALETTE        MAKE_NODE_ID('P','A','L','4')
-#define CT_TABLE          MAKE_NODE_ID('T','B','L','E')
-#define CT_ENTITY         MAKE_NODE_ID('E','N','T','Y')
-#define CT_SCRIPT         MAKE_NODE_ID('S','C','P','T')
-#define CT_STRING_TABLE   MAKE_NODE_ID('S','T','R','T')
-
-#define IET_KEYDOWN    1
-#define IET_KEYUP      2
-#define IET_SELECTDOWN 3
-#define IET_SELECTUP   4
-#define IET_SELECT     5
-#define IET_MENUDOWN   6
-#define IET_MENUUP     7
-#define IET_MENU       8
-#define IET_CURSOR     9
-
-struct INPUTEVENT
+enum PtAssetType
 {
-  UWORD             ie_Type;
-  UWORD             ie_Code;
-  WORD              ie_CursX;
-  WORD              ie_CursY;
+  PT_AT_GAME_INFO    = MAKE_NODE_ID('G','A','M','E'),
+  PT_AT_ROOM         = MAKE_NODE_ID('R','O','O','M'),
+  PT_AT_IMAGE        = MAKE_NODE_ID('I','M','G','E'),
+  PT_AT_PALETTE      = MAKE_NODE_ID('P','A','L','4'),
+  PT_AT_TABLE        = MAKE_NODE_ID('T','B','L','E'),
+  PT_AT_ENTITY       = MAKE_NODE_ID('E','N','T','Y'),
+  PT_AT_SCRIPT       = MAKE_NODE_ID('S','C','P','T'),
+  PT_AT_STRING_TABLE = MAKE_NODE_ID('S','T','R','T'),
+  
+  PT_AT_COUNT        = 8
 };
 
-#define IS_REF_LOADED(REF) (NULL != (REF).ar_Ptr)
+enum PtAssetFlags
+{
+  /* Arch is Amiga ECS */
+  PT_AF_ARCH_ECS  = (1 << 0),
+  /* Arch is Amiga AGA */
+  PT_AF_ARCH_AGA  = (1 << 1),
+  /* Arch is Amiga RTG */
+  PT_AF_ARCH_RTG  = (1 << 2),
+  /* Arch is Any */
+  PT_AF_ARCH_ANY  = (PT_AF_ARCH_ECS | PT_AF_ARCH_AGA | PT_AF_ARCH_RTG),
 
-#define CHUNK_FLAG_ARCH_ECS       (1 << 0)
-#define CHUNK_FLAG_ARCH_AGA       (1 << 1)
-#define CHUNK_FLAG_ARCH_RTG       (1 << 2)
-#define CHUNK_FLAG_ARCH_ANY       (CHUNK_FLAG_ARCH_ECS | CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG)
+  /* Asset does not have a serialised form; i.e. created via AllocVec */
+  PT_AF_INSTANCE  = (1 << 13),
 
-#define CHUNK_FLAG_HAS_DATA       (1 << 14)
-#define CHUNK_FLAG_IGNORE         (1 << 15)
+  /* Asset has data with it */
+  PT_AF_HAS_DATA   = (1 << 14),
+
+  /* Ignore this asset when loading */
+  PT_AF_IGNORE     = (1 << 15),
+};
 
 /*
       Game Info
 */
 
-struct GAME_INFO
+typedef struct PtGameInfo_t PtGameInfo;
+
+struct PtGameInfo_t
 {
-  ASSET_HEADER;
+  PtAssetHeader;
   
-  ULONG                     gi_GameId;
-  ULONG                     gi_GameVersion;
-  DIALOGUE                  gi_Title;
-  DIALOGUE                  gi_ShortTitle;
-  DIALOGUE                  gi_Author;
-  DIALOGUE                  gi_Release;
-  UWORD                     gi_Width;
-  UWORD                     gi_Height;
-  UWORD                     gi_Depth;
-  UWORD                     gi_NumAssetTables;
-  UWORD                     gi_StartScript;
+  PtUnsigned32                     gi_GameId;
+  PtUnsigned32                     gi_GameVersion;
+  PtDialogue                  gi_Title;
+  PtDialogue                  gi_ShortTitle;
+  PtDialogue                  gi_Author;
+  PtDialogue                  gi_Release;
+  PtUnsigned16                     gi_Width;
+  PtUnsigned16                     gi_Height;
+  PtUnsigned16                     gi_Depth;
+  PtUnsigned16                     gi_NumAssetTables;
+  PtUnsigned16                     gi_StartScript;
 };
 
-extern struct GAME_INFO GameInfo;
+extern PtGameInfo GameInfo;
 
 /*
     Asset Table
 */
 
-struct ASSET_TABLE_ENTRY
+struct AssetTableEntry
 {
-  UWORD  ti_Id;
-  UWORD  ti_Archive;
+  PtUnsigned16  ti_Id;
+  PtUnsigned16  ti_Archive;
 };
 
-struct ASSET_TABLE
+struct AssetTable
 {
-  ASSET_HEADER;
+  PtAssetHeader;
 
-  ULONG  at_AssetType;
-  UWORD  at_Chapter;
-  UWORD  at_Count;
-  UWORD  at_Lowest;
-  UWORD  at_Highest;
+  PtUnsigned32  at_AssetType;
+  PtUnsigned16  at_Chapter;
+  PtUnsigned16  at_Count;
+  PtUnsigned16  at_Lowest;
+  PtUnsigned16  at_Highest;
 
-  struct ASSET_TABLE_ENTRY at_Assets[];
+  struct AssetTableEntry at_Assets[];
 };
 
 /*
@@ -289,13 +275,13 @@ struct ASSET_TABLE
   
 */
 
-struct STRING_TABLE
+struct StringTable
 {
-  ASSET_HEADER;
+  PtAssetHeader;
 
-  UWORD   st_Language;
-  UWORD   st_Offsets[256];
-  CHAR    st_Text[];
+  PtUnsigned16   st_Language;
+  PtUnsigned16   st_Offsets[256];
+  PtChar    st_Text[];
 };
 
 #define LANG_ENGLISH  MAKE_LANGUAGE_CODE('e','n')
@@ -309,13 +295,13 @@ struct STRING_TABLE
 
     Upto 16 Colours
 */
-struct PALETTE_TABLE
+struct PaletteTable
 {
-  ASSET_HEADER;
+  PtAssetHeader;
 
-  UBYTE pt_Begin;
-  UBYTE pt_End;
-  ULONG pt_Data[64];
+  PtUnsigned8 pt_Begin;
+  PtUnsigned8 pt_End;
+  PtUnsigned32 pt_Data[64];
 };
 
 /*
@@ -324,17 +310,17 @@ struct PALETTE_TABLE
 
 struct IMAGE
 {
-  ASSET_HEADER;
+  PtAssetHeader;
 
-  UWORD             im_BytesPerRow;
-  UWORD             im_Height;
-  UBYTE             im_Flags;
-  UBYTE             im_Depth;
-  UWORD             im_pad;
-  UBYTE*            im_Planes[8];
-  UWORD             im_Width;
-  UWORD             im_Palette;
-  ULONG             im_PlaneSize;
+  PtUnsigned16             im_BytesPerRow;
+  PtUnsigned16             im_Height;
+  PtUnsigned8             im_Flags;
+  PtUnsigned8             im_Depth;
+  PtUnsigned16             im_pad;
+  PtUnsigned8*            im_Planes[8];
+  PtUnsigned16             im_Width;
+  PtUnsigned16             im_Palette;
+  PtUnsigned32             im_PlaneSize;
 };
 
 #define CAST_IMAGE_TO_BITMAP(IMG) ((struct BitMap*)(&IMG->im_BytesPerRow))
@@ -349,10 +335,10 @@ struct IMAGE
 #define VERB_NONE 0
 #define VERB_WALK 1
 
-struct VERBS
+struct Verbs
 {
-  UWORD  vb_Allowed;
-  UWORD  vb_Selected;
+  PtUnsigned16  vb_Allowed;
+  PtUnsigned16  vb_Selected;
 };
 
 /*
@@ -372,18 +358,18 @@ struct VERBS
 #define DIR_UP     DIR_N
 #define DIR_DOWN   DIR_S
 
-struct RECT
+struct Rect
 {
-  WORD rt_Left;
-  WORD rt_Top;
-  WORD rt_Right;
-  WORD rt_Bottom;
+  PtSigned16 rt_Left;
+  PtSigned16 rt_Top;
+  PtSigned16 rt_Right;
+  PtSigned16 rt_Bottom;
 };
 
-struct POINT
+struct Point
 {
-  WORD pt_Left;
-  WORD pt_Top;
+  PtSigned16 pt_Left;
+  PtSigned16 pt_Top;
 };
 
 #define ET_ANY        MAKE_ENTITY_ID('A','N')
@@ -395,61 +381,61 @@ struct POINT
 #define ETF_IS_OPEN   (1 << 15)
 
 #define STRUCT_ENTITY_COMMON \
-  ASSET_HEADER;               \
-  UWORD                en_Size;\
-  UWORD                en_Type;\
-  struct RECT          en_HitBox;\
-  UWORD                en_Flags;\
-  UWORD                en_Context;\
-  DIALOGUE             en_Name;\
-  UWORD                en_Images[MAX_ENTITY_IMAGES];\
-  UWORD                en_Scripts[MAX_ENTITY_SCRIPTS]
+  PtAssetHeader;               \
+  PtUnsigned16                en_Size;\
+  PtUnsigned16                en_Type;\
+  struct Rect          en_HitBox;\
+  PtUnsigned16                en_Flags;\
+  PtUnsigned16                en_Context;\
+  PtDialogue             en_Name;\
+  PtUnsigned16                en_Images[MAX_ENTITY_IMAGES];\
+  PtUnsigned16                en_Scripts[MAX_ENTITY_SCRIPTS]
 
-struct NEW_ANY_ENTITY
+struct AnyEntity
 {
   STRUCT_ENTITY_COMMON;
-  LONG                 en_Params[];
+  PtSigned32                 en_Params[];
 };
 
-struct NEW_ANY_ENTITY_ASSET
+struct AnyEntityAsset
 {
   STRUCT_ENTITY_COMMON;
 };
 
-struct NEW_EXIT_ENTITY
+struct RoomExitEntity
 {
   STRUCT_ENTITY_COMMON;
-  LONG                 ex_Target;
+  PtSigned32                 ex_Target;
 };
 
 
-struct ENTITY
+struct Entity
 {
-  UWORD                en_Type;
-  UWORD                en_Flags;
-  struct RECT          en_HitBox;
-  UBYTE                en_Name[MAX_ENTITY_NAME_LENGTH + 1];
+  PtUnsigned16                en_Type;
+  PtUnsigned16                en_Flags;
+  struct Rect                 en_HitBox;
+  PtUnsigned8                 en_Name[MAX_ENTITY_NAME_LENGTH + 1];
 };
 
-struct EXIT
+struct RoomExit
 {
-  UWORD                ex_Type;
-  UWORD                ex_Flags;
-  struct RECT          ex_HitBox;
-  UBYTE                ex_Name[MAX_ENTITY_NAME_LENGTH + 1];
-  UWORD                ex_Target;
+  PtUnsigned16                ex_Type;
+  PtUnsigned16                ex_Flags;
+  struct Rect                 ex_HitBox;
+  PtUnsigned8                 ex_Name[MAX_ENTITY_NAME_LENGTH + 1];
+  PtUnsigned16                ex_Target;
 };
 
-struct ROOM
+struct Room
 {
-  ASSET_HEADER;
+  PtAssetHeader;
 
-  UWORD               rm_Width;
-  UWORD               rm_Height;
-  UWORD               rm_Backdrops[MAX_ROOM_BACKDROPS];
-  UWORD               rm_Exits[MAX_ROOM_EXITS];
-  UWORD               rm_Entities[MAX_ROOM_ENTITIES];
-  UWORD               rm_Scripts[MAX_ROOM_SCRIPTS];
+  PtUnsigned16               rm_Width;
+  PtUnsigned16               rm_Height;
+  PtUnsigned16               rm_Backdrops[MAX_ROOM_BACKDROPS];
+  PtUnsigned16               rm_Exits[MAX_ROOM_EXITS];
+  PtUnsigned16               rm_Entities[MAX_ROOM_ENTITIES];
+  PtUnsigned16               rm_Scripts[MAX_ROOM_SCRIPTS];
 };
 
 #define UFLG_DEBUG     1
@@ -461,65 +447,68 @@ struct ROOM
 
 struct UNPACKED_ROOM
 {
-  struct ROOM         ur_Room;
+  struct Room         lv_Room;
 
-  struct IMAGE        ur_Backdrops[MAX_ROOM_BACKDROPS];
-  struct EXIT*        ur_Exits[MAX_ROOM_EXITS];
-  struct ENTITIES*    ur_Entities[MAX_ROOM_ENTITIES];
-  struct SCRIPT*      ur_Scripts[MAX_ROOM_SCRIPTS];
-  struct VERBS        ur_Verbs;
+  struct IMAGE        lv_Backdrops[MAX_ROOM_BACKDROPS];
+  struct RoomExit*    lv_Exits[MAX_ROOM_EXITS];
+  struct Entity*      lv_Entities[MAX_ROOM_ENTITIES];
+  struct SCRIPT*      lv_Scripts[MAX_ROOM_SCRIPTS];
+  struct Verbs        lv_Verbs;
 
-  ULONG               ur_Unpacked;
-  WORD                ur_CamX;
-  WORD                ur_CamY;
-  struct ENTITY*      ur_HoverEntity;
-  UWORD               ur_UpdateFlags;
+  PtUnsigned32               lv_InitialisationFlags;
+  PtSigned16                lv_CamX;
+  PtSigned16                lv_CamY;
+  struct Entity*      lv_HoverEntity;
+  PtUnsigned16               lv_UpdateFlags;
 };
 
-struct ENTRANCE
+struct RoomEntrance
 {
-  UWORD   en_Room;
-  UWORD   en_Exit;
+  PtUnsigned16   en_Room;
+  PtUnsigned16   en_Exit;
 };
 
-#define UNPACK_ROOM_ASSET      1
-#define UNPACK_ROOM_BACKDROPS  2
-#define UNPACK_ROOM_ENTITIES   4
+enum RoomInitialisationFlags
+{
+  RIF_ASSET = 1,
+  RIF_BACKDROPS = 2,
+  RIF_ENTITIES = 4,
 
-#define UNPACK_ROOM_ALL        (UNPACK_ROOM_ASSET | UNPACK_ROOM_BACKDROPS | UNPACK_ROOM_ENTITIES)
+  RIF_ALL = (RIF_ASSET | RIF_BACKDROPS | RIF_ENTITIES)
+};
 
 /*
       Script
 */
 
-typedef UWORD OPCODE;
+typedef PtUnsigned16 OPCODE;
 
 struct SCRIPT
 {
-  ASSET_HEADER;
+  PtAssetHeader;
   
-  UWORD  sc_NumOpcodes;
-  LONG   sc_Constants[MAX_CONSTANTS_PER_SCRIPT];
+  PtUnsigned16  sc_NumOpcodes;
+  PtSigned32   sc_Constants[MAX_CONSTANTS_PER_SCRIPT];
   OPCODE sc_Opcodes[];
 };
 
-extern LONG Vm_Globals[MAX_VM_GLOBALS];
+extern PtSigned32 Vm_Globals[MAX_VM_GLOBALS];
 
 struct VIRTUAL_MACHINE
 {
-  UWORD            vm_State;
-  WORD             vm_PC;
-  UWORD            vm_Timer;
-  UWORD            vm_StackHead;
-  UWORD            vm_Cmp;
-  UWORD            vm_Reserved;
-  DIALOGUE         vm_DialogueRegister;
+  PtUnsigned16            vm_State;
+  PtSigned16             vm_PC;
+  PtUnsigned16            vm_Timer;
+  PtUnsigned16            vm_StackHead;
+  PtUnsigned16            vm_Cmp;
+  PtUnsigned16            vm_Reserved;
+  PtDialogue         vm_DialogueRegister;
   OPCODE*          vm_Opcodes;
-  UWORD            vm_OpcodesLength;
-  LONG*            vm_Constants;
+  PtUnsigned16            vm_OpcodesLength;
+  PtSigned32*            vm_Constants;
   struct SCRIPT*   vm_Script;
-  LONG             vm_Vars[MAX_VM_VARIABLES];
-  LONG             vm_Stack[MAX_VM_STACK_SIZE];
+  PtSigned32             vm_Vars[MAX_VM_VARIABLES];
+  PtSigned32             vm_Stack[MAX_VM_STACK_SIZE];
 };
 
 extern struct VIRTUAL_MACHINE* Vm_Current;
@@ -541,5 +530,47 @@ extern struct VIRTUAL_MACHINE* Vm_Current;
 #define SYSCALL_SAVE_GAME 4
 #define SYSCALL_DELAY_TICKS 5
 #define SYSCALL_DELAY_SECONDS 6
+
+
+enum UiElementType
+{
+  UET_NONE           = 0,
+  UET_TEXT           = 1,
+  UET_BUTTON         = 2,
+  UET_VERB           = 3,
+  UET_SENTENCE       = 4,
+  UET_INVENTORY_ITEM = 5,
+};
+
+enum UiFunction
+{
+  UF_None                = 0,
+  UF_RunScript           = 1,
+  UF_ReleaseThisPanel    = 2,
+  UF_ReleasePanel        = 3,
+};
+
+struct UiElement
+{
+  PtUnsigned16    ue_Id;
+  PtUnsigned16    ue_Type;
+  PtUnsigned16    ue_X;
+  PtUnsigned16    ue_Y;
+  PtUnsigned16    ue_Width;
+  PtUnsigned16    ue_Height;
+  PtDialogue ue_Text;
+  PtUnsigned16    ue_Function[2];
+  PtUnsigned16    ue_Argument[2];
+  PtUnsigned16    ue_Status;
+};
+
+struct UiPanel
+{
+  PtAssetHeader;
+
+  PtUnsigned16                   ui_Screen;
+  PtUnsigned16                   ui_NumElements;
+  struct UiElement        ui_Elements[];
+};
 
 #endif

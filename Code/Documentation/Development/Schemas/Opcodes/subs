@@ -6,7 +6,7 @@ Argument:
   0 : LHS
   1 : RHS
 Code:
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop();
   l = Vm_Pop();
   Vm_Push(l - r);

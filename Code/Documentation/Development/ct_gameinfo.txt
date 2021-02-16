@@ -10,25 +10,25 @@ Game Information Table
 
 ## C Version
 
-  struct GAME_INFO
+  PtGameInfo
   {
     struct GAME_VERSION       gi_Version;
-    ULONG                     gi_FeatureSet;
-    ULONG                     gi_GameId;
-    ULONG                     gi_GameVersion;
+    PtUnsigned32                     gi_FeatureSet;
+    PtUnsigned32                     gi_GameId;
+    PtUnsigned32                     gi_GameVersion;
     DIALOGUE                  gi_Title;
     DIALOGUE                  gi_ShortTitle;
     DIALOGUE                  gi_Author;
     DIALOGUE                  gi_Release;
-    UWORD                     gi_Width;
-    UWORD                     gi_Height;
-    UWORD                     gi_Depth;
-    UWORD                     gi_RoomCount;
+    PtUnsigned16                     gi_Width;
+    PtUnsigned16                     gi_Height;
+    PtUnsigned16                     gi_Depth;
+    PtUnsigned16                     gi_RoomCount;
     struct OBJECT_TABLE_REF   gi_StartTables[16];
-    UWORD                     gi_StartPalette;
-    UWORD                     gi_StartCursorPalette;
-    UWORD                     gi_StartRoom;
-    UWORD                     gi_StartScript;
+    PtUnsigned16                     gi_StartPalette;
+    PtUnsigned16                     gi_StartCursorPalette;
+    PtUnsigned16                     gi_StartRoom;
+    PtUnsigned16                     gi_StartScript;
   };
 
 ## gi_ParrotVersion (struct GAME_VERSION)
@@ -38,20 +38,20 @@ The version of Parrot which was used to create the Game Asset files.
 example:
   1, 2, 199
 
-## gi_FeatureSet (ULONG)
+## gi_FeatureSet (PtUnsigned32)
 
 A bit-field containg special features required by Parrot to run.
 
 RESERVED FOR FUTURE USE
 
-## gi_GameId (ULONG)
+## gi_GameId (PtUnsigned32)
 
 FourCC id of the Game
 
 example:
   PRRT
 
-## gi_GameVersion (ULONG)
+## gi_GameVersion (PtUnsigned32)
 
 Numerical version of the game.
 
@@ -85,57 +85,57 @@ Release information, including version number and/or Language
 
 example: "Adventures of Parrot 1.0, English"
 
-## gi_Width (UWORD)
+## gi_Width (PtUnsigned16)
 
 Number of pixels that represent the width of the display
 
 example:
   320
 
-## gi_Height (UWORD)
+## gi_Height (PtUnsigned16)
 
 Number of pixels that represent the height of the display
 
 example:
   200
 
-## gi_Depth (UWORD)
+## gi_Depth (PtUnsigned16)
 
 Maximum Bitplane depth used by the display
 
 example:
   4
 
-## gi_RoomCount (UWORD)
+## gi_RoomCount (PtUnsigned16)
 
 Number of Rooms used in this game
 
 example:
   24
 
-## gi_StartTables (UWORD)
+## gi_StartTables (PtUnsigned16)
 
 UNDOCUMENTATED
 
-## gi_StartPalette (UWORD)
+## gi_StartPalette (PtUnsigned16)
 
 Palette Asset ID for the initial Display Palette
 
 example:
   1
 
-## gi_StartCursorPalette (UWORD)
+## gi_StartCursorPalette (PtUnsigned16)
 
 Palette Asset ID for the initial Cursor Palette
 
 example:
   1
 
-## gi_StartRoom (UWORD)
+## gi_StartRoom (PtUnsigned16)
 
 UNDOCUMENTATED
 
-## gi_StartScript (UWORD)
+## gi_StartScript (PtUnsigned16)
 
 Script Asset ID for the first script to be executed when the game has initialised
 

@@ -6,6 +6,6 @@ Argument:
   i : Function
   0 : Argument
 Code:
-  LONG arg;
+  PtSigned32 arg;
   arg = Vm_Pop();
   Parrot_SysCall(#F, arg);

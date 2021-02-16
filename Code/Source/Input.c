@@ -44,28 +44,28 @@
 
 #include <Parrot/Private/SDI_interrupt.h>
 
-struct INPUTEVENT Inputs[MAX_INPUT_EVENT_SIZE] = { 0 };
-UWORD InputWrite, InputRead;
+PtInputEvent Inputs[MAX_INPUT_EVENT_SIZE] = { 0 };
+PtUnsigned16 InputWrite, InputRead;
 
-UWORD CursorSelect[2], CursorMenu[2];
+PtUnsigned16 CursorSelect[2], CursorMenu[2];
 
-BYTE  KeyState[256] = { 0 };
+PtByte  KeyState[256] = { 0 };
 
 
-EXTERN struct SimpleSprite CursorSprite;
-EXTERN WORD CursorOffsetX;
-EXTERN WORD CursorOffsetY;
-EXTERN WORD CursorX;
-EXTERN WORD CursorY;
-EXTERN WORD CursorXLimit;
-EXTERN WORD CursorYLimit;
+PtPublic struct SimpleSprite CursorSprite;
+PtPublic PtSigned16 CursorOffsetX;
+PtPublic PtSigned16 CursorOffsetY;
+PtPublic PtSigned16 CursorX;
+PtPublic PtSigned16 CursorY;
+PtPublic PtSigned16 CursorXLimit;
+PtPublic PtSigned16 CursorYLimit;
 
 #define SemAcquireInputRw()
 #define SemReleaseInputRw() 
 
-BOOL PopEvent(struct INPUTEVENT* ie)
+BOOL PopEvent(PtInputEvent* ie)
 {
-  struct INPUTEVENT* popped;
+  PtInputEvent* popped;
   BOOL rc;
 
   rc = FALSE;
@@ -86,9 +86,9 @@ BOOL PopEvent(struct INPUTEVENT* ie)
   return rc;
 }
 
-VOID PushEvent(struct INPUTEVENT* ie)
+void PushEvent(PtInputEvent* ie)
 {
-  struct INPUTEVENT* pushed;
+  PtInputEvent* pushed;
 
   pushed = &Inputs[InputWrite];
   pushed->ie_Type = ie->ie_Type;
@@ -99,11 +99,11 @@ VOID PushEvent(struct INPUTEVENT* ie)
   InputWrite = (InputWrite + 1) & (MAX_INPUT_EVENT_SIZE - 1);
 }
 
-HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
+HANDLERPROTO(handlerfunc, PtUnsigned32, struct InputEvent* ie, APTR userdata)
 {
-  struct INPUTEVENT evt;
+  PtInputEvent evt;
   BOOL hasMouseUpdate;
-  WORD mouseX, mouseY, selectDown, selectUp, menuDown, menuUp;
+  PtSigned16 mouseX, mouseY, selectDown, selectUp, menuDown, menuUp;
 
   hasMouseUpdate = FALSE;
   mouseX = CursorX;
@@ -115,7 +115,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
     {
       if ((ie->ie_Code & IECODE_UP_PREFIX) != 0)
       {
-        evt.ie_Type = IET_KEYUP;
+        evt.ie_Type = PT_IET_KEYUP;
         evt.ie_Code = ie->ie_Code & ~IECODE_UP_PREFIX;
         evt.ie_CursX = 0;
         evt.ie_CursY = 0;
@@ -124,7 +124,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
       }
       else
       {
-        evt.ie_Type = IET_KEYDOWN;
+        evt.ie_Type = PT_IET_KEYDOWN;
         evt.ie_Code = ie->ie_Code;
         evt.ie_CursX = 0;
         evt.ie_CursY = 0;
@@ -191,7 +191,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 
     MoveSprite(NULL, &CursorSprite, CursorX + CursorOffsetX, CursorY + CursorOffsetY);
 
-    evt.ie_Type = IET_CURSOR;
+    evt.ie_Type = PT_IET_CURSOR;
     evt.ie_Code = 0;
     evt.ie_CursX = CursorX;
     evt.ie_CursY = CursorY;
@@ -200,7 +200,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 
   if (selectDown == TRUE)
   {
-    evt.ie_Type = IET_SELECTDOWN;
+    evt.ie_Type = PT_IET_SELECTDOWN;
     evt.ie_Code = 0;
     evt.ie_CursX = CursorX;
     evt.ie_CursY = CursorY;
@@ -212,7 +212,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 
   if (selectUp == TRUE)
   {
-    evt.ie_Type = IET_SELECTUP;
+    evt.ie_Type = PT_IET_SELECTUP;
     evt.ie_Code = 0;
     evt.ie_CursX = CursorX;
     evt.ie_CursY = CursorY;
@@ -223,7 +223,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 
     if (CursorSelect[0] == TRUE)
     {
-      evt.ie_Type = IET_SELECT;
+      evt.ie_Type = PT_IET_SELECT;
       evt.ie_Code = 0;
       evt.ie_CursX = CursorX;
       evt.ie_CursY = CursorY;
@@ -234,7 +234,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 
   if (menuDown == TRUE)
   {
-    evt.ie_Type = IET_MENUDOWN;
+    evt.ie_Type = PT_IET_MENUDOWN;
     evt.ie_Code = 0;
     evt.ie_CursX = CursorX;
     evt.ie_CursY = CursorY;
@@ -246,7 +246,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 
   if (menuUp == TRUE)
   {
-    evt.ie_Type = IET_MENUUP;
+    evt.ie_Type = PT_IET_MENUUP;
     evt.ie_Code = 0;
     evt.ie_CursX = CursorX;
     evt.ie_CursY = CursorY;
@@ -257,7 +257,7 @@ HANDLERPROTO(handlerfunc, ULONG, struct InputEvent* ie, APTR userdata)
 
     if (CursorMenu[0] == TRUE)
     {
-      evt.ie_Type = IET_MENU;
+      evt.ie_Type = PT_IET_MENU;
       evt.ie_Code = 0;
       evt.ie_CursX = CursorX;
       evt.ie_CursY = CursorY;
@@ -273,10 +273,10 @@ MakeHandlerPri(Handler, handlerfunc, "ParrotInput", NULL, 100);
 STATIC struct Interrupt Handler;
 STATIC struct MsgPort* KeyMsgPort = NULL;
 STATIC struct IOStdReq* KeyIOReq = NULL;
-UWORD InEvtForceQuit = FALSE;
-UWORD InEvtKey = 0;
+PtUnsigned16 InEvtForceQuit = FALSE;
+PtUnsigned16 InEvtKey = 0;
 
-EXPORT VOID InputInitialise()
+void InputInitialise()
 {
   InEvtForceQuit = FALSE;
   InEvtKey = 0;
@@ -295,7 +295,7 @@ EXPORT VOID InputInitialise()
 
   DoIO((struct IORequest*) KeyIOReq);
 
-  // UBYTE port = 0;
+  // PtUnsigned8 port = 0;
   // KeyIOReq->io_Data = &port;
   // KeyIOReq->io_Flags = IOF_QUICK;
   // KeyIOReq->io_Length = 1;
@@ -304,7 +304,7 @@ EXPORT VOID InputInitialise()
 
 }
 
-EXPORT VOID InputExit()
+void InputExit()
 {
   if (KeyIOReq)
   {
@@ -330,7 +330,7 @@ EXPORT VOID InputExit()
   }
 }
 
-EXPORT BOOL IsMenuDown()
+BOOL IsMenuDown()
 {
   return CursorMenu[1] == TRUE;
 }

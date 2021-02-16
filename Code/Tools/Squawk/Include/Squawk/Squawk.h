@@ -39,20 +39,20 @@
 #include <Parrot/Requester.h>
 #include <Parrot/String.h>
 
-typedef struct SquawkFile* SquawkPtr;
+typedef struct Archive* SquawkPtr;
 
-SquawkPtr OpenSquawkFile(UWORD id);
-VOID CloseSquawkFile(SquawkPtr squawk);
+SquawkPtr OpenSquawkFile(PtUnsigned16 id);
+void CloseSquawkFile(SquawkPtr squawk);
 
-VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter);
-VOID EndAssetList(SquawkPtr squawk);
-VOID SaveAsset(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize);
-VOID SaveAssetExtra(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize, APTR data, ULONG dataLength);
+void StartAssetList(SquawkPtr squawk, PtUnsigned32 classType, PtUnsigned16 chapter);
+void EndAssetList(SquawkPtr squawk);
+void SaveAsset(SquawkPtr squawk, PtAsset* asset, PtUnsigned32 assetSize);
+void SaveAssetExtra(SquawkPtr squawk, PtAsset* asset, PtUnsigned32 assetSize, APTR data, PtUnsigned32 dataLength);
 
-UWORD GenerateAssetId(ULONG classType);
-UWORD GenerateArchiveId();
-VOID AddToTable(ULONG classType, UWORD id, UWORD archive, UWORD chapter);
-ULONG PushDialogue(UWORD language, UBYTE textLength, STRPTR text);
+PtUnsigned16 GenerateAssetId(PtUnsigned32 classType);
+PtUnsigned16 GenerateArchiveId();
+void AddToTable(PtUnsigned32 classType, PtUnsigned16 id, PtUnsigned16 archive, PtUnsigned16 chapter);
+PtUnsigned32 PushDialogue(PtUnsigned16 language, PtUnsigned8 textLength, STRPTR text);
 
 #define GrowMem(VAL, NEED, CAPACITY) \
     if (NEED > CAPACITY)\

@@ -30,28 +30,28 @@
 #define MM_MAX_ROOMS   55
 #define MM_MAX_OBJECTS 1024
 
-UWORD RoomExportOrder[] = {
+PtUnsigned16 RoomExportOrder[] = {
   44,
   1,
   10
 };
 
-#define ROOM_COUNT (sizeof(RoomExportOrder) / sizeof(UWORD))
+#define ROOM_COUNT (sizeof(RoomExportOrder) / sizeof(PtUnsigned16))
 
 struct RM_Table
 {
-  UWORD rt_Mm;
-  UWORD rt_Parrot;
+  PtUnsigned16 rt_Mm;
+  PtUnsigned16 rt_Parrot;
 };
 
 STATIC struct RM_Table MM_RoomId_Table[MM_MAX_ROOMS] = { 0 };
 
 struct MM_EXIT
 {
-  UWORD ex_Mm_Id;
-  UWORD ex_Mm_Target;
-  UWORD ex_Parrot_Id;
-  UWORD ex_Parrot_Target;
+  PtUnsigned16 ex_Mm_Id;
+  PtUnsigned16 ex_Mm_Target;
+  PtUnsigned16 ex_Parrot_Id;
+  PtUnsigned16 ex_Parrot_Target;
 };
 
 STATIC struct MM_EXIT Mm_Exit_Table[] = {
@@ -62,28 +62,28 @@ STATIC struct MM_EXIT Mm_Exit_Table[] = {
 
 struct MM_OBJECT
 {
-  UWORD ob_Mm_Id;
-  UWORD ob_Parrot_Room;
-  UWORD ob_Parrot_Id;
-  UWORD ob_Parrot_Type;
+  PtUnsigned16 ob_Mm_Id;
+  PtUnsigned16 ob_Parrot_Room;
+  PtUnsigned16 ob_Parrot_Id;
+  PtUnsigned16 ob_Parrot_Type;
 };
 
 STATIC struct MM_OBJECT MM_Object_Table[MM_MAX_OBJECTS] = { 0 };
 
-STATIC VOID AddRoom(UWORD mmId, UWORD parrotId)
+STATIC void AddRoom(PtUnsigned16 mmId, PtUnsigned16 parrotId)
 {
   MM_RoomId_Table[mmId].rt_Mm = mmId;
   MM_RoomId_Table[mmId].rt_Parrot = parrotId;
 }
 
-STATIC VOID AddObject(UWORD mmId, UWORD parrotId, UWORD parrotRoom)
+STATIC void AddObject(PtUnsigned16 mmId, PtUnsigned16 parrotId, PtUnsigned16 parrotRoom)
 {
   MM_Object_Table[mmId].ob_Mm_Id = mmId;
   MM_Object_Table[mmId].ob_Parrot_Id = parrotId;
   MM_Object_Table[mmId].ob_Parrot_Room = parrotRoom;
 }
 
-STATIC BOOL AddExit(UWORD mmId, UWORD parrotId)
+STATIC BOOL AddExit(PtUnsigned16 mmId, PtUnsigned16 parrotId)
 {
   struct MM_EXIT* ex;
 
@@ -108,7 +108,7 @@ STATIC BOOL AddExit(UWORD mmId, UWORD parrotId)
   return FALSE;
 }
 
-STATIC BOOL FindRoom(UWORD mmId, UWORD* out_parrotId)
+STATIC BOOL FindRoom(PtUnsigned16 mmId, PtUnsigned16* out_parrotId)
 {
   if (mmId >= 55)
   {
@@ -120,9 +120,9 @@ STATIC BOOL FindRoom(UWORD mmId, UWORD* out_parrotId)
   return TRUE;
 }
 
-STATIC BOOL FindObject(UWORD mmId, struct MM_OBJECT** obj)
+STATIC BOOL FindObject(PtUnsigned16 mmId, struct MM_OBJECT** obj)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
 
   for (ii = 0; ii < MM_MAX_OBJECTS; ii++)
   {
@@ -139,7 +139,7 @@ STATIC BOOL FindObject(UWORD mmId, struct MM_OBJECT** obj)
   return FALSE;
 }
 
-STATIC BOOL FindExit(UWORD mmId, UWORD* out_parrotId, UWORD* out_targetId)
+STATIC BOOL FindExit(PtUnsigned16 mmId, PtUnsigned16* out_parrotId, PtUnsigned16* out_targetId)
 {
   struct MM_EXIT* ex;
 

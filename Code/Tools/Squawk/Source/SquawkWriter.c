@@ -26,30 +26,31 @@
 */
 
 #include <Squawk/Squawk.h>
+#include <Parrot/Squawk.h>
 
 #define SAVE_PATH "PROGDIR:%ld.Parrot"
 
-struct SquawkFile
+struct Archive
 {
   BPTR   sq_File;
-  ULONG  sq_ListPos;
-  CHAR   sq_Path[1 + sizeof(SAVE_PATH) + 6];
+  PtUnsigned32  sq_ListPos;
+  PtChar   sq_Path[1 + sizeof(SAVE_PATH) + 6];
   struct SQUAWK_ASSET_LIST_HEADER sq_ListHeader;
 };
 
 #define SQUAWK_HEADER "SQWK"
 #define SQUAWK_FOOTER "STOP\0\0\0\0\0\0\0\0"
 
-STATIC CHAR strtype[5];
+STATIC PtChar strtype[5];
 
-SquawkPtr OpenSquawkFile(UWORD id)
+SquawkPtr OpenSquawkFile(PtUnsigned16 id)
 {
   SquawkPtr squawk;
-  LONG err;
+  PtSigned32 err;
 
-  squawk = AllocMem(sizeof(struct SquawkFile), MEMF_CLEAR);
+  squawk = AllocMem(sizeof(struct Archive), MEMF_CLEAR);
 
-  StrFormat(squawk->sq_Path, sizeof(squawk->sq_Path), SAVE_PATH, (ULONG)id);
+  StrFormat(squawk->sq_Path, sizeof(squawk->sq_Path), SAVE_PATH, (PtUnsigned32)id);
 
   squawk->sq_File = Open(squawk->sq_Path, MODE_NEWFILE);
 
@@ -69,13 +70,13 @@ SquawkPtr OpenSquawkFile(UWORD id)
     );
   }
   
-  Write(squawk->sq_File, SQUAWK_HEADER, literal_strlen(SQUAWK_HEADER));
+  Write(squawk->sq_File, SQUAWK_HEADER, Pt_literal_strlen(SQUAWK_HEADER));
   
   return squawk;
 }
-VOID EndAssetList(SquawkPtr squawk);
+void EndAssetList(SquawkPtr squawk);
 
-VOID CloseSquawkFile(SquawkPtr squawk)
+void CloseSquawkFile(SquawkPtr squawk)
 {
   if (squawk->sq_ListPos > 0)
   {
@@ -83,16 +84,16 @@ VOID CloseSquawkFile(SquawkPtr squawk)
   }
 
   /* Footer */
-  Write(squawk->sq_File, SQUAWK_FOOTER, literal_strlen(SQUAWK_FOOTER));
+  Write(squawk->sq_File, SQUAWK_FOOTER, Pt_literal_strlen(SQUAWK_FOOTER));
 
   Close(squawk->sq_File);
 
-  FreeMem(squawk, sizeof(struct SquawkFile));
+  FreeMem(squawk, sizeof(struct Archive));
 }
 
-VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter)
+void StartAssetList(SquawkPtr squawk, PtUnsigned32 classType, PtUnsigned16 chapter)
 {
-  ULONG zero;
+  PtUnsigned32 zero;
 
   if (squawk->sq_ListPos != 0)
   {
@@ -114,9 +115,9 @@ VOID StartAssetList(SquawkPtr squawk, ULONG classType, UWORD chapter)
   Write(squawk->sq_File, &squawk->sq_ListHeader, sizeof(struct SQUAWK_ASSET_LIST_HEADER));
 }
 
-VOID EndAssetList(SquawkPtr squawk)
+void EndAssetList(SquawkPtr squawk)
 {
-  ULONG now, len;
+  PtUnsigned32 now, len;
 
   if (squawk->sq_ListPos != 0)
   {
@@ -148,7 +149,7 @@ VOID EndAssetList(SquawkPtr squawk)
   }
 }
 
-VOID SaveAsset(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize)
+void SaveAsset(SquawkPtr squawk, PtAsset* asset, PtUnsigned32 assetSize)
 {
 
   if (squawk->sq_ListPos == 0)
@@ -171,7 +172,7 @@ VOID SaveAsset(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize)
   squawk->sq_ListHeader.al_Count++;
 }
 
-VOID SaveAssetExtra(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize, APTR data, ULONG dataLength)
+void SaveAssetExtra(SquawkPtr squawk, PtAsset* asset, PtUnsigned32 assetSize, APTR data, PtUnsigned32 dataLength)
 {
   if (squawk->sq_ListPos == 0)
   {
@@ -188,7 +189,7 @@ VOID SaveAssetExtra(SquawkPtr squawk, struct ANY_ASSET* asset, ULONG assetSize, 
   }
 
   asset->as_Length = assetSize + dataLength;
-  asset->as_Flags |= CHUNK_FLAG_HAS_DATA;
+  asset->as_Flags |= PT_AF_HAS_DATA;
 
   Write(squawk->sq_File, asset, assetSize);
   Write(squawk->sq_File, data, dataLength);

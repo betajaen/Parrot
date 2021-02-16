@@ -27,8 +27,8 @@ of the structure.
 
   struct Lever
   {
-    ULONG lv_Strength;
-    ULONG lv_Length;
+    PtUnsigned32 lv_Strength;
+    PtUnsigned32 lv_Length;
     BOOL  lv_IsDown;
   };
 
@@ -113,14 +113,14 @@ Parrot uses the types from <exec/types.h> as its POD types.
 
 These are:-
 
-  UBYTE   Unsigned  8-bit Integer
-  BYTE    Signed    8-bit Integer
-  UWORD   Unsigned  16-bit Integer
-  WORD    Signed    16-bit Integer
-  ULONG   Unsigned  32-bit Integer
-  LONG    Signed    32-bit Integer
+  PtUnsigned8   Unsigned  8-bit Integer
+  PtByte    Signed    8-bit Integer
+  PtUnsigned16   Unsigned  16-bit Integer
+  PtSigned16    Signed    16-bit Integer
+  PtUnsigned32   Unsigned  32-bit Integer
+  PtSigned32    Signed    32-bit Integer
 
-  VOID    void
+  void    void
   APTR    void*
   BOOL    Boolean
   STRPTR  char*
@@ -129,10 +129,10 @@ These are:-
 
 Other Macros should be used as well:
 
-  EXTERN instead of extern
+  PtPublic instead of extern
   CONST  instead of const
   STATIC instead of static
-  VOID   instead of void
+  void   instead of void
   
   These are defined in <exec/types.h> and <parrot/Parrot.h>
 

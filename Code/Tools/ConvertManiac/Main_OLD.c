@@ -46,55 +46,55 @@ struct IntuitionBase* IntuitionBase;
 #define RC_OKAY RETURN_OK
 #define RC_FAIL RETURN_FAIL
 
-#ifndef INT
-#define INT int
+#ifndef PtSigned32
+#define PtSigned32 int
 #endif
 
-#ifndef CHAR
-#define CHAR char
+#ifndef PtChar
+#define PtChar char
 #endif
 
 #define NO_ROOMS 54
 
 STATIC struct IFFHandle* DstIff;
-STATIC UBYTE* SrcFileData;
-STATIC UBYTE* SrcFilePos;
-STATIC UBYTE* SrcFileEnd;
-STATIC ULONG  NextRoomId;
-STATIC ULONG  NextBackdropId;
-STATIC UWORD  CurrentArchiveId;
-STATIC UWORD  NextEntityId;
+STATIC PtUnsigned8* SrcFileData;
+STATIC PtUnsigned8* SrcFilePos;
+STATIC PtUnsigned8* SrcFileEnd;
+STATIC PtUnsigned32  NextRoomId;
+STATIC PtUnsigned32  NextBackdropId;
+STATIC PtUnsigned16  CurrentArchiveId;
+STATIC PtUnsigned16  NextEntityId;
 
-ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
-ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
+PtUnsigned32 StrFormat(PtChar* pBuffer, PtSigned32 pBufferCapacity, PtChar* pFmt, ...);
+PtUnsigned32 StrCopy(PtChar* pDst, PtUnsigned32 pDstCapacity, CONST PtChar* pSrc);
 
-STATIC VOID MemClear(APTR pMem, ULONG size);
+STATIC void MemClear(APTR pMem, PtUnsigned32 size);
 
-STATIC VOID OpenParrotIff(UWORD id);
-STATIC VOID CloseParrotIff();
-STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD mainPalette, UWORD cursorPalette, UWORD startRoom, UWORD startScript);
-STATIC VOID ExportRooms();
-STATIC VOID ExportPalette(UWORD id);
-STATIC VOID ExportCursorPalette(UWORD id);
-STATIC VOID ExportRoom(UWORD id, UWORD backdrop);
-STATIC VOID ExportBackdrop(UWORD id, UWORD palette);
-STATIC VOID ExportStartDefaultScript(UWORD startRoom);
-STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h);
-STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h);
-STATIC UWORD ReadUWORDBE();
-STATIC UWORD ReadUWORDLE();
-STATIC UBYTE ReadUBYTE();
-STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size);
-STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG type);
-STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot);
-STATIC VOID ResolveLookupTables();
+STATIC void OpenParrotIff(PtUnsigned16 id);
+STATIC void CloseParrotIff();
+STATIC void ExportGame(PtUnsigned16 id, struct OBJECT_TABLE_REF* tables, PtUnsigned16 mainPalette, PtUnsigned16 cursorPalette, PtUnsigned16 startRoom, PtUnsigned16 startScript);
+STATIC void ExportRooms();
+STATIC void ExportPalette(PtUnsigned16 id);
+STATIC void ExportCursorPalette(PtUnsigned16 id);
+STATIC void ExportRoom(PtUnsigned16 id, PtUnsigned16 backdrop);
+STATIC void ExportBackdrop(PtUnsigned16 id, PtUnsigned16 palette);
+STATIC void ExportStartDefaultScript(PtUnsigned16 startRoom);
+STATIC void ReadImageData(PtUnsigned8* tgt, PtUnsigned16 w, PtUnsigned16 h);
+STATIC void ConvertImageDataToPlanar(PtUnsigned8* src, PtUnsigned16* dst, PtUnsigned16 w, PtUnsigned16 h);
+STATIC PtUnsigned16 ReadUWORDBE();
+STATIC PtUnsigned16 ReadUWORDLE();
+STATIC PtUnsigned8 ReadUBYTE();
+STATIC void AddToTable(struct OBJECT_TABLE* table, PtUnsigned16 id, PtUnsigned16 archive, PtUnsigned16 flags, PtUnsigned32 size);
+STATIC void InitTable(struct OBJECT_TABLE* table, PtUnsigned32 type);
+STATIC void ExportTable(struct OBJECT_TABLE* table, PtUnsigned16 id, PtUnsigned16 tableRefSlot);
+STATIC void ResolveLookupTables();
 
-STATIC LONG DebugF(CONST_STRPTR pFmt, ...);
+STATIC PtSigned32 DebugF(CONST_STRPTR pFmt, ...);
 
-STATIC ULONG OpenLFL(CHAR* basePath, UWORD id);
-STATIC VOID CloseLFL();
-STATIC BOOL SeekFile(ULONG pos);
-STATIC BOOL JumpFile(LONG extraPos);
+STATIC PtUnsigned32 OpenLFL(PtChar* basePath, PtUnsigned16 id);
+STATIC void CloseLFL();
+STATIC BOOL SeekFile(PtUnsigned32 pos);
+STATIC BOOL JumpFile(PtSigned32 extraPos);
 
 STATIC struct OBJECT_TABLE_REF TableRefs[16];
 STATIC struct OBJECT_TABLE RoomTable;
@@ -103,10 +103,10 @@ STATIC struct OBJECT_TABLE PaletteTable;
 STATIC struct OBJECT_TABLE EntityTable;
 STATIC struct OBJECT_TABLE ScriptTable;
 
-INT main()
+PtSigned32 main()
 {
-  INT rc;
-  UWORD ii;
+  PtSigned32 rc;
+  PtUnsigned16 ii;
 
   struct Process* process;
   struct Message* wbMsg;
@@ -217,8 +217,8 @@ CLEAN_EXIT:
   return RETURN_OK;
 }
 
-STATIC CONST ULONG PutChar = 0x16c04e75;
-STATIC CONST ULONG CountChar = 0x52934E75;
+STATIC CONST PtUnsigned32 PutChar = 0x16c04e75;
+STATIC CONST PtUnsigned32 CountChar = 0x52934E75;
 char RequesterText[1024];
 
 struct EasyStruct EasyRequesterStruct =
@@ -230,9 +230,9 @@ struct EasyStruct EasyRequesterStruct =
   "Ok",
 };
 
-STATIC LONG DebugF(CONST_STRPTR pFmt, ...)
+STATIC PtSigned32 DebugF(CONST_STRPTR pFmt, ...)
 {
-  LONG size;;
+  PtSigned32 size;;
   STRPTR* arg;
 
   size = 0;
@@ -251,9 +251,9 @@ STATIC LONG DebugF(CONST_STRPTR pFmt, ...)
 }
 
 
-STATIC UWORD ReadUWORDBE()
+STATIC PtUnsigned16 ReadUWORDBE()
 {
-  UWORD r = 0;
+  PtUnsigned16 r = 0;
 
   r = SrcFilePos[0] << 8 | SrcFilePos[1];
   r ^= 0xFFFF;  /* Copy Protection */
@@ -263,9 +263,9 @@ STATIC UWORD ReadUWORDBE()
   return r;
 }
 
-STATIC UWORD ReadUWORDLE()
+STATIC PtUnsigned16 ReadUWORDLE()
 {
-  UWORD r = 0;
+  PtUnsigned16 r = 0;
 
   r = SrcFilePos[1] << 8 | SrcFilePos[0]; /* Little Endian to Big Endian */
   r ^= 0xFFFF;  /* Copy Protection */
@@ -275,9 +275,9 @@ STATIC UWORD ReadUWORDLE()
   return r;
 }
 
-STATIC UBYTE ReadUBYTE()
+STATIC PtUnsigned8 ReadUBYTE()
 {
-  UBYTE r = 0;
+  PtUnsigned8 r = 0;
 
   r = SrcFilePos[0];
   r ^= 0xFF;  /* Copy Protection */
@@ -287,13 +287,13 @@ STATIC UBYTE ReadUBYTE()
   return r;
 }
 
-STATIC VOID OpenParrotIff(UWORD id)
+STATIC void OpenParrotIff(PtUnsigned16 id)
 {
-  CHAR filename[26];
+  PtChar filename[26];
 
   CurrentArchiveId = id;
 
-  StrFormat(filename, sizeof(filename), "PROGDIR:%ld.Parrot", (ULONG)id);
+  StrFormat(filename, sizeof(filename), "PROGDIR:%ld.Parrot", (PtUnsigned32)id);
   
   DstIff = AllocIFF();
   DstIff->iff_Stream = Open(filename, MODE_NEWFILE);
@@ -305,7 +305,7 @@ STATIC VOID OpenParrotIff(UWORD id)
 
 }
 
-STATIC VOID CloseParrotIff()
+STATIC void CloseParrotIff()
 {
   if (NULL != DstIff)
   {
@@ -321,18 +321,18 @@ STATIC VOID CloseParrotIff()
 #include "Tables.h"
 #include "ScriptWriter.h"
 
-STATIC VOID ExportPalette(UWORD id)
+STATIC void ExportPalette(PtUnsigned16 id)
 {
   struct CHUNK_HEADER hdr;
   struct PALETTE_TABLE pal;
-  ULONG* pData;
+  PtUnsigned32* pData;
 
   MemClear((APTR)&pal, sizeof(pal));
   
   hdr.ch_Id = id;
   hdr.ch_Flags = CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG;
 
-  pData = (ULONG*)&pal.pt_Data[0];
+  pData = (PtUnsigned32*)&pal.pt_Data[0];
 
   *pData++ = (16l << 16) | 0;
 
@@ -430,18 +430,18 @@ STATIC VOID ExportPalette(UWORD id)
   AddToTable(&PaletteTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct PALETTE_TABLE));
 }
 
-STATIC VOID ExportCursorPalette(UWORD id)
+STATIC void ExportCursorPalette(PtUnsigned16 id)
 {
   struct CHUNK_HEADER   hdr;
   struct PALETTE_TABLE  pal;
-  ULONG* pData;
+  PtUnsigned32* pData;
 
   MemClear((APTR)&pal, sizeof(pal));
 
   hdr.ch_Id = id;
   hdr.ch_Flags = CHUNK_FLAG_ARCH_AGA | CHUNK_FLAG_ARCH_RTG;
 
-  pData = (ULONG*) &pal.pt_Data[0];
+  pData = (PtUnsigned32*) &pal.pt_Data[0];
 
   *pData++ = (1l << 16) | 18;
 
@@ -462,11 +462,11 @@ STATIC VOID ExportCursorPalette(UWORD id)
   AddToTable(&PaletteTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct PALETTE_TABLE));
 }
 
-STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD startPalette, UWORD startCursorPalette, UWORD startRoom, UWORD startScript)
+STATIC void ExportGame(PtUnsigned16 id, struct OBJECT_TABLE_REF* tables, PtUnsigned16 startPalette, PtUnsigned16 startCursorPalette, PtUnsigned16 startRoom, PtUnsigned16 startScript)
 {
   struct CHUNK_HEADER hdr;
-  struct GAME_INFO info;
-  UWORD  tableCount;
+  PtGameInfo info;
+  PtUnsigned16  tableCount;
 
   tableCount = 0;
   MemClear(&info, sizeof(info));
@@ -497,23 +497,23 @@ STATIC VOID ExportGame(UWORD id, struct OBJECT_TABLE_REF* tables, UWORD startPal
     tables++;
   }
 
-  PushChunk(DstIff, ID_SQWK, CT_GAME_INFO, sizeof(struct CHUNK_HEADER) + sizeof(struct GAME_INFO));
+  PushChunk(DstIff, ID_SQWK, CT_GAME_INFO, sizeof(struct CHUNK_HEADER) + sizeof(PtGameInfo));
   WriteChunkBytes(DstIff, &hdr, sizeof(struct CHUNK_HEADER));
-  WriteChunkBytes(DstIff, &info, sizeof(struct GAME_INFO));
+  WriteChunkBytes(DstIff, &info, sizeof(PtGameInfo));
   PopChunk(DstIff);
 
 }
 
-STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
+STATIC void ExportBackdrop(PtUnsigned16 id, PtUnsigned16 palette)
 {
   struct CHUNK_HEADER hdr;
   struct IMAGE backdrop;
 
-  ULONG  chunkySize, planarSize, p, imgOffset;
-  UBYTE* chunky;
-  UWORD* planar;
-  UWORD  x, y, w, h;
-  UBYTE  r, col, len, ii;
+  PtUnsigned32  chunkySize, planarSize, p, imgOffset;
+  PtUnsigned8* chunky;
+  PtUnsigned16* planar;
+  PtUnsigned16  x, y, w, h;
+  PtUnsigned8  r, col, len, ii;
 
   MemClear(&backdrop, sizeof(struct IMAGE));
 
@@ -561,7 +561,7 @@ STATIC VOID ExportBackdrop(UWORD id, UWORD palette)
 
 #if 0
 
-STATIC VOID ExportEntity(UWORD id)
+STATIC void ExportEntity(PtUnsigned16 id)
 {
   struct CHUNK_HEADER hdr;
   struct ENTITY ent;
@@ -574,12 +574,12 @@ STATIC VOID ExportEntity(UWORD id)
   ent.ob_Type = ET_INFO;
 
   JumpFile(7);
-  ent.ob_HitBox.rt_Left = ((UWORD) ReadUBYTE()) << 3;
-  ent.ob_HitBox.rt_Top = ((UWORD) (ReadUBYTE() & 0xF)) << 3;
-  ent.ob_HitBox.rt_Right =  ((UWORD)ReadUBYTE()) << 3;
+  ent.ob_HitBox.rt_Left = ((PtUnsigned16) ReadUBYTE()) << 3;
+  ent.ob_HitBox.rt_Top = ((PtUnsigned16) (ReadUBYTE() & 0xF)) << 3;
+  ent.ob_HitBox.rt_Right =  ((PtUnsigned16)ReadUBYTE()) << 3;
   ent.ob_HitBox.rt_Right += ent.ob_HitBox.rt_Left;
   JumpFile(4);
-  ent.ob_HitBox.rt_Bottom =  ((UWORD)(ReadUBYTE() & 0xF8));
+  ent.ob_HitBox.rt_Bottom =  ((PtUnsigned16)(ReadUBYTE() & 0xF8));
   ent.ob_HitBox.rt_Bottom += ent.ob_HitBox.rt_Top;
 
   PushChunk(DstIff, ID_SQWK, CT_ENTITY, sizeof(struct CHUNK_HEADER) + sizeof(struct ENTITY));
@@ -592,10 +592,10 @@ STATIC VOID ExportEntity(UWORD id)
 
 #endif
 
-STATIC VOID ReadStringIntoName(CHAR* name)
+STATIC void ReadStringIntoName(PtChar* name)
 {
-  UWORD ii;
-  CHAR ch;
+  PtUnsigned16 ii;
+  PtChar ch;
 
   while (ii < MAX_ENTITY_NAME_LENGTH)
   {
@@ -606,11 +606,11 @@ STATIC VOID ReadStringIntoName(CHAR* name)
   }
 }
 
-STATIC VOID ExportExit(UWORD id, UWORD target, ULONG start)
+STATIC void ExportExit(PtUnsigned16 id, PtUnsigned16 target, PtUnsigned32 start)
 {
   struct CHUNK_HEADER hdr;
   struct EXIT ent;
-  ULONG nameStart;
+  PtUnsigned32 nameStart;
 
   MemClear(&ent, sizeof(struct ENTITY));
 
@@ -622,14 +622,14 @@ STATIC VOID ExportExit(UWORD id, UWORD target, ULONG start)
   
   SeekFile(start + 7);
    
-  ent.ex_HitBox.rt_Left = ((UWORD)ReadUBYTE()) << 3;
-  ent.ex_HitBox.rt_Top = ((UWORD)(ReadUBYTE() & 0xF)) << 3;
-  ent.ex_HitBox.rt_Right = ((UWORD)ReadUBYTE()) << 3;
+  ent.ex_HitBox.rt_Left = ((PtUnsigned16)ReadUBYTE()) << 3;
+  ent.ex_HitBox.rt_Top = ((PtUnsigned16)(ReadUBYTE() & 0xF)) << 3;
+  ent.ex_HitBox.rt_Right = ((PtUnsigned16)ReadUBYTE()) << 3;
   ent.ex_HitBox.rt_Right += ent.ex_HitBox.rt_Left;
 
   SeekFile(start + 13);
 
-  ent.ex_HitBox.rt_Bottom = ((UWORD)(ReadUBYTE() & 0xF8));
+  ent.ex_HitBox.rt_Bottom = ((PtUnsigned16)(ReadUBYTE() & 0xF8));
   ent.ex_HitBox.rt_Bottom += ent.ex_HitBox.rt_Top;
 
   SeekFile(start + ReadUBYTE());
@@ -643,11 +643,11 @@ STATIC VOID ExportExit(UWORD id, UWORD target, ULONG start)
   AddToTable(&EntityTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct EXIT));
 }
 
-STATIC VOID ExportEntity(UWORD id, ULONG start)
+STATIC void ExportEntity(PtUnsigned16 id, PtUnsigned32 start)
 {
   struct CHUNK_HEADER hdr;
   struct ENTITY ent;
-  ULONG nameStart;
+  PtUnsigned32 nameStart;
 
   MemClear(&ent, sizeof(struct ENTITY));
 
@@ -658,14 +658,14 @@ STATIC VOID ExportEntity(UWORD id, ULONG start)
 
   SeekFile(start + 7);
 
-  ent.en_HitBox.rt_Left = ((UWORD)ReadUBYTE()) << 3;
-  ent.en_HitBox.rt_Top = ((UWORD)(ReadUBYTE() & 0xF)) << 3;
-  ent.en_HitBox.rt_Right = ((UWORD)ReadUBYTE()) << 3;
+  ent.en_HitBox.rt_Left = ((PtUnsigned16)ReadUBYTE()) << 3;
+  ent.en_HitBox.rt_Top = ((PtUnsigned16)(ReadUBYTE() & 0xF)) << 3;
+  ent.en_HitBox.rt_Right = ((PtUnsigned16)ReadUBYTE()) << 3;
   ent.en_HitBox.rt_Right += ent.en_HitBox.rt_Left;
 
   SeekFile(start + 13);
 
-  ent.en_HitBox.rt_Bottom = ((UWORD)(ReadUBYTE() & 0xF8));
+  ent.en_HitBox.rt_Bottom = ((PtUnsigned16)(ReadUBYTE() & 0xF8));
   ent.en_HitBox.rt_Bottom += ent.en_HitBox.rt_Top;
 
   SeekFile(start + ReadUBYTE());
@@ -679,10 +679,10 @@ STATIC VOID ExportEntity(UWORD id, ULONG start)
   AddToTable(&EntityTable, id, CurrentArchiveId, hdr.ch_Flags, sizeof(struct ENTITY));
 }
 
-STATIC VOID ExportEntities(UWORD numObjects, UWORD* objDat, UWORD* roomExits, UWORD* roomEntities)
+STATIC void ExportEntities(PtUnsigned16 numObjects, PtUnsigned16* objDat, PtUnsigned16* roomExits, PtUnsigned16* roomEntities)
 {
-  UWORD  ii, exitCount, objectCount;
-  UWORD  mmId, id, target;
+  PtUnsigned16  ii, exitCount, objectCount;
+  PtUnsigned16  mmId, id, target;
   struct MM_OBJECT* mmObj;
 
   exitCount = 0;
@@ -718,14 +718,14 @@ STATIC VOID ExportEntities(UWORD numObjects, UWORD* objDat, UWORD* roomExits, UW
   }
 }
 
-STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
+STATIC void ExportRoom(PtUnsigned16 id, PtUnsigned16 backdrop)
 {
   struct CHUNK_HEADER hdr;
   struct ROOM room;
-  UWORD  numObjects;
-  UWORD  objImg[256];
-  UWORD  objDat[256];
-  UWORD  ii;
+  PtUnsigned16  numObjects;
+  PtUnsigned16  objImg[256];
+  PtUnsigned16  objDat[256];
+  PtUnsigned16  ii;
 
   MemClear(&room, sizeof(struct ROOM));
   
@@ -742,7 +742,7 @@ STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
 
   if (numObjects > MAX_ROOM_ENTITIES)
   {
-    DebugF("Maximum entity count exceeded! %ld vs %ld in Room %ld", (ULONG) numObjects, (ULONG) MAX_ROOM_ENTITIES, (ULONG) id);
+    DebugF("Maximum entity count exceeded! %ld vs %ld in Room %ld", (PtUnsigned32) numObjects, (PtUnsigned32) MAX_ROOM_ENTITIES, (PtUnsigned32) id);
     return;
   }
 
@@ -769,11 +769,11 @@ STATIC VOID ExportRoom(UWORD id, UWORD backdrop)
 
 }
 
-STATIC VOID ExportRooms()
+STATIC void ExportRooms()
 {
-  UWORD ii;
-  UWORD mmId;
-  UWORD room;
+  PtUnsigned16 ii;
+  PtUnsigned16 mmId;
+  PtUnsigned16 room;
 
   for (ii = 0; ii < ROOM_COUNT; ii++)
   {
@@ -799,7 +799,7 @@ STATIC VOID ExportRooms()
 
 }
 
-STATIC VOID ExportScript(UWORD archive, UWORD id, UWORD scriptType, UWORD scriptFlags)
+STATIC void ExportScript(PtUnsigned16 archive, PtUnsigned16 id, PtUnsigned16 scriptType, PtUnsigned16 scriptFlags)
 {
 #if 0
 
@@ -823,11 +823,11 @@ STATIC VOID ExportScript(UWORD archive, UWORD id, UWORD scriptType, UWORD script
 #endif
 }
 
-STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
+STATIC void ReadImageData(PtUnsigned8* tgt, PtUnsigned16 w, PtUnsigned16 h)
 {
-  UWORD x, y;
-  UBYTE r, len, col;
-  ULONG offset;
+  PtUnsigned16 x, y;
+  PtUnsigned8 r, len, col;
+  PtUnsigned32 offset;
 
   x = 0;
   y = 0;
@@ -889,28 +889,28 @@ STATIC VOID ReadImageData(UBYTE* tgt, UWORD w, UWORD h)
   }
 }
 
-STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h)
+STATIC void ConvertImageDataToPlanar(PtUnsigned8* src, PtUnsigned16* dst, PtUnsigned16 w, PtUnsigned16 h)
 {
-  ULONG idx;
-  UBYTE bp, shift;
-  UWORD y, x, i;
+  PtUnsigned32 idx;
+  PtUnsigned8 bp, shift;
+  PtUnsigned16 y, x, i;
   idx = 0;
 
   for (bp = 0; bp < 4; bp++)
   {
-    UBYTE shift = 1 << bp;
+    PtUnsigned8 shift = 1 << bp;
     idx = 0;
 
     for (y = 0; y < h; y++)
     {
       for (x = 0; x < w; x += 16)
       {
-        UWORD word = 0;
+        PtUnsigned16 word = 0;
 
         for (i = 0; i < 16; i++)
         {
-          UBYTE col = src[idx + x + i];
-          UBYTE bit = (col & shift) != 0 ? 1 : 0;
+          PtUnsigned8 col = src[idx + x + i];
+          PtUnsigned8 bit = (col & shift) != 0 ? 1 : 0;
 
           if (bit)
             word |= (1 << (15 - i));
@@ -924,12 +924,12 @@ STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h)
   }
 }
 
-STATIC VOID MemClear(APTR pMem, ULONG size)
+STATIC void MemClear(APTR pMem, PtUnsigned32 size)
 {
-  ULONG ii;
-  UBYTE* m;
+  PtUnsigned32 ii;
+  PtUnsigned8* m;
 
-  m = (UBYTE*)pMem;
+  m = (PtUnsigned8*)pMem;
 
   for (ii = 0; ii < size; ii++)
   {
@@ -937,14 +937,14 @@ STATIC VOID MemClear(APTR pMem, ULONG size)
   }
 }
 
-STATIC ULONG OpenLFL(CHAR* basePath, UWORD id)
+STATIC PtUnsigned32 OpenLFL(PtChar* basePath, PtUnsigned16 id)
 {
-  CHAR path[512];
+  PtChar path[512];
 
-  ULONG len;
+  PtUnsigned32 len;
   BPTR  file;
 
-  StrFormat(path, sizeof(path), "%s%02ld.LFL", basePath, (ULONG) id);
+  StrFormat(path, sizeof(path), "%s%02ld.LFL", basePath, (PtUnsigned32) id);
 
   file = Open(path, MODE_OLDFILE);
 
@@ -967,7 +967,7 @@ STATIC ULONG OpenLFL(CHAR* basePath, UWORD id)
   return len;
 }
 
-STATIC VOID CloseLFL()
+STATIC void CloseLFL()
 {
   if (NULL != SrcFileData)
   {
@@ -977,9 +977,9 @@ STATIC VOID CloseLFL()
 }
 
 
-STATIC BOOL SeekFile(ULONG pos)
+STATIC BOOL SeekFile(PtUnsigned32 pos)
 {
-  UBYTE* nextPos;
+  PtUnsigned8* nextPos;
 
   nextPos = SrcFileData + pos;
 
@@ -993,9 +993,9 @@ STATIC BOOL SeekFile(ULONG pos)
   return FALSE;
 }
 
-STATIC BOOL JumpFile(LONG extraPos)
+STATIC BOOL JumpFile(PtSigned32 extraPos)
 {
-  UBYTE* nextPos;
+  PtUnsigned8* nextPos;
 
   nextPos = SrcFileData + (SrcFilePos - SrcFileData) + extraPos;
 
@@ -1009,7 +1009,7 @@ STATIC BOOL JumpFile(LONG extraPos)
   return FALSE;
 }
 
-STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWORD flags, ULONG size)
+STATIC void AddToTable(struct OBJECT_TABLE* table, PtUnsigned16 id, PtUnsigned16 archive, PtUnsigned16 flags, PtUnsigned32 size)
 {
   struct OBJECT_TABLE_ITEM* item;
 
@@ -1033,7 +1033,7 @@ STATIC VOID AddToTable(struct OBJECT_TABLE* table, UWORD id, UWORD archive, UWOR
   table->ot_Next = (APTR)(item + 1);
 }
 
-STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG classType)
+STATIC void InitTable(struct OBJECT_TABLE* table, PtUnsigned32 classType)
 {
   MemClear(table, sizeof(struct OBJECT_TABLE));
 
@@ -1043,7 +1043,7 @@ STATIC VOID InitTable(struct OBJECT_TABLE* table, ULONG classType)
   table->ot_Next = &table->ot_Items[0];
 }
 
-STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot)
+STATIC void ExportTable(struct OBJECT_TABLE* table, PtUnsigned16 id, PtUnsigned16 tableRefSlot)
 {
   struct CHUNK_HEADER hdr;
   struct OBJECT_TABLE_REF* ref;
@@ -1083,7 +1083,7 @@ STATIC VOID ExportTable(struct OBJECT_TABLE* table, UWORD id, UWORD tableRefSlot
 
 }
 
-STATIC VOID ExportStartDefaultScript(UWORD startRoom)
+STATIC void ExportStartDefaultScript(PtUnsigned16 startRoom)
 {
   ScriptBegin();
   ScriptOpPushWord(startRoom);
@@ -1092,16 +1092,16 @@ STATIC VOID ExportStartDefaultScript(UWORD startRoom)
   ExportScript(0, 1, SCRIPT_TYPE_SCENE, 0);
 }
 
-STATIC VOID ResolveLookupTables()
+STATIC void ResolveLookupTables()
 {
-  UWORD ii, jj;
-  UWORD objDat[256];
-  UWORD objCount;
-  UWORD exitId;
-  UWORD mmId;
-  UWORD mmRoom;
-  UWORD roomId;
-  UWORD objectId;
+  PtUnsigned16 ii, jj;
+  PtUnsigned16 objDat[256];
+  PtUnsigned16 objCount;
+  PtUnsigned16 exitId;
+  PtUnsigned16 mmId;
+  PtUnsigned16 mmRoom;
+  PtUnsigned16 roomId;
+  PtUnsigned16 objectId;
 
   roomId = 1;
   objectId = 1;
@@ -1117,7 +1117,7 @@ STATIC VOID ResolveLookupTables()
       objCount = ReadUBYTE();
 
       AddRoom(mmRoom, roomId);
-      SeekFile(28 + objCount * sizeof(UWORD));
+      SeekFile(28 + objCount * sizeof(PtUnsigned16));
 
       for (jj = 0; jj < objCount; jj++)
       {

@@ -53,21 +53,21 @@ extern struct GfxBase* GfxBase;
 
 struct CURSOR_IMAGE
 {
-  WORD  OffsetX, OffsetY;
-  UWORD Height;
-  UWORD Data[2 * 24];
+  PtSigned16  OffsetX, OffsetY;
+  PtUnsigned16 Height;
+  PtUnsigned16 Data[2 * 24];
 };
 
 
 struct SimpleSprite CursorSprite;
-WORD CursorOffsetX;
-WORD CursorOffsetY;
-WORD CursorX;
-WORD CursorY;
-WORD CursorXLimit;
-WORD CursorYLimit;
+PtSigned16 CursorOffsetX;
+PtSigned16 CursorOffsetY;
+PtSigned16 CursorX;
+PtSigned16 CursorY;
+PtSigned16 CursorXLimit;
+PtSigned16 CursorYLimit;
 
-STATIC ULONG DefaultPalette[] =
+STATIC PtUnsigned32 DefaultPalette[] =
 {
     2 << 16 | 17,
     0,0,0,
@@ -121,9 +121,9 @@ CHIP struct CURSOR_IMAGE Cursors[] = {
 };
 
 
-EXPORT UWORD CursorInitialise()
+PtUnsigned16 CursorInitialise()
 {
-  UWORD spriteNum;
+  PtUnsigned16 spriteNum;
 
   FreeSprite(0);
   spriteNum = GetSprite(&CursorSprite, 0);
@@ -146,37 +146,37 @@ EXPORT UWORD CursorInitialise()
   return spriteNum;
 }
 
-EXPORT VOID CursorShutdown()
+void CursorShutdown()
 {
   FreeSprite(CursorSprite.num);
 }
 
-EXPORT VOID Busy()
+void Busy()
 {
 
 }
 
-EXPORT VOID NotBusy()
+void NotBusy()
 {
 
 }
 
-EXPORT VOID CursorSetType(UWORD cursor)
+void CursorSetType(PtUnsigned16 cursor)
 {
 
 }
 
-EXPORT UWORD CursorGetType()
+PtUnsigned16 CursorGetType()
 {
 
 }
 
-EXPORT VOID CursorSetPos(WORD x, WORD y)
+void CursorSetPos(PtSigned16 x, PtSigned16 y)
 {
 
 }
 
-EXPORT VOID CursorGetPos(WORD* x, WORD* y)
+void CursorGetPos(PtSigned16* x, PtSigned16* y)
 {
 
 }

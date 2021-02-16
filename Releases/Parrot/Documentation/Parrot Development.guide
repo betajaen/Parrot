@@ -106,8 +106,8 @@ of the structure.
 
 @{FG Text}@{BG None}  struct Lever@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG lv_Strength;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG lv_Length;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32 lv_Strength;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32 lv_Length;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    BOOL  lv_IsDown;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
@@ -207,14 +207,14 @@ Parrot uses the types from <exec/types.h> as its POD types.
 These are:-
 
 
-@{FG Text}@{BG None}  UBYTE   Unsigned  8-bit Integer@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  BYTE    Signed    8-bit Integer@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  UWORD   Unsigned  16-bit Integer@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  WORD    Signed    16-bit Integer@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  ULONG   Unsigned  32-bit Integer@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  LONG    Signed    32-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtUnsigned8   Unsigned  8-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtByte    Signed    8-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtUnsigned16   Unsigned  16-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtSigned16    Signed    16-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtUnsigned32   Unsigned  32-bit Integer@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtSigned32    Signed    32-bit Integer@{BG Background}@{FG Text}
 
-@{FG Text}@{BG None}  VOID    void@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  void    void@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  APTR    void*@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  BOOL    Boolean@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  STRPTR  char*@{BG Background}@{FG Text}
@@ -225,10 +225,10 @@ These are:-
 Other Macros should be used as well:
 
 
-@{FG Text}@{BG None}  EXTERN instead of extern@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtPublic instead of extern@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  CONST  instead of const@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  STATIC instead of static@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  VOID   instead of void@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  void   instead of void@{BG Background}@{FG Text}
 
 @{FG Text}@{BG None}  These are defined in <exec/types.h> and <parrot/Parrot.h>@{BG Background}@{FG Text}
 @ENDNODE
@@ -247,25 +247,25 @@ Game Information Table
 @{FG None}@{BG None}@{u}@{i}C Version@{uu}@{ui}@{BG Background}@{FG Text}
 
 
-@{FG Text}@{BG None}  struct GAME_INFO@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtGameInfo@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    struct GAME_VERSION       gi_Version;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG                     gi_FeatureSet;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG                     gi_GameId;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG                     gi_GameVersion;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32                     gi_FeatureSet;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32                     gi_GameId;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32                     gi_GameVersion;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    DIALOGUE                  gi_Title;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    DIALOGUE                  gi_ShortTitle;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    DIALOGUE                  gi_Author;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    DIALOGUE                  gi_Release;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_Width;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_Height;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_Depth;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_RoomCount;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_Width;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_Height;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_Depth;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_RoomCount;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    struct OBJECT_TABLE_REF   gi_StartTables[16];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartPalette;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartCursorPalette;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartRoom;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD                     gi_StartScript;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_StartPalette;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_StartCursorPalette;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_StartRoom;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16                     gi_StartScript;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}gi_ParrotVersion (struct GAME_VERSION)@{uu}@{ui}@{BG Background}@{FG Text}
@@ -277,14 +277,14 @@ example:
   1, 2, 199
 
 
-@{FG None}@{BG None}@{u}@{i}gi_FeatureSet (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_FeatureSet (PtUnsigned32)@{uu}@{ui}@{BG Background}@{FG Text}
 
 A bit-field containg special features required by Parrot to run.
 
 RESERVED FOR FUTURE USE
 
 
-@{FG None}@{BG None}@{u}@{i}gi_GameId (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_GameId (PtUnsigned32)@{uu}@{ui}@{BG Background}@{FG Text}
 
 FourCC id of the Game
 
@@ -292,7 +292,7 @@ example:
   PRRT
 
 
-@{FG None}@{BG None}@{u}@{i}gi_GameVersion (ULONG)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_GameVersion (PtUnsigned32)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Numerical version of the game.
 
@@ -331,7 +331,7 @@ Release information, including version number and/or Language
 example: "Adventures of Parrot 1.0, English"
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Width (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_Width (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Number of pixels that represent the width of the display
 
@@ -339,7 +339,7 @@ example:
   320
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Height (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_Height (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Number of pixels that represent the height of the display
 
@@ -347,7 +347,7 @@ example:
   200
 
 
-@{FG None}@{BG None}@{u}@{i}gi_Depth (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_Depth (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Maximum Bitplane depth used by the display
 
@@ -355,7 +355,7 @@ example:
   4
 
 
-@{FG None}@{BG None}@{u}@{i}gi_RoomCount (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_RoomCount (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Number of Rooms used in this game
 
@@ -363,12 +363,12 @@ example:
   24
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartTables (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_StartTables (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 UNDOCUMENTATED
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartPalette (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_StartPalette (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Palette Asset ID for the initial Display Palette
 
@@ -376,7 +376,7 @@ example:
   1
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartCursorPalette (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_StartCursorPalette (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Palette Asset ID for the initial Cursor Palette
 
@@ -384,12 +384,12 @@ example:
   1
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartRoom (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_StartRoom (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 UNDOCUMENTATED
 
 
-@{FG None}@{BG None}@{u}@{i}gi_StartScript (UWORD)@{uu}@{ui}@{BG Background}@{FG Text}
+@{FG None}@{BG None}@{u}@{i}gi_StartScript (PtUnsigned16)@{uu}@{ui}@{BG Background}@{FG Text}
 
 Script Asset ID for the first script to be executed when the game has initialised
 
@@ -414,9 +414,9 @@ Asset Lookup Table
 
 @{FG Text}@{BG None}  struct STRING_TABLE@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD          st_Language;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD          st_Offsets[256];@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR           st_Text[] /* Upto 66,048 bytes */@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16          st_Language;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16          st_Offsets[256];@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtChar           st_Text[] /* Upto 66,048 bytes */@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}Asset Id@{uu}@{ui}@{BG Background}@{FG Text}
@@ -434,7 +434,7 @@ In future versions Parrot this may increase to 512.
 
 @{FG None}@{BG None}@{u}st_Language@{uu}@{BG Background}@{FG Text}
 
-Two character ISO 639-1 language code represented as a UWORD
+Two character ISO 639-1 language code represented as a PtUnsigned16
 
 XX is reserved for non-spoke dialogue; such as action text.
 
@@ -498,18 +498,18 @@ Asset Lookup Table
 
 @{FG Text}@{BG None}  struct ASSET_TABLE@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG   at_AssetType;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Chapter;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Count;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Lowest;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   at_Highest;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32   at_AssetType;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16   at_Chapter;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16   at_Count;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16   at_Lowest;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16   at_Highest;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    +       ITEMS@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG Text}@{BG None}  struct ASSET_TABLE_ITEM@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   ti_Id;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   ti_Archive;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16   ti_Id;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16   ti_Archive;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}Fields@{uu}@{ui}@{BG Background}@{FG Text}
@@ -594,12 +594,12 @@ is referenced by a 4 byte Id, which is in two parts.
 
 @{FG Text}@{BG None}  struct DIALOGUE_REF@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD   dt_Magic;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UBYTE   dt_Table;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UBYTE   dt_Item;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16   dt_Magic;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned8   dt_Table;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned8   dt_Item;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
-@{FG Text}@{BG None}  Dialogue Text may be referred to as a Big-Endian ULONG or as a @{BG Background}@{FG Text}
+@{FG Text}@{BG None}  Dialogue Text may be referred to as a Big-Endian PtUnsigned32 or as a @{BG Background}@{FG Text}
 @{FG Text}@{BG None}  C DIALOGUE_REF structure.@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}As a Reference@{uu}@{ui}@{BG Background}@{FG Text}
@@ -632,8 +632,8 @@ turned into a pointer.
 @{FG Text}@{BG None}  union DIALOGUE_TEXT@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    struct DIALOGUE_REF dt_Parts;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG               dt_AssetId;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    CHAR*               dt_Str;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32               dt_AssetId;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtChar*               dt_Str;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}Tables@{uu}@{ui}@{BG Background}@{FG Text}
@@ -678,7 +678,7 @@ Pop last two values from stack and add them together. Result is in vars
 Id
   0
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = Vm_Pop(};
   Vm_SetVar(#V, l + r};
@@ -708,7 +708,7 @@ Pop last two values from stack and add them together. Result is in stack
 Id
   1
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = Vm_Pop(};
   Vm_Push(l + r};
@@ -868,7 +868,7 @@ Compare variable to last item on stack
 Id
   9
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = Vm_GetVar(#L};
   Vm_Compare(l, r};
@@ -893,7 +893,7 @@ Compare variable to last item to an immediate on stack
 Id
   10
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = #L;
   Vm_Compare(l, r};
@@ -918,7 +918,7 @@ Compare two stack values together
 Id
   11
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = Vm_Pop(};
   Vm_Compare(l, r};
@@ -1002,7 +1002,7 @@ Load a constant and place it onto the stack
 Id
   16
 Code
-  LONG v;
+  PtSigned32 v;
   v = Vm_GetConstant(#C};
   Vm_Push(v};
 Arg '#C'
@@ -1021,7 +1021,7 @@ Pop last two values from stack and add them together. Result is in vars
 Id
   17
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = Vm_Pop(};
   Vm_SetVar(#V, l @{b} r};@{ub}
@@ -1061,7 +1061,7 @@ Push 10-bit signed value on the stack
 Id
   19
 Code
-  LONG v;
+  PtSigned32 v;
   v = Vm_GetVar(#V};
   Vm_Push(v};
 Arg '#V'
@@ -1080,7 +1080,7 @@ Pop a value. Left Shift it and push the result on the stack
 Id
   20
 Code
-  LONG l;
+  PtSigned32 l;
   l = Vm_Pop(};
   Vm_Push(l << #V};
 Arg '#V'
@@ -1104,7 +1104,7 @@ Pop a value. Right Shift it and push the result on the stack
 Id
   21
 Code
-  LONG l;
+  PtSigned32 l;
   l = Vm_Pop(};
   Vm_Push(l >> #V};
 Arg '#V'
@@ -1128,7 +1128,7 @@ Pop last two values from stack and subtract them together. Result is in vars
 Id
   22
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = Vm_Pop(};
   Vm_SetVar(#V, l - r};
@@ -1158,7 +1158,7 @@ Pop last two values from stack and subtract them together. Result is in stack.
 Id
   23
 Code
-  LONG l, r;
+  PtSigned32 l, r;
   r = Vm_Pop(};
   l = Vm_Pop(};
   Vm_Push(l - r};
@@ -1181,7 +1181,7 @@ Perform a System Call, where the top of the stack is the argument.
 Id
   24
 Code
-  LONG arg;
+  PtSigned32 arg;
   arg = Vm_Pop(};
   Parrot_SysCall(#F, arg};
 Arg '#F'
@@ -1320,15 +1320,15 @@ A slug is the asset ID encoded as a 4-byte word via the UWordToId
 function, and placed within the IFF Chunk Type:-
 
 
-@{FG Text}@{BG None}    ULONG   Chunk Type@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG   Length@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32   Chunk Type@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32   Length@{BG Background}@{FG Text}
 
-It takes each nibble of the UWORD and places for each byte in the
+It takes each nibble of the PtUnsigned16 and places for each byte in the
 integer in little-endian order. Each byte is then added by a constant
 of 0x41 to make the number compatible with FourCC. 
 
 
-@{FG Text}@{BG None}    ULONG s;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32 s;@{BG Background}@{FG Text}
 
 @{FG Text}@{BG None}    s = 0x41;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    s += (r & 0xF);@{BG Background}@{FG Text}
@@ -1368,14 +1368,14 @@ Header but before any of the Asset Data.
 
 @{FG Text}@{BG None}  struct ASSET_HEADER@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD ah_Id;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    UWORD ah_AssetFlags;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16 ah_Id;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned16 ah_AssetFlags;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}Asset Id@{BG Background}@{FG Text}
 
 
-The Id is a UWORD start starts from 1 to 65535. This is a repeat
+The Id is a PtUnsigned16 start starts from 1 to 65535. This is a repeat
 of the Slug in the Chunk Type, but in its original form.
 
 
@@ -1598,18 +1598,18 @@ of commits reaches 65,535.
 @{FG None}@{BG None}@{u}@{i}C Implementation@{uu}@{ui}@{BG Background}@{FG Text}
 
 Internally a VERSION_INFO union is used which is represents
-a version number as a C Struct or a ULONG (in Big Endian}
+a version number as a C Struct or a PtUnsigned32 (in Big Endian}
 
 
 @{FG Text}@{BG None}  union VERSION_INFO@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    struct@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    {@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      UBYTE gv_Game;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      UBYTE gv_Feature;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}      UBYTE gv_Build;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      PtUnsigned8 gv_Game;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      PtUnsigned8 gv_Feature;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}      PtUnsigned8 gv_Build;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    } gv_Version;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    ULONG gv_Num;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtUnsigned32 gv_Num;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 To determine if a a Version is older or newer, the gv_Num field
@@ -1620,7 +1620,7 @@ can be compared with <, > or == operators.
 @NODE VM "Virtual Machine"
 @{FG None}@{BG None}@{b}@{u}@{i}VM@{uu}@{ub}@{ui}@{BG Background}@{FG Text}
 
-Stack based virtual machine. Each stack variable is 4 bytes (LONG}.
+Stack based virtual machine. Each stack variable is 4 bytes (PtSigned32}.
 There are 16 variables and 256 global variables.
 
 Variables may belong to the object or room running with the script.

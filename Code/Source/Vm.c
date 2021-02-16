@@ -33,17 +33,17 @@
 #include <Parrot/Log.h>
 #include <Parrot/Api.h>
 
-void Parrot_SysCall(UWORD function, LONG argument);
+void Parrot_SysCall(PtUnsigned16 function, PtSigned32 argument);
 STATIC struct VIRTUAL_MACHINE VirtualMachine[MAX_VIRTUAL_MACHINES];
 struct VIRTUAL_MACHINE* Vm_Current;
-LONG Vm_Globals[MAX_SCRIPT_GLOBALS];
+PtSigned32 Vm_Globals[MAX_SCRIPT_GLOBALS];
 
-STATIC VOID Vm_TickAll();
-STATIC VOID Vm_Tick();
+STATIC void Vm_TickAll();
+STATIC void Vm_Tick();
 
-VOID Vm_Initialise()
+void PtVm_Initialise()
 {
-  UWORD ii, jj;
+  PtUnsigned16 ii, jj;
   struct VIRTUAL_MACHINE* vm;
 
   for (ii = 0; ii < MAX_VIRTUAL_MACHINES; ii++)
@@ -76,20 +76,20 @@ VOID Vm_Initialise()
 
 }
 
-VOID Vm_Shutdown()
+void PtVm_Shutdown()
 {
 }
 
-STATIC VOID Vm_PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
+STATIC void Vm_PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
 
   vm->vm_PC = 0;
   vm->vm_StackHead = 0;
   vm->vm_Stack[0] = 0;
   vm->vm_State = VM_STATE_RUN;
   vm->vm_Timer = 0;
-  vm->vm_Constants = (ULONG*)&script->sc_Constants;
+  vm->vm_Constants = (PtUnsigned32*)&script->sc_Constants;
   vm->vm_Opcodes = ((OPCODE*) &script->sc_Opcodes);
   vm->vm_OpcodesLength = script->sc_NumOpcodes;
   vm->vm_Script = script;
@@ -105,7 +105,7 @@ STATIC VOID Vm_PrepareVm(struct VIRTUAL_MACHINE* vm, struct SCRIPT* script)
   }
 }
 
-STATIC VOID Vm_Recycle(struct VIRTUAL_MACHINE* vm)
+STATIC void Vm_Recycle(struct VIRTUAL_MACHINE* vm)
 {
   /*
     Free the script after it has ran.
@@ -121,10 +121,10 @@ STATIC VOID Vm_Recycle(struct VIRTUAL_MACHINE* vm)
   vm->vm_State = VM_STATE_END;
 }
 
-STATIC VOID Vm_StartScript(struct SCRIPT* script)
+STATIC void Vm_StartScript(struct SCRIPT* script)
 {
   struct VIRTUAL_MACHINE* vm;
-  UWORD ii;
+  PtUnsigned16 ii;
 
   for (ii = 0; ii < MAX_VIRTUAL_MACHINES; ii++)
   {
@@ -138,10 +138,10 @@ STATIC VOID Vm_StartScript(struct SCRIPT* script)
   }
 }
 
-VOID Vm_RunScript(UWORD id)
+void PtVm_RunScript(PtUnsigned16 id)
 {
   struct SCRIPT* script;
-  UWORD archive;
+  PtUnsigned16 archive;
 
 #if 0
   archive = FindAssetArchive(id, CT_SCRIPT, CHUNK_FLAG_ARCH_ANY);
@@ -150,14 +150,14 @@ VOID Vm_RunScript(UWORD id)
   Vm_StartScript(script);
 }
 
-VOID Vm_RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena)
+void PtVm_RunScriptNow(PtUnsigned16 id, PtUnsigned16 chapter, struct ARENA* arena)
 {
   struct SCRIPT* script;
   struct VIRTUAL_MACHINE vm;
 
-  InitStackVar(vm);
+  ClearMem(vm);
 
-  script = (struct SCRIPT*)Asset_Load(id, chapter, CT_SCRIPT, arena);
+  script = (struct SCRIPT*)Asset_Load(id, chapter, PT_AT_SCRIPT, arena);
 
   Vm_PrepareVm(&vm, script);
 
@@ -182,9 +182,9 @@ VOID Vm_RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena)
 
 #define Vm_Branch(A) return A;
 
-INLINE VOID Vm_Compare(LONG l, LONG r)
+INLINE void Vm_Compare(PtSigned32 l, PtSigned32 r)
 {
-  UWORD cmp = VM_CMP_NONE;
+  PtUnsigned16 cmp = VM_CMP_NONE;
   if (l == r)
     cmp |= VM_CMP_EQUALS;
   if (l < r)
@@ -195,7 +195,7 @@ INLINE VOID Vm_Compare(LONG l, LONG r)
   Vm_Current->vm_Cmp = cmp;
 }
 
-INLINE VOID Vm_Push(LONG value)
+INLINE void Vm_Push(PtSigned32 value)
 {
   if (Vm_Current->vm_StackHead < MAX_VM_STACK_SIZE)
   {
@@ -216,60 +216,60 @@ INLINE VOID Vm_Push(LONG value)
   }
 }
 
-INLINE LONG Vm_Pop()
+INLINE PtSigned32 Vm_Pop()
 {
   if (Vm_Current->vm_StackHead > 0)
   {
     Vm_Current->vm_StackHead--;
   }
 
-  LONG value = Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
+  PtSigned32 value = Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
 
   TRACEF("Vm Stack::Pop. Size=%ld, Top=%ld", Vm_Current->vm_StackHead, value);
 
   return value;
 }
 
-INLINE LONG Vm_Peek()
+INLINE PtSigned32 Vm_Peek()
 {
-  LONG value = Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
+  PtSigned32 value = Vm_Current->vm_Stack[Vm_Current->vm_StackHead];
 
   TRACEF("Vm Stack::Peek. Size=%ld, Top=%ld", Vm_Current->vm_StackHead, value);
 
   return value;
 }
 
-INLINE VOID Vm_SetVar(UWORD index, LONG v)
+INLINE void Vm_SetVar(PtUnsigned16 index, PtSigned32 v)
 {
   Vm_Current->vm_Vars[index] = v;
 }
 
-INLINE LONG Vm_GetVar(UWORD index)
+INLINE PtSigned32 Vm_GetVar(PtUnsigned16 index)
 {
   return Vm_Current->vm_Vars[index];
 }
 
-INLINE VOID Vm_IncVar(UWORD index)
+INLINE void Vm_IncVar(PtUnsigned16 index)
 {
   Vm_Current->vm_Vars[index]++;
 }
 
-INLINE VOID Vm_DecVar(UWORD index)
+INLINE void Vm_DecVar(PtUnsigned16 index)
 {
   Vm_Current->vm_Vars[index]--;
 }
 
-INLINE LONG Vm_GetConstant(UWORD index)
+INLINE PtSigned32 Vm_GetConstant(PtUnsigned16 index)
 {
   return Vm_Current->vm_Constants[index];
 }
 
-INLINE LONG Vm_s10tos16(UWORD value)
+INLINE PtSigned32 Vm_s10tos16(PtUnsigned16 value)
 {
   return value >> 6;
 }
 
-INLINE LONG Vm_u10tou16(UWORD value)
+INLINE PtSigned32 Vm_u10tou16(PtUnsigned16 value)
 {
   return value >> 6;
 }
@@ -279,9 +279,9 @@ INLINE LONG Vm_u10tou16(UWORD value)
 #include <Parrot/Vm_Opcodes.h>
 #include "Vm_RunOpcode.inc"
 
-STATIC VOID Vm_TickAll()
+STATIC void Vm_TickAll()
 {
-  UWORD ii;
+  PtUnsigned16 ii;
 
   for (ii = 0; ii < MAX_VIRTUAL_MACHINES; ii++)
   {
@@ -296,7 +296,7 @@ STATIC VOID Vm_TickAll()
   }
 }
 
-STATIC VOID Vm_Tick()
+STATIC void Vm_Tick()
 {
   switch (Vm_Current->vm_State)
   {
@@ -307,7 +307,7 @@ STATIC VOID Vm_Tick()
     break;
     case VM_STATE_RUN:
     {
-      WORD pc, nextPc;
+      PtSigned16 pc, nextPc;
       OPCODE opcode;
 
       pc = Vm_Current->vm_PC;

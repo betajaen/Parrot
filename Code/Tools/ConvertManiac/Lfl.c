@@ -40,38 +40,38 @@
 #define MM_LFL_OBJOFF_HEIGHT  0xD
 #define MM_LFL_OBJOFF_NAME    0xE
 
-STATIC BYTE*  LflData;
-STATIC ULONG  LflLength;
-STATIC ULONG  LflCapacity;
+STATIC PtByte*  LflData;
+STATIC PtUnsigned32  LflLength;
+STATIC PtUnsigned32  LflCapacity;
 STATIC SquawkPtr Archive;
-STATIC UWORD  ArchiveId;
+STATIC PtUnsigned16  ArchiveId;
 
-STATIC UWORD  RoomId;
-STATIC UWORD  RoomWidth;
-STATIC UWORD  RoomHeight;
-STATIC UWORD  BackdropId;
-STATIC UWORD  NumObjects;
-STATIC ULONG  ObjectOffset;
-STATIC ULONG  GraphicsOffset;
+STATIC PtUnsigned16  RoomId;
+STATIC PtUnsigned16  RoomWidth;
+STATIC PtUnsigned16  RoomHeight;
+STATIC PtUnsigned16  BackdropId;
+STATIC PtUnsigned16  NumObjects;
+STATIC PtUnsigned32  ObjectOffset;
+STATIC PtUnsigned32  GraphicsOffset;
 
-STATIC UBYTE* ChunkyData;
-STATIC ULONG  ChunkyCapacity;
+STATIC PtUnsigned8* ChunkyData;
+STATIC PtUnsigned32  ChunkyCapacity;
 
-STATIC UWORD* PlanarData;
-STATIC ULONG  PlanarCapacity;
+STATIC PtUnsigned16* PlanarData;
+STATIC PtUnsigned32  PlanarCapacity;
 
-STATIC VOID OpenLflFile(STRPTR lflPath, UWORD lflNum);
-STATIC VOID CloseLflFile();
-STATIC VOID ExportRoom();
-STATIC VOID ExportEntities();
-STATIC VOID ExportImageBackdrop(UWORD id);
-STATIC VOID ReadRoomData();
-STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, UWORD w, UWORD h);
-STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h);
+STATIC void OpenLflFile(STRPTR lflPath, PtUnsigned16 lflNum);
+STATIC void CloseLflFile();
+STATIC void ExportRoom();
+STATIC void ExportEntities();
+STATIC void ExportImageBackdrop(PtUnsigned16 id);
+STATIC void ReadRoomData();
+STATIC void DecodeBackdrop(PtUnsigned8* src, PtUnsigned8* dst, PtUnsigned16 w, PtUnsigned16 h);
+STATIC void ConvertImageDataToPlanar(PtUnsigned8* src, PtUnsigned16* dst, PtUnsigned16 w, PtUnsigned16 h);
 
-STATIC UBYTE ReadByte(ULONG offset)
+STATIC PtUnsigned8 ReadByte(PtUnsigned32 offset)
 {
-  UBYTE r = 0;
+  PtUnsigned8 r = 0;
 
   r = LflData[offset];
   r ^= 0xFF;  /* Copy Protection */
@@ -79,9 +79,9 @@ STATIC UBYTE ReadByte(ULONG offset)
   return r;
 }
 
-STATIC UWORD ReadUWordLE(ULONG offset)
+STATIC PtUnsigned16 ReadUWordLE(PtUnsigned32 offset)
 {
-  UWORD r = 0;
+  PtUnsigned16 r = 0;
 
   r = LflData[offset + 1] << 8 | LflData[offset]; /* Little Endian to Big Endian */
   r ^= 0xFFFF;  /* Copy Protection */
@@ -89,11 +89,11 @@ STATIC UWORD ReadUWordLE(ULONG offset)
   return r;
 }
 
-STATIC ULONG ReadLflNameStringToDialogue(ULONG offset)
+STATIC PtUnsigned32 ReadLflNameStringToDialogue(PtUnsigned32 offset)
 {
-  UWORD len;
-  UBYTE ch;
-  CHAR text[255];
+  PtUnsigned16 len;
+  PtUnsigned8 ch;
+  PtChar text[255];
 
   for (len = 0; len < 255; len++)
   {
@@ -118,7 +118,7 @@ STATIC ULONG ReadLflNameStringToDialogue(ULONG offset)
   return PushDialogue(LANG_ENGLISH, len, &text[0]);
 }
 
-VOID StartLfl()
+void StartLfl()
 {
   LflData = NULL;
   LflCapacity = 0;
@@ -128,7 +128,7 @@ VOID StartLfl()
   PlanarCapacity = 0;
 }
 
-VOID EndLfl()
+void EndLfl()
 {
   if (NULL != PlanarData)
   {
@@ -150,7 +150,7 @@ VOID EndLfl()
   }
 }
 
-VOID ExportLfl(UWORD lflNum)
+void ExportLfl(PtUnsigned16 lflNum)
 {
   OpenLflFile("PROGDIR:", lflNum);
 
@@ -162,7 +162,7 @@ VOID ExportLfl(UWORD lflNum)
   ExportRoom();
   ExportEntities();
 
-  StartAssetList(Archive, CT_IMAGE, 1);
+  StartAssetList(Archive, PT_AT_IMAGE, 1);
   ExportImageBackdrop(BackdropId);
   EndAssetList(Archive);
 
@@ -171,33 +171,33 @@ VOID ExportLfl(UWORD lflNum)
   CloseLflFile();
 }
 
-STATIC VOID ExportRoom()
+STATIC void ExportRoom()
 {
-  struct ROOM room;
+  struct Room room;
 
-  InitStackVar(room);
+  ClearMem(room);
 
-  RoomId = GenerateAssetId(CT_ROOM);
-  BackdropId = GenerateAssetId(CT_IMAGE);
+  RoomId = GenerateAssetId(PT_AT_ROOM);
+  BackdropId = GenerateAssetId(PT_AT_IMAGE);
 
   room.rm_Width = RoomWidth;
   room.rm_Height = RoomHeight;
   room.rm_Backdrops[0] = BackdropId;
 
-  StartAssetList(Archive, CT_ROOM, 1);
+  StartAssetList(Archive, PT_AT_ROOM, 1);
 
   room.as_Id = RoomId;
-  room.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  room.as_Flags = PT_AF_ARCH_ANY;
 
-  SaveAsset(Archive, (struct ANY_ASSET*) &room, sizeof(struct ROOM));
-  AddToTable(CT_ROOM, RoomId, ArchiveId, MM_CHAPTER);
+  SaveAsset(Archive, (PtAsset*) &room, sizeof(struct Room));
+  AddToTable(PT_AT_ROOM, RoomId, ArchiveId, MM_CHAPTER);
   EndAssetList(Archive);
 }
 
 
-STATIC VOID ReadLflObject(struct NEW_ANY_ENTITY* entity, ULONG dataOffset, ULONG graphicsOffset)
+STATIC void ReadLflObject(struct AnyEntity* entity, PtUnsigned32 dataOffset, PtUnsigned32 graphicsOffset)
 {
-  ULONG nameOff, size;
+  PtUnsigned32 nameOff, size;
 
   size = ReadUWordLE(dataOffset + MM_LFL_OBJOFF_SIZE);
   entity->en_Context = ReadUWordLE(dataOffset + MM_LFL_OBJOFF_NUM);
@@ -224,38 +224,38 @@ STATIC VOID ReadLflObject(struct NEW_ANY_ENTITY* entity, ULONG dataOffset, ULONG
 
 }
 
-STATIC VOID ExportEntity(UWORD id, ULONG dataOffset, ULONG graphicsOffset)
+STATIC void ExportEntity(PtUnsigned16 id, PtUnsigned32 dataOffset, PtUnsigned32 graphicsOffset)
 {
-  struct NEW_ANY_ENTITY entity;
-  InitStackVar(entity);
+  struct AnyEntity entity;
+  ClearMem(entity);
 
   ReadLflObject(&entity, dataOffset, graphicsOffset);
 
   entity.en_Type = ET_ANY;
-  entity.en_Size = sizeof(struct NEW_ANY_ENTITY);
+  entity.en_Size = sizeof(struct AnyEntity);
   
   entity.as_Id = id;
-  entity.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  entity.as_Flags = PT_AF_ARCH_ANY;
 
-  SaveAsset(Archive, (struct ANY_ASSET*)&entity, sizeof(struct NEW_ANY_ENTITY));
-  AddToTable(CT_ENTITY, id, ArchiveId, MM_CHAPTER);
+  SaveAsset(Archive, (PtAsset*)&entity, sizeof(struct AnyEntity));
+  AddToTable(PT_AT_ENTITY, id, ArchiveId, MM_CHAPTER);
 }
 
-STATIC VOID ExportEntities()
+STATIC void ExportEntities()
 {
-  UWORD ii;
-  ULONG dataIdx, graphicsIdx, dataOffset, graphicsOffset;
+  PtUnsigned16 ii;
+  PtUnsigned32 dataIdx, graphicsIdx, dataOffset, graphicsOffset;
 
   dataIdx = ObjectOffset;
   graphicsIdx = GraphicsOffset;
 
-  StartAssetList(Archive, CT_ENTITY, 1);
+  StartAssetList(Archive, PT_AT_ENTITY, 1);
   for (ii = 0; ii < NumObjects; ii++)
   {
     dataOffset = ReadUWordLE(dataIdx);
     graphicsOffset = ReadUWordLE(graphicsIdx);
 
-    ExportEntity(GenerateAssetId(CT_ENTITY), dataOffset, graphicsOffset);
+    ExportEntity(GenerateAssetId(PT_AT_ENTITY), dataOffset, graphicsOffset);
 
     dataIdx += 2;
     graphicsIdx += 2;
@@ -263,13 +263,13 @@ STATIC VOID ExportEntities()
   EndAssetList(Archive);
 }
 
-STATIC VOID ExportImageBackdrop(UWORD id)
+STATIC void ExportImageBackdrop(PtUnsigned16 id)
 {
-  ULONG offset;
-  ULONG chunkySize, planarSize;
+  PtUnsigned32 offset;
+  PtUnsigned32 chunkySize, planarSize;
   struct IMAGE backdrop;
 
-  InitStackVar(backdrop)
+  ClearMem(backdrop)
 
   offset = ReadUWordLE(10);
 
@@ -316,7 +316,7 @@ STATIC VOID ExportImageBackdrop(UWORD id)
   ConvertImageDataToPlanar(ChunkyData, PlanarData, RoomWidth, RoomHeight);
 
   backdrop.as_Id = id;
-  backdrop.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  backdrop.as_Flags = PT_AF_ARCH_ANY;
   backdrop.im_Width = RoomWidth;
   backdrop.im_Height = RoomHeight;
   backdrop.im_Depth = 4;
@@ -324,17 +324,17 @@ STATIC VOID ExportImageBackdrop(UWORD id)
   backdrop.im_BytesPerRow = (RoomWidth >> 3);
   backdrop.im_PlaneSize = backdrop.im_BytesPerRow * backdrop.im_Height;
 
-  SaveAssetExtra(Archive, (struct ANY_ASSET*) &backdrop, sizeof(backdrop), PlanarData, planarSize);
-  AddToTable(CT_IMAGE, id, ArchiveId, MM_CHAPTER);
+  SaveAssetExtra(Archive, (PtAsset*) &backdrop, sizeof(backdrop), PlanarData, planarSize);
+  AddToTable(PT_AT_IMAGE, id, ArchiveId, MM_CHAPTER);
   
 }
 
-STATIC VOID OpenLflFile(STRPTR lflPath, UWORD lflNum)
+STATIC void OpenLflFile(STRPTR lflPath, PtUnsigned16 lflNum)
 {
-  CHAR path[MAX_PATH];
+  PtChar path[MAX_PATH];
   BPTR  file;
 
-  StrFormat(path, sizeof(path), "%s%02ld.LFL", lflPath, (ULONG) lflNum);
+  StrFormat(path, sizeof(path), "%s%02ld.LFL", lflPath, (PtUnsigned32) lflNum);
 
   file = Open(path, MODE_OLDFILE);
 
@@ -346,7 +346,7 @@ STATIC VOID OpenLflFile(STRPTR lflPath, UWORD lflNum)
       PARROT_ERR_STR("Path")
       PARROT_ERR_INT("LFL File"),
       lflPath,
-      (ULONG) lflNum
+      (PtUnsigned32) lflNum
     );
   }
 
@@ -371,12 +371,12 @@ STATIC VOID OpenLflFile(STRPTR lflPath, UWORD lflNum)
   Close(file);
 }
 
-STATIC VOID CloseLflFile()
+STATIC void CloseLflFile()
 {
   LflLength = 0;
 }
 
-STATIC VOID ReadRoomData()
+STATIC void ReadRoomData()
 {
   RoomWidth = ReadUWordLE(4);
   RoomHeight = ReadUWordLE(6);
@@ -387,10 +387,10 @@ STATIC VOID ReadRoomData()
   ObjectOffset = 28 + (NumObjects * 2);
 }
 
-STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, ULONG w, ULONG h)
+STATIC void DecodeBackdrop(PtUnsigned8* src, PtUnsigned8* dst, PtUnsigned32 w, PtUnsigned32 h)
 {
-  ULONG x, y, z;
-  UBYTE r, len, col;
+  PtUnsigned32 x, y, z;
+  PtUnsigned8 r, len, col;
   
   x = 0;
   y = 0;
@@ -450,28 +450,28 @@ STATIC VOID DecodeBackdrop(UBYTE* src, UBYTE* dst, ULONG w, ULONG h)
 
 }
 
-STATIC VOID ConvertImageDataToPlanar(UBYTE* src, UWORD* dst, UWORD w, UWORD h)
+STATIC void ConvertImageDataToPlanar(PtUnsigned8* src, PtUnsigned16* dst, PtUnsigned16 w, PtUnsigned16 h)
 {
-  ULONG idx;
-  UBYTE bp, shift;
-  UWORD y, x, i;
+  PtUnsigned32 idx;
+  PtUnsigned8 bp, shift;
+  PtUnsigned16 y, x, i;
   idx = 0;
 
   for (bp = 0; bp < 4; bp++)
   {
-    UBYTE shift = 1 << bp;
+    PtUnsigned8 shift = 1 << bp;
     idx = 0;
 
     for (y = 0; y < h; y++)
     {
       for (x = 0; x < w; x += 16)
       {
-        UWORD word = 0;
+        PtUnsigned16 word = 0;
 
         for (i = 0; i < 16; i++)
         {
-          UBYTE col = src[idx + x + i];
-          UBYTE bit = (col & shift) != 0 ? 1 : 0;
+          PtUnsigned8 col = src[idx + x + i];
+          PtUnsigned8 bit = (col & shift) != 0 ? 1 : 0;
 
           if (bit)
             word |= (1 << (15 - i));

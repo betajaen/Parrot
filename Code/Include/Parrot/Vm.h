@@ -28,13 +28,15 @@
 #ifndef PARROT_VM_H
 #define PARROT_VM_H
 
-EXPORT VOID Vm_Initialise();
+#include <Parrot/Parrot.h>
 
-EXPORT VOID Vm_Shutdown();
+PtPublic void PtVm_Initialise();
 
-EXPORT VOID Vm_RunScript(UWORD id);
+PtPublic void PtVm_Shutdown();
 
-EXPORT VOID Vm_RunScriptNow(UWORD id, UWORD chapter, struct ARENA* arena);
+PtPublic void PtVm_RunScript(PtUnsigned16 id);
+
+PtPublic void PtVm_RunScriptNow(PtUnsigned16 id, PtUnsigned16 chapter, struct ARENA* arena);
 
 #endif
 

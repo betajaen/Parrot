@@ -28,13 +28,13 @@
 #ifndef PARROT_API_H
 #define PARROT_API_H
 
-VOID Api_LoadRoom(LONG roomNum);
+void Api_LoadRoom(PtSigned32 roomNum);
 
-VOID Api_LoadPalette(LONG paletteNum);
+void Api_LoadPalette(PtSigned32 paletteNum);
 
-VOID Api_DelayTicks(UWORD ticks);
+void Api_DelayTicks(PtUnsigned16 ticks);
 
-VOID Api_DelaySeconds(UWORD seconds);
+void Api_DelaySeconds(PtUnsigned16 seconds);
 
 #endif
 

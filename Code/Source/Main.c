@@ -38,8 +38,8 @@
 
 #define PARROT_VERSION "Parrot 1.3 (11.02.2021)"
 
-BYTE VersionString[]   = "$VER: " PARROT_VERSION "\r\n";
-BYTE CopyrightString[] = "Copyright(c) 2021 Robin Southern. All Rights Reserved.";
+PtByte VersionString[]   = "$VER: " PARROT_VERSION "\r\n";
+PtByte CopyrightString[] = "Copyright(c) 2021 Robin Southern. All Rights Reserved.";
 
 //struct ExecBase*      SysBase;
 struct DosLibrary*    DOSBase;
@@ -48,16 +48,16 @@ struct GfxBase*       GfxBase;
 struct Library*       IFFParseBase;
 struct Message*       wbMsg;
 
-EXPORT VOID GameStart(STRPTR name);
+PtPublic void GameStart(STRPTR name);
 
-UWORD GcCounter;
+PtUnsigned16 GcCounter;
 
-INT main()
+PtSigned32 main()
 {
   struct Process* process;
-  INT             rc;
+  PtSigned32             rc;
   struct SCREEN_INFO screenInfo;
-  ULONG  screen;
+  PtUnsigned32  screen;
 
   rc = RETURN_OK;
   DOSBase = NULL;
@@ -156,11 +156,11 @@ INT main()
   return rc;
 }
 
-VOID ExitArenaNow();
-VOID ExitScreenNow();
-extern VOID exit();
+void ExitArenaNow();
+void ExitScreenNow();
+extern void exit();
 
-VOID ExitNow()
+void ExitNow()
 {
 
   ExitArenaNow();

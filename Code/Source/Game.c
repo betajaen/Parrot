@@ -40,30 +40,28 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 
-struct GAME_INFO GameInfo;
+PtGameInfo GameInfo;
 
-struct ARCHIVE* GameArchive;
 struct UNPACKED_ROOM  GameRoom;
 
-EXPORT VOID GameStart(STRPTR path)
+void GameStart(STRPTR path)
 {
   struct SCREEN_INFO screenInfo;
-  struct ROOM* room;
+  struct Room* room;
   struct UNPACKED_ROOM uroom;
-  struct ENTRANCE entrance;
-  struct VIEW_LAYOUTS viewLayouts;
-  struct VIEW_LAYOUT* roomLayout;
-  struct VIEW_LAYOUT* verbLayout;
+  struct RoomEntrance entrance;
+  PtViewLayouts viewLayouts;
+  PtViewLayout* roomLayout;
+  PtViewLayout* verbLayout;
 
-  UBYTE ii;
+  PtUnsigned8 ii;
 
-  GameArchive = NULL;
   ArenaGame = NULL;
   ArenaChapter = NULL;
   ArenaRoom = NULL;
 
-  InitStackVar(uroom);
-  InitStackVar(GameInfo);
+  ClearMem(uroom);
+  ClearMem(GameInfo);
 
   ArenaGame = ArenaOpen(MAKE_NODE_ID('G', 'A', 'M', 'E'), 16384, MEMF_CLEAR);
   ArenaChapter = ArenaOpen(MAKE_NODE_ID('C', 'H', 'A', 'P'), 131072, MEMF_CLEAR);
@@ -74,7 +72,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   TRACE("GAME Start. Attempting to load Game Info.");
 
-  if (FALSE == Asset_LoadInto_KnownArchive(1, 0, CT_GAME_INFO, (struct ANY_ASSET*) &GameInfo, sizeof(GameInfo)))
+  if (FALSE == Asset_LoadInto_KnownArchive(1, 0, PT_AT_GAME_INFO, (PtAsset*) &GameInfo, sizeof(GameInfo)))
   {
     ERROR("GAME_INFO structure was not found in the first archive");
     
@@ -88,7 +86,7 @@ EXPORT VOID GameStart(STRPTR path)
 
   AssetTables_Load(0, 0, GameInfo.gi_NumAssetTables);
 
-  Vm_Initialise();
+  PtVm_Initialise();
 
   viewLayouts.v_NumLayouts = 2;
   viewLayouts.v_Width = GameInfo.gi_Width;
@@ -124,14 +122,14 @@ EXPORT VOID GameStart(STRPTR path)
 
   InputInitialise();
   
-  Vm_RunScriptNow(GameInfo.gi_StartScript, 0, ArenaFrameTemp);
+  PtVm_RunScriptNow(GameInfo.gi_StartScript, 0, ArenaFrameTemp);
   
   InputExit();
 
   GfxHide();
   GfxClose();
 
-  Vm_Shutdown();
+  PtVm_Shutdown();
 
   /* CloseArchives(); */
 
@@ -141,12 +139,12 @@ EXPORT VOID GameStart(STRPTR path)
 
 }
 
-EXPORT VOID Api_DelayTicks(UWORD ticks)
+void Api_DelayTicks(PtUnsigned16 ticks)
 {
   Delay(ticks);
 }
 
-EXPORT VOID Api_DelaySeconds(UWORD seconds)
+void Api_DelaySeconds(PtUnsigned16 seconds)
 {
   Delay(seconds);
 }

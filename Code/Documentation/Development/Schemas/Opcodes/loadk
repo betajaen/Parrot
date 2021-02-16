@@ -5,6 +5,6 @@ Description:
 Argument:
   i : Constant
 Code:
-  LONG v;
+  PtSigned32 v;
   v = Vm_GetConstant(#C);
   Vm_Push(v);

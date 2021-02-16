@@ -44,9 +44,9 @@ void Log_Initialise();
 
 void Log_Shutdown();
 
-void Log(UWORD logType, CONST_STRPTR text);
+void Log(PtUnsigned16 logType, CONST_STRPTR text);
 
-void LogF(UWORD logType, CONST_STRPTR fmt, ...);
+void LogF(PtUnsigned16 logType, CONST_STRPTR fmt, ...);
 
 #if PARROT_LOG_LEVEL <= LOG_TYPE_TRACE
 #define TRACE(text) Log(LOG_TYPE_TRACE, text)

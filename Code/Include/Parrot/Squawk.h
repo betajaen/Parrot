@@ -33,31 +33,40 @@
 #define ID_SQWK MAKE_NODE_ID('S','Q','W','K')
 #define ID_MNIC MAKE_NODE_ID('M','N','C','M')
 
-struct ARENA;
-struct ANY_ASSET;
+struct SQUAWK_ASSET_LIST_HEADER
+{
+  PtUnsigned32             al_Type;
+  PtUnsigned16             al_Count;
+  PtUnsigned16             al_Chapter;
+  PtUnsigned32             al_Length;
+};
 
-typedef VOID(*LoadSpecialCallback)(struct ANY_ASSET* asset, UWORD counter, ULONG* readLength, APTR* readInto);
+typedef void(*LoadSpecialCallback)(PtAsset* asset, PtUnsigned16 counter, PtUnsigned32* readLength, APTR* readInto);
 
-VOID Archives_Initialise();
+void Archives_Initialise();
 
-struct ANY_ASSET* Archives_Unload(UWORD olderThan);
+void Archives_Unload(PtUnsigned16 olderThan);
 
-VOID AssetTables_Load(UWORD archive, UWORD chapter, UWORD count);
+void AssetTables_Load(PtUnsigned16 archive, PtUnsigned16 chapter, PtUnsigned16 count);
 
-UWORD Asset_LoadAll(ULONG classType, UWORD archiveId, struct ARENA* arena, struct ANY_ASSET** outAssets, UWORD outCapacity);
+PtUnsigned16 Asset_LoadAll(PtUnsigned32 classType, PtUnsigned16 archiveId, struct ARENA* arena, PtAsset** outAssets, PtUnsigned16 outCapacity);
 
-struct ANY_ASSET* Asset_Load_KnownArchive(ULONG classType, UWORD archiveId, UWORD id, struct ARENA* arena);
+PtAsset* Asset_Load_KnownArchive(PtUnsigned32 classType, PtUnsigned16 archiveId, PtUnsigned16 id, struct ARENA* arena);
 
-BOOL Asset_LoadInto_KnownArchive(UWORD id, UWORD archiveId, ULONG classType, struct ANY_ASSET* outAsset, ULONG assetSize);
+BOOL Asset_LoadInto_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsigned32 classType, PtAsset* outAsset, PtUnsigned32 assetSize);
 
-struct ANY_ASSET* Asset_Load(UWORD id, UWORD chapter, ULONG assetType, struct ARENA* arena);
+PtAsset* Asset_Load(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, struct ARENA* arena);
 
-BOOL Asset_LoadInto(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize);
+BOOL Asset_LoadInto(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize);
 
-VOID Asset_Unload(struct ANY_ASSET* asset);
+BOOL Asset_LoadInto_Callback(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize, LoadSpecialCallback cb);
 
-VOID Asset_LoadInto_Callback(UWORD id, UWORD chapter, ULONG assetType, struct ANY_ASSET* asset, ULONG assetSize, LoadSpecialCallback cb);
+void Asset_CallbackFor_Image(PtAsset* asset, PtUnsigned16 counter, PtUnsigned32* readLength, APTR* readInto);
 
-VOID Asset_CallbackFor_Image(struct ANY_ASSET* asset, UWORD counter, ULONG* readLength, APTR* readInto);
+PtAsset* Asset_New(PtUnsigned32 size);
+
+PtAsset* Asset_New1(PtUnsigned32 size, PtUnsigned32 dataSize, PtUnsigned32 numDataElements);
+
+void Asset_Release(PtAsset* asset);
 
 #endif

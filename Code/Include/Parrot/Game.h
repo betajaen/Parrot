@@ -28,6 +28,6 @@
 #ifndef PARROT_GAME_H
 #define PARROT_GAME_H
 
-VOID PlayCaption(struct UNPACKED_ROOM* room);
+void PlayCaption(struct UNPACKED_ROOM* room);
 
 #endif

@@ -6,6 +6,6 @@ Argument:
   i : Var
   0 : LHS
 Code:
-  LONG l;
+  PtSigned32 l;
   l = Vm_Pop();
   Vm_Push(l >> #V);

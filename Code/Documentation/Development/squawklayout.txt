@@ -43,14 +43,14 @@ LIST      SQWK
 A slug is the asset ID encoded as a 4-byte word via the UWordToId
 function, and placed within the IFF Chunk Type:-
 
-    ULONG   Chunk Type
-    ULONG   Length
+    PtUnsigned32   Chunk Type
+    PtUnsigned32   Length
 
-It takes each nibble of the UWORD and places for each byte in the
+It takes each nibble of the PtUnsigned16 and places for each byte in the
 integer in little-endian order. Each byte is then added by a constant
 of 0x41 to make the number compatible with FourCC. 
 
-    ULONG s;
+    PtUnsigned32 s;
     
     s = 0x41;
     s += (r & 0xF);
@@ -88,13 +88,13 @@ Header but before any of the Asset Data.
 
   struct ASSET_HEADER
   {
-    UWORD ah_Id;
-    UWORD ah_AssetFlags;
+    PtUnsigned16 ah_Id;
+    PtUnsigned16 ah_AssetFlags;
   };
 
 #### Asset Id
 
-The Id is a UWORD start starts from 1 to 65535. This is a repeat
+The Id is a PtUnsigned16 start starts from 1 to 65535. This is a repeat
 of the Slug in the Chunk Type, but in its original form.
 
 #### Asset Flags

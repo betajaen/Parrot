@@ -25,13 +25,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-UWORD __chip Cursor0[] = {
+PtUnsigned16 __chip Cursor0[] = {
   0x0000,0x0000,
   0x0000,0x0000,
   0x0000,0x0000
 };
 
-UWORD __chip Cursor1[] = {
+PtUnsigned16 __chip Cursor1[] = {
   0x0000,0x0000,
   0x7000,0x0   ,
   0x8800,0x7000,
@@ -41,7 +41,7 @@ UWORD __chip Cursor1[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor2[] = {
+PtUnsigned16 __chip Cursor2[] = {
   0x0000,0x0000,
   0xfff0,0x0   ,
   0x9058,0x6fa0,
@@ -59,7 +59,7 @@ UWORD __chip Cursor2[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor3[] = {
+PtUnsigned16 __chip Cursor3[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x280 ,0x100 ,
@@ -79,7 +79,7 @@ UWORD __chip Cursor3[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor4[] = {
+PtUnsigned16 __chip Cursor4[] = {
   0x0000,0x0000,
   0xfe00,0x0   ,
   0x8400,0x7800,
@@ -93,7 +93,7 @@ UWORD __chip Cursor4[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor5[] = {
+PtUnsigned16 __chip Cursor5[] = {
   0x0000,0x0000,
   0x800 ,0x0   ,
   0x1400,0x800 ,
@@ -109,7 +109,7 @@ UWORD __chip Cursor5[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor6[] = {
+PtUnsigned16 __chip Cursor6[] = {
   0x0000,0x0000,
   0x3f80,0x0   ,
   0x1080,0xf00 ,
@@ -123,7 +123,7 @@ UWORD __chip Cursor6[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor7[] = {
+PtUnsigned16 __chip Cursor7[] = {
   0x0000,0x0000,
   0x600 ,0x0   ,
   0x500 ,0x200 ,
@@ -137,7 +137,7 @@ UWORD __chip Cursor7[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor8[] = {
+PtUnsigned16 __chip Cursor8[] = {
   0x0000,0x0000,
   0x2000,0x0   ,
   0x5000,0x2000,
@@ -151,7 +151,7 @@ UWORD __chip Cursor8[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor9[] = {
+PtUnsigned16 __chip Cursor9[] = {
   0x0000,0x0000,
   0x3e00,0x0   ,
   0x2200,0x1c00,
@@ -167,7 +167,7 @@ UWORD __chip Cursor9[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor10[] = {
+PtUnsigned16 __chip Cursor10[] = {
   0x0000,0x0000,
   0x200 ,0x0   ,
   0x500 ,0x200 ,
@@ -181,7 +181,7 @@ UWORD __chip Cursor10[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor11[] = {
+PtUnsigned16 __chip Cursor11[] = {
   0x0000,0x0000,
   0xc00 ,0x0   ,
   0x1400,0x800 ,
@@ -195,7 +195,7 @@ UWORD __chip Cursor11[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor12[] = {
+PtUnsigned16 __chip Cursor12[] = {
   0x0000,0x0000,
   0x100 ,0x0   ,
   0x280 ,0x100 ,
@@ -215,7 +215,7 @@ UWORD __chip Cursor12[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor13[] = {
+PtUnsigned16 __chip Cursor13[] = {
   0x0000,0x0000,
   0x400 ,0x0   ,
   0xc00 ,0x0   ,
@@ -235,7 +235,7 @@ UWORD __chip Cursor13[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor14[] = {
+PtUnsigned16 __chip Cursor14[] = {
   0x0000,0x0000,
   0x400 ,0x0   ,
   0xc00 ,0x0   ,
@@ -255,7 +255,7 @@ UWORD __chip Cursor14[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor15[] = {
+PtUnsigned16 __chip Cursor15[] = {
   0x0000,0x0000,
   0x400 ,0x0   ,
   0xc00 ,0x0   ,
@@ -275,7 +275,7 @@ UWORD __chip Cursor15[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor16[] = {
+PtUnsigned16 __chip Cursor16[] = {
   0x0000,0x0000,
   0x700 ,0x0   ,
   0x880 ,0x700 ,
@@ -293,7 +293,7 @@ UWORD __chip Cursor16[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor17[] = {
+PtUnsigned16 __chip Cursor17[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -311,7 +311,7 @@ UWORD __chip Cursor17[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor18[] = {
+PtUnsigned16 __chip Cursor18[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -329,7 +329,7 @@ UWORD __chip Cursor18[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor19[] = {
+PtUnsigned16 __chip Cursor19[] = {
   0x0000,0x0000,
   0x700 ,0x0   ,
   0x880 ,0x700 ,
@@ -347,7 +347,7 @@ UWORD __chip Cursor19[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor20[] = {
+PtUnsigned16 __chip Cursor20[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -365,7 +365,7 @@ UWORD __chip Cursor20[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor21[] = {
+PtUnsigned16 __chip Cursor21[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -383,7 +383,7 @@ UWORD __chip Cursor21[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor22[] = {
+PtUnsigned16 __chip Cursor22[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -401,7 +401,7 @@ UWORD __chip Cursor22[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor23[] = {
+PtUnsigned16 __chip Cursor23[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -419,7 +419,7 @@ UWORD __chip Cursor23[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor24[] = {
+PtUnsigned16 __chip Cursor24[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -437,7 +437,7 @@ UWORD __chip Cursor24[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor25[] = {
+PtUnsigned16 __chip Cursor25[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -455,7 +455,7 @@ UWORD __chip Cursor25[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor26[] = {
+PtUnsigned16 __chip Cursor26[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,
@@ -473,7 +473,7 @@ UWORD __chip Cursor26[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor27[] = {
+PtUnsigned16 __chip Cursor27[] = {
   0x0000,0x0000,
   0x700 ,0x0   ,
   0x880 ,0x700 ,
@@ -491,7 +491,7 @@ UWORD __chip Cursor27[] = {
   0x0000,0x0000
 };
 
-UWORD __chip Cursor28[] = {
+PtUnsigned16 __chip Cursor28[] = {
   0x0000,0x0000,
   0x380 ,0x0   ,
   0x440 ,0x380 ,

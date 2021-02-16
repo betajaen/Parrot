@@ -32,7 +32,7 @@
 
 extern BOOL InEvtForceQuit;
 
-VOID Parrot_SysCall(UWORD function, LONG argument)
+void Parrot_SysCall(PtUnsigned16 function, PtSigned32 argument)
 {
   switch (function)
   {

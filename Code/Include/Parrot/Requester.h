@@ -28,13 +28,13 @@
 #ifndef PARROT_REQUESTER_H
 #define PARROT_REQUESTER_H
 
-VOID SetRequesterWindow(APTR window);
+void SetRequesterWindow(APTR window);
 
-LONG Requester(CONST_STRPTR pOptions, CONST_STRPTR pText);
+PtSigned32 Requester(CONST_STRPTR pOptions, CONST_STRPTR pText);
 
-LONG RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
+PtSigned32 RequesterF(CONST_STRPTR pOptions, CONST_STRPTR pFmt, ...);
 
-VOID ErrorF(CONST_STRPTR pFmt, ...);
+void ErrorF(CONST_STRPTR pFmt, ...);
 
 #define PARROT_SERIOUS_ERROR(MESSAGE, REASON, ...) \
   ErrorF(MESSAGE "\nReason:" REASON, __VA_ARGS__)

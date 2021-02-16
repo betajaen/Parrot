@@ -12,9 +12,9 @@ Asset Lookup Table
 
   struct STRING_TABLE
   {
-    UWORD          st_Language;
-    UWORD          st_Offsets[256];
-    CHAR           st_Text[] /* Upto 66,048 bytes */
+    PtUnsigned16          st_Language;
+    PtUnsigned16          st_Offsets[256];
+    PtChar           st_Text[] /* Upto 66,048 bytes */
   };
 
 ## Asset Id
@@ -29,7 +29,7 @@ In future versions Parrot this may increase to 512.
 
 ### st_Language
 
-Two character ISO 639-1 language code represented as a UWORD
+Two character ISO 639-1 language code represented as a PtUnsigned16
 
 XX is reserved for non-spoke dialogue; such as action text.
 

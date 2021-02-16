@@ -28,30 +28,30 @@
 #ifndef PARROT_STRING_H
 #define PARROT_STRING_H
 
-ULONG StrLength(CONST_STRPTR pStr);
+PtUnsigned32 StrLength(CONST_STRPTR pStr);
 
-ULONG StrLengthFormat(CHAR* pFmt, ...);
+PtUnsigned32 StrLengthFormat(PtChar* pFmt, ...);
 
-ULONG StrFormat(CHAR* pBuffer, LONG pBufferCapacity, CHAR* pFmt, ...);
+PtUnsigned32 StrFormat(PtChar* pBuffer, PtSigned32 pBufferCapacity, PtChar* pFmt, ...);
 
-ULONG StrLen(CONST CHAR* pSrc);
+PtUnsigned32 StrLen(CONST PtChar* pSrc);
 
-ULONG StrCopy(CHAR* pDst, ULONG pDstCapacity, CONST CHAR* pSrc);
+PtUnsigned32 StrCopy(PtChar* pDst, PtUnsigned32 pDstCapacity, CONST PtChar* pSrc);
 
-ULONG StrHash(UBYTE length, STRPTR text);
+PtUnsigned32 StrHash(PtUnsigned8 length, STRPTR text);
 
-BOOL StrStartsWith(CONST CHAR* pTest, CHAR value);
+BOOL StrStartsWith(CONST PtChar* pTest, PtChar value);
 
-BOOL StrEndsWith(CONST CHAR* test, CHAR value);
+BOOL StrEndsWith(CONST PtChar* test, PtChar value);
 
-BOOL StrStartsWithStr(CONST CHAR* pTest, CONST CHAR* pPrefix);
+BOOL StrStartsWithStr(CONST PtChar* pTest, CONST PtChar* pPrefix);
 
-VOID FillMem(UBYTE* pDst, ULONG length, UBYTE value);
+void FillMem(PtUnsigned8* pDst, PtUnsigned32 length, PtUnsigned8 value);
 
-#define InitStackVar(X) FillMem((UBYTE*) &X, sizeof(X), 0);
+#define ClearMem(X) FillMem((PtUnsigned8*) &X, sizeof(X), 0);
 
-CHAR* StrDuplicate(CONST CHAR* pSrc);
+PtChar* StrDuplicate(CONST PtChar* pSrc);
 
-ULONG UWordToId(UWORD value);
+PtUnsigned32 UWordToId(PtUnsigned16 value);
 
 #endif

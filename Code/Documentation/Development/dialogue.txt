@@ -15,12 +15,12 @@ is referenced by a 4 byte Id, which is in two parts.
 
   struct DIALOGUE_REF
   {
-    UWORD   dt_Magic;
-    UBYTE   dt_Table;
-    UBYTE   dt_Item;
+    PtUnsigned16   dt_Magic;
+    PtUnsigned8   dt_Table;
+    PtUnsigned8   dt_Item;
   };
 
-  Dialogue Text may be referred to as a Big-Endian ULONG or as a 
+  Dialogue Text may be referred to as a Big-Endian PtUnsigned32 or as a 
   C DIALOGUE_REF structure.
 
 ## As a Reference
@@ -50,8 +50,8 @@ turned into a pointer.
   union DIALOGUE_TEXT
   {
     struct DIALOGUE_REF dt_Parts;
-    ULONG               dt_AssetId;
-    CHAR*               dt_Str;
+    PtUnsigned32               dt_AssetId;
+    PtChar*               dt_Str;
   };
 
 ## Tables

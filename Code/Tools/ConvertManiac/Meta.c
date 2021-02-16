@@ -31,21 +31,21 @@
 
 #include "Maniac.h"
 
-struct GAME_INFO GameInfo;
+PtGameInfo GameInfo;
 
-STATIC UWORD GamePaletteId;
-STATIC UWORD GameCursorPaletteId;
-STATIC UWORD GameStartScript;
+STATIC PtUnsigned16 GamePaletteId;
+STATIC PtUnsigned16 GameCursorPaletteId;
+STATIC PtUnsigned16 GameStartScript;
 
-VOID ReadGameInfo()
+void ReadGameInfo()
 {
   GameInfo.as_Id = 1;
-  GameInfo.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  GameInfo.as_Flags = PT_AF_ARCH_ANY;
 
-  GameInfo.gi_Title = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_TITLE), MM_META_TITLE);
-  GameInfo.gi_ShortTitle = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_SHORT_TITLE), MM_META_SHORT_TITLE);
-  GameInfo.gi_Author = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_AUTHOR), MM_META_AUTHOR);
-  GameInfo.gi_Release = PushDialogue(LANG_ENGLISH, literal_strlen(MM_META_RELEASE), MM_META_RELEASE);
+  GameInfo.gi_Title = PushDialogue(LANG_ENGLISH, Pt_literal_strlen(MM_META_TITLE), MM_META_TITLE);
+  GameInfo.gi_ShortTitle = PushDialogue(LANG_ENGLISH, Pt_literal_strlen(MM_META_SHORT_TITLE), MM_META_SHORT_TITLE);
+  GameInfo.gi_Author = PushDialogue(LANG_ENGLISH, Pt_literal_strlen(MM_META_AUTHOR), MM_META_AUTHOR);
+  GameInfo.gi_Release = PushDialogue(LANG_ENGLISH, Pt_literal_strlen(MM_META_RELEASE), MM_META_RELEASE);
 
   GameInfo.gi_Width = 320;
   GameInfo.gi_Height = 200;
@@ -55,23 +55,23 @@ VOID ReadGameInfo()
 
 }
 
-VOID ExportGameInfo(SquawkPtr archive)
+void ExportGameInfo(SquawkPtr archive)
 {
   GameInfo.gi_StartScript = GameStartScript;
 
-  StartAssetList(archive, CT_GAME_INFO, MM_SHARED_CHAPTER);
-  SaveAsset(archive, (struct ANY_ASSET*)&GameInfo, sizeof(struct GAME_INFO));
+  StartAssetList(archive, PT_AT_GAME_INFO, MM_SHARED_CHAPTER);
+  SaveAsset(archive, (PtAsset*)&GameInfo, sizeof(PtGameInfo));
   EndAssetList(archive);
 }
 
-STATIC VOID ExportGamePalette(SquawkPtr primary, UWORD id)
+STATIC void ExportGamePalette(SquawkPtr primary, PtUnsigned16 id)
 {
-  struct PALETTE_TABLE pal;
-  ULONG* pData;
+  struct PaletteTable pal;
+  PtUnsigned32* pData;
 
-  InitStackVar(pal);
+  ClearMem(pal);
 
-  pData = (ULONG*)&pal.pt_Data[0];
+  pData = (PtUnsigned32*)&pal.pt_Data[0];
 
   *pData++ = (16l << 16) | 0;
 
@@ -162,19 +162,19 @@ STATIC VOID ExportGamePalette(SquawkPtr primary, UWORD id)
   pal.pt_End = 15;
 
   pal.as_Id = id;
-  pal.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  pal.as_Flags = PT_AF_ARCH_ANY;
 
-  SaveAsset(primary, (struct ANY_ASSET*)&pal, sizeof(struct PALETTE_TABLE));
+  SaveAsset(primary, (PtAsset*)&pal, sizeof(struct PaletteTable));
 }
 
-STATIC VOID ExportCursorPalette(SquawkPtr primary, UWORD id)
+STATIC void ExportCursorPalette(SquawkPtr primary, PtUnsigned16 id)
 {
-  struct PALETTE_TABLE  pal;
-  ULONG* pData;
+  struct PaletteTable  pal;
+  PtUnsigned32* pData;
 
-  InitStackVar(pal)
+  ClearMem(pal)
 
-  pData = (ULONG*)&pal.pt_Data[0];
+  pData = (PtUnsigned32*)&pal.pt_Data[0];
 
   *pData++ = (1l << 16) | 18;
 
@@ -188,28 +188,28 @@ STATIC VOID ExportCursorPalette(SquawkPtr primary, UWORD id)
   pal.pt_End = 18;
 
   pal.as_Id = id;
-  pal.as_Flags = CHUNK_FLAG_ARCH_ANY;
+  pal.as_Flags = PT_AF_ARCH_ANY;
 
-  SaveAsset(primary, (struct ANY_ASSET*)&pal, sizeof(struct PALETTE_TABLE));
+  SaveAsset(primary, (PtAsset*)&pal, sizeof(struct PaletteTable));
 }
 
 
-VOID ExportPalettes(SquawkPtr primary)
+void ExportPalettes(SquawkPtr primary)
 {
-  GamePaletteId = GenerateAssetId(CT_PALETTE);
-  GameCursorPaletteId = GenerateAssetId(CT_PALETTE);
+  GamePaletteId = GenerateAssetId(PT_AT_PALETTE);
+  GameCursorPaletteId = GenerateAssetId(PT_AT_PALETTE);
 
-  StartAssetList(primary, CT_PALETTE, 0);
+  StartAssetList(primary, PT_AT_PALETTE, 0);
   ExportGamePalette(primary, GamePaletteId);
   ExportCursorPalette(primary, GameCursorPaletteId);
   EndAssetList(primary);
 }
 
-VOID ExportPrimaryScripts(SquawkPtr primary)
+void ExportPrimaryScripts(SquawkPtr primary)
 {
-  GameStartScript = GenerateAssetId(CT_SCRIPT);
+  GameStartScript = GenerateAssetId(PT_AT_SCRIPT);
 
-  StartAssetList(primary, CT_SCRIPT, 0);
+  StartAssetList(primary, PT_AT_SCRIPT, 0);
 
   ScriptBegin();
 

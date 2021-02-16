@@ -28,27 +28,52 @@
 #ifndef PARROT_INPUT_H
 #define PARROT_INPUT_H
 
-#define INEVT_CURSOR 1
-#define INEVT_KEY    2
+#include <Parrot/Parrot.h>
 
-EXTERN UWORD InEvtForceQuit;
-EXTERN UWORD InEvtKey;
-EXTERN WORD  InMouseX;
-EXTERN WORD  InMouseY;
+enum PtInputEventType
+{
+  PT_IET_KEYDOWN = 1,
+  PT_IET_KEYUP = 2,
+  PT_IET_SELECTDOWN = 3,
+  PT_IET_SELECTUP = 4,
+  PT_IET_SELECT = 5,
+  PT_IET_MENUDOWN = 6,
+  PT_IET_MENUUP = 7,
+  PT_IET_MENU = 8,
+  PT_IET_CURSOR = 9
+};
 
-EXTERN BYTE  KeyState[];
+enum PtKeyCode
+{
+  PT_KC_ESC    = 0x45,
+  PT_KC_F1     = 0x50,
+  PT_KC_F2     = 0x51,
+  PT_KC_LSHIFT = 0x60
+};
 
-EXPORT VOID InputInitialise();
+typedef struct PtInputEvent_t PtInputEvent;
 
-EXPORT VOID InputExit();
+struct PtInputEvent_t
+{
+  PtUnsigned16      ie_Type;
+  PtUnsigned16      ie_Code;
+  PtSigned16        ie_CursX;
+  PtSigned16        ie_CursY;
+};
 
-EXPORT BOOL PopEvent(struct INPUTEVENT* ie);
+PtPublic PtUnsigned16 InEvtForceQuit;
+PtPublic PtUnsigned16 InEvtKey;
+PtPublic PtSigned16  InMouseX;
+PtPublic PtSigned16  InMouseY;
 
-EXPORT BOOL IsMenuDown();
+PtPublic PtByte  KeyState[];
 
-#define KC_ESC     0x45
-#define KC_F1      0x50
-#define KC_F2      0x51
-#define KC_LSHIFT  0x60
+PtPublic void InputInitialise();
+
+PtPublic void InputExit();
+
+PtPublic BOOL PopEvent(PtInputEvent* ie);
+
+PtPublic BOOL IsMenuDown();
 
 #endif

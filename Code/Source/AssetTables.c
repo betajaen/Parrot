@@ -38,23 +38,23 @@
 
 #define NO_ARCHIVE 0xFFFF
 
-STATIC struct ASSET_TABLE* AssetTables[256];
-STATIC UWORD  NumAssetTables;
+STATIC struct AssetTable* AssetTables[256];
+STATIC PtUnsigned16  NumAssetTables;
 STATIC char strType[5];
 
 
-UWORD AssetTables_FindArchive(UWORD assetId, UWORD chapter, ULONG assetType)
+PtUnsigned16 AssetTables_FindArchive(PtUnsigned16 assetId, PtUnsigned16 chapter, PtUnsigned32 assetType)
 {
-  UWORD ii, jj;
-  struct ASSET_TABLE* tbl;
-  struct ASSET_TABLE_ENTRY* ent;
+  PtUnsigned16 ii, jj;
+  struct AssetTable* tbl;
+  struct AssetTableEntry* ent;
 
   for (ii = 0; ii < NumAssetTables; ii++)
   {
     tbl = AssetTables[ii];
     
     //RequesterF("OK", "Table %ld, Type=%s, Count=%ld, Chapter=%ld",
-    //  (ULONG)ii, IDtoStr(tbl->at_AssetType, strType), (ULONG)tbl->at_Count, (ULONG)tbl->at_Chapter);
+    //  (PtUnsigned32)ii, IDtoStr(tbl->at_AssetType, strType), (PtUnsigned32)tbl->at_Count, (PtUnsigned32)tbl->at_Chapter);
 
     if (tbl->at_AssetType != assetType)
       continue;
@@ -76,17 +76,17 @@ UWORD AssetTables_FindArchive(UWORD assetId, UWORD chapter, ULONG assetType)
   return NO_ARCHIVE;
 }
 
-VOID AssetTables_Load(UWORD archive, UWORD chapter, UWORD count)
+void AssetTables_Load(PtUnsigned16 archive, PtUnsigned16 chapter, PtUnsigned16 count)
 {
-  UWORD ii;
+  PtUnsigned16 ii;
   NumAssetTables = count;
-  struct ASSET_TABLE* tbl;
+  struct AssetTable* tbl;
 
   TRACEF("LoadAssetTables. Archive = %ld, Chapter = %ld, Count = %ld", archive, chapter, count);
 
   for (ii = 0; ii < count; ii++)
   {
-    tbl = (struct ASSET_TABLE*)Asset_Load_KnownArchive(CT_TABLE, archive, 1 + ii, ArenaGame);
+    tbl = (struct AssetTable*)Asset_Load_KnownArchive(PT_AT_TABLE, archive, 1 + ii, ArenaGame);
 
     if (NULL == tbl)
     {
@@ -95,8 +95,8 @@ VOID AssetTables_Load(UWORD archive, UWORD chapter, UWORD count)
         "Reason: (1) Asset Table does not exist in archive"
         PARROT_ERR_INT("Asset Type")
         PARROT_ERR_INT("Archive"),
-        (ULONG)(1+ii),
-        (ULONG)archive
+        (PtUnsigned32)(1+ii),
+        (PtUnsigned32)archive
       );
     }
 
