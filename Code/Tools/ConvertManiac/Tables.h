@@ -83,7 +83,7 @@ STATIC void AddObject(PtUnsigned16 mmId, PtUnsigned16 parrotId, PtUnsigned16 par
   MM_Object_Table[mmId].ob_Parrot_Room = parrotRoom;
 }
 
-STATIC BOOL AddExit(PtUnsigned16 mmId, PtUnsigned16 parrotId)
+STATIC PtBool AddExit(PtUnsigned16 mmId, PtUnsigned16 parrotId)
 {
   struct MM_EXIT* ex;
 
@@ -108,7 +108,7 @@ STATIC BOOL AddExit(PtUnsigned16 mmId, PtUnsigned16 parrotId)
   return FALSE;
 }
 
-STATIC BOOL FindRoom(PtUnsigned16 mmId, PtUnsigned16* out_parrotId)
+STATIC PtBool FindRoom(PtUnsigned16 mmId, PtUnsigned16* out_parrotId)
 {
   if (mmId >= 55)
   {
@@ -120,7 +120,7 @@ STATIC BOOL FindRoom(PtUnsigned16 mmId, PtUnsigned16* out_parrotId)
   return TRUE;
 }
 
-STATIC BOOL FindObject(PtUnsigned16 mmId, struct MM_OBJECT** obj)
+STATIC PtBool FindObject(PtUnsigned16 mmId, struct MM_OBJECT** obj)
 {
   PtUnsigned16 ii;
 
@@ -139,7 +139,7 @@ STATIC BOOL FindObject(PtUnsigned16 mmId, struct MM_OBJECT** obj)
   return FALSE;
 }
 
-STATIC BOOL FindExit(PtUnsigned16 mmId, PtUnsigned16* out_parrotId, PtUnsigned16* out_targetId)
+STATIC PtBool FindExit(PtUnsigned16 mmId, PtUnsigned16* out_parrotId, PtUnsigned16* out_targetId)
 {
   struct MM_EXIT* ex;
 

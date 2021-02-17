@@ -49,6 +49,7 @@ typedef int   PtSigned32;
 typedef APTR PtPtr;
 typedef char PtChar;
 typedef char PtByte;
+typedef BOOL PtBool;
 
 #if defined(EXTERN)
 #define PtPublic EXTERN
@@ -56,10 +57,16 @@ typedef char PtByte;
 #define PtPublic extern
 #endif
 
-#if defined(PtPublic)
+#if defined(STATIC)
 #define PtPrivate STATIC
 #else
 #define PtPrivate static
+#endif
+
+#if defined(INLINE)
+#define PtInline INLINE
+#else
+#define PtInline inline
 #endif
 
 /**
@@ -124,9 +131,9 @@ union PtDialogueText_t
   Squawk Files
 */
 
-#define PtAssetHeader          \
-  PtUnsigned16      as_Id;     \
-  PtUnsigned16      as_Flags;  \
+#define PtAssetHeader        \
+  PtUnsigned16      as_Id;    \
+  PtUnsigned16      as_Flags; \
   PtUnsigned32      as_Length
 
 typedef struct PtAsset_t PtAsset;
@@ -134,46 +141,6 @@ typedef struct PtAsset_t PtAsset;
 struct PtAsset_t
 {
   PtAssetHeader;
-};
-
-#define GET_ASSET_ID(X) (((PtAsset*) (X))->as_Id)
-#define GET_ASSET_TYPE(X) (((PtAsset*) (X))->as_Type)
-
-#define SIF_IS_PUBLIC   1
-#define SIF_IS_HIRES    2
-#define SIF_IS_LACE     4
-
-struct SCREEN_INFO
-{
-  PtSigned32    si_Left, si_Top, si_Width, si_Height;
-  STRPTR  si_Title;
-  PtUnsigned16   si_Depth;
-  PtUnsigned16   si_Flags;  /* See SIF_* */
-};
-
-typedef struct PtViewLayout_t PtViewLayout;
-
-struct PtViewLayout_t
-{
-  PtUnsigned16  vl_Width;
-  PtUnsigned16  vl_Height;
-  PtUnsigned16  vl_BitMapWidth;
-  PtUnsigned16  vl_BitmapHeight;
-  PtSigned16   vl_Horizontal;
-  PtSigned16   vl_Vertical;
-  PtUnsigned16  vl_Depth;
-};
-
-typedef struct PtViewLayouts_t PtViewLayouts;
-
-struct PtViewLayouts_t
-{
-  PtSigned32    v_Left;
-  PtSigned32    v_Top;
-  PtSigned32    v_Width;
-  PtSigned32    v_Height;
-  PtUnsigned16  v_NumLayouts;
-  PtViewLayout  v_Layouts[MAX_VIEW_LAYOUTS];
 };
 
 enum PtCursorType
@@ -231,17 +198,17 @@ struct PtGameInfo_t
 {
   PtAssetHeader;
   
-  PtUnsigned32                     gi_GameId;
-  PtUnsigned32                     gi_GameVersion;
-  PtDialogue                  gi_Title;
-  PtDialogue                  gi_ShortTitle;
-  PtDialogue                  gi_Author;
-  PtDialogue                  gi_Release;
-  PtUnsigned16                     gi_Width;
-  PtUnsigned16                     gi_Height;
-  PtUnsigned16                     gi_Depth;
-  PtUnsigned16                     gi_NumAssetTables;
-  PtUnsigned16                     gi_StartScript;
+  PtUnsigned32  gi_GameId;
+  PtUnsigned32  gi_GameVersion;
+  PtDialogue    gi_Title;
+  PtDialogue    gi_ShortTitle;
+  PtDialogue    gi_Author;
+  PtDialogue    gi_Release;
+  PtUnsigned16  gi_Width;
+  PtUnsigned16  gi_Height;
+  PtUnsigned16  gi_Depth;
+  PtUnsigned16  gi_NumAssetTables;
+  PtUnsigned16  gi_StartScript;
 };
 
 extern PtGameInfo GameInfo;

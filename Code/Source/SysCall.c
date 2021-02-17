@@ -30,7 +30,7 @@
 #include <Parrot/Log.h>
 #include <Parrot/Api.h>
 
-extern BOOL InEvtForceQuit;
+extern PtBool InEvtForceQuit;
 
 void Parrot_SysCall(PtUnsigned16 function, PtSigned32 argument)
 {

@@ -29,7 +29,7 @@ of the structure.
   {
     PtUnsigned32 lv_Strength;
     PtUnsigned32 lv_Length;
-    BOOL  lv_IsDown;
+    PtBool  lv_IsDown;
   };
 
 ## Functions
@@ -122,7 +122,7 @@ These are:-
 
   void    void
   APTR    void*
-  BOOL    Boolean
+  PtBool    Boolean
   STRPTR  char*
 
 ## Other Macros

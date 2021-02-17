@@ -30,6 +30,35 @@
 
 #include <Parrot/Parrot.h>
 
+
+
+typedef struct PtViewLayout_t PtViewLayout;
+
+struct PtViewLayout_t
+{
+  PtUnsigned16  vl_Width;
+  PtUnsigned16  vl_Height;
+  PtUnsigned16  vl_BitMapWidth;
+  PtUnsigned16  vl_BitmapHeight;
+  PtSigned16   vl_Horizontal;
+  PtSigned16   vl_Vertical;
+  PtUnsigned16  vl_Depth;
+};
+
+typedef struct PtViewLayouts_t PtViewLayouts;
+
+struct PtViewLayouts_t
+{
+  PtSigned32    v_Left;
+  PtSigned32    v_Top;
+  PtSigned32    v_Width;
+  PtSigned32    v_Height;
+  PtUnsigned16  v_NumLayouts;
+  PtViewLayout  v_Layouts[MAX_VIEW_LAYOUTS];
+};
+
+
+
 PtPublic void GfxInitialise();
 
 PtPublic void GfxOpen(PtViewLayouts* view);
@@ -40,7 +69,7 @@ PtPublic void GfxShow();
 
 PtPublic void GfxHide();
 
-PtPublic BOOL GfxIsPal();
+PtPublic PtBool GfxIsPal();
 
 PtPublic void GfxSetScrollOffset(PtUnsigned16 vp, PtSigned16 x, PtSigned16 y);
 

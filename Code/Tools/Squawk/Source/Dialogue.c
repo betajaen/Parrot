@@ -136,7 +136,7 @@ void ExportDialogue(SquawkPtr squawk)
 {
   PtUnsigned16 ii;
   struct WRITE_STRING_TABLE* tbl;
-  BOOL hasWrittenHeader;
+  PtBool hasWrittenHeader;
 
   hasWrittenHeader = FALSE;
 

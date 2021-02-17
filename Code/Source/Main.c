@@ -55,9 +55,7 @@ PtUnsigned16 GcCounter;
 PtSigned32 main()
 {
   struct Process* process;
-  PtSigned32             rc;
-  struct SCREEN_INFO screenInfo;
-  PtUnsigned32  screen;
+  PtSigned32      rc;
 
   rc = RETURN_OK;
   DOSBase = NULL;

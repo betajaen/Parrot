@@ -59,7 +59,7 @@ void Ui_Teardown()
 
 struct UiPanel* Ui_CreatePanel(PtUnsigned32 numElements, PtUnsigned16 screen)
 {
-  struct UiPanel* panel = Asset_New1(sizeof(struct UiPanel), sizeof(struct UiElement), numElements);
+  struct UiPanel* panel = PtAsset_New1(sizeof(struct UiPanel), sizeof(struct UiElement), numElements);
 
   panel->ui_NumElements = numElements;
   panel->ui_Screen = screen;

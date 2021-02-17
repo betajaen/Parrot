@@ -26,6 +26,7 @@
 */
 
 #include <Parrot/Parrot.h>
+#include <Parrot/Asset.h>
 #include <Parrot/Arena.h>
 #include <Parrot/Squawk.h>
 #include <Parrot/String.h>
@@ -225,14 +226,14 @@ STATIC struct RoomExit* FindExit(struct UNPACKED_ROOM* room, PtUnsigned16 id)
     if (NULL == exit)
       break;
     
-    if (GET_ASSET_ID(exit) == id)
+    if (PtAsset_Id(exit) == id)
       break;
   }
 
   return exit;
 }
 
-STATIC BOOL PointInside(struct Rect* rect, PtSigned16 x, PtSigned16 y)
+STATIC PtBool PointInside(struct Rect* rect, PtSigned16 x, PtSigned16 y)
 {
   return x >= rect->rt_Left && x <= rect->rt_Right && y >= rect->rt_Top && y <= rect->rt_Bottom;
 }
@@ -242,13 +243,13 @@ void Room_Run(PtUnsigned16 screen, struct RoomEntrance* entrance)
   struct UNPACKED_ROOM room;
   PtInputEvent evt;
   PtUnsigned16 screenW, screenH;
-  BOOL exitRoom;
+  PtBool exitRoom;
   PtUnsigned16 mostLeftEdge;
   PtUnsigned16 ii;
   PtSigned16 rmMouseX, rmMouseY;
-  BOOL updateCaption;
-  BOOL hasCaption;
-  BOOL eventThisFrame;
+  PtBool updateCaption;
+  PtBool hasCaption;
+  PtBool eventThisFrame;
   PtUnsigned16 mouseFrameTimer;
   PtUnsigned16 mouseFrame;
 
@@ -359,7 +360,7 @@ void Room_Run(PtUnsigned16 screen, struct RoomEntrance* entrance)
         case PT_IET_CURSOR:
         {
           struct Entity* entity;
-          BOOL didFind;
+          PtBool didFind;
 
           didFind = FALSE;
           rmMouseX = room.lv_CamX + CursorX;

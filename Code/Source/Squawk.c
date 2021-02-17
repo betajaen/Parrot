@@ -165,7 +165,7 @@ STATIC struct Archive* GetOrOpenArchive(PtUnsigned16 id)
   return NULL;
 }
 
-STATIC BOOL NavigateToAssetList(struct Archive* archive, PtUnsigned32 classType)
+STATIC PtBool NavigateToAssetList(struct Archive* archive, PtUnsigned32 classType)
 {
   PtSigned32 err;
   struct SQUAWK_ASSET_LIST_HEADER hdr;
@@ -311,7 +311,7 @@ STATIC PtAsset* Load(PtUnsigned32 classType, struct Archive* archive, struct ARE
 }
 
 
-STATIC BOOL LoadInto(PtUnsigned32 classType, struct Archive* archive, PtAsset* asset, PtUnsigned32 assetSize, PtUnsigned16 id)
+STATIC PtBool LoadInto(PtUnsigned32 classType, struct Archive* archive, PtAsset* asset, PtUnsigned32 assetSize, PtUnsigned16 id)
 {
   PtUnsigned32 assetLength;
 
@@ -371,7 +371,7 @@ STATIC BOOL LoadInto(PtUnsigned32 classType, struct Archive* archive, PtAsset* a
 }
 
 
-STATIC BOOL LoadInto_Callback(PtUnsigned32 classType, struct Archive* archive, PtAsset* asset, PtUnsigned32 assetSize, PtUnsigned16 id, LoadSpecialCallback cb)
+STATIC PtBool LoadInto_Callback(PtUnsigned32 classType, struct Archive* archive, PtAsset* asset, PtUnsigned32 assetSize, PtUnsigned16 id, LoadSpecialCallback cb)
 {
   PtUnsigned32 assetLength;
 
@@ -421,7 +421,7 @@ STATIC BOOL LoadInto_Callback(PtUnsigned32 classType, struct Archive* archive, P
   return TRUE;
 }
 
-STATIC BOOL LoadIntoRaster(PtUnsigned32 classType, struct Archive* archive, PtAsset* asset, PtUnsigned32 assetSize, PtUnsigned16 id)
+STATIC PtBool LoadIntoRaster(PtUnsigned32 classType, struct Archive* archive, PtAsset* asset, PtUnsigned32 assetSize, PtUnsigned16 id)
 {
   PtUnsigned32 assetLength;
 
@@ -515,7 +515,7 @@ PtAsset* Asset_Load_KnownArchive(PtUnsigned32 classType, PtUnsigned16 archiveId,
   return Load(classType, archive, arena, id);
 }
 
-BOOL Asset_LoadInto_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsigned32 classType, PtAsset* outAsset, PtUnsigned32 assetSize)
+PtBool Asset_LoadInto_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsigned32 classType, PtAsset* outAsset, PtUnsigned32 assetSize)
 {
   struct Archive* archive;
   archive = GetOrOpenArchive(archiveId);
@@ -525,7 +525,7 @@ BOOL Asset_LoadInto_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsi
   return LoadInto(classType, archive, outAsset, assetSize, id);
 }
 
-BOOL Asset_LoadInto_Callback_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsigned32 classType, PtAsset* outAsset, PtUnsigned32 assetSize, LoadSpecialCallback cb)
+PtBool Asset_LoadInto_Callback_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsigned32 classType, PtAsset* outAsset, PtUnsigned32 assetSize, LoadSpecialCallback cb)
 {
   struct Archive* archive;
   archive = GetOrOpenArchive(archiveId);
@@ -578,7 +578,7 @@ PtAsset* Asset_Load(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetTyp
   return Asset_Load_KnownArchive(assetType, archiveId, id, arena);
 }
 
-BOOL Asset_LoadInto(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize)
+PtBool Asset_LoadInto(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize)
 {
   PtUnsigned16 archiveId;
 
@@ -611,7 +611,7 @@ void Asset_Unload(PtAsset* asset)
 }
 
 
-BOOL Asset_LoadInto_Callback(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize, LoadSpecialCallback cb)
+PtBool Asset_LoadInto_Callback(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize, LoadSpecialCallback cb)
 {
 
   PtUnsigned16 archiveId;
@@ -635,56 +635,4 @@ BOOL Asset_LoadInto_Callback(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32
   }
 
   return Asset_LoadInto_Callback_KnownArchive(id, archiveId, assetType, asset, assetSize, cb);
-}
-
-
-
-PtAsset* Asset_New(PtUnsigned32 size)
-{
-  PtAsset* asset;
-
-  asset = AllocMem(size, MEMF_CLEAR);
-
-  asset->as_Id = 0;
-  asset->as_Flags = PT_AF_INSTANCE | PT_AF_ARCH_ANY;
-  asset->as_Length = size;
-
-  return asset;
-}
-
-PtAsset* Asset_New1(PtUnsigned32 size, PtUnsigned32 dataSize, PtUnsigned32 numDataElements)
-{
-  PtAsset* asset;
-  PtUnsigned32 realSize;
-
-  realSize = size + (dataSize * numDataElements);
-
-  asset = AllocMem(realSize, MEMF_CLEAR);
-
-  asset->as_Id = 0;
-  asset->as_Flags = PT_AF_INSTANCE | PT_AF_ARCH_ANY | PT_AF_HAS_DATA;
-  asset->as_Length = realSize;
-
-  return asset;
-}
-
-void Asset_Release(PtAsset* asset)
-{
-  if (asset == NULL)
-  {
-    WARNING("Tried to release a NULL asset!");
-    return;
-  }
-
-  if (asset->as_Flags & PT_AF_INSTANCE)
-  {
-    TRACEF("ASSET Release. Releasing Instance %ld", asset->as_Id);
-    FreeMem(asset, asset->as_Length);
-    return;
-  }
-  else
-  {
-    TRACEF("ASSET Release. Asset %ld was not released! Due to unimplementation", asset->as_Id);
-  }
-
 }

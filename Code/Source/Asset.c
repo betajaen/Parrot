@@ -1,5 +1,5 @@
 /**
-    $Id: Arena.h 1.2 2020/05/17 16:07:00, betajaen Exp $
+    $Id: Object.c, 1.2 2020/02/16 16:42:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,23 +25,59 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PARROT_ARENA_H
-#define PARROT_ARENA_H
-
 #include <Parrot/Parrot.h>
+#include <Parrot/Log.h>
 
-extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom, *ArenaFrameTemp;
+#include <proto/exec.h>
 
-struct ARENA* ArenaOpen(PtUnsigned32 name, PtUnsigned32 size, PtUnsigned32 requirements);
+PtPrivate PtUnsigned16 sNextObjectInstanceId = 0x8000;
 
-PtBool ArenaClose(struct ARENA* arena);
+PtAsset* PtAsset_New(PtUnsigned32 size)
+{
+  PtAsset* asset;
 
-PtBool ArenaRollback(struct ARENA* arena);
+  asset = AllocMem(size, MEMF_CLEAR);
 
-PtUnsigned32 ArenaSpace(struct ARENA* arena);
+  asset->as_Id = 0;
+  asset->as_Flags = PT_AF_INSTANCE | PT_AF_ARCH_ANY;
+  asset->as_Length = size;
 
-PtUnsigned32 ArenaSize(struct ARENA* arena);
+  return asset;
+}
 
-APTR NewObject(struct ARENA* arena, PtUnsigned32 size, PtBool zeroFill);
+PtAsset* PtAsset_New1(PtUnsigned32 size, PtUnsigned32 dataSize, PtUnsigned32 numDataElements)
+{
+  PtAsset* asset;
+  PtUnsigned32 realSize;
 
-#endif
+  realSize = size + (dataSize * numDataElements);
+
+  asset = AllocMem(realSize, MEMF_CLEAR);
+
+  asset->as_Id = 0;
+  asset->as_Flags = PT_AF_INSTANCE | PT_AF_ARCH_ANY | PT_AF_HAS_DATA;
+  asset->as_Length = realSize;
+
+  return asset;
+}
+
+void PtAsset_Destroy(PtAsset* asset)
+{
+  if (asset == NULL)
+  {
+    WARNING("Tried to release a NULL asset!");
+    return;
+  }
+
+  if (asset->as_Flags & PT_AF_INSTANCE)
+  {
+    TRACEF("ASSET Release. Releasing Instance %ld", asset->as_Id);
+    FreeMem(asset, asset->as_Length);
+    return;
+  }
+  else
+  {
+    TRACEF("ASSET Release. Asset %ld was not released! Due to unimplementation", asset->as_Id);
+  }
+}
+

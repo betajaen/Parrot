@@ -40,11 +40,11 @@ PtUnsigned32 StrCopy(PtChar* pDst, PtUnsigned32 pDstCapacity, CONST PtChar* pSrc
 
 PtUnsigned32 StrHash(PtUnsigned8 length, STRPTR text);
 
-BOOL StrStartsWith(CONST PtChar* pTest, PtChar value);
+PtBool StrStartsWith(CONST PtChar* pTest, PtChar value);
 
-BOOL StrEndsWith(CONST PtChar* test, PtChar value);
+PtBool StrEndsWith(CONST PtChar* test, PtChar value);
 
-BOOL StrStartsWithStr(CONST PtChar* pTest, CONST PtChar* pPrefix);
+PtBool StrStartsWithStr(CONST PtChar* pTest, CONST PtChar* pPrefix);
 
 void FillMem(PtUnsigned8* pDst, PtUnsigned32 length, PtUnsigned8 value);
 

@@ -1,5 +1,5 @@
 /**
-    $Id: Arena.h 1.2 2020/05/17 16:07:00, betajaen Exp $
+    $Id: Object.h 1.2 2020/02/16 16:28:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,23 +25,36 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PARROT_ARENA_H
-#define PARROT_ARENA_H
+#ifndef PARROT_ASSET_H
+#define PARROT_ASSET_H
 
 #include <Parrot/Parrot.h>
 
-extern struct ARENA *ArenaGame, *ArenaChapter, *ArenaRoom, *ArenaFrameTemp;
+/**
+ * Get Object Id
+ */
+PtUnsigned16 PtAsset_Id(APTR ptr)
+{
+  if (ptr == NULL)
+    return 0;
 
-struct ARENA* ArenaOpen(PtUnsigned32 name, PtUnsigned32 size, PtUnsigned32 requirements);
+  return ((PtAsset*)ptr)->as_Id;
+}
 
-PtBool ArenaClose(struct ARENA* arena);
+/**
+ * Get if the Object is created at runtime
+ */
+PtInline PtBool PtAsset_IsInstance(PtAsset* object)
+{
+  return object != NULL && object->as_Flags & PT_AF_INSTANCE;
+}
 
-PtBool ArenaRollback(struct ARENA* arena);
-
-PtUnsigned32 ArenaSpace(struct ARENA* arena);
-
-PtUnsigned32 ArenaSize(struct ARENA* arena);
-
-APTR NewObject(struct ARENA* arena, PtUnsigned32 size, PtBool zeroFill);
+/**
+ * Get if the Object is loaded from disk
+ */
+PtInline PtBool PtAsset_IsSaved(PtAsset* object)
+{
+  return object != NULL && (object->as_Flags & PT_AF_INSTANCE == 0);
+}
 
 #endif

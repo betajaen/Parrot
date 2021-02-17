@@ -51,7 +51,8 @@ PARROT_OBJ = \
 						squawk.o \
 						syscall.o \
 						log.o \
-						vm_opcodes.o
+						vm_opcodes.o \
+						asset.o
 
 SQUAWK_OBJ = squawk_main.o squawk_writer.o squawk_table.o squawk_dialogue.o string.o requester.o Source/minstart.o
 CONVERTER_MANIAC_OBJ = $(SQUAWK_OBJ) maniac_main.o maniac_meta.o maniac_lfl.o squawk_writer_script.o
@@ -115,6 +116,9 @@ log.o: Source/Log.c
 
 vm_opcodes.o: Source/Vm_Opcodes.c
 	$(CC) $(CFLAGS) -c Source/Vm_Opcodes.c -o vm_opcodes.o
+
+asset.o: Source/Asset.c
+	$(CC) $(CFLAGS) -c Source/Asset.c -o asset.o
 
 # SQUAWK
 

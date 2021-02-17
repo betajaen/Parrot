@@ -108,7 +108,7 @@ of the structure.
 @{FG Text}@{BG None}  {@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    PtUnsigned32 lv_Strength;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}    PtUnsigned32 lv_Length;@{BG Background}@{FG Text}
-@{FG Text}@{BG None}    BOOL  lv_IsDown;@{BG Background}@{FG Text}
+@{FG Text}@{BG None}    PtBool  lv_IsDown;@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  };@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}Functions@{uu}@{ui}@{BG Background}@{FG Text}
@@ -216,7 +216,7 @@ These are:-
 
 @{FG Text}@{BG None}  void    void@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  APTR    void*@{BG Background}@{FG Text}
-@{FG Text}@{BG None}  BOOL    Boolean@{BG Background}@{FG Text}
+@{FG Text}@{BG None}  PtBool    Boolean@{BG Background}@{FG Text}
 @{FG Text}@{BG None}  STRPTR  char*@{BG Background}@{FG Text}
 
 @{FG None}@{BG None}@{u}@{i}Other Macros@{uu}@{ui}@{BG Background}@{FG Text}

@@ -93,8 +93,8 @@ STATIC PtSigned32 DebugF(CONST_STRPTR pFmt, ...);
 
 STATIC PtUnsigned32 OpenLFL(PtChar* basePath, PtUnsigned16 id);
 STATIC void CloseLFL();
-STATIC BOOL SeekFile(PtUnsigned32 pos);
-STATIC BOOL JumpFile(PtSigned32 extraPos);
+STATIC PtBool SeekFile(PtUnsigned32 pos);
+STATIC PtBool JumpFile(PtSigned32 extraPos);
 
 STATIC struct OBJECT_TABLE_REF TableRefs[16];
 STATIC struct OBJECT_TABLE RoomTable;
@@ -977,7 +977,7 @@ STATIC void CloseLFL()
 }
 
 
-STATIC BOOL SeekFile(PtUnsigned32 pos)
+STATIC PtBool SeekFile(PtUnsigned32 pos)
 {
   PtUnsigned8* nextPos;
 
@@ -993,7 +993,7 @@ STATIC BOOL SeekFile(PtUnsigned32 pos)
   return FALSE;
 }
 
-STATIC BOOL JumpFile(PtSigned32 extraPos)
+STATIC PtBool JumpFile(PtSigned32 extraPos)
 {
   PtUnsigned8* nextPos;
 

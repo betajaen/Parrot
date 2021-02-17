@@ -72,8 +72,8 @@ PtPublic void InputInitialise();
 
 PtPublic void InputExit();
 
-PtPublic BOOL PopEvent(PtInputEvent* ie);
+PtPublic PtBool PopEvent(PtInputEvent* ie);
 
-PtPublic BOOL IsMenuDown();
+PtPublic PtBool IsMenuDown();
 
 #endif

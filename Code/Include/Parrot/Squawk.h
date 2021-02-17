@@ -53,20 +53,20 @@ PtUnsigned16 Asset_LoadAll(PtUnsigned32 classType, PtUnsigned16 archiveId, struc
 
 PtAsset* Asset_Load_KnownArchive(PtUnsigned32 classType, PtUnsigned16 archiveId, PtUnsigned16 id, struct ARENA* arena);
 
-BOOL Asset_LoadInto_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsigned32 classType, PtAsset* outAsset, PtUnsigned32 assetSize);
+PtBool Asset_LoadInto_KnownArchive(PtUnsigned16 id, PtUnsigned16 archiveId, PtUnsigned32 classType, PtAsset* outAsset, PtUnsigned32 assetSize);
 
 PtAsset* Asset_Load(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, struct ARENA* arena);
 
-BOOL Asset_LoadInto(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize);
+PtBool Asset_LoadInto(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize);
 
-BOOL Asset_LoadInto_Callback(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize, LoadSpecialCallback cb);
+PtBool Asset_LoadInto_Callback(PtUnsigned16 id, PtUnsigned16 chapter, PtUnsigned32 assetType, PtAsset* asset, PtUnsigned32 assetSize, LoadSpecialCallback cb);
 
 void Asset_CallbackFor_Image(PtAsset* asset, PtUnsigned16 counter, PtUnsigned32* readLength, APTR* readInto);
 
-PtAsset* Asset_New(PtUnsigned32 size);
+PtAsset* PtAsset_New(PtUnsigned32 size);
 
-PtAsset* Asset_New1(PtUnsigned32 size, PtUnsigned32 dataSize, PtUnsigned32 numDataElements);
+PtAsset* PtAsset_New1(PtUnsigned32 size, PtUnsigned32 dataSize, PtUnsigned32 numDataElements);
 
-void Asset_Release(PtAsset* asset);
+void PtAsset_Destroy(PtAsset* asset);
 
 #endif

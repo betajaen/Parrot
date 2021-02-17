@@ -117,7 +117,7 @@ void ExitArenaNow()
   }
 }
 
-BOOL ArenaRollback(struct ARENA* arena)
+PtBool ArenaRollback(struct ARENA* arena)
 {
   if (NULL == arena)
     return FALSE;
@@ -144,7 +144,7 @@ PtUnsigned32 ArenaSize(struct ARENA* arena)
 }
 
 
-APTR NewObject(struct ARENA* arena, PtUnsigned32 size, BOOL zeroFill)
+APTR NewObject(struct ARENA* arena, PtUnsigned32 size, PtBool zeroFill)
 {
   APTR result;
 

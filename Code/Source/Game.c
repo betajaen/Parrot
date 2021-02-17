@@ -46,7 +46,6 @@ struct UNPACKED_ROOM  GameRoom;
 
 void GameStart(STRPTR path)
 {
-  struct SCREEN_INFO screenInfo;
   struct Room* room;
   struct UNPACKED_ROOM uroom;
   struct RoomEntrance entrance;

@@ -63,10 +63,10 @@ PtPublic PtSigned16 CursorYLimit;
 #define SemAcquireInputRw()
 #define SemReleaseInputRw() 
 
-BOOL PopEvent(PtInputEvent* ie)
+PtBool PopEvent(PtInputEvent* ie)
 {
   PtInputEvent* popped;
-  BOOL rc;
+  PtBool rc;
 
   rc = FALSE;
 
@@ -102,7 +102,7 @@ void PushEvent(PtInputEvent* ie)
 HANDLERPROTO(handlerfunc, PtUnsigned32, struct InputEvent* ie, APTR userdata)
 {
   PtInputEvent evt;
-  BOOL hasMouseUpdate;
+  PtBool hasMouseUpdate;
   PtSigned16 mouseX, mouseY, selectDown, selectUp, menuDown, menuUp;
 
   hasMouseUpdate = FALSE;
@@ -330,7 +330,7 @@ void InputExit()
   }
 }
 
-BOOL IsMenuDown()
+PtBool IsMenuDown()
 {
   return CursorMenu[1] == TRUE;
 }

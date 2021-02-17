@@ -331,7 +331,7 @@ void GfxHide()
   TRACE("GFX Hidden.");
 }
 
-BOOL GfxIsPal()
+PtBool GfxIsPal()
 {
   return (GfxBase->DisplayFlags & PAL) == PAL;
 }

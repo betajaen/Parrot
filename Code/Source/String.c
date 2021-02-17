@@ -165,9 +165,9 @@ PtChar* StrDuplicate(CONST PtChar* pSrc)
   return dst;
 }
 
-BOOL StrStartsWith(CONST PtChar* pTest, PtChar value)
+PtBool StrStartsWith(CONST PtChar* pTest, PtChar value)
 {
-  BOOL rc;
+  PtBool rc;
 
   rc = FALSE;
 
@@ -182,7 +182,7 @@ CLEAN_EXIT:
   return rc;
 }
 
-BOOL StrStartsWithStr(CONST PtChar* pTest, CONST PtChar* pPrefix)
+PtBool StrStartsWithStr(CONST PtChar* pTest, CONST PtChar* pPrefix)
 {
   if (NULL == pTest || NULL == pPrefix)
   {
@@ -198,9 +198,9 @@ BOOL StrStartsWithStr(CONST PtChar* pTest, CONST PtChar* pPrefix)
   return TRUE;
 }
 
-BOOL StrEndsWith(CONST PtChar* pTest, PtChar value)
+PtBool StrEndsWith(CONST PtChar* pTest, PtChar value)
 {
-  BOOL rc;
+  PtBool rc;
 
   rc = FALSE;
 

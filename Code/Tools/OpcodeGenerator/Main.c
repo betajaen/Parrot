@@ -67,7 +67,7 @@ struct Opcode
   char* Name;
   char* Description;
   char* Code;
-  BOOL  IsBig;
+  PtBool  IsBig;
   PtUnsigned16 NumArguments;
   struct Argument Args[MAX_ARGUMENTS];
 };
@@ -78,7 +78,7 @@ STATIC struct Opcode Opcodes[MAX_OPCODES] = { 0 };
 STATIC PtUnsigned32 sTmpStrLen;
 STATIC PtChar sTmpStr[256];
 STATIC PtChar Line[512];
-STATIC BOOL LineIsEof;
+STATIC PtBool LineIsEof;
 STATIC PtChar SectionText[1024];
 STATIC PtUnsigned16 SectionTextLength;
 
@@ -132,7 +132,7 @@ void ReadOpcodeDirectory(const char* source)
   struct ExAllControl* excontrol;
   struct ExAllData* ead, * buffer;
   BPTR            sourcelock;
-  BOOL            exmore;
+  PtBool            exmore;
   PtSigned32            error;
 
   if ( (buffer = AllocMem(BUFFERSIZE, MEMF_CLEAR)) == 0)
@@ -189,7 +189,7 @@ void ReadOpcodeDirectory(const char* source)
   FreeMem(buffer, BUFFERSIZE);
 }
 
-BOOL ReadLine(BPTR file)
+PtBool ReadLine(BPTR file)
 {
   PtChar ch;
   PtUnsigned16 ii;
@@ -479,7 +479,7 @@ void WriteCWriter(PtUnsigned16 id, BPTR file)
   struct Argument* arg;
   PtChar tmpStr[2];
   PtUnsigned16 ii;
-  BOOL hasStack, hasArgs;
+  PtBool hasStack, hasArgs;
 
   opcode = &Opcodes[id];
 
@@ -666,7 +666,7 @@ void WriteCReader(PtUnsigned16 id, BPTR file)
   PtChar tmpStr[2];
   PtChar ch, *code;
   PtUnsigned16 ii;
-  BOOL hasStack, hasArgs;
+  PtBool hasStack, hasArgs;
 
   opcode = &Opcodes[id];
 
@@ -839,7 +839,7 @@ void ReadOpcode(char* path)
   PtSigned32 err;
   PtUnsigned16 lineLen;
   PtUnsigned16 section;
-  BOOL isTrimming;
+  PtBool isTrimming;
   
   file = Open(path, MODE_OLDFILE);
 
