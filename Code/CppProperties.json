@@ -4,7 +4,7 @@
       "inheritEnvironments": [
         "vsdev"
       ],
-      "name": "m68k-os3-release",
+      "name": "amiga-os3",
         "includePath": [
             "${workspaceRoot}\\**",
             "${workspaceRoot}\\Include",

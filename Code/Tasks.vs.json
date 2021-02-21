@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "make",
+      "appliesTo": "makefile",
+      "type": "launch",
+      "contextType": "build",
+      "inheritEnvironments": [
+        "amiga-os3"
+      ],
+      "command": "make"
+    }
+  ]
+}

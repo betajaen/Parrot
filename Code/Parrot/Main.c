@@ -1,5 +1,5 @@
 /**
-    $Id: Log.c, 1.2 2021/02/10 16:56:00, betajaen Exp $
+    $Id: Main.c 1.5 2021/02/21 10:22:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -26,61 +26,8 @@
 */
 
 #include <Parrot/Parrot.h>
-#include <Parrot/Log.h>
 
-#include <proto/exec.h>
-#include <proto/dos.h>
-
-static BPTR sLog = NULL;
-
-void Log_Initialise()
+int main(int argc, char** argv)
 {
-  if (sLog == NULL)
-  {
-    sLog = Open("Parrot:Parrot.log", MODE_NEWFILE);
-  }
-}
-
-void Log_Shutdown()
-{
-  if (sLog != NULL)
-  {
-    Close(sLog);
-    sLog = NULL;
-  }
-}
-
-void Log(PtUnsigned16 logType, CONST_STRPTR text)
-{
-  switch (logType)
-  {
-    case LOG_TYPE_TRACE:   FPuts(sLog, "TRC "); break;
-    case LOG_TYPE_VERBOSE: FPuts(sLog, "VRB "); break;
-    case LOG_TYPE_INFO:    FPuts(sLog, "INF "); break;
-    case LOG_TYPE_WARNING: FPuts(sLog, "WAR "); break;
-    case LOG_TYPE_ERROR:   FPuts(sLog, "ERR "); break;
-  }
-
-  FPuts(sLog, text);
-  FPutC(sLog, '\n');
-  Flush(sLog);
-}
-
-void LogF(PtUnsigned16 logType, CONST_STRPTR format, ...)
-{
-  APTR arg;
-  arg = (CONST_STRPTR*)(&format + 1);
-
-  switch (logType)
-  {
-    case LOG_TYPE_TRACE:    FPuts(sLog, "TRC "); break;
-    case LOG_TYPE_VERBOSE:  FPuts(sLog, "VRB "); break;
-    case LOG_TYPE_INFO:     FPuts(sLog, "INF "); break;
-    case LOG_TYPE_WARNING:  FPuts(sLog, "WAR "); break;
-    case LOG_TYPE_ERROR:    FPuts(sLog, "ERR "); break;
-  }
-
-  VFPrintf(sLog, format, arg);
-  FPutC(sLog, '\n');
-  Flush(sLog);
+  return 0;
 }
