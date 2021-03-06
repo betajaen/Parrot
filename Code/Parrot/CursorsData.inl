@@ -1,5 +1,5 @@
 /**
-    $Id: Log.h 1.5 2021/02/21 10:19:00, betajaen Exp $
+    $Id: Cursors.inl 1.5 2021/03/06 7:12:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,50 +25,54 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _PARROT_GRAPHICS_H_
-#define _PARROT_GRAPHICS_H_
-
-#include <Parrot/Parrot.h>
-
-typedef struct _GraphicsViewInfo GraphicsViewInfo;
-
-struct _GraphicsViewInfo
+struct CursorImageDataInfo
 {
-  uint16 viewLeft;
-  uint16 viewTop;
-  uint16 viewWidth;
-  uint16 viewHeight;
-  uint8  depth;
-  uint8  pad;
-  uint16 bitmapWidth;
-  uint16 bitmapHeight;
+    int16 offsetX, offsetY;
+    uint16 height;
+    uint16 data[2 * 24];
+};  
+
+CHIP struct CursorImageDataInfo CursorImageData[] = {
+  {
+    -7,-7,15,
+    {
+        0x0000,0x0000,
+        0x380 ,0x0   ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x380 ,0x0   ,
+        0x0   ,0x0   ,
+        0xf83e,0x0   ,
+        0x8822,0x701c,
+        0xf83e,0x0   ,
+        0x0   ,0x0   ,
+        0x380 ,0x0   ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x280 ,0x100 ,
+        0x380 ,0x0   ,
+        0x0000,0x0000
+    }
+  },
+  {
+    -7, -7, 15,
+    {
+      0x0000,0x0000,
+      0xfff0,0x0   ,
+      0x9058,0x6fa0,
+      0x9148,0x6eb0,
+      0x9148,0x6eb0,
+      0x9048,0x6fb0,
+      0x9fc8,0x6030,
+      0x8008,0x7ff0,
+      0x9fc8,0x6030,
+      0xa028,0x5fd0,
+      0xafa8,0x5050,
+      0xa028,0x5fd0,
+      0xa028,0x5fd0,
+      0xfff8,0x0   ,
+      0x0000,0x0000
+    }
+  }
 };
-
-typedef enum _CursorType CursorType;
-
-enum _CursorType
-{
-  CursorType_Crosshair,
-  CursorType_Busy,
-  CursorType_Count
-};
-
-bool gfx_setup();
-
-bool gfx_teardown();
-
-bool gfx_is_visible();
-
-bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count);
-
-bool gfx_destroy_views();
-
-bool gfx_open_views();
-
-bool gfx_close_views();
-
-void gfx_set_cursor(CursorType type);
-
-CursorType gfx_get_cursor();
-
-#endif

@@ -47,6 +47,8 @@
 
 #include <clib/graphics_protos.h>
 
+#include "CursorsData.inl"
+
 #define MAX_VIEWPORTS 2
 
 typedef struct _GraphicsView GraphicsView;
@@ -80,6 +82,9 @@ static bool sViewsAreOpen = FALSE;
 
 static GraphicsView sViews[MAX_VIEWPORTS];
 static uint8  sNumViewPorts = 0;
+static CursorType sCursorType = CursorType_Crosshair;
+static struct SimpleSprite sCursorSprite;
+static uint sCursorSpriteNum;
 
 static int32 DepthToColours(uint8 depth)
 {
@@ -121,6 +126,15 @@ bool gfx_setup()
   CloseWorkBench();
   WaitTOF();
 
+  FreeSprite(0);
+  sCursorSpriteNum = GetSprite(&sCursorSprite, 0);
+  sCursorSprite.x = 0;
+  sCursorSprite.y = 0;
+  sCursorSprite.height = CursorImageData[0].height;
+
+  ChangeSprite(NULL, &sCursorSprite, (APTR)&CursorImageData[CursorType_Busy].data);
+  MoveSprite(NULL, &sCursorSprite, 50, 50);
+
   sIsSetup = TRUE;
 
   log_trace("Opened Graphics View");
@@ -161,9 +175,9 @@ bool gfx_is_visible()
 
 bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count)
 {
-  GraphicsView *view, *lastVp;
+  GraphicsView *view;
   GraphicsViewInfo* info;
-  struct ViewPort* vp;
+  struct ViewPort* vp, *lastVp;
   uint8 viewIdx;
   int32 numColours;
 
@@ -243,7 +257,7 @@ bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count)
     if (lastVp != NULL)
     {
       // nth or last
-      lastVp->viewPort.Next = vp;
+      lastVp->Next = vp;
     }
     else
     {
@@ -345,6 +359,8 @@ bool gfx_open_views()
 
   sViewsAreOpen = TRUE;
 
+  gfx_set_cursor(CursorType_Crosshair);
+
   return TRUE;
 }
 
@@ -369,4 +385,20 @@ bool gfx_close_views()
   sViewsAreOpen = FALSE;
 
   return TRUE;
+}
+
+void gfx_set_cursor(CursorType type)
+{
+  sCursorType = type;
+
+  if (sCursorType >= CursorType_Count)
+    sCursorType = 0;
+
+  ChangeSprite(NULL, &sCursorSprite, (APTR)&CursorImageData[sCursorType].data);
+
+}
+
+CursorType gfx_get_cursor()
+{
+  return sCursorType;
 }

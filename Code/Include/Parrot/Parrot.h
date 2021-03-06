@@ -31,13 +31,14 @@
 #define PARROT_VERSION "Parrot 1.5 (21.02.2021)"
 
 #include <exec/types.h>
+#include <Parrot/sdi/SDI_compiler.h>
 
 typedef BYTE   int8;
-typedef SHORT  int16;
+typedef WORD   int16;
 typedef LONG   int32;
 
 typedef UBYTE  uint8;
-typedef USHORT uint16;
+typedef UWORD  uint16;
 typedef ULONG  uint32;
 
 typedef ULONG  uint;
