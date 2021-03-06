@@ -1,5 +1,5 @@
 /**
-    $Id: Parrot.h 1.5 2021/02/21 10:19:00, betajaen Exp $
+    $Id: Log.h 1.5 2021/02/21 10:19:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,23 +25,37 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _PARROT_H_
-#define _PARROT_H_
+#ifndef _PARROT_GRAPHICS_H_
+#define _PARROT_GRAPHICS_H_
 
-#define PARROT_VERSION "Parrot 1.5 (21.02.2021)"
+#include <Parrot/Parrot.h>
 
-#include <exec/types.h>
+typedef struct _GraphicsViewInfo GraphicsViewInfo;
 
-typedef BYTE   int8;
-typedef SHORT  int16;
-typedef LONG   int32;
+struct _GraphicsViewInfo
+{
+  uint16 viewLeft;
+  uint16 viewTop;
+  uint16 viewWidth;
+  uint16 viewHeight;
+  uint8  depth;
+  uint8  pad;
+  uint16 bitmapWidth;
+  uint16 bitmapHeight;
+};
 
-typedef UBYTE  uint8;
-typedef USHORT uint16;
-typedef ULONG  uint32;
+bool gfx_setup();
 
-typedef ULONG  uint;
-typedef BOOL   bool;
+bool gfx_teardown();
+
+bool gfx_is_visible();
+
+bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count);
+
+bool gfx_destroy_views();
+
+bool gfx_open_views();
+
+bool gfx_close_views();
 
 #endif
-

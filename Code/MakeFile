@@ -33,16 +33,32 @@ CFLAGS  = +aos68km -lamiga -nostdlib -IInclude -ITools/Squawk/Include
 
 # PARROT
 
-PARROT_OBJ = main.o
+PARROT_OBJ = \
+						start.o \
+						log.o \
+						graphics.o \
+						parrot_version.o \
+						parrot_main.o
 
 parrot: $(PARROT_OBJ) $(CONVERTER_MANIAC_OBJ) $(OPCODE_GENERATOR_OBJ)
 	$(CC) $(CFLAGS) Parrot/minstart.o $(PARROT_OBJ) -o ../Releases/Parrot/Parrot
 
 # OBJECTS
 
-main.o: Parrot/Main.c
-	$(CC) $(CFLAGS) -c Parrot/Main.c -o main.o
+start.o: Parrot/Start.c
+	$(CC) $(CFLAGS) -c Parrot/Start.c -o start.o
+	
+log.o: Parrot/Log.c
+	$(CC) $(CFLAGS) -c Parrot/Log.c -o log.o
+	
+graphics.o: Parrot/Graphics.c
+	$(CC) $(CFLAGS) -c Parrot/Graphics.c -o graphics.o
 
+parrot_main.o: Parrot/Game/Main.c
+	$(CC) $(CFLAGS) -c Parrot/Game/Main.c -o parrot_main.o
+
+parrot_version.o: Parrot/Game/Version.c
+	$(CC) $(CFLAGS) -c Parrot/Game/Version.c -o parrot_version.o
 
 # CLEAN
 

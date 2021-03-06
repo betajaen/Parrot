@@ -1,5 +1,5 @@
 /**
-    $Id: Parrot.h 1.5 2021/02/21 10:19:00, betajaen Exp $
+    $Id: Version.c 1.5 2021/02/21 13:22:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,23 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _PARROT_H_
-#define _PARROT_H_
+#include <Parrot/Parrot.h>
 
-#define PARROT_VERSION "Parrot 1.5 (21.02.2021)"
-
-#include <exec/types.h>
-
-typedef BYTE   int8;
-typedef SHORT  int16;
-typedef LONG   int32;
-
-typedef UBYTE  uint8;
-typedef USHORT uint16;
-typedef ULONG  uint32;
-
-typedef ULONG  uint;
-typedef BOOL   bool;
-
-#endif
-
+BYTE VersionString[] = "$VER: " PARROT_VERSION "\r\n";
+BYTE CopyrightString[] = "Copyright(c) 2021 Robin Southern. All Rights Reserved.";

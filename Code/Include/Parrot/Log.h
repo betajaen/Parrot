@@ -1,5 +1,5 @@
 /**
-    $Id: Parrot.h 1.5 2021/02/21 10:19:00, betajaen Exp $
+    $Id: Log.h 1.5 2021/02/21 10:19:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,23 +25,56 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _PARROT_H_
-#define _PARROT_H_
+#ifndef _PARROT_LOG_H_
+#define _PARROT_LOG_H_
 
-#define PARROT_VERSION "Parrot 1.5 (21.02.2021)"
+#include <Parrot/Parrot.h>
 
-#include <exec/types.h>
+void log_text(uint8 level, const char* text);
+void log_fmt(uint8 level, const char* fmt, ...);
 
-typedef BYTE   int8;
-typedef SHORT  int16;
-typedef LONG   int32;
-
-typedef UBYTE  uint8;
-typedef USHORT uint16;
-typedef ULONG  uint32;
-
-typedef ULONG  uint;
-typedef BOOL   bool;
-
+#ifndef PARROT_LOG_LEVEL
+#define PARROT_LOG_LEVEL 0
 #endif
 
+void log_open();
+
+void log_close();
+
+#if PARROT_LOG_LEVEL <= 0
+#define log_trace(text) log_text(0, text)
+#define log_trace_fmt(fmt, ...) log_fmt(0, fmt, __VA_ARGS__)
+#else
+#define log_trace(text)
+#define log_trace_fmt(fmt, ...)
+#endif
+
+#if PARROT_LOG_LEVEL <= 1
+#define log_debug(text) log_text(1, text)
+#define log_debug_fmt(fmt, ...) log_fmt(1, fmt, __VA_ARGS__)
+#else
+#define log_debug(text)
+#define log_debug_fmt(fmt, ...)
+#endif
+
+#if PARROT_LOG_LEVEL <= 2
+#define log_info(text) log_text(2, text)
+#define log_info_fmt(fmt, ...) log_fmt(2, fmt, __VA_ARGS__)
+#else
+#define log_info(text)
+#define log_info_fmt(fmt, ...)
+#endif
+
+void log_warn(const char* text);
+void log_warn_fmt(const char* fmt, ...);
+
+void log_error(const char* text);
+void log_error_fmt(const char* fmt, ...);
+
+#define assert(expression, text) \
+  if ((expression) == FALSE)\
+  { \
+      log_error(text);\
+  }
+
+#endif

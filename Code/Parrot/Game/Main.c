@@ -26,8 +26,58 @@
 */
 
 #include <Parrot/Parrot.h>
+#include <Parrot/Log.h>
+#include <Parrot/Graphics.h>
 
-int main(int argc, char** argv)
+static GraphicsViewInfo sGfxViews[] = {
+  {
+    .viewLeft = 0,
+    .viewTop = 0,
+    .viewWidth = 320,
+    .viewHeight = 200,
+    .depth = 4,
+    .bitmapWidth = 640,
+    .bitmapHeight = 200
+  },
+  {
+    .viewLeft = 0,
+    .viewTop = 200,
+    .viewWidth = 320,
+    .viewHeight = 80,
+    .depth = 2,
+    .bitmapWidth = 320,
+    .bitmapHeight = 200
+  },
+  {
+    .depth = 0
+  }
+};
+
+void parrot_entry()
 {
-  return 0;
+  log_info(PARROT_VERSION);
+  
+  if (gfx_setup() == FALSE)
+    goto CleanExit;
+
+  if (gfx_create_views(sGfxViews, 2) == FALSE)
+  {
+    gfx_teardown();
+    goto CleanExit;
+  }
+
+  if (gfx_open_views() == FALSE)
+  {
+    gfx_destroy_views();
+    gfx_teardown();
+    goto CleanExit;
+  }
+  
+  
+
+CleanExit:
+  gfx_teardown();
+  
+  log_info("Parrot Stopping.");
+  log_close();
 }
