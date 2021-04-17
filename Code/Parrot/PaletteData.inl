@@ -1,5 +1,5 @@
 /**
-    $Id: CursorData.inl 1.5 2021/03/06 7:12:00, betajaen Exp $
+    $Id: PaletteData.inl 1.5 2021/03/06 7:12:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,55 +25,23 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-struct CursorImageDataInfo
+static ULONG kDefaultPalette[] =
 {
-    int32  offsetX, offsetY;
-    uint16 height;
-    uint16 data[2 * 24];
+    2 << 16 | 0,
+    0X00000000, 0X00000000, 0X00000000,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    3 << 16 | 17,
+    0X00000000, 0X00000000, 0X00000000,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0
 };
 
-CHIP struct CursorImageDataInfo CursorImageData[] = {
-  {
-    -7,-7,15,
-    {
-        0x0000,0x0000,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0   ,0x0   ,
-        0xf83e,0x0   ,
-        0x8822,0x701c,
-        0xf83e,0x0   ,
-        0x0   ,0x0   ,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0000,0x0000
-    }
-  },
-  {
-    -7, -7, 15,
-    {
-      0x0000,0x0000,
-      0xfff0,0x0   ,
-      0x9058,0x6fa0,
-      0x9148,0x6eb0,
-      0x9148,0x6eb0,
-      0x9048,0x6fb0,
-      0x9fc8,0x6030,
-      0x8008,0x7ff0,
-      0x9fc8,0x6030,
-      0xa028,0x5fd0,
-      0xafa8,0x5050,
-      0xa028,0x5fd0,
-      0xa028,0x5fd0,
-      0xfff8,0x0   ,
-      0x0000,0x0000
-    }
-  }
+static ULONG kCursorPalette[] =
+{
+    3 << 16 | 17,
+    0X00000000, 0X00000000, 0X00000000,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF,
+    0
 };
-

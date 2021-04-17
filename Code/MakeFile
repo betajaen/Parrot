@@ -29,7 +29,7 @@
 
 CC      = vc
 CPU     = 68020
-CFLAGS  = +aos68km -lamiga -nostdlib -IInclude -ITools/Squawk/Include
+CFLAGS  = +aos68km -lamiga -nostdlib -IInclude -ITools/Squawk/Include -DPARROT_DEBUG
 
 # PARROT
 
@@ -37,6 +37,8 @@ PARROT_OBJ = \
 						start.o \
 						log.o \
 						graphics.o \
+						ui.o \
+						events.o \
 						parrot_version.o \
 						parrot_main.o
 
@@ -53,6 +55,12 @@ log.o: Parrot/Log.c
 	
 graphics.o: Parrot/Graphics.c
 	$(CC) $(CFLAGS) -c Parrot/Graphics.c -o graphics.o
+	
+ui.o: Parrot/Ui.c
+	$(CC) $(CFLAGS) -c Parrot/Ui.c -o ui.o
+	
+events.o: Parrot/Events.c
+	$(CC) $(CFLAGS) -c Parrot/Events.c -o events.o
 
 parrot_main.o: Parrot/Game/Main.c
 	$(CC) $(CFLAGS) -c Parrot/Game/Main.c -o parrot_main.o

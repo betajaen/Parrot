@@ -1,5 +1,5 @@
 /**
-    $Id: CursorData.inl 1.5 2021/03/06 7:12:00, betajaen Exp $
+    $Id: Events.h 1.5 2021/04/17 09:50:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,55 +25,49 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-struct CursorImageDataInfo
+#ifndef _PARROT_EVENTS_H_
+#define _PARROT_EVENTS_H_
+
+#include <Parrot/Parrot.h>
+
+typedef union _Event Event;
+
+union _Event
 {
-    int32  offsetX, offsetY;
-    uint16 height;
-    uint16 data[2 * 24];
+  struct {
+    int16 type;
+    int16 num;
+    int16 x;
+    int16 y;
+  } mouse;
+  struct {
+    int16 type;
+    int16 num;
+    int16 button;
+    int16 pad;
+  } button;
+  struct {
+    int16 type;
+    int16 num;
+    int16 key;
+    int16 pad;
+  } key;
+  int16 data[4];
 };
 
-CHIP struct CursorImageDataInfo CursorImageData[] = {
-  {
-    -7,-7,15,
-    {
-        0x0000,0x0000,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0   ,0x0   ,
-        0xf83e,0x0   ,
-        0x8822,0x701c,
-        0xf83e,0x0   ,
-        0x0   ,0x0   ,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0000,0x0000
-    }
-  },
-  {
-    -7, -7, 15,
-    {
-      0x0000,0x0000,
-      0xfff0,0x0   ,
-      0x9058,0x6fa0,
-      0x9148,0x6eb0,
-      0x9148,0x6eb0,
-      0x9048,0x6fb0,
-      0x9fc8,0x6030,
-      0x8008,0x7ff0,
-      0x9fc8,0x6030,
-      0xa028,0x5fd0,
-      0xafa8,0x5050,
-      0xa028,0x5fd0,
-      0xa028,0x5fd0,
-      0xfff8,0x0   ,
-      0x0000,0x0000
-    }
-  }
+enum _EventType
+{
+  EventType_MouseMove,
+  EventType_MouseButtonUp,
+  EventType_MouseButtonDown,
+  EventType_KeyUp,
+  EventType_KeyDown
 };
 
+bool evt_initialise();
+void evt_teardown();
+bool evt_pop(Event* evt);
+void evt_warp_cursor(int32 x, int32 y);
+void evt_limit_cursor(int32 left, int32 top, int32 right, int32 bottom);
+
+#endif

@@ -1,5 +1,5 @@
 /**
-    $Id: CursorData.inl 1.5 2021/03/06 7:12:00, betajaen Exp $
+    $Id: Ui.h 1.5 2021/04/17 09:37:00, betajaen Exp $
 
     Parrot - Point and Click Adventure Game Player
     ==============================================
@@ -25,55 +25,64 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-struct CursorImageDataInfo
+#ifndef _PARROT_UI_H_
+#define _PARROT_UI_H_
+
+#include <Parrot/Parrot.h>
+
+union _Event;
+typedef struct _Button Button;
+
+struct _Button
 {
-    int32  offsetX, offsetY;
-    uint16 height;
-    uint16 data[2 * 24];
+  char* text;
+  uint16 left, top, right, bottom;
+  uint8  view, state;
 };
 
-CHIP struct CursorImageDataInfo CursorImageData[] = {
-  {
-    -7,-7,15,
-    {
-        0x0000,0x0000,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0   ,0x0   ,
-        0xf83e,0x0   ,
-        0x8822,0x701c,
-        0xf83e,0x0   ,
-        0x0   ,0x0   ,
-        0x380 ,0x0   ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x280 ,0x100 ,
-        0x380 ,0x0   ,
-        0x0000,0x0000
-    }
-  },
-  {
-    -7, -7, 15,
-    {
-      0x0000,0x0000,
-      0xfff0,0x0   ,
-      0x9058,0x6fa0,
-      0x9148,0x6eb0,
-      0x9148,0x6eb0,
-      0x9048,0x6fb0,
-      0x9fc8,0x6030,
-      0x8008,0x7ff0,
-      0x9fc8,0x6030,
-      0xa028,0x5fd0,
-      0xafa8,0x5050,
-      0xa028,0x5fd0,
-      0xa028,0x5fd0,
-      0xfff8,0x0   ,
-      0x0000,0x0000
-    }
-  }
+
+typedef enum _KeyState KeyState;
+
+enum _KeyState
+{
+  ButtonState_New = 0,
+  ButtonState_InsideUp = 1,
+  ButtonState_InsideDown = 2,
+  ButtonState_Inside = 3,
+  ButtonState_Outside = 4
 };
 
+
+
+typedef enum _UiKeyState UiKeyState;
+
+enum _UiKeyState
+{
+  UiKeyState_Up = 0,
+  UiKeyState_Down = 1
+};
+
+typedef enum _UiKeyCode UiKeyCode;
+
+enum _UiKeyCode
+{
+  UiKeyCode_Escape = 0x45,
+  UiKeyCode_F1 = 0x50,
+  UiKeyCode_F2 = 0x51,
+  UiKeyCode_LeftShift = 0x60,
+};
+
+typedef struct _Key Key;
+
+struct _Key
+{
+  uint8 key, state;
+};
+
+bool ui_handle_event(union _Event* evt);
+
+bool ui_button(Button* btn);
+
+bool ui_key(Key* key);
+
+#endif

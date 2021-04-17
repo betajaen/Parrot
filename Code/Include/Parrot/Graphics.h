@@ -30,6 +30,8 @@
 
 #include <Parrot/Parrot.h>
 
+union _Event;
+
 typedef struct _GraphicsViewInfo GraphicsViewInfo;
 
 struct _GraphicsViewInfo
@@ -67,8 +69,22 @@ bool gfx_open_views();
 
 bool gfx_close_views();
 
+bool gfx_handle_event(union _Event* evt);
+
 void gfx_set_cursor(CursorType type);
 
-CursorType gfx_get_cursor();
+void gfx_warp_cursor(int32 x, int32 y);
+
+void gfx_wait_tof();
+
+void gfx_try_flipbuffers(uint8 view);
+
+void gfx_apen(uint8 view, uint8 pen);
+
+void gfx_bpen(uint8 view, uint8 pen);
+
+void gfx_abpen(uint8 view, uint8 apen, uint8 bpen);
+
+void gfx_box(uint8 view, uint16 left, uint16 top, uint16 right, uint16 bottom);
 
 #endif

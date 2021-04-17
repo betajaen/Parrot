@@ -28,6 +28,7 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Graphics.h>
 #include <Parrot/Log.h>
+#include <Parrot/Events.h>
 
 #include <proto/exec.h>
 #include <proto/intuition.h>
@@ -48,6 +49,7 @@
 #include <clib/graphics_protos.h>
 
 #include "CursorsData.inl"
+#include "PaletteData.inl"
 
 #define MAX_VIEWPORTS 2
 
@@ -62,13 +64,14 @@ struct _GraphicsView
   struct ColorMap* colorMap;
 
   uint32 width, height;
-  uint32 bitmapWidth, bitmapFrameHeight, bitmapTotalHeight;
+  uint32 bitmapWidth, bitmapFrameHeight, bitmapHeight;
   int32  horizontal, vertical;
   int32  scrollX, scrollY;
   uint16 depth;
 
   uint32 offsetStride;
   uint32 writeOffset, readOffset;
+  bool   dirty;
 };
 
 extern struct GfxBase* GfxBase;
@@ -81,10 +84,11 @@ static bool sViewsAllocated = FALSE;
 static bool sViewsAreOpen = FALSE;
 
 static GraphicsView sViews[MAX_VIEWPORTS];
+
 static uint8  sNumViewPorts = 0;
 static CursorType sCursorType = CursorType_Crosshair;
-static struct SimpleSprite sCursorSprite;
-static uint sCursorSpriteNum;
+static struct SimpleSprite sCursorSprite = { 0 };
+static int16 sCursorSpriteNum = -1;
 
 static int32 DepthToColours(uint8 depth)
 {
@@ -125,19 +129,15 @@ bool gfx_setup()
 
   CloseWorkBench();
   WaitTOF();
-
-  FreeSprite(0);
-  sCursorSpriteNum = GetSprite(&sCursorSprite, 0);
-  sCursorSprite.x = 0;
-  sCursorSprite.y = 0;
-  sCursorSprite.height = CursorImageData[0].height;
-
-  ChangeSprite(NULL, &sCursorSprite, (APTR)&CursorImageData[CursorType_Busy].data);
-  MoveSprite(NULL, &sCursorSprite, 50, 50);
+  WaitTOF();
 
   sIsSetup = TRUE;
 
   log_trace("Opened Graphics View");
+  
+  LoadView(NULL);
+  WaitTOF();
+  WaitTOF();
 
   return TRUE;
 }
@@ -212,7 +212,7 @@ bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count)
     
     view->bitmapWidth = info->bitmapWidth;
     view->bitmapFrameHeight = info->bitmapHeight;
-    view->bitmapTotalHeight = info->bitmapHeight * 2;
+    view->bitmapHeight = info->bitmapHeight * 2;
 
     view->offsetStride = info->bitmapHeight;
     view->readOffset = 0;
@@ -225,12 +225,19 @@ bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count)
     view->depth = info->depth;
     view->scrollX = 0;
     view->scrollY = 0;
+    view->dirty = FALSE;
+
+    log_trace_fmt("gfx_create_views %ld Bitmap Width = %ld", viewIdx, view->bitmapWidth);
+    log_trace_fmt("gfx_create_views %ld Bitmap Height = %ld", viewIdx, view->bitmapHeight);
+    log_trace_fmt("gfx_create_views %ld Bitmap FrameHeight = %ld", viewIdx, view->bitmapFrameHeight);
 
     view->bitmap = AllocBitMap(
       view->bitmapWidth,
-      view->bitmapTotalHeight,
+      view->bitmapHeight,
       view->depth,
       BMF_DISPLAYABLE | BMF_INTERLEAVED | BMF_CLEAR, NULL);
+
+    log_trace_fmt("gfx_create_views %ld Bitmap = %lx", viewIdx, view->bitmap);
 
     InitRastPort(&view->rastPort);
     view->rastPort.BitMap = view->bitmap;
@@ -245,24 +252,43 @@ bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count)
     vp->RasInfo->BitMap = view->bitmap;
     vp->DWidth = view->width;
     vp->DHeight = view->height;
-    vp->Modes = 0 | SPRITES;
+    vp->Modes = SPRITES;
     vp->DxOffset = view->horizontal;
     vp->DyOffset = view->vertical;
 
+
+    log_trace_fmt("gfx_create_views %ld DWidth = %ld", viewIdx, vp->DWidth);
+    log_trace_fmt("gfx_create_views %ld DHeight = %ld", viewIdx, vp->DHeight);
+    log_trace_fmt("gfx_create_views %ld DxOffset = %ld", viewIdx, vp->DxOffset);
+    log_trace_fmt("gfx_create_views %ld DyOffset = %ld", viewIdx, vp->DyOffset);
+    log_trace_fmt("gfx_create_views %ld Modes = %lx", viewIdx, vp->Modes);
+    log_trace_fmt("gfx_create_views %ld Vp.Bitmap = %lx", viewIdx, vp->RasInfo->BitMap);
+
     numColours = DepthToColours(view->depth);
+    
+    if (numColours < 20)
+    {
+      // Allocate 4 extra colours for the first sprite (mouse pointer). These
+      // are fixed at 16, 17, 18, 19
+      numColours = 20;
+    }
 
     view->colorMap = GetColorMap(numColours);
     vp->ColorMap = view->colorMap;
+
+    log_trace_fmt("gfx_create_views %ld ColorMap = %lx", viewIdx, vp->ColorMap);
 
     if (lastVp != NULL)
     {
       // nth or last
       lastVp->Next = vp;
+      log_trace_fmt("gfx_create_views %ld IsNth", viewIdx);
     }
     else
     {
       // first
       sView.ViewPort = vp;
+      log_trace_fmt("gfx_create_views %ld IsFirst = %lx", viewIdx);
     }
 
     MakeVPort(&sView, vp);
@@ -270,7 +296,7 @@ bool gfx_create_views(GraphicsViewInfo views_ary[], uint8 count)
     lastVp = vp;
   }
 
-  sView.Modes = 0 | SPRITES;
+  sView.Modes = SPRITES;
   MrgCop(&sView);
 
   sViewsAllocated = TRUE;
@@ -341,6 +367,9 @@ bool gfx_destroy_views()
 
 bool gfx_open_views()
 {
+  uint8 viewIndex;
+  struct ViewPort* vp;
+
   if (sViewsAllocated == FALSE)
   {
     log_warn("gfx_open_views was called when no views are available");
@@ -359,8 +388,30 @@ bool gfx_open_views()
 
   sViewsAreOpen = TRUE;
 
-  gfx_set_cursor(CursorType_Crosshair);
+  // Apply default palette to all of the viewports
+  for (viewIndex = 0; viewIndex < sNumViewPorts; viewIndex++)
+  {
+    vp = &sViews[viewIndex].viewPort;
+    LoadRGB32(vp, kDefaultPalette);
+  }
 
+  // Reserve the first sprite which is used for the mouse.
+  FreeSprite(0);
+
+  sCursorSpriteNum = GetSprite(&sCursorSprite, 0);
+
+  log_trace_fmt("GetSprite result = %ld", sCursorSpriteNum);
+
+  sCursorSprite.x = 0;
+  sCursorSprite.y = 0;
+  sCursorSprite.height = CursorImageData[CursorType_Crosshair].height;
+  ChangeSprite(NULL, &sCursorSprite, (APTR)&CursorImageData[CursorType_Crosshair].data);
+  
+  // Wait two frames for it all to apply.
+  WaitTOF();
+  WaitTOF();
+  
+  
   return TRUE;
 }
 
@@ -376,6 +427,11 @@ bool gfx_close_views()
   {
     log_warn("gfx_open_views was called when view is already closed");
     return FALSE;
+  }
+
+  if (sCursorSpriteNum != -1)
+  {
+    FreeSprite(0);
   }
 
   LoadView(NULL);
@@ -398,7 +454,148 @@ void gfx_set_cursor(CursorType type)
 
 }
 
-CursorType gfx_get_cursor()
+void gfx_warp_cursor(int32 x, int32 y)
 {
-  return sCursorType;
+  MoveSprite(NULL, &sCursorSprite, 
+    x + CursorImageData[sCursorType].offsetX,
+    y + CursorImageData[sCursorType].offsetY
+  );
+}
+
+bool gfx_handle_event(union _Event* evt)
+{
+  if (evt->mouse.type == EventType_MouseMove)
+  {
+    log_trace_fmt("Mouse Move %ld, %ld", evt->mouse.x, evt->mouse.y);
+
+    MoveSprite(NULL, &sCursorSprite,
+      evt->mouse.x + CursorImageData[sCursorType].offsetX,
+      evt->mouse.y + CursorImageData[sCursorType].offsetY
+      );
+
+    return TRUE;
+  }
+  return FALSE;
+}
+
+void gfx_wait_tof()
+{
+  WaitTOF();
+}
+
+void gfx_try_flipbuffers(uint8 view)
+{
+  GraphicsView* gv;
+
+#if defined(PARROT_DEBUG)
+  if (view >= MAX_VIEWPORTS)
+  {
+    log_warn_fmt("In %s the view argument is out of bounds %lu", PARROT_STRINGIFY(__FUNCTION__), (uint32)view);
+    return;
+  }
+#endif
+
+  gv = &sViews[view];
+
+  if (gv->dirty)
+  {
+
+    uint32 t;
+    t = gv->writeOffset;
+    gv->writeOffset = gv->readOffset;
+    gv->readOffset = t;
+
+
+    gv->rasInfo.RxOffset = gv->scrollX;
+    gv->rasInfo.RyOffset = gv->readOffset + gv->scrollY;
+
+    gv->dirty = FALSE;
+
+    ScrollVPort(&gv->viewPort);
+
+    log_trace_fmt("%s is swappped buffers for %lu", PARROT_STRINGIFY(__FUNCTION__), (uint32)view);
+  }
+
+}
+
+void gfx_apen(uint8 view, uint8 pen)
+{
+  GraphicsView* gv;
+
+
+#if defined(PARROT_DEBUG)
+  if (view >= MAX_VIEWPORTS)
+  {
+    log_warn_fmt("In %s the view argument is out of bounds %lu", PARROT_STRINGIFY(__FUNCTION__), (uint32)view);
+    return;
+  }
+#endif
+
+  gv = &sViews[view];
+
+  SetAPen(&gv->rastPort, pen);
+}
+
+void gfx_bpen(uint8 view, uint8 pen)
+{
+  GraphicsView* gv;
+
+
+#if defined(PARROT_DEBUG)
+  if (view >= MAX_VIEWPORTS)
+  {
+    log_warn_fmt("In %s the view argument is out of bounds %lu", PARROT_STRINGIFY(__FUNCTION__), (uint32)view);
+    return;
+  }
+#endif
+
+  gv = &sViews[view];
+
+  SetBPen(&gv->rastPort, pen);
+}
+
+void gfx_abpen(uint8 view, uint8 apen, uint8 bpen)
+{
+  GraphicsView* gv;
+
+
+#if defined(PARROT_DEBUG)
+  if (view >= MAX_VIEWPORTS)
+  {
+    log_warn_fmt("In %s the view argument is out of bounds %lu", PARROT_STRINGIFY(__FUNCTION__), (uint32)view);
+    return;
+  }
+#endif
+
+  gv = &sViews[view];
+
+  SetAPen(&gv->rastPort, apen);
+  SetBPen(&gv->rastPort, bpen);
+}
+
+void gfx_box(uint8 view, uint16 left, uint16 top, uint16 right, uint16 bottom)
+{
+  GraphicsView* gv;
+  uint32 otop, obottom;
+
+
+#if defined(PARROT_DEBUG)
+  if (view >= MAX_VIEWPORTS)
+  {
+    log_warn_fmt("In %s the view argument is out of bounds %lu", PARROT_STRINGIFY(__FUNCTION__), (uint32)view);
+    return;
+  }
+#endif
+
+  gv = &sViews[view];
+  
+  gv->dirty = TRUE;
+  otop = gv->writeOffset + top;
+  obottom = gv->writeOffset + bottom;
+
+  Move(&gv->rastPort, left, otop);
+  Draw(&gv->rastPort, right, otop);
+  Draw(&gv->rastPort, right, obottom);
+  Draw(&gv->rastPort, left, obottom);
+  Draw(&gv->rastPort, left, otop);
 }

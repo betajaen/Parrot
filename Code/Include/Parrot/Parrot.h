@@ -44,5 +44,8 @@ typedef ULONG  uint32;
 typedef ULONG  uint;
 typedef BOOL   bool;
 
+#define PARROT_STRINGIFY(a) PARROT_STRINGIFY_(a)
+#define PARROT_STRINGIFY_(a) #a
+
 #endif
 

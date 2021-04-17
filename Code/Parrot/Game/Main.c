@@ -28,6 +28,8 @@
 #include <Parrot/Parrot.h>
 #include <Parrot/Log.h>
 #include <Parrot/Graphics.h>
+#include <Parrot/Ui.h>
+#include <Parrot/Events.h>
 
 static GraphicsViewInfo sGfxViews[] = {
   {
@@ -43,7 +45,7 @@ static GraphicsViewInfo sGfxViews[] = {
     .viewLeft = 0,
     .viewTop = 200,
     .viewWidth = 320,
-    .viewHeight = 80,
+    .viewHeight = 40,
     .depth = 2,
     .bitmapWidth = 320,
     .bitmapHeight = 200
@@ -55,6 +57,11 @@ static GraphicsViewInfo sGfxViews[] = {
 
 void parrot_entry()
 {
+  bool shouldExit = FALSE;
+  Event evt = { 0 };
+  Key key = { .key = UiKeyCode_Escape, .state = 0 };
+  uint32 screenWidth, screenHeight;
+
   log_info(PARROT_VERSION);
   
   if (gfx_setup() == FALSE)
@@ -72,10 +79,47 @@ void parrot_entry()
     gfx_teardown();
     goto CleanExit;
   }
-  
+
+  if (evt_initialise() == FALSE)
+  {
+    gfx_destroy_views();
+    gfx_teardown();
+    goto CleanExit;
+  }
+
+  log_info("Parrot Active");
+
+  screenWidth = sGfxViews[0].viewWidth;
+  screenHeight = sGfxViews[1].viewTop + sGfxViews[1].viewHeight;
+
+  gfx_set_cursor(CursorType_Crosshair);
+
+  evt_limit_cursor(0, 0, screenWidth - 1, screenHeight - 1);
+  evt_warp_cursor(screenWidth >> 1, screenHeight >> 1);
+  gfx_warp_cursor(screenWidth >> 1, screenHeight >> 1);
   
 
+  while(shouldExit == FALSE)
+  {
+
+    while (evt_pop(&evt))
+    {
+      ui_handle_event(&evt);
+      gfx_handle_event(&evt);
+    }
+
+    if (ui_key(&key))
+    {
+      shouldExit = TRUE;
+    }
+
+    gfx_try_flipbuffers(0);
+    gfx_try_flipbuffers(1);
+  }
+
+  
 CleanExit:
+  evt_teardown();
   gfx_teardown();
   
   log_info("Parrot Stopping.");
