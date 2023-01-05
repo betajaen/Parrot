@@ -1,8 +1,0 @@
-Name:
-  pushi
-Description:
-  Push 10-bit signed value on the stack
-Argument:
-  i : Variable
-Code:
-  Vm_Push(#V);

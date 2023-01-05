@@ -1,8 +1,0 @@
-Name:
-  loadpal
-Description:
-  Load a palette
-Argument:
-  i : PaletteNum
-Code:
-  Api_LoadPalette(#P);
