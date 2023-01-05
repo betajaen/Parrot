@@ -1,0 +1,40 @@
+{
+  "configurations": [
+    {
+      "inheritEnvironments": [
+        "msvc_x86"
+      ],
+      "name": "Amiga Debug (Maniac)",
+      "includePath": [
+        "${env.INCLUDE}",
+        "${workspaceRoot}\\**",
+        "C:\\Amiga\\Dev\\NDK3.2\\Include_H\\"
+      ],
+      "defines": [
+        "PARROT_DEBUG",
+        "PARROT_AMIGA",
+        "GAME_MANIAC",
+        "__GNUC__"
+      ],
+      "intelliSenseMode": "windows-msvc-x86"
+    },
+    {
+      "inheritEnvironments": [
+        "msvc_x86"
+      ],
+      "name": "Amiga Release (Maniac)",
+      "includePath": [
+        "${env.INCLUDE}",
+        "${workspaceRoot}\\**",
+        "C:\\Amiga\\Dev\\NDK3.2\\Include_H\\"
+      ],
+      "defines": [
+        "PARROT_RELEASE",
+        "PARROT_AMIGA",
+        "GAME_MANIAC",
+        "__GNUC__"
+      ],
+      "intelliSenseMode": "windows-msvc-x86"
+    }
+  ]
+}
