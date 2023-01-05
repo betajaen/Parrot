@@ -1,5 +1,6 @@
 OBJS += platform/amiga/entry.o \
-		platform/amiga/string.o
+		platform/amiga/string.o \
+		platform/amiga/screen.o
 
 
 CC			= m68k-amigaos-gcc

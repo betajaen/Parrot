@@ -36,6 +36,8 @@ int __initlibraries = 0;
 extern char * __commandline;
 struct DosLibrary* DOSBase = NULL;
 struct IntuitionBase* IntuitionBase = NULL;
+struct Library* CyberGfxBase = NULL;
+
 extern struct WBStartup* _WBenchMsg;
 int Parrot_StartedFromCli = 0;
 
@@ -84,6 +86,7 @@ int main(void) {
 		return RETURN_FAIL;
 	}
 
+
 	param = Parrot::Main(param);
 
 	if (_WBenchMsg) {
@@ -97,6 +100,10 @@ int main(void) {
 		EasyRequest(NULL, &str, NULL);
 	}
 
+	if (CyberGfxBase != NULL)
+	{
+		CloseLibrary((struct Library*)CyberGfxBase);
+	}
 
 	CloseLibrary((struct Library*)IntuitionBase);
 	CloseLibrary((struct Library*)DOSBase);
@@ -138,6 +145,24 @@ namespace Parrot {
 		}
 
 		Exit(1);
+	}
+
+	void ShowAlert(ConstCString text)
+	{
+		if (Parrot_StartedFromCli) {
+			Printf(text);
+		}
+		else {
+
+			struct EasyStruct str;
+			str.es_StructSize = sizeof(struct EasyStruct);
+			str.es_Flags = 0;
+			str.es_GadgetFormat = (UBYTE*)"OK";
+			str.es_TextFormat = (UBYTE*) text;
+			str.es_Title = (UBYTE*)"Parrot";
+
+			EasyRequest(NULL, &str, NULL);
+		}
 	}
 
 }

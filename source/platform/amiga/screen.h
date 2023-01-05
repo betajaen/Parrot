@@ -16,17 +16,37 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "required.h"
-#include "screen.h"
+#pragma once
 
-namespace Parrot
-{
-	int Main(int param)
+#include "../../required.h"
+
+struct Screen;
+struct Window;
+struct ScreenBuffer;
+struct RastPort;
+
+namespace Parrot {
+
+	struct AmigaScreen final
 	{
-		Screen screen;
-		screen.CreateScreen(320, 200, 4, true, "Parrot");
-		screen.CreateWindow(320, 200, true, nullptr);
+	private:
 
-		return 0;
-	}
+		struct Screen* Screen;
+		struct Window* Window;
+		struct ScreenBuffer* Buffer;
+		struct RastPort* RastPort;
+
+	public:
+
+		AmigaScreen();
+		~AmigaScreen();
+
+		bool CreateScreen(Uint32 w, Uint32 h, Uint8 depth, bool tryRTG = true, ConstCString title = nullptr);
+		bool CreateWindow(Uint32 w, Uint32 h, bool borderless, ConstCString title = nullptr);
+
+		void DestroyWindow();
+		void DestroyScreen();
+
+	};
+
 }
