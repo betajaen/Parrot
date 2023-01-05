@@ -20,15 +20,23 @@
 
 #if defined(PARROT_AMIGA)
 #include "platform/amiga/types.h"
+struct TagItem;
+#else
+struct TagItem {
+	Parrot::Uint32 ti_Tag;
+	Parrot::Uint32 ti_Data;
+};
 #endif
 
 #include <new>
 
 namespace Parrot {
 	void Assert(ConstCString file, Uint32 line);
+	void ShowAlert(ConstCString str);
 }
 
 #define PARROT_ASSERT(COND) do { if (!(COND)) { ::Parrot::Assert(__FILE__, __LINE__); } } while(0)
+#define PARROT_ERROR(STR) ::Parrot::ShowAlert(STR)
 
 namespace Parrot
 {
@@ -123,5 +131,51 @@ namespace Parrot
         Byte Bytes[sizeof(T)];
     };
 
+	template<typename T>
+	struct Opt {
+		bool HasValue;
+		T Value;
+
+		Opt(T value) : Value(value), HasValue(true) {}
+		Opt() : Value{}, HasValue(false) {}
+		~Opt() = default;
+
+		operator bool() const {
+			return HasValue;
+		}
+
+	};
+
+	template<Size Capacity>
+	struct TagList {
+	private:
+		Size It;
+		Uint32 Tags[Capacity*2];
+	public:
+
+		TagList() : It(0) {
+			Tags[0] = 0;
+		}
+
+		TagItem* GetTags() const {
+			return (TagItem*) ((Uint32*)&Tags[0]);
+		}
+
+		void Done() {
+			Tags[It++] = 0;
+		}
+
+		void Value(Uint32 tag, Uint32 value) {
+			PARROT_ASSERT(It < (Capacity*2));
+			Tags[It++] = tag;
+			Tags[It++] = value;
+		}
+
+		template<typename T>
+		void Ptr(Uint32 tag, T* value) {
+			Value(tag, (Uint32) (value));
+		}
+
+	};
 	
 }
