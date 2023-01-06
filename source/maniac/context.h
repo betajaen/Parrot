@@ -25,7 +25,6 @@ namespace Parrot
 	struct ManiacContext
 	{
 		PScreen Screen;
-		PMenu<2> Menu;
 
 		ManiacContext() = default;
 		~ManiacContext() = default;

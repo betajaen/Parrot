@@ -25,9 +25,30 @@ namespace Parrot
 {
 	ManiacContext* Ctx;
 
-	void ManiacContext::Run() {		
+	void ManiacContext::Run() {	
+		
+		PMenu<21> Menu;
 		Menu.Title("Maniac");
+		Menu.Item("Load");
+		Menu.Item("Save");
+		Menu.Item("Restart");
 		Menu.Item("Quit");
+		Menu.Title("Verb");	
+		Menu.Item("Push");
+		Menu.Item("Pull");
+		Menu.Item("Give");
+		Menu.Item("Open");
+		Menu.Item("Close");
+		Menu.Item("Read");
+		Menu.Item("Walk to");
+		Menu.Item("Pick up");
+		Menu.Item("What is");
+		Menu.Item("New kid");
+		Menu.Item("Unlock");
+		Menu.Item("Use");
+		Menu.Item("Turn on");
+		Menu.Item("Turn off");
+		Menu.Item("Fix");
 
 		Screen.CreateScreen(320, 200, 4, true, "Parrot");
 		Screen.CreateWindow(320, 200, true, nullptr);
@@ -43,7 +64,7 @@ namespace Parrot
 
 		PrintFmt("Menu %ld, %ld, %ld", (Uint32) menuNum, (Uint32) menuItem, (Uint32) subMenuItem);
 
-		if (menuNum == 0 && menuItem == 0) {
+		if (menuNum == 0 && menuItem == 3) {
 			Ctx->Screen.StopListening();
 		}
 	}
