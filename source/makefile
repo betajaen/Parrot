@@ -10,7 +10,7 @@ CFLAGS = -std=c++17 -I.
 include $(PDIR)/makefile.inc
 include $(GDIR)/makefile.inc
 
-OBJS += util/string.o
+OBJS += platform/shared/string.o
 
 ifneq ($(DEBUG), 0)
 	CFLAGS += -g -O0 -DPARROT_RELEASE

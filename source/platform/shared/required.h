@@ -58,7 +58,7 @@ namespace Parrot
 	constexpr Tag32 MakeTag32(Byte A, Byte B, Byte C, Byte D) {
 		return ((Uint32) (A)<<24 | (Uint32) (B)<<16 | (Uint32) (C)<<8 | (Uint32) (D));
 	}
-	
+
 	struct TagPair16 {
 
 		Tag16 Tag;
@@ -163,6 +163,7 @@ namespace Parrot
 
 		void Done() {
 			Tags[It++] = 0;
+			Tags[It++] = 0;
 		}
 
 		void Value(Uint32 tag, Uint32 value) {
@@ -175,7 +176,6 @@ namespace Parrot
 		void Ptr(Uint32 tag, T* value) {
 			Value(tag, (Uint32) (value));
 		}
-
 	};
-	
+
 }

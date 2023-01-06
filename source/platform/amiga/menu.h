@@ -19,44 +19,48 @@
 #pragma once
 
 #include "platform/shared/required.h"
-#include "platform/amiga/timer.h"
-#include "platform/amiga/menu.h"
-
-struct Screen;
-struct Window;
-struct ScreenBuffer;
-struct RastPort;
-struct Menu;
 
 namespace Parrot {
+	
 
-	struct AmigaScreen final
-	{
-	private:
+	template<Uint16 Count>
+	struct AmigaMenu {
+		
+		struct MenuItem {
+			Uint8		Type;
+			ConstCString		Label;
+			ConstCString		CommandKey;
+			Uint16		Flags;
+			Uint32		MutualExclude;
+			Ptr32		UserData;
+		};
 
-		::Screen* Screen;
-		struct Window* Window;
-		struct ScreenBuffer* Buffer;
-		struct RastPort* RastPort;
-		Ptr32 ScreenVisualInfo;
-		bool StopEvents;
-		AmigaTimer Timer;
-		struct Menu* Menu;
+		MenuItem Menus[Count + 1] = { 0 };
+		Uint16 It = 0;
 
-	public:
+		AmigaMenu() = default;
+		~AmigaMenu() = default;
 
-		AmigaScreen();
-		~AmigaScreen();
+		AmigaMenu& Title(ConstCString title) {
+			PARROT_ASSERT(It < Count);
+			MenuItem& menu = Menus[It++];
+			menu.Type = 1;
+			menu.Label = title;
+			return *this;
+		}
 
-		bool CreateScreen(Uint32 w, Uint32 h, Uint8 depth, bool tryRTG = true, ConstCString title = nullptr);
-		bool CreateWindow(Uint32 w, Uint32 h, bool borderless, ConstCString title = nullptr);
-		bool StartListening(Uint32 framesPerSecond);
-		void SetMenu(Ptr32 menuData);
+		AmigaMenu& Item(ConstCString label, ConstCString commandKey = nullptr) {
+			PARROT_ASSERT(It < Count);
+			MenuItem& menu = Menus[It++];
+			menu.Type = 2;
+			menu.Label = label;
+			menu.CommandKey = commandKey;
+			return *this;
+		}
 
-		void StopListening();
-		void DestroyWindow();
-		void DestroyScreen();
-
+		Ptr32 GetData() const {
+			return (Ptr32) &Menus[0];
+		}
 
 	};
 

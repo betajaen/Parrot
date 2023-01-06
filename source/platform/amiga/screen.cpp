@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "screen.h"
+#include "platform/amiga/screen.h"
 
 #include <proto/exec.h>
 #include <proto/dos.h>
@@ -38,11 +38,18 @@
 #include <intuition/intuition.h>
 #include <intuition/intuitionbase.h>
 
+#include <clib/gadtools_protos.h>
+
+#include "platform/shared/events.h"
+#include "platform/shared/string.h"
+
 extern struct Library* CyberGfxBase;
 
 namespace Parrot {
 
 #define PARROT_NO_MODE 0xFFFFFFFE;
+
+	void InitTimer();
 
 	static Opt<ULONG> FindRTGModeId(Uint32 width, Uint32 height, Uint8 depth)
 	{
@@ -87,9 +94,12 @@ namespace Parrot {
 		Window = nullptr;
 		Buffer = nullptr;
 		RastPort = nullptr;
+		ScreenVisualInfo = nullptr;
+		Menu = nullptr;
 	}
 
 	AmigaScreen::~AmigaScreen() {
+		// Timer.Destroy();
 		DestroyWindow();
 		DestroyScreen();
 	}
@@ -176,15 +186,111 @@ namespace Parrot {
 
 		tags.Value(WA_Activate, TRUE);
 		tags.Value(WA_SimpleRefresh, TRUE);
-		tags.Value(WA_IDCMP, IDCMP_CLOSEWINDOW | IDCMP_VANILLAKEY | IDCMP_IDCMPUPDATE | IDCMP_MOUSEBUTTONS);
+		tags.Value(WA_IDCMP, IDCMP_CLOSEWINDOW | IDCMP_VANILLAKEY | IDCMP_IDCMPUPDATE | IDCMP_MOUSEBUTTONS | IDCMP_MENUPICK);
 		tags.Done();
 
 		Window = OpenWindowTagList(NULL, tags.GetTags());
 
+		if (Window != nullptr)
+		{
+			ScreenVisualInfo = GetVisualInfo(Window->WScreen, TAG_END);
+		}
+
 		return Window != nullptr;
 	}
 
+	bool AmigaScreen::StartListening(Uint32 framesPerSecond) {
+		Uint32 waitTime = (1000000 / framesPerSecond);
+		StopEvents = false;
+
+		Timer.Create();
+		InitTimer();
+
+		Uint32 timerBit = Timer.Start(waitTime);
+		Uint32 windowBit = (1 << Window->UserPort->mp_SigBit);
+		Uint32 signalBits = windowBit | timerBit | SIGBREAKF_CTRL_C;
+		
+		Uint16 idcmpCode;
+		struct MenuItem* menuItem;
+
+		while (StopEvents == false) {
+			
+			ULONG signal = Wait(signalBits);
+
+			if (signal & SIGBREAKF_CTRL_C) {
+				StopEvents = true;
+				break;
+			}
+			
+			if (signal & windowBit) {
+				
+				struct IntuiMessage* msg;
+				while (true)
+				{
+					msg = (struct IntuiMessage*)GetMsg(Window->UserPort);
+
+					if (msg == NULL)
+						break;
+
+					struct TagItem* tstate, * tag, * tags;
+					ULONG tiData;
+
+					switch (msg->Class)
+					{
+						case IDCMP_CLOSEWINDOW: {
+							StopEvents = true;
+						}
+						break;
+						case IDCMP_MENUPICK: {
+							idcmpCode = msg->Code;
+							while ((idcmpCode != MENUNULL)) {
+								menuItem = ItemAddress(Menu, idcmpCode);
+
+								OnMenuEvent(
+										MENUNUM(idcmpCode),
+										ITEMNUM(idcmpCode),
+										SUBNUM(idcmpCode)									
+								);
+
+								idcmpCode = menuItem->NextSelect;
+							}
+						}
+						break;
+					}
+
+					ReplyMsg((struct Message*)msg);
+				}
+
+			}
+
+			if (signal & timerBit) {
+
+				if (Timer.IsReady()) {
+					// Frame here.
+
+					Timer.Start(waitTime);
+				}
+
+			}
+
+		}
+
+	}
+
 	void AmigaScreen::DestroyWindow() {
+
+		if (Menu != nullptr)
+		{
+			FreeMenus(Menu);
+			Menu = nullptr;
+		}
+
+		if (ScreenVisualInfo != nullptr)
+		{
+			FreeVisualInfo(ScreenVisualInfo);
+			ScreenVisualInfo = nullptr;
+		}
+
 		if (Window != nullptr) {
 			CloseWindow(Window);
 			Window = nullptr;
@@ -201,6 +307,18 @@ namespace Parrot {
 			CloseScreen(Screen);
 			Screen = nullptr;
 		}
+	}
+
+	void AmigaScreen::StopListening() {
+		StopEvents = true;
+		PrintFmt("Stopping event loop by request");
+	}
+
+	void AmigaScreen::SetMenu(Ptr32 data) {
+		struct NewMenu* menuData = (struct NewMenu*) data;
+		Menu = CreateMenus(menuData, TAG_END);
+		LayoutMenus(Menu, ScreenVisualInfo, TAG_END);
+		SetMenuStrip(Window, Menu);
 	}
 
 }

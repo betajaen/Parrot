@@ -23,7 +23,7 @@
 
 namespace Parrot
 {
-	typedef AmigaScreen Screen;
+	typedef AmigaScreen PScreen;
 }
 
 #endif

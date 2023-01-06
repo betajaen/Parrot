@@ -20,43 +20,30 @@
 
 #include "platform/shared/required.h"
 #include "platform/amiga/timer.h"
-#include "platform/amiga/menu.h"
 
-struct Screen;
-struct Window;
-struct ScreenBuffer;
-struct RastPort;
-struct Menu;
+struct MsgPort;
+struct timerequest;
 
 namespace Parrot {
 
-	struct AmigaScreen final
+	struct AmigaTimer final
 	{
 	private:
-
-		::Screen* Screen;
-		struct Window* Window;
-		struct ScreenBuffer* Buffer;
-		struct RastPort* RastPort;
-		Ptr32 ScreenVisualInfo;
-		bool StopEvents;
-		AmigaTimer Timer;
-		struct Menu* Menu;
+		
+		struct MsgPort* MsgPort;
+		struct timerequest* TimerReq;
+		Uint32 SignalBit;
 
 	public:
 
-		AmigaScreen();
-		~AmigaScreen();
+		AmigaTimer();
+		~AmigaTimer();
 
-		bool CreateScreen(Uint32 w, Uint32 h, Uint8 depth, bool tryRTG = true, ConstCString title = nullptr);
-		bool CreateWindow(Uint32 w, Uint32 h, bool borderless, ConstCString title = nullptr);
-		bool StartListening(Uint32 framesPerSecond);
-		void SetMenu(Ptr32 menuData);
-
-		void StopListening();
-		void DestroyWindow();
-		void DestroyScreen();
-
+		bool Create();
+		void Destroy();
+		Uint32 Start(Uint32 microSeconds);
+		bool IsReady() const;
+		Uint32 GetSignalBit();
 
 	};
 

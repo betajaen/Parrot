@@ -34,16 +34,19 @@
 int __nocommandline = 1;
 int __initlibraries = 0;
 extern char * __commandline;
+
 struct DosLibrary* DOSBase = NULL;
 struct IntuitionBase* IntuitionBase = NULL;
 struct Library* CyberGfxBase = NULL;
+struct Library *GadToolsBase = NULL;
 
 extern struct WBStartup* _WBenchMsg;
 int Parrot_StartedFromCli = 0;
 
 namespace Parrot {
 	int Main(int param);
-	Uint32 CStringFmt(CString str, Uint32 strCapacity, ConstCString fmt, ...) ;
+	Uint32 CStringFmt(CString str, Uint32 strCapacity, ConstCString fmt, ...);
+	void InitTimer();
 }
 
 int main(void) {
@@ -85,7 +88,12 @@ int main(void) {
 		CloseLibrary((struct Library*)DOSBase);
 		return RETURN_FAIL;
 	}
-
+	
+	if ((GadToolsBase  = (struct Library*)OpenLibrary("gadtools.library", 37)) == NULL) {
+		CloseLibrary((struct Library*)IntuitionBase);
+		CloseLibrary((struct Library*)DOSBase);
+		return RETURN_FAIL;
+	}
 
 	param = Parrot::Main(param);
 

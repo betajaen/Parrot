@@ -18,12 +18,14 @@
 
 #pragma once
 
-#include "../required.h"
+#include "platform/shared/required.h"
 
 namespace Parrot {
 	
 	Uint32 CStringFmtLength(ConstCString* fmt, ...);
 
 	Uint32 CStringFmt(CString str, Size strCapacity, ConstCString fmt, ...);
+	
+	void PrintFmt(ConstCString fmt, ...);
 
 }

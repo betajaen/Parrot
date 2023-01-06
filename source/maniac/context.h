@@ -17,42 +17,22 @@
 */
 
 #include "platform/shared/required.h"
-#include "platform/shared/string.h"
-
-#include "maniac/context.h"
+#include "platform/shared/screen.h"
+#include "platform/shared/menu.h"
 
 namespace Parrot
 {
-	ManiacContext* Ctx;
+	struct ManiacContext
+	{
+		PScreen Screen;
+		PMenu<2> Menu;
 
-	void ManiacContext::Run() {		
-		Menu.Title("Maniac");
-		Menu.Item("Quit");
+		ManiacContext() = default;
+		~ManiacContext() = default;
 
-		Screen.CreateScreen(320, 200, 4, true, "Parrot");
-		Screen.CreateWindow(320, 200, true, nullptr);
-		Screen.SetMenu(Menu.GetData());
-		Screen.StartListening(25);
+		void Run();
+	};
 
-		Screen.DestroyWindow();
-		Screen.DestroyScreen();
-	}
+	extern ManiacContext* Ctx;
 
-
-	void OnMenuEvent(Uint16 menuNum, Uint16 menuItem, Uint16 subMenuItem) {
-
-		PrintFmt("Menu %ld, %ld, %ld", (Uint32) menuNum, (Uint32) menuItem, (Uint32) subMenuItem);
-
-		if (menuNum == 0 && menuItem == 0) {
-			Ctx->Screen.StopListening();
-		}
-	}
-
-	int Main(int param) {	
-		ManiacContext context;
-		Ctx = &context;
-		Ctx->Run();
-
-		return 0;
-	}
 }
