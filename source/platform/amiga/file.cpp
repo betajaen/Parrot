@@ -60,6 +60,7 @@ namespace Parrot {
 	void AmigaReadFile::CloseFile() {
 		if (Handle != 0) {
 			Close(Handle);
+			Handle = 0;
 			Position = 0;
 			Length = 0;
 		}
