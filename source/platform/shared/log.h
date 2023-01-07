@@ -21,3 +21,8 @@
 #if defined(PARROT_AMIGA)
 #include "platform/amiga/log.h"
 #endif
+
+namespace Parrot
+{
+	extern bool SeriousError;
+}

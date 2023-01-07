@@ -47,6 +47,8 @@ namespace Parrot {
 	int Main(int param);
 	Uint32 CStringFmt(CString str, Uint32 strCapacity, ConstCString fmt, ...);
 	void InitTimer();
+
+	bool SeriousError = false;
 }
 
 int main(void) {

@@ -27,6 +27,8 @@ namespace Parrot {
 	void PrintLogFmt(Uint16 LogLevel, ConstCString Fmt, ...);
 	void PrintLogStr(Uint16 LogLevel, ConstCString Str);
 
+	void ParrotStop(ConstCString Str);
+
 }
 
 #define PARROT_PRINT_FMT(FMT, ...) ::Parrot::PrintFmt(FMT, __VA_ARGS__)
@@ -69,3 +71,5 @@ namespace Parrot {
 #define PARROT_DEBUG_STR(STR)
 #endif
 
+
+#define PARROT_STOP(STR) ::Parrot::ParrotStop(STR);

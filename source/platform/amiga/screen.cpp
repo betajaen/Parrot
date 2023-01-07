@@ -214,7 +214,7 @@ namespace Parrot {
 		Uint16 idcmpCode;
 		struct MenuItem* menuItem;
 
-		while (StopEvents == false) {
+		while (StopEvents == false && SeriousError == false) {
 			
 			ULONG signal = Wait(signalBits);
 

@@ -118,4 +118,12 @@ namespace Parrot {
 
 	}
 
+	void ShowAlert(ConstCString text);
+	extern bool SeriousError;
+
+	void ParrotStop(ConstCString Str) {
+		ShowAlert(Str);
+		SeriousError = true;
+	}
+
 }
