@@ -26,8 +26,33 @@ namespace Parrot
 {
 	ManiacContext* Ctx;
 
+	bool ManiacContext::LoadIndex() {
+		if (IndexLfl.Open(0) == false) {
+			PARROT_STOP("Could not open Rooms/0.LFL file!");
+			return false;
+		}
+
+		Uint16 magic = IndexLfl.ReadUint16LE();
+
+		switch (magic) {
+			default:
+				PARROT_STOP("Unsupported Maniac Mansion data files!");
+				return false;
+			case 256:
+				Version = ManiacVersion::Amiga;
+				PARROT_INFO_STR("Game is Maniac Mansion for the Commodore Amiga.");
+			break;
+		}
+
+		return true;
+	}
+
 	void ManiacContext::Run() {	
-		
+
+		if (LoadIndex() == false) {
+			return;
+		}
+
 		PMenu<21> Menu;
 		Menu.Title("Maniac");
 		Menu.Item("Load");
@@ -55,9 +80,11 @@ namespace Parrot
 		Screen.CreateWindow(320, 200, true, nullptr);
 		Screen.SetMenu(Menu.GetData());
 		Screen.StartListening(25);
-
+		
+		IndexLfl.Close();
 		Screen.DestroyWindow();
 		Screen.DestroyScreen();
+
 	}
 
 

@@ -29,12 +29,32 @@ namespace Parrot
 		Uint16 Num;
 		PReadFile File;
 	public:
-		Lfl(Uint16 num);
+		Lfl();
 		~Lfl();
 
 		Uint16 GetNum() const {
 			return Num;
 		}
+
+		bool Open(Uint16 num);
+
+		void Close();
+
+		Uint32 GetLength() const;
+
+		Uint32 GetPosition() const;
+
+		void SetPosition(Uint32 Offset);
+
+		void MovePosition(Uint32 Offset);
+
+		bool IsEof() const;
+
+		Byte ReadByte();
+
+		Uint32 ReadBytes(Byte* Data, Uint32 Length);
+
+		Uint16 ReadUint16LE();
 
 	};
 }

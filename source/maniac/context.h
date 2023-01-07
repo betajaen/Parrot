@@ -20,9 +20,11 @@
 #include "platform/shared/screen.h"
 #include "platform/shared/menu.h"
 
+#include "maniac/lfl.h"
+
 namespace Parrot
 {
-	enum ManiacType : Uint16
+	enum ManiacVersion : Uint16
 	{
 		Unknown = 0,
 		Amiga = 1
@@ -30,8 +32,15 @@ namespace Parrot
 
 	struct ManiacContext
 	{
+	public:
 		PScreen Screen;
-		ManiacType GameType;
+		ManiacVersion Version;
+		Lfl IndexLfl;
+	private:
+		
+		bool LoadIndex();
+
+	public:
 
 		ManiacContext() = default;
 		~ManiacContext() = default;
