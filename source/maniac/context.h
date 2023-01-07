@@ -22,9 +22,16 @@
 
 namespace Parrot
 {
+	enum ManiacType : Uint16
+	{
+		Unknown = 0,
+		Amiga = 1
+	};
+
 	struct ManiacContext
 	{
 		PScreen Screen;
+		ManiacType GameType;
 
 		ManiacContext() = default;
 		~ManiacContext() = default;

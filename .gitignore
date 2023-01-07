@@ -1,5 +1,8 @@
 .vs
-*.o
-game/data
+game/data/Rooms
+game/data/Rooms.info
 game/maniac
+game/test
+
 *.LFL
+*.o

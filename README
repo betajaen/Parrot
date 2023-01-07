@@ -15,35 +15,42 @@ Point and Click Adventure Game Player
 Description
 -----------
 
-This is a very early days Point and Click Adventure Game Player for the Commodore Amiga.
+This is a very early days Point and Click Adventure Game Player for 
+the Commodore Amiga.
 
 You've heard of ScummVM right?
 ------------------------------
 
-Yes, and ScummVM has been ported to the Amiga. This is different, in a few ways:-
+Yes, and ScummVM has been ported to the Amiga. This is different,
+in a few ways:-
 
 * We don't use any ScummVM code.
-* This is written directly for the Amiga, using the Amiga hardware and software directly.
+* This is written directly for the Amiga, using the Amiga hardware and 
+  software directly.
 
 Can my Amiga play it?
 ---------------------
 
-Probably. Our minimum requirement for a playable Maniac Mansion is an ECS Amiga, running Workbench 2.
+Probably. Our minimum requirement for a playable Maniac Mansion is an ECS 
+Amiga, running Workbench 2.
 
 Can I play "Insert Game Here"
 -----------------------------
 
-Not yet. Current focus is to get Parrot to play Maniac Mansion. It is the grand-daddy of "Point and Click's" and we have to start somewhere.
+Not yet. Current focus is to get Parrot to play Maniac Mansion. It is the 
+grand-daddy of "Point and Click's" and we have to start somewhere.
 
 What language are you writing this in?
 --------------------------------------
 
-It is C++, using the GCC compiler. Assembly may be used to "tighten up those graphics on Level 3"
+It is C++, using the GCC compiler. 
+Assembly may be used to "tighten up those graphics on Level 3"
 
 Why the name Parrot?
 --------------------
 
-It's a reference in Monkey Island 2. You've probably never heard of it. And its better name than a bodily fluid.
+It's a reference in Monkey Island 2. You've probably never heard of it, and
+its better name than a bodily fluid.
 
 Is this Free?
 -------------
