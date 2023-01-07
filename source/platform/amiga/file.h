@@ -18,20 +18,45 @@
 
 #pragma once
 
-#include <exec/types.h>
+#include "platform/shared/required.h"
+#include "platform/amiga/timer.h"
+#include "platform/amiga/menu.h"
+
 
 namespace Parrot {
 
-    typedef LONG			Int32;
-    typedef ULONG			Uint32;
-    typedef WORD			Int16;
-    typedef UWORD			Uint16;
-    typedef BYTE			Int8;
-    typedef UBYTE			Uint8;
-    typedef APTR			Ptr32;
-    typedef ULONG			Size;
-	typedef ULONG			PtrInt;
-    typedef STRPTR			CString;
-    typedef CONST_STRPTR	ConstCString;
-    typedef TEXT			Char;
+	struct AmigaReadFile {
+	private:
+		PtrInt Handle;
+		Uint32 Position, Length;
+	public:
+		AmigaReadFile();
+		~AmigaReadFile();
+
+		bool OpenFile(ConstCString path);
+		void CloseFile();
+
+		bool IsOpen() const {
+			return Handle != 0;
+		}
+
+		bool IsEof() const {
+			return Position >= Length;
+		}
+
+		bool GetLength() const {
+			return Length;
+		}
+
+		Uint32 GetPosition() const {
+			return Position;
+		}
+
+		void SetPosition(Uint32 Offset);
+		void MovePosition(Int32 Offset);
+
+		Byte ReadByte();
+		Uint32 ReadBytes(Ptr32 Data, Uint32 Length);
+	};
+
 }

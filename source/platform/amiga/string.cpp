@@ -73,33 +73,4 @@ namespace Parrot {
 		return length;
 	}
 
-	void PrintFmt(ConstCString fmt, ...) {
-		static char buf[1024];
-		
-		Uint32 length = 0;
-		VA_LIST args;
-
-		if (fmt == NULL) {
-			return;
-		}
-
-		VA_START(args, fmt);
-		
-		RawDoFmt((CONST_STRPTR)fmt, static_cast<Ptr32>(args), (CharacterProcessor)&LenChar, &length);
-		
-		if (length >= 1024) {
-			VA_END(args);
-			return;
-		}
-		
-		RawDoFmt((CONST_STRPTR)fmt, static_cast<Ptr32>(args), (CharacterProcessor)&PutChar, buf);
-		buf[length] = 0;
-
-		PutStr(buf);
-		PutStr("\n");
-
-		VA_END(args);
-
-	}
-
 }

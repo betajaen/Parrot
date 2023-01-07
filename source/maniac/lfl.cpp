@@ -16,22 +16,15 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include "maniac/lfl.h"
 
-#include <exec/types.h>
+namespace Parrot
+{
+	Lfl::Lfl(Uint16 num) {
+		Num = num;
+	}
 
-namespace Parrot {
-
-    typedef LONG			Int32;
-    typedef ULONG			Uint32;
-    typedef WORD			Int16;
-    typedef UWORD			Uint16;
-    typedef BYTE			Int8;
-    typedef UBYTE			Uint8;
-    typedef APTR			Ptr32;
-    typedef ULONG			Size;
-	typedef ULONG			PtrInt;
-    typedef STRPTR			CString;
-    typedef CONST_STRPTR	ConstCString;
-    typedef TEXT			Char;
+	Lfl::~Lfl() {
+		File.CloseFile();
+	}
 }

@@ -18,6 +18,7 @@
 
 #include "platform/shared/required.h"
 #include "platform/shared/string.h"
+#include "platform/shared/log.h"
 
 #include "maniac/context.h"
 
@@ -62,7 +63,7 @@ namespace Parrot
 
 	void OnMenuEvent(Uint16 menuNum, Uint16 menuItem, Uint16 subMenuItem) {
 
-		PrintFmt("Menu %ld, %ld, %ld", (Uint32) menuNum, (Uint32) menuItem, (Uint32) subMenuItem);
+		PARROT_DEBUG_FMT("Menu %ld, %ld, %ld", (Uint32) menuNum, (Uint32) menuItem, (Uint32) subMenuItem);
 
 		if (menuNum == 0 && menuItem == 3) {
 			Ctx->Screen.StopListening();

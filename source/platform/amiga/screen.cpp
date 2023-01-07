@@ -42,6 +42,7 @@
 
 #include "platform/shared/events.h"
 #include "platform/shared/string.h"
+#include "platform/shared/log.h"
 
 extern struct Library* CyberGfxBase;
 
@@ -311,7 +312,7 @@ namespace Parrot {
 
 	void AmigaScreen::StopListening() {
 		StopEvents = true;
-		PrintFmt("Stopping event loop by request");
+		PARROT_INFO_STR("Stopping event loop by request");
 	}
 
 	void AmigaScreen::SetMenu(Ptr32 data) {

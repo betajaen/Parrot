@@ -18,20 +18,12 @@
 
 #pragma once
 
-#include <exec/types.h>
+#if defined(PARROT_AMIGA)
+#include "platform/amiga/file.h"
 
-namespace Parrot {
-
-    typedef LONG			Int32;
-    typedef ULONG			Uint32;
-    typedef WORD			Int16;
-    typedef UWORD			Uint16;
-    typedef BYTE			Int8;
-    typedef UBYTE			Uint8;
-    typedef APTR			Ptr32;
-    typedef ULONG			Size;
-	typedef ULONG			PtrInt;
-    typedef STRPTR			CString;
-    typedef CONST_STRPTR	ConstCString;
-    typedef TEXT			Char;
+namespace Parrot
+{
+	typedef AmigaReadFile PReadFile;
 }
+
+#endif
