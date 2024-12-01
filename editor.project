@@ -1,6 +1,7 @@
 N editor
 B Code/
 F main.c
+F tags.c
 D PARROT_EDITOR=1
 D PARROT_DEBUG=0
 L auto
