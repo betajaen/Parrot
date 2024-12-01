@@ -160,6 +160,7 @@ DO i = 1 TO project.o_file.0
     lcmd = lcmd || ' ' || temp_base || project.o_file.i
 END
 
+lcmd = lcmd || cflags
 lcmd = lcmd || ' -o ' || project.filename
 
 SAY 'Linking ' || project.name || ' ...'
