@@ -2,8 +2,11 @@ N editor
 B Code/
 F main.c
 F tags.c
+F palette.c
+F gadgets.c
 D PARROT_EDITOR=1
 D PARROT_DEBUG=0
+D PARROT_PAL=1
 L auto
 O c99
 O warnings-as-errors
