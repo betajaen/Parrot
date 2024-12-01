@@ -1,6 +1,0 @@
-Name:
-  dup
-Description:
-  Duplicate the stack value
-Code:
-  Vm_Push(Vm_Peek());

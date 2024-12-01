@@ -1,8 +1,0 @@
-Name:
-  bra
-Description:
-  Branch to address always
-Argument:
-  s : Address
-Code:
-  return #A;

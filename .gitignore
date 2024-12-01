@@ -9,3 +9,4 @@ Code/Build/Windows/Md2Guide.exe
 Code/Build/Windows/TextToAmigaGuide.exe
 Parrot.log
 .backdrop
+.DS_Store
