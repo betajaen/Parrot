@@ -5,14 +5,43 @@
 */
 
 OPTIONS FAILAT 5
+ARG project_file force
+
+IF LENGTH(project_file) = 0 THEN DO
+    SAY "Project file not specified!"
+    EXIT 20
+END
+
+IF EXISTS(project_file) = 0 THEN DO
+    SAY "Project file not found!"
+    EXIT 20
+END
 
 force_build = 0
+IF LENGTH(force) ~=0 THEN DO
+    force = STRIP(force)
+    IF force = 'FORCE' THEN DO
+        force_build = 1
+        SAY 'Forcing build ...'
+    END
+END
+
+delim = LASTPOS('/', project_file)
+IF delim = 0 THEN DO
+    delim = LASTPOS(':', project_file)
+    IF delim = 0 THEN DO
+        SAY 'Project file should be a absolute path.'
+        EXIT 20
+    END
+END
+
+project_dir = SUBSTR(project_file, 1,  delim)
+
 rv = ''
 temp_base = 'T:'
-project_file = 'Code/editor.project'
 project.name = 'parrot'
 project.filename = 'T:parrot'
-project.base = 'Code'
+project.base = project_dir || 'Code'
 project.c_file.0 = 0
 project.o_file.0 = 0
 project.libs.0 = 0
@@ -34,7 +63,7 @@ DO WHILE ~EOF('PF')
             project.filename = temp_base || project.name
         END
         IF lt = 'B' THEN DO
-            project.base = STRIP(SUBSTR(ll, 3))
+            project.base = project_dir || STRIP(SUBSTR(ll, 3))
         END
         IF lt = 'F' THEN DO
             idx = 1 + project.c_file.0
@@ -91,10 +120,11 @@ DO i = 1 TO project.c_file.0
    
     fd = STRIP(UPPER(DateFile(project.base, cf)))
     od = STRIP(UPPER(ReadFile(temp_base || df, '01-Jan-01 01:01:40')))
-    same = force_build
     IF fd = od THEN DO
-        SAY cf || ' has not changed.'
-        ITERATE i
+        IF force_build = 0 THEN DO
+        	SAY cf || ' has not changed.'
+        	ITERATE i
+        END
     END
                                                   
 
