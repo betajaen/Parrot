@@ -78,6 +78,7 @@ struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struc
 
     screen->UserData = (BYTE*) info;
 
+    u_clear_tags();
     return screen;
 
 err:
