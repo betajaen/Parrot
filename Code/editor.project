@@ -1,0 +1,9 @@
+N editor
+B Code/
+F main.c
+D PARROT_EDITOR=1
+D PARROT_DEBUG=0
+L auto
+O c99
+O warnings-as-errors
+O strip-path
