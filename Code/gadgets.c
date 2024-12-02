@@ -31,9 +31,15 @@ struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struc
     struct Screen* screen = NULL;
     struct TagItem* tags = NULL;
     struct ScreenInfo* info = NULL;
-	ULONG displayMode = 0UL;
+	ULONG displayMode = 0UL, numColours = 0;
 
     if (d == 0 || d > 8) {
+        goto err;
+    }
+
+    numColours = 1 << d;
+
+    if (palette && palette->num_colours > numColours) {
         goto err;
     }
 
