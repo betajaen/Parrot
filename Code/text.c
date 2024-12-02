@@ -2,7 +2,11 @@
 
 static const ULONG PutChar = 0x16c04e75;
 static const ULONG CountChar = 0x52934e75;
-static TEXT s_Text[1024] = { 0 };
+TEXT u_Text[1024] = { 0 };
+
+BOOL u_IsNullOrEmpty(CONST_STRPTR text) {
+    return text == NULL || text[0] == '\0';
+}
 
 STRPTR u_Format(CONST_STRPTR fmt, ...) {
     ULONG textSize;
@@ -12,14 +16,14 @@ STRPTR u_Format(CONST_STRPTR fmt, ...) {
     arg = (TEXT**)(&fmt + 1);
     RawDoFmt((STRPTR) fmt, arg, (void(*)()) &CountChar, (STRPTR) &textSize);
 
-    if (textSize >= sizeof(s_Text)) {
-        s_Text[0] = '\0';
-        return s_Text;
+    if (textSize >= sizeof(u_Text)) {
+        u_Text[0] = '\0';
+        return u_Text;
     }
 
-    RawDoFmt((STRPTR) fmt, arg, (void(*)()) &PutChar, (STRPTR) s_Text);
+    RawDoFmt((STRPTR) fmt, arg, (void(*)()) &PutChar, (STRPTR) u_Text);
 
-    return s_Text;
+    return u_Text;
 }
 
 STRPTR u_FormatInto(STRPTR text, ULONG textMaxSize, CONST_STRPTR fmt, ...) {
