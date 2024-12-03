@@ -7,13 +7,15 @@
 
 #define LL_XY(X, Y) X##Y
 
-#define LL_LIST(LL_PTR) \
+#define LL_NULL_LIST { NULL, NULL, NULL, 0, 0 }
+
+#define LL_INIT_LIST(LL_PTR) \
 	do { \
-    	struct List* ll_ptr = (struct List*) LL_PTR; \
-        ll_ptr->lh_Head = (struct Node*) &ll_ptr->lh_Tail; \
-        ll_ptr->lh_Tail = NULL; \
-        ll_ptr->lh_TailPred = (struct Node*) &ll_ptr->lh_Head; \
-	while(0)
+    	struct List* ll_0 = (struct List*) (LL_PTR); \
+        ll_0->lh_Head = (struct Node*) &ll_0->lh_Tail; \
+        ll_0->lh_Tail = NULL; \
+        ll_0->lh_TailPred = (struct Node*) &ll_0->lh_Head; \
+	} while(0)
 
 #define LL_CAST(LL_PTR) \
     ((struct List*) LL_PTR)
@@ -23,6 +25,9 @@
 
 #define LL_HAS_ANY(LL_PTR) \
     (LL_CAST(LL_PTR)->lh_TailPred != LN_CAST(LL_PTR))
+
+#define LL_IS_NULL(LL_PTR) \
+    ((LL_PTR)->lh_Head == NULL)
 
 #define LL_FOREACH(LL, LN) \
 	for(struct Node* LN=((struct List*)LL)->lh_Head,*LL_XY(ll_,__LINE__);(LL_XY(ll_,__LINE__)=LN->ln_Succ)!=NULL;LN=LL_XY(ll_,__LINE__))
