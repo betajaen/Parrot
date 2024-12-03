@@ -2,6 +2,7 @@ N editor
 B Code/
 F main.c
 F tags.c
+F object.c
 F text.c
 F palette.c
 F gadgets.c
