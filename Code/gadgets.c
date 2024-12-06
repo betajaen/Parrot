@@ -3,9 +3,12 @@
 #include <proto/dos.h>
 #include <proto/graphics.h>
 #include <proto/utility.h>
-#include <proto/graphics.h>
+#include <proto/gadtools.h>
+#include <exec/lists.h>
+#include <exec/nodes.h>
 #include <libraries/gadtools.h>
 #include <intuition/screens.h>
+#include <intuition/intuition.h>
 #include <graphics/modeid.h>
 
 #include "gadgets.h"
@@ -32,27 +35,38 @@ struct PScreenInfo {
 #define PSCREENINFO_TAG TAG('S','C','I','F')
 
 struct PWindowInfo {
-    struct Node    node;
-    ULONG          tag;
-    struct Window* window;
+    struct Node     node;
+    ULONG           tag;
+    struct Window*  window;
+    struct Gadget*  gctx;
+    g_WindowEventCb cb;
 };
 
 #define PWINDOWINFO_TAG TAG('W','N','I','F')
 
-struct PGadgetInfo {
-    struct Node       node;
-    ULONG             tag;
-    struct Gadget*    gadget;
-    struct NewGadget* new_gadget;
+enum GadgetKindCapabilities {
+    GKC_Text     = 1,
+    GKC_Palette  = 2
 };
 
-#define PGADGETINFO_TAG TAG('G','A','I','F')
+struct PGadgetKindInfo {
+    UBYTE type;
+    UBYTE kind;
+    UBYTE cap;
+    UBYTE pad;
+};                                   
 
+static const struct TextAttr k_ScreenFont = { (STRPTR) "topaz.font", 8, 0, 1 };
+static const struct PGadgetKindInfo k_GadToolKindInfos[] = {
+    { 0, 0, 0, 0 },
+    { 1, BUTTON_KIND, GKC_Text,     0 },
+    { 2, PALETTE_KIND, GKC_Palette, 0 }
+};
 
 static ULONG s_WindowSignals = 0UL;
-static struct TextAttr s_ScreenFont = { (STRPTR) "topaz.font", 8, 0, 1 };
 static UWORD s_WindowEventLoop = FALSE;
 static struct List s_WindowInfoList = LL_NULL_LIST;
+
 
 struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struct Palette* palette) {
 
@@ -62,7 +76,7 @@ struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struc
 	ULONG displayMode = 0UL, numColours = 0;
 
     if (d == 0 || d > 8) {
-        goto err;
+        goto err; ;
     }
 
     numColours = 1 << d;
@@ -71,7 +85,12 @@ struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struc
         goto err;
     }
 
-    info = U_ALLOC_OBJECT(sizeof(struct PScreenInfo), PSCREENINFO_TAG);
+	info = U_ALLOC_OBJECT(struct PScreenInfo, PSCREENINFO_TAG);
+
+    if (info == NULL) {
+    	U_ERROR("Cannot allocate PScreenInfo object!");
+		goto err;
+	}
 
     displayMode = BestModeID(
       BIDTAG_NominalWidth,	w,
@@ -128,17 +147,24 @@ err:
         u_clear_tags();
     }
 
+    U_ERROR("Screen was not created!");
+
     return NULL;
 }
 
 VOID g_CloseScreen(struct Screen* screen) {
-    if (screen) {
-        if (screen->UserData) {
-        	U_FREE_OBJECT(screen->UserData, PSCREENINFO_TAG);
-        	screen->UserData = NULL;
-        }
-        CloseScreen(screen);
+
+    if (screen == NULL) {
+        U_ERROR("Cannot close a NULL screen!");
+        return;
     }
+
+    if (screen->UserData) {
+    	U_FREE_OBJECT(screen->UserData, PSCREENINFO_TAG);
+		screen->UserData = NULL;
+	}
+
+    CloseScreen(screen);
 }
 
 struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWORD h, CONST_STRPTR title, UWORD kind) {
@@ -146,10 +172,6 @@ struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWOR
     struct TagItem* tags = NULL;
     struct PWindowInfo* info = NULL;
     ULONG idcmp = 0UL, winFlags = 0UL;
-
-    if (LL_IS_NULL(&s_WindowInfoList)) {
-        LL_INIT_LIST(&s_WindowInfoList);
-    }
 
     u_clear_tags();
     tags = u_start_tags();
@@ -166,6 +188,7 @@ struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWOR
     if (kind == WK_Normal) {
         idcmp |= IDCMP_CLOSEWINDOW | IDCMP_GADGETUP;
         winFlags |= WFLG_ACTIVATE | WFLG_DRAGBAR | WFLG_CLOSEGADGET;
+    	u_push_tags(WA_Title, title);
     }
     else if (kind == WK_Background) {
         idcmp |= IDCMP_GADGETUP;
@@ -180,7 +203,6 @@ struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWOR
 
     u_push_tagu(WA_IDCMP, idcmp);
     u_push_tagu(WA_Flags, winFlags);
-    u_push_tags(WA_Title, title);
     u_end_tags();
 
     window = OpenWindowTagList(NULL, tags);
@@ -190,10 +212,24 @@ struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWOR
         goto err;
     }
 
-    info = U_ALLOC_OBJECT(sizeof(struct PWindowInfo), PWINDOWINFO_TAG);
+
+    info = U_ALLOC_OBJECT(struct PWindowInfo, PWINDOWINFO_TAG);
+
+    if (info == NULL) {
+        U_ERROR("PWindowInfo was not allocated!");
+        goto err;
+    }
+
     window->UserData = (BYTE*) info;
 
+    if (LL_IS_NULL((&s_WindowInfoList))) {
+        LL_INIT_LIST((&s_WindowInfoList));
+    }
+
+    AddTail((&s_WindowInfoList), (struct Node*) info);
+
     return window;
+
 err:
 
     if (info) {
@@ -209,20 +245,89 @@ err:
         CloseWindow(window);
     }
 
-
     if (tags) {
         u_clear_tags();
     }
 
+    U_ERROR("Window was not created!");
+
+    return NULL;
 }
 
 VOID g_CloseWindow(struct Window* window) {
-    if (window) {
-    	if (window->UserData) {
-            U_FREE_OBJECT(window->UserData, PWINDOWINFO_TAG);
-            window->UserData = NULL;
-        }
-        CloseWindow(window);
+
+    if (window == NULL) {
+        U_ERROR("Cannot close a NULL window!");
+        return;
     }
+
+	if (window->UserData != NULL) {
+        struct PWindowInfo* info = (struct PWindowInfo*) window->UserData;
+
+        Remove((struct Node*) info);
+
+        U_FREE_OBJECT(info, PWINDOWINFO_TAG);
+        window->UserData = NULL;
+    }
+
+    CloseWindow(window);
 }
 
+VOID g_AttachToWindow(struct Window* window, struct GadgetDesc* desc) {
+    struct NewGadget newgadget = {0};
+    struct Gadget *gctx, *gad;
+    void *visualinfo;
+    struct PWindowInfo *wininfo;
+
+    wininfo = (struct PWindowInfo*) window->UserData;
+    visualinfo = GetVisualInfo(window->WScreen, NULL);
+
+    gctx = CreateContext(&gad);
+    wininfo->gctx = gctx;
+
+    u_clear_tags();
+
+    while(desc != NULL && desc->kind != 0) {
+
+        const struct PGadgetKindInfo* info = &k_GadToolKindInfos[desc->kind];
+        struct TagItem* tags = u_start_tags();
+
+        newgadget.ng_LeftEdge = desc->left;
+        newgadget.ng_TopEdge = desc->top;
+    	newgadget.ng_Width = desc->width;
+    	newgadget.ng_Height = desc->height;
+    	newgadget.ng_GadgetID = desc->num;  
+    	newgadget.ng_VisualInfo = visualinfo;
+    	newgadget.ng_UserData = NULL;
+
+        if (info->cap & GKC_Text) {
+    		newgadget.ng_GadgetText = (UBYTE*) desc->data;
+    		newgadget.ng_TextAttr = &k_ScreenFont;
+    		newgadget.ng_Flags = PLACETEXT_IN;
+        }
+        if (info->cap & GKC_Palette) {
+        	u_push_tagu(GTPA_ColorOffset, desc->data1);
+    		u_push_tagu(GTPA_NumColors, desc->data2);
+        }
+
+        u_end_tags();
+
+        gad = CreateGadgetA(info->kind, gad, &newgadget, &tags[0]);
+
+        desc++;
+    }
+
+    AddGList(window, gctx, 0, ~0, 0);
+    RefreshGList(gctx, window, 0, ~0);
+    GT_RefreshWindow(window, NULL);
+
+}
+
+VOID g_BindToWindow(struct Window* window, g_WindowEventCb cb) {
+}
+
+VOID g_Listen() {
+}
+
+VOID g_StopListening(){
+}

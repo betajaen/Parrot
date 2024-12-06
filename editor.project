@@ -9,6 +9,7 @@ F gadgets.c
 F debug.c
 D PARROT_EDITOR=1
 D PARROT_DEBUG=1
+D PARROT_MEM_DEBUG=1
 D PARROT_PAL=1
 L auto
 O c99
