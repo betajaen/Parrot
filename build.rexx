@@ -137,9 +137,8 @@ DO i = 1 TO project.c_file.0
     ocmd = cc ||  ' -c ' || project.base || cf || cflags || ' -o ' || temp_base || of
     SAY '> ' || ocmd
 	ADDRESS command ocmd
-
-    SAY '> ' || RC || '.'
     IF RC ~= 0 THEN DO
+    	SAY '> ' || RC || '.'
         EXIT 0
     END
 
@@ -166,6 +165,14 @@ lcmd = lcmd || ' -o ' || project.filename
 SAY 'Linking ' || project.name || ' ...'
 
 ADDRESS command lcmd
+
+IF RC ~= 0 THEN DO
+	SAY '> ' || RC || '.'
+    EXIT 0
+END
+ELSE DO
+    SAY 'Linked.'
+END
 
 EXIT
 
