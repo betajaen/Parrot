@@ -8,12 +8,14 @@
 VOID* u__AllocObject(ULONG size, ULONG tag);
 VOID  u__FreeObject(VOID* object, ULONG tag);
 
-#define U_ALLOC_OBJECT(T, TAG) u__AllocObject(sizeof(T), TAG)
+#define U_ALLOC_OBJECT(T, TAG) \
+	u__AllocObject(sizeof(T), TAG)
+
 #define U_FREE_OBJECT(OBJ,TAG) \
 	do { \
-    	u__FreeObject((VOID*)OBJ, TAG); \
-        OBJ = NULL; \
-    } while(0)
+		u__FreeObject((VOID*)OBJ, TAG); \
+		OBJ = NULL; \
+	} while(0)
 
 #endif
 
