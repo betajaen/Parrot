@@ -7,7 +7,7 @@
 static const ULONG PutChar = 0x16c04e75;
 static const ULONG CountChar = 0x52934e75;
 extern TEXT u_Text[1024];
-
+static TEXT u_TagStr[5]={0,0,0,0,0};
 static struct EasyStruct s_EasyStruct = {
 	sizeof(struct EasyStruct),
     0,
@@ -15,6 +15,12 @@ static struct EasyStruct s_EasyStruct = {
     NULL,
     NULL
 };
+
+STRPTR u_Tag2Str(ULONG tag) {
+    ULONG* d = (ULONG*) &u_TagStr;
+    *d = tag;
+    return (STRPTR) d;
+}
 
 LONG u_Requester(CONST_STRPTR options, CONST_STRPTR text) {
 	if (u_IsNullOrEmpty(options)) {
