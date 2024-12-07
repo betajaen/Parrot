@@ -13,7 +13,7 @@ UWORD s_Palette[GM_NUM_PENS] = {
     0x00AA, // Cyan
     0x0A00, // Red
     0x0A0A, // Magenta
-    0x0A5A, // Brown
+    0x0A50, // Brown
     0x0AAA, // Grey
     0x0555, // Dark Grey
     0x055F, // Light Blue
