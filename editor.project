@@ -7,6 +7,7 @@ F text.c
 F palette.c
 F gadgets.c
 F debug.c
+F gm_pens.c
 D PARROT_EDITOR=1
 D PARROT_DEBUG=1
 D PARROT_MEM_DEBUG=1
