@@ -17,6 +17,7 @@
 #include "list.h"
 #include "object.h"
 #include "debug.h"
+#include "math.h"
 
 #if defined(PARROT_PAL) && (PARROT_PAL == 0)
 #define PARROT_MONITOR_ID NTSC_MONITOR_ID
@@ -29,7 +30,6 @@ struct PScreenInfo {
     struct Node    node;
     ULONG          tag;
     struct Screen* screen;
-    struct ColorSpec*  colorspec;
 };
 
 #define PSCREENINFO_TAG TAG('S','C','I','F')
@@ -68,21 +68,15 @@ static UWORD s_WindowEventLoop = FALSE;
 static struct List s_WindowInfoList = LL_NULL_LIST;
 
 
-struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struct Palette* palette) {
+struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title) {
 
     struct Screen* screen = NULL;
     struct TagItem* tags = NULL;
     struct PScreenInfo* info = NULL;
-	ULONG displayMode = 0UL, numColours = 0;
+	ULONG displayMode = 0UL;
 
     if (d == 0 || d > 8) {
         goto err; ;
-    }
-
-    numColours = 1 << d;
-
-    if (palette && palette->num_colours > numColours) {
-        goto err;
     }
 
 	info = U_ALLOC_OBJECT(struct PScreenInfo, PSCREENINFO_TAG);
@@ -115,12 +109,6 @@ struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struc
     u_push_tagu(SA_DisplayID,   displayMode);
     u_push_tagu(SA_Type,        CUSTOMSCREEN);
     u_push_tags(SA_Title,       title);
-
-    if (palette) {
-        info->colorspec = g_create_colorspec(palette);
-        u_push_tagp(SA_Colors, info->colorspec);
-    }
-
     u_end_tags();
 
     screen = OpenScreenTagList(NULL, tags);
@@ -136,10 +124,6 @@ struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struc
 
 err:
     if (info) {
-        if (info->colorspec) {
-            g_destroy_colorspec(info->colorspec);
-            info->colorspec = NULL;
-    	}
     	U_FREE_OBJECT(info, PSCREENINFO_TAG);
     }
 
@@ -165,6 +149,21 @@ VOID g_CloseScreen(struct Screen* screen) {
 	}
 
     CloseScreen(screen);
+}
+
+VOID g_CopyToScreenPalette(struct Screen* screen, struct Palette* palette, UWORD from, UWORD to, UWORD length) {
+
+    struct ViewPort* vp;
+    UWORD i;
+
+    // TODO: Bounds check.
+
+    vp = &screen->ViewPort;
+    for(i=0;i < length;i++) {
+        UWORD pen = palette->pens[from++];
+        SetRGB4(vp, to++, (pen >> 8) & 0xF, (pen >> 4) & 0xF, pen & 0xF);
+    }
+
 }
 
 struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWORD h, CONST_STRPTR title, UWORD kind) {

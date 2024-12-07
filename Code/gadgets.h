@@ -21,8 +21,9 @@ struct GadgetDesc {
 
 typedef void(*g_WindowEventCb)(struct Window*, UWORD, UWORD, LONG);
 
-struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title, struct Palette* palette);
+struct Screen* g_OpenScreen(UWORD w, UWORD h, UWORD d, CONST_STRPTR title);
 VOID g_CloseScreen(struct Screen* screen);
+VOID g_CopyToScreenPalette(struct Screen* screen, struct Palette* palette, UWORD from, UWORD to, UWORD length);
 
 struct Window* g_OpenWindow(struct Screen*, WORD x, WORD y, UWORD w, UWORD h, CONST_STRPTR title, UWORD kind);
 VOID g_CloseWindow();
