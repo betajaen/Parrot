@@ -1,0 +1,5 @@
+Delete T:parrot_copy_icons
+List code/#?.c LFORMAT="Copy FROM Icons/c.info TO %F%N.info" > T:parrot_copy_icons
+List code/#?.h LFORMAT="Copy FROM Icons/h.info TO %F%N.info" >> T:parrot_copy_icons
+Execute T:parrot_copy_icons
+Delete T:parrot_copy_icons
