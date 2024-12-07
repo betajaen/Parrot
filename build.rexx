@@ -47,6 +47,7 @@ project.o_file.0 = 0
 project.libs.0 = 0
 project.defines.0 = 0
 project.options.0 = 0
+project.info = 'Icons/program.info'
 
 IF ~OPEN('PF', project_file, 'R') THEN DO
     SAY 'Could not open project file: ' || project_file
@@ -88,6 +89,9 @@ DO WHILE ~EOF('PF')
             idx = 1 + project.options.0
             project.options.idx = SUBSTR(ll, 3)
             project.options.0 = idx
+        END
+        IF lt = 'I' THEN DO
+            project.info = STRIP(SUBSTR(ll, 3))
         END
     END
 END
@@ -173,6 +177,10 @@ END
 ELSE DO
     SAY 'Linked.'
 END
+
+icmd = 'COPY FROM ' || project_dir || project.info || ' TO ' || project.filename || '.info'
+
+ADDRESS command icmd
 
 EXIT
 
