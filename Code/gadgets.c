@@ -186,12 +186,20 @@ struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWOR
 
     if (kind == WK_Normal) {
         idcmp |= IDCMP_CLOSEWINDOW | IDCMP_GADGETUP;
-        winFlags |= WFLG_ACTIVATE | WFLG_DRAGBAR | WFLG_CLOSEGADGET;
+        winFlags |= WFLG_ACTIVATE | WFLG_DRAGBAR | WFLG_CLOSEGADGET | WFLG_DEPTHGADGET;
     	u_push_tags(WA_Title, title);
     }
     else if (kind == WK_Background) {
         idcmp |= IDCMP_GADGETUP;
         winFlags |= WFLG_ACTIVATE | WFLG_BORDERLESS;
+    }
+    else if (kind == WK_Scene) {
+        idcmp |= IDCMP_CLOSEWINDOW | IDCMP_GADGETUP;
+        winFlags |= WFLG_ACTIVATE | WFLG_DRAGBAR | WFLG_BORDERLESS | WFLG_DEPTHGADGET;
+    }
+    else if (kind == WK_Toolbar) {
+        idcmp |= IDCMP_GADGETUP;
+        winFlags |= WFLG_BORDERLESS;
     }
     else {
         U_ERROR("Unknown Window kind!");
@@ -226,6 +234,9 @@ struct Window* g_OpenWindow(struct Screen* screen, WORD x, WORD y, UWORD w, UWOR
     }
 
     AddTail((&s_WindowInfoList), (struct Node*) info);
+
+    SetAPen(window->RPort, 4);
+    RectFill(window->RPort,0,0,w,h);
 
     return window;
 
@@ -302,6 +313,11 @@ VOID g_AttachToWindow(struct Window* window, struct GadgetDesc* desc) {
         if (info->cap & GKC_Text) {
     		newgadget.ng_GadgetText = (UBYTE*) desc->data;
     		newgadget.ng_TextAttr = &k_ScreenFont;
+    		newgadget.ng_Flags = PLACETEXT_IN;
+        }
+        else {
+    		newgadget.ng_GadgetText = NULL;
+    		newgadget.ng_TextAttr = NULL;
     		newgadget.ng_Flags = PLACETEXT_IN;
         }
         if (info->cap & GKC_Palette) {

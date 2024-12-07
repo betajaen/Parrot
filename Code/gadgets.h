@@ -5,7 +5,9 @@
 
 enum WindowKind {
     WK_Normal,
-    WK_Background
+    WK_Background,
+    WK_Scene,
+    WK_Toolbar
 };
 
 struct Screen;
